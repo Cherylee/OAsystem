@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('经营部投标申请列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" id="companyId" name="companyId"/> <input
+                                type="text" id="companyName"
+                                onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+                        </li>
+                        <li>
+                            <input type="text" name="applier" placeholder="申请人"/>
+                        </li>
+
+                        <li><select id="proType" name="proType"
+                                          th:with="type=${@dict.getType('business_engineer_type')}">
+                            <option value="">工程类型</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
+                        </select>
+
+                        </li>
+                        <li><select id="tenderType" name="tenderType"
+                                          th:with="type=${@dict.getType('business_project_type')}">
+                            <option value="">投标方式</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
+                        </select>
+
+                        </li>
+                        <li class="select-time">
+                            <label>开标时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+
+
+                        <li><a class="btn btn-primary btn-rounded btn-sm"
+                               onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm"
+                               onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <!--				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="business:jyTender:add">-->
+            <!--					<i class="fa fa-plus"></i> 添加-->
+            <!--				</a>-->
+            <!--				<a class="btn btn-primary btn-edit disabled"-->
+            <!--					onclick="$.operate.editTab()"-->
+            <!--					shiro:hasPermission="business:jyTender:edit"> <i-->
+            <!--					class="fa fa-edit"></i> 修改-->
+            <!--				</a> <a class="btn btn-danger btn-del btn-del disabled"-->
+            <!--					onclick="$.operate.removeAll()"-->
+            <!--					shiro:hasPermission="business:jyTender:remove"> <i-->
+            <!--					class="fa fa-remove"></i> 删除-->
+            <!--				</a> -->
+            <a class="btn btn-warning" onclick="$.table.exportExcel()"
+               shiro:hasPermission="business:jyTender:export"> <i
+                    class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('business:jyTender:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('business:jyTender:remove')}]];
+    var prefix = ctx + "business/jyTender";
+
+    var engineerType = [[${@dict.getType('business_engineer_type')}]];
+    var projectType = [[${@dict.getType('business_project_type')}]];
+    var jyTendstatus = [[${@dict.getType('oa_ApplyStatusContract')}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            sortName: "createTime",
+            sortOrder: "desc",
+            modalName: "经营部投标申请",
+            queryParams:{'delFlag':'0'},
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'projectName',
+                    title: '工程名称',
+                    sortable: true
+                },
+                {
+                    field: 'code',
+                    title: '编号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = null;
+                        if (row.code) {
+                            text = row.code
+                        } else {
+                            text = '暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editTab(\'' + row.id + '\')">' + text + '</a>'
+                    }
+                },
+                {
+                    field: 'companyName',
+                    title: '申请公司',
+                    sortable: true
+                },
+                {
+                    field: 'deptName',
+                    title: '申请部门',
+                    sortable: true
+                },
+                {
+                    field: 'applier',
+                    title: '申请人',
+                    sortable: true
+                },
+                {
+                    field: 'createTime',
+                    title: '申请日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'proType',
+                    title: '工程类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(engineerType, value);
+                    }
+                },
+                {
+                    field: 'openTenderDate',
+                    title: '开标时间',
+                    sortable: true
+                },
+                {
+                    field: 'amount',
+                    title: '工程造价',
+                    sortable: true,
+                    visible: false
+                },
+
+                {
+                    field: 'tenderType',
+                    title: '投标方式',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(projectType, value);
+                    }
+                },
+                {
+                    field: 'investAmount',
+                    title: '投资总额',
+                    sortable: true
+                },
+                {
+                    field: 'payAlready',
+                    title: '已收款',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'unpayMoney',
+                    title: '未收款',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'depositAlready',
+                    title: '已汇保证金',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'status',
+                    title: '状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(jyTendstatus, value);
+                    }
+                },
+                {
+                    field: 'proposer',
+                    title: '申请人id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deptId',
+                    title: '申请部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'procInstId',
+                    title: '流程id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createBy',
+                    title: '创建人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '修改日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '修改人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'tenderUrl',
+                    title: '招标公告网址',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'tenderDoc',
+                    title: '投标公告文件',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'qualifications',
+                    title: '资质要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'kpiRequire',
+                    title: '业绩要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'otherRequire',
+                    title: '其他要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'partners',
+                    title: '合作伙伴',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'timeLimit',
+                    title: '工期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'constructUnit',
+                    title: '建设单位',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'promiseMoney',
+                    title: '保证金金额',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'builderName',
+                    title: '建造师',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectDesc',
+                    title: '工程概况',
+                    sortable: true,
+                    visible: false
+                },
+
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var edit = 'disabled';
+                        var exam = 'disabled';
+                        if (row.status == '3' || row.directTender == 'Y' || row.status == '99') {//编辑
+                            edit = ''
+                        }
+                        if (row.status != '3' && row.status != '2' && row.status != '99') {//审核
+                            exam = ''
+                            actions.push('<a class="btn btn-info btn-xs  ' + exam + '" href="#" onclick="openExamine(\'' + row.id + '\')">审核</a> ');
+                        }
+                        if (row.ytApply == 'Y' && row.status == '2') {//禹涛人员申请的  且 审核通过
+                            actions.push('<a class="btn btn-warning btn-xs ' + removeFlag + '" href="#" onclick="synchroYt(\'' + row.id + '\')">同步</a> ');
+                            if(row.ytSecondApply=='Y'){
+                                actions.push('<a class="btn btn-info btn-xs" href="#" onclick="toAudit(\'' + row.id + '\')">投标申请</a> ');
+                            }
+
+                        }
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + ' ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')">编辑</a> ');
+                        if (row.status == '0') {//撤回
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //打开合同审核界面
+    function openExamine(id) {
+        $.modal.openTab("投标审核", prefix + "/toJyTenderExamine/" + id);
+    }
+
+    //打开投标申请
+    function toAudit(id) {
+        $.modal.openTab( '投标申请',ctx + "business/jyTender/add/" + id)
+    }
+
+    //同步接口
+    function synchroYt(id) {
+        $.operate.get(ctx + "business/jyTender/syncYtProject/" + id)
+        $.table.refresh();
+    }
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+
+</script>
+</body>
+</html>

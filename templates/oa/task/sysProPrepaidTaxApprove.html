@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('预缴税金审批页')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProPrepaidTax-edit" th:object="${sysProPrepaidTax}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <input id="procInstId" name="procInstId" th:field="*{procInstId}" class="form-control" type="hidden">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>预缴税金</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">项目：</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="hidden">
+                                        <input th:field="*{projectName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">编码：</td>
+                                    <td>
+                                        <input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposerId" name="proposerId" th:field="*{proposerId}" class="form-control" type="hidden">
+                                        <input th:field="*{proposerName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">申请部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                        <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期：</td>
+                                    <td>
+                                        <input id="applyTime" name="applyTime" th:value="${#dates.format(sysProPrepaidTax.applyTime, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">税务机关：</td>
+                                    <td>
+                                        <input id="taxationBureau" name="taxationBureau" th:field="*{taxationBureau}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">税票数量：</td>
+                                    <td>
+                                        <input id="taxReceiptNum" name="taxReceiptNum" th:field="*{taxReceiptNum}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">税款所属时期开始：</td>
+                                    <td>
+                                        <input id="periodStart" name="periodStart" th:value="${#dates.format(sysProPrepaidTax.periodStart, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">税款所属时期结束：</td>
+                                    <td>
+                                        <input id="periodEnd" name="periodEnd" th:value="${#dates.format(sysProPrepaidTax.periodEnd, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">税额总计：</td>
+                                    <td>
+                                        <input id="totalTax" name="totalTax" th:value="${#numbers.formatDecimal(sysProPrepaidTax.totalTax,1,'COMMA',2,'POINT')}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">销售金额：</td>
+                                    <td>
+                                        <input id="salesAmount" name="salesAmount" th:value="${#numbers.formatDecimal(sysProPrepaidTax.salesAmount,1,'COMMA',2,'POINT')}" class="form-control" type="text" >
+                                    </td>
+                                    <td class="active">备注：</td>
+                                    <td>
+                                        <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">审批状态：</td>
+                                    <td>
+                                        <select class="form-control" name="status"
+                                                th:with="type=${@dict.getType('oa_leave_status')}"
+                                                th:field="*{status}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                    <td class="active">缴税地点：</td>
+                                    <td>
+                                        <select id="taxeSite" disabled="disabled" th:field="*{taxeSite}"  name="taxeSite" class="form-control" th:with="type=${@dict.getType('sys_pro_tax_site')}" required="required" >
+                                            <option value="">--请选择--</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+
+
+                        <!-- 税额明细 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <div class="btn-group-sm" id="toolbar1" role="group">
+                                <a class="btn btn-warning" data-toggle="modal" th:if="${status=='3' || status =='99'}" onclick="addDetail()"> <i class="fa fa-plus"></i> 添加税额明细 </a>
+                                <a class="btn btn-danger" th:if="${status=='3' || status =='99'}" onclick="removeRowAll('taxDetailTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                            </div>
+                            <div class="fixed-table-container">
+                                <table id="taxDetailTable" data-mobile-responsive="true"></table>
+                            </div>
+                        </div>
+
+                        <!-- 审批流程记录 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                                <button type="button" class="btn btn-sm btn-success"
+                                        th:onclick="selectUser('','','0',[[${sysProPrepaidTax.id}]],'oa/oaCertificatesLogout/copy','flag')">
+                                    抄送</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/sysProPrepaidTax";
+		$("#form-sysProPrepaidTax-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+
+        //同意
+        function agree(){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-6/sys_pro_prepaid_tax/"+[[${sysProPrepaidTax.id}]]);
+        }
+        //不同意
+        function disagree(){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-6/sys_pro_prepaid_tax/"+[[${sysProPrepaidTax.id}]]);
+        }
+        //返回
+        function backAway(){
+            $.modal.close();
+            var parent = window.parent;
+            parent.$.table.refresh();
+        }
+
+        var sysProTaxType = [[${@dict.getType('sys_pro_tax_type')}]];
+        var options = {
+            id : 'taxDetailTable',
+            url : ctx + 'oa/sysProPrepaidTax/detailList',
+            showSearch : false,
+            showRefresh : false,
+            showToggle : false,
+            showColumns : false,
+            showPageGo : false,
+            pagination : false,
+            uniqueId : 'id',
+            modalName : "税额明细",
+            showExport : false,
+            clickToSelect : true,
+            queryParams : {"mainId" : [[${sysProPrepaidTax.id}]]},
+            columns : [
+                {
+                    field : 'id',
+                    title : 'id',
+                    visible : false
+                },
+                {
+                    field : 'taxType',
+                    title : '税种',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(sysProTaxType, value);
+                    }
+                },
+                {
+                    field : 'taxRate',
+                    title : '税率'
+                },
+                {
+                    field : 'taxAmount',
+                    title : '税额'
+                }]
+
+        };
+        $(function() {
+            $.table.init(options);
+            //流程
+            var data = {};
+            data.procInstId= [[${sysProPrepaidTax.procInstId}]];
+            data.id = [[${sysProPrepaidTax.id}]];
+            selectActProcessList(data);
+        });
+
+        $(function () {
+            var attachmentList = new Array();
+            //回显附件
+            var config = {
+                url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+                type: "post",
+                dataType: "json",
+                data: {"objId": [[${sysProPrepaidTax.id}]]},
+                success: function(result) {
+                    var imgsUrl = new Array();
+                    var attachList = result.data;
+                    if(attachList!=null && attachList.length>0){
+                        var downloadConfig = new Array();
+                        for(var i=0; i<attachList.length; i++){
+                            var down = {};
+                            var attach = attachList[i];
+                            imgsUrl.push(attach.attachmentUrl);
+                            down.key = attach.attachmentName;
+                            down.caption = attach.fileName;
+                            down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                            if(isAssetTypeAnImage(attach.attachmentName)){
+                                down.type = 'image';
+                            }else{
+                                down.type = 'object';
+                            }
+                            downloadConfig.push(down);
+                        }
+                        var option1={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            imgsUrl:imgsUrl,
+                            downloadConfig:downloadConfig
+                        }
+                        $.common.uploadFile(option1);
+                    }else{
+                        var option2={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            deleteExtraData:null,
+                            imgsUrl:new Array(),
+                            initialPreviewConfig:null
+                        }
+                        $.common.uploadFile(option2);
+                    }
+                    downFile();
+                }
+            };
+            $.ajax(config)
+        });
+
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增禹涛项目拨款记录')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-ytAllocateRecord-add">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">关联工程：</label>
+				<div class="col-sm-8">
+					<input id="projectId" name="projectId" class="form-control" type="hidden">
+					<input id="projectName" name="projectName" class="form-control" type="text" onclick="selectPoject()">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">拨款金额：</label>
+				<div class="col-sm-8">
+					<input id="amount" name="amount" class="form-control" type="number">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">拨款时间：</label>
+				<div class="col-sm-8">
+					<input id="alloDate" name="alloDate" class="form-control time-input" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">拨款类型：</label>
+				<div class="col-sm-8">
+					<select id="type"  name="type" class="form-control" th:with="type=${@dict.getType('yt_allocateRecord_type')}">
+						<option value="">--请选择--</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<br>
+				<button type="button" class="btn btn-sm btn-primary"
+						onclick="submitHandler()">
+					<i class="fa fa-check"></i>提交
+				</button>
+				<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+				<br>
+			</div>
+		</div>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript" th:inline="javascript">
+		var prefix = ctx + "yt/ytAllocateRecord"
+		////工程
+		function selectPoject () {
+			var options = {
+				title: '工程',
+				width: "1200",
+				url: ctx + 'yt/ytProjectMain',
+				callBack: doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			$('#projectId').val(data.id);
+			$('#projectName').val(data.name);
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/add", $('#form-ytAllocateRecord-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

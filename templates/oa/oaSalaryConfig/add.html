@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增缴费基数与缴费比例配置')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaSalaryConfig-add">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>缴费基数与缴费比例配置</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">是否本市户口</td>
+									<td>
+										<select class="form-control" id="cityAccount" name="cityAccount" th:with="type=${@dict.getType('sys_yes_no')}">
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">养老保险缴费基数</td>
+									<td>
+										<input id="oldInsureBase" name="oldInsureBase" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">养老保险最高缴费基数</td>
+									<td>
+										<input id="oldInsureBaseMax" name="oldInsureBaseMax" class="form-control" type="number">
+									</td>
+									<td class="active">公司养老保险缴费比率%</td>
+									<td>
+										<input id="companyOldRate" name="companyOldRate" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">个人养老保险缴费比率%</td>
+									<td>
+										<input id="personOldRate" name="personOldRate" class="form-control" type="number">
+									</td>
+									<td class="active">公司工伤保险缴纳比率%</td>
+									<td>
+										<input id="companyInjuryRate" name="companyInjuryRate" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">医疗保险缴费基数</td>
+									<td>
+										<input id="cureBase" name="cureBase" class="form-control" type="number">
+									</td>
+									<td class="active">医疗保险最高缴费基数</td>
+									<td>
+										<input id="cureBaseMax" name="cureBaseMax" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">公司医疗保险缴纳比例%</td>
+									<td>
+										<input id="companyCureRate" name="companyCureRate" class="form-control" type="number">
+									</td>
+									<td class="active">个人医疗保险缴纳比例%</td>
+									<td>
+										<input id="personCureRate" name="personCureRate" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">失业保险最低缴费基数</td>
+									<td>
+										<input id="loseBase" name="loseBase" class="form-control" type="number">
+									</td>
+									<td class="active">公司失业保险缴纳比例%</td>
+									<td>
+										<input id="companyLoseRate" name="companyLoseRate" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">个人失业保险缴纳比例%</td>
+									<td>
+										<input id="personLoseRate" name="personLoseRate" class="form-control" type="number">
+									</td>
+									<td class="active">公司生育险缴费基数</td>
+									<td>
+										<input id="companyBirthBase" name="companyBirthBase" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">公司生育险最高缴费基数</td>
+									<td>
+										<input id="companyBirthBaseMax" name="companyBirthBaseMax" class="form-control" type="number">
+									</td>
+									<td class="active">公司生育险缴纳比例%</td>
+									<td>
+										<input id="companyBirthRate" name="companyBirthRate" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">公司公积金缴纳比例%</td>
+									<td>
+										<input id="companyCommonRate" name="companyCommonRate" class="form-control" type="number">
+									</td>
+									<td class="active">个人公积金缴纳比例%</td>
+									<td>
+										<input id="personCommonRate" name="personCommonRate" class="form-control" type="number">
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>保 存
+								</button>
+								&nbsp;
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript">
+		var prefix = ctx + "oa/oaSalaryConfig"
+		
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.saveTab(prefix + "/add", $('#form-oaSalaryConfig-add')
+						.serialize());
+			}
+		}
+	</script>
+</body>
+</html>

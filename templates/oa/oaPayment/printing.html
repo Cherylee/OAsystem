@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div style="position: fixed; z-index: 10; top: 30px;right: 40px">
+    <button class="btn btn-warning btn-rounded btn-sm" onclick="printing()"><i class="fa fa-download"></i>打印</button>
+</div>
+<div id="printing">
+    <div th:each="payment,paymentStat :${paymentVoList}">
+        <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+            <!--抬头  -->
+            <div class="hr-line-dashed"></div>
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <table class="table table-bordered table-condensed" >
+                                <caption class="text-center">
+                                    <h2>付款单</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active" style="width: 15%">编号</td>
+                                    <td style="width: 35%">[[${payment.oaPayment.code}]]</td>
+                                    <td class="active" style="width: 15%">所属公司</td>
+                                    <td>[[${payment.oaPayment.companyName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人</td>
+                                    <td>[[${payment.oaPayment.userName}]]</td>
+                                    <td class="active">申请部门</td>
+                                    <td>[[${payment.oaPayment.deptName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">项目名称</td>
+                                    <td colspan="3">[[${payment.oaPayment.projectName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期</td>
+                                    <td>[[${#dates.format(payment.oaPayment.applyDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">支付日期</td>
+                                    <td>[[${#dates.format(payment.oaPayment.payDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款金额</td>
+                                    <td>[[${payment.oaPayment.money}]]</td>
+                                    <td class="active">金额大写</td>
+                                    <td>[[${payment.oaPayment.moneyUpcase}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款方</td>
+                                    <td>[[${payment.oaPayment.drawee}]]</td>
+                                    <td class="active" th:if="${payment.oaPayment.projectId==null}">付款方式</td>
+                                    <td class="active" th:unless="${payment.oaPayment.projectId==null}">付款类型</td>
+                                    <td th:classappend="${'payType'+ (paymentStat.index) }"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">到账截止日期</td>
+                                    <td>[[${#dates.format(payment.oaPayment.expirationDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">是否代收代付</td>
+                                    <td th:classappend="${'isAgent'+ (paymentStat.index) }"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">关联收款</td>
+                                    <td>[[${payment.oaPayment.receivablesName}]]</td>
+                                    <td class="active">是否委托关联公司代付</td>
+                                    <td th:classappend="${'companyPay'+ (paymentStat.index) }"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">实际付款金额</td>
+                                    <td>[[${payment.oaPayment.actualMoney}]]</td>
+                                    <td class="active">实际付款金额大写</td>
+                                    <td>[[${payment.oaPayment.actualMoneyUpcase}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">关联公司</td>
+                                    <td>[[${payment.oaPayment.company}]]</td>
+                                    <td class="active">金额</td>
+                                    <td>[[${payment.oaPayment.companyPayMoney}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">关联公司账号</td>
+                                    <td>[[${payment.oaPayment.companyAccount}]]</td>
+                                    <td class="active">关联公司开户行</td>
+                                    <td>[[${payment.oaPayment.companyOpenBank}]]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 60px">
+                                    <span>付款明细</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 16%">付款事由</th>
+                                            <th style="width: 12%">付款金额</th>
+                                            <th style="width: 12%">付款类型</th>
+                                            <th style="width: 12%">收款人</th>
+                                            <th style="width: 12%">收款人账号</th>
+                                            <th style="width: 12%">收款人开户行</th>
+                                            <th style="width: 12%">工程大类</th>
+                                            <th style="width: 12%">工程小类</th>
+                                        </tr>
+                                        <tr th:each="detail,detailStat :${paymentVoList[paymentStat.index].detailList}">
+                                            <td>[[${detail.paymentReason}]]</td>
+                                            <td>[[${detail.money}]]</td>
+                                            <td th:classappend="${'payType'+ (paymentStat.index) + (detailStat.index) }"></td>
+                                            <td>[[${detail.payee}]]</td>
+                                            <td>[[${detail.payeeAccount}]]</td>
+                                            <td>[[${detail.payeeOpenBank}]]</td>
+                                            <td th:classappend="${'proCategory'+ (paymentStat.index) + (detailStat.index) }"></td>
+                                            <td>[[${detail.detailCategory}]]</td>
+                                        </tr>
+                                        <tr th:if="${paymentVoList[paymentStat.index].detailList == null}">
+                                            <td colspan="8" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>扣款明细</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 25%">审批人Id</th>
+                                            <th style="width: 25%">审批人</th>
+                                            <th style="width: 25%">扣款事由</th>
+                                            <th style="width: 25%">扣款金额</th>
+                                        </tr>
+                                        <tr th:each="cut,cutStat :${paymentVoList[paymentStat.index].cutList}" >
+                                            <td>[[${cut.userId}]]</td>
+                                            <td>[[${cut.userName}]]</td>
+                                            <td>[[${cut.reason}]]</td>
+                                            <td>[[${cut.money}]]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>审批流程</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th></th>
+                                            <th style="width: 25%">流程名称</th>
+                                            <th style="width: 25%">开始时间</th>
+                                            <th style="width: 25%">审批信息</th>
+                                            <th style="width: 25%">审核时间</th>
+                                        </tr>
+                                        <tr th:each="approval,approvalStat :${paymentVoList[paymentStat.index].processList}">
+                                            <td>[[${approvalStat.index}]]</td>
+                                            <td>[[${approval.actName}]]</td>
+                                            <td>[[${#dates.format(approval.startTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${approval.message}]]</td>
+                                            <td>[[${#dates.format(approval.endTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>最后一个节点</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 50%">用户名称</th>
+                                            <th style="width: 50%">留言</th>
+                                        </tr>
+                                        <tr th:unless="${payment.oaProcExeComment==null}">
+                                            <td>[[${payment.oaProcExeComment.userName}]]</td>
+                                            <td>[[${payment.oaProcExeComment.content}]]</td>
+                                        </tr>
+                                        <tr th:if="${payment.oaProcExeComment==null}">
+                                            <td colspan="2" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="page-break-after:always;"></div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    console.log([[${paymentVoList}]]);
+    var paymentVoList = [[${paymentVoList}]];
+    var payTypeList1 = [[${@dict.getType('oa_payment_type')}]];
+    var payTypeList2 = [[${@dict.getType('sys_pro_pay_type')}]];
+    var isAgentList = [[${@dict.getType('sys_yes_no')}]];
+    var payType = [[${@dict.getType('oa_reimbursement_type')}]];
+    var bigTpye=[[${@dict.getType('sys_payment_big_type')}]];
+
+    for(var i=0;i<paymentVoList.length;i++){
+        //付款方式
+        var payTypeText = '';
+        if (paymentVoList[i].oaPayment.projectId==null){
+            payTypeText = $.table.selectDictLabel(payTypeList1, paymentVoList[i].oaPayment.payType);
+        }else{
+            payTypeText = $.table.selectDictLabel(payTypeList2, paymentVoList[i].oaPayment.payType);
+        }
+        $('.payType'+i).html(payTypeText);
+    }
+
+    //字典查询
+    //是否代收代付
+    selectDictionary(isAgentList,[[${paymentVoList}]],'oaPayment','isAgent');
+    //是否委托关联公司代付
+    selectDictionary(isAgentList,[[${paymentVoList}]],'oaPayment','companyPay');
+    //明细付款类型
+    selectDetailDictionary(payType,[[${paymentVoList}]],'detailList','payType');
+    //工程大类
+    selectDetailDictionary(bigTpye,[[${paymentVoList}]],'detailList','proCategory');
+
+    function printing() {
+        $('#printing').jqprint({
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: false
+        });
+    }
+</script>
+</body>
+</html>

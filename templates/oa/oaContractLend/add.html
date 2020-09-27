@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增合同借阅申请')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<form class="form-horizontal" id="form-oaContractLend-add">
+		    <input type="hidden" name="type1" id="type1">
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">申请日期：</label>
+					<div class="col-sm-8">
+						<div class="input-group data">
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							<input id="createTime" name="createTime"
+								class="form-control time-input currentTime" type="text">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">合同名称：</label>
+					<div class="col-sm-8">
+						<input id="contractName" name="contractName" class="form-control"
+							type="text"
+							onclick="selectContract('contractName','contractCode','contractId')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">合同编号：</label>
+					<div class="col-sm-8">
+						<input id="contractCode" name="contractCode" class="form-control"
+							type="text"> <input id="contractId" name="contractId"
+							class="form-control" type="hidden">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">借阅事由：</label>
+					<div class="col-sm-8">
+						<input id="reason" name="reason" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+
+
+			<div class="col-sm-6  hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">合同审核状态：</label>
+					<div class="col-sm-8">
+						<select id="status" name="status" class="form-control"
+							th:with="type=${@dict.getType('oa_ApplyStatusContract')}">
+							<option value="">------所有------</option>
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-6 hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">签约背景/备注说明：</label>
+					<div class="col-sm-8">
+						<input id="remark" name="remark" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">合同借阅文本：</label>
+					<div class="col-sm-8">
+						<input id="lendDoc" name="lendDoc" class="form-control"
+							type="text" value="原件借出">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">借阅开始时间：</label>
+					<div class="col-sm-8">
+						<div class="input-group data">
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							<input id="lendStart" name="lendStart"
+								class="form-control time-input-data " type="text">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">借阅结束时间：</label>
+					<div class="col-sm-8">
+						<div class="input-group data">
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							<input id="lendEnd" name="lendEnd"
+								class="form-control time-input-data" type="text">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-8">
+				<div class="form-group">
+					<label class="col-sm-3 control-label">借阅人承诺：</label>
+					<div class="col-sm-9">
+					    <textarea id="promise" name="promise" class="form-control" >不得私自外借、随意涂改、裁剪、泄密，妥善保管借阅资料，借用合同原件的，承诺按预计归还日期及时返还</textarea>
+
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            &nbsp;
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript">
+		var prefix = ctx + "oa/oaContractLend"
+
+		var cName = null;
+		var cCode = null;
+		var cId = null;
+		function selectContract(name, code, id) {
+			cName = name;
+			cCode = code;
+			cId = id;
+			var options = {
+				title : '选择合同',
+				width : "1200",
+				url : prefix + "/toContractList",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			if (data) {
+				$('#' + cName).val(data.contractName);
+				$('#' + cCode).val(data.contractCode);
+				$('#' + cId).val(data.id);
+				$("#type1").val(data.type1)
+			}
+
+		}
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.saveTab(prefix + "/add",
+						$('#form-oaContractLend-add').serialize());
+			}
+		}
+	</script>
+</body>
+</html>

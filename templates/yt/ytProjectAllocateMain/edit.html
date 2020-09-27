@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改主管分配主')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-ytProjectAllocateMain-edit" th:object="${ytProjectAllocateMain}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目id：</label>
+            <div class="col-sm-8">
+            	<input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">设计费用：</label>
+            <div class="col-sm-8">
+            	<input id="designCost" name="designCost" th:field="*{designCost}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否预估：</label>
+            <div class="col-sm-8">
+            	<input id="isEstimate" name="isEstimate" th:field="*{isEstimate}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">主负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="principleLeaderId" name="principleLeaderId" th:field="*{principleLeaderId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">副负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="deputyLeaderId" name="deputyLeaderId" th:field="*{deputyLeaderId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目分管id：</label>
+            <div class="col-sm-8">
+            	<input id="projectManagerId" name="projectManagerId" th:field="*{projectManagerId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">测量负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="auditorId" name="measureLeaderId" th:field="*{measureLeaderId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">勘测负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="checkerId" name="surveyLeaderId" th:field="*{surveyLeaderId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">其它负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="participantIds" name="otherLeaderId" th:field="*{otherLeaderId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">总工期：</label>
+            <div class="col-sm-8">
+            	<input id="totalPeriod" name="totalPeriod" th:field="*{totalPeriod}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "yt/ytProjectAllocateMain";
+		$("#form-ytProjectAllocateMain-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-ytProjectAllocateMain-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

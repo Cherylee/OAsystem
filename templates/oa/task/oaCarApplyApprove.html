@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('用车申请')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaCarApply-edit" th:object="${oaCarApply}">
+							<input id="id" name="id" th:field="*{id}" type="hidden"> <input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+							<input name="procInstId" type="hidden" id="procInstId" th:value="*{procInstId}" />
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>用车申请</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active"><span style="color: red;">*</span>申请人</td>
+									<td>
+										<input id="proposer" name="proposer" th:field="*{userName}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active"><span style="color: red;">*</span>申请部门</td>
+									<td>
+										<input id="deptId" name="deptId" th:field="*{dept.deptName}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">出发时间</td>
+									<td>
+										<input id="applyTimeFrom" name="applyTimeFrom" th:value="${#dates.format(oaCarApply.applyTimeFrom, 'yyyy-MM-dd HH:mm:ss')}"
+											   placeholder="出发时间" autocomplete="off" class="form-control time-input" type="text" readonly>
+									</td>
+									<td class="active">返回时间</td>
+									<td>
+										<input id="applyTimeTo" name="applyTimeTo" th:value="${#dates.format(oaCarApply.applyTimeTo, 'yyyy-MM-dd HH:mm:ss')}"
+											   placeholder="返回时间" autocomplete="off" class="form-control time-input" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">车牌号</td>
+									<td>
+										<input id="carNo" name="carNo" th:field="*{carNo}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active">用车时长</td>
+									<td>
+										<input id="carUsed" name="carUsed" th:field="*{carUsed}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">驾驶员信息</td>
+									<td>
+										<input id="driverInfo" name="driverInfo" th:field="*{driverInfo}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active">乘客信息</td>
+									<td>
+										<input id="passengerInfo" name="passengerInfo" th:field="*{passengerInfo}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">乘车地点</td>
+									<td>
+										<input id="ridePlace" name="ridePlace" th:field="*{ridePlace}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active">用车事由</td>
+									<td>
+										<input id="applyReason" name="applyReason" th:field="*{applyReason}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">目的地</td>
+									<td>
+										<input id="destination" name="destination" th:field="*{destination}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active">里程开始数</td>
+									<td>
+										<input id="mileageStart" name="mileageStart" th:field="*{mileageStart}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">里程终止数</td>
+									<td>
+										<input id="mileageEnd" name="mileageEnd" th:field="*{mileageEnd}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active">行驶里程数</td>
+									<td>
+										<input id="mileage" name="mileage" th:field="*{mileage}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">指定司机</td>
+									<td>
+										<input id="designatedDriver" name="designatedDriver" th:field="*{designatedDriver}" class="form-control" type="text" readonly>
+									</td>
+									<td class="active">用车类型</td>
+									<td>
+										<select name="useCarType" class="form-control" th:with="type=${@dict.getType('oa_use_car_type')}" th:field="*{useCarType}" disabled="disabled">
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">备注</td>
+									<td colspan="3">
+										<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text" readonly>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+								<button type="button" class="btn btn-sm btn-success"
+								th:onclick="selectUser('','','0',[[${oaCarApply.id}]],'oa/oaCarApply/copy','flag')">
+								抄送</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关闭
+								</button>
+							</div>
+						</div>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="bootstrap-table" data-mobile-responsive="true"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js"/>
+	<th:block th:include="include :: lastNode" />
+	<script th:inline="javascript">
+        var prefix = ctx + "oa/oaCarApply";
+		var lastNodeId=[[${oaCarApply.id}]];
+		var actDefineId=[[${oaCarApply.actDefineId}]];
+		var lastStatus=[[${oaCarApply.status}]];
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+$("#taskId").val()+"/4/oa_car_apply/"+[[${oaCarApply.id}]]);
+    	}
+    
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+$("#taskId").val()+"/4/oa_car_apply/"+[[${oaCarApply.id}]]);
+	    }
+		
+		//返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaCarApply.procInstId}]];
+    	data.id = [[${oaCarApply.id}]];
+		selectActProcessList(data);
+	</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改考勤记录')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-oaAttendance-edit" th:object="${oaAttendance}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">公司id：</label>
+            <div class="col-sm-8">
+            	<input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">部门id：</label>
+            <div class="col-sm-8">
+            	<input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">打卡人id：</label>
+            <div class="col-sm-8">
+            	<input id="userId" name="userId" th:field="*{userId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建者：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" th:field="*{createBy}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">上班时间：</label>
+            <div class="col-sm-8">
+            	<input id="workTime" name="workTime" th:field="*{workTime}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新者：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" th:field="*{updateBy}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">下班时间：</label>
+            <div class="col-sm-8">
+            	<input id="closingTime" name="closingTime" th:field="*{closingTime}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">经度：</label>
+            <div class="col-sm-8">
+            	<input id="longitude" name="longitude" th:field="*{longitude}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">纬度：</label>
+            <div class="col-sm-8">
+            	<input id="latitude" name="latitude" th:field="*{latitude}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">标记（0上班打卡，1下班打卡，2更新下班打卡）：</label>
+            <div class="col-sm-8">
+            	<input id="flag" name="flag" th:field="*{flag}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">打卡点到公司的距离：</label>
+            <div class="col-sm-8">
+            	<input id="distance" name="distance" th:field="*{distance}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaAttendance";
+		$("#form-oaAttendance-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-oaAttendance-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

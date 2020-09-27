@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('项目概览列表')"/>
+    <th:block th:include="include :: sysProCss"/>
+</head>
+<body>
+<div class="container-div">
+    <div class="row">
+        <div class="col-md-3">
+            <div class=" select-table table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+        <div class="col-md-9 project-report" style="margin-top: 10px">
+            <div class="panel panel-default">
+                <div class="panel-body ad-btnBox" style="height: 780px;">
+                    <div class="choice-List">
+                        <button class="choice-left" onclick="shiftLeft()"><</button>
+                        <button class="choice-right" onclick="shiftRight()">></button>
+                        <ul>
+                            <li class="choice-li choice-li-active" onclick="goDetails('projectOverview',this)">项目概况</li>
+                            <li class="choice-li" onclick="goDetails('chartAnalysis',this)">项目进度</li>
+                            <li class="choice-li" onclick="goDetails('statisticsReport',this)">项目付款</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-12">
+                        <iframe class="layui-layer-iframes" id="iframe" src=""></iframe>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "yt/ytProjectMain/ytCustomProject";
+    var optProjectId;//项目id
+    $(function () {
+        var options = {
+            url: prefix + "/listData",
+            sortName: "createTime",
+            sortOrder: "desc",
+            striped: true,
+            showExport: true,
+            showColumns: false,
+            showExport: false,
+            columns: [
+                {
+                    field: 'name',
+                    title: '项目名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var projectName = $.table.tooltip(row.name, 25);
+                        if (index == '0') {
+                            displayBox(row.id)
+                        }
+                        return '<a href="#"  onclick="displayBox(\'' + row.id + '\')">' + projectName + '</a>';
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+
+    //点击项目名称查看报表
+    function displayBox(id) {
+        $('.project-report').removeClass('hide');
+        optProjectId = id;
+        //导航栏显示选择第一个
+        var choiceList = $(".choice-li");
+        choiceList.eq(0).addClass('choice-li-active').siblings().removeClass('choice-li-active');
+
+        //判断宽度是否足够  是否显示按钮
+        var choiceListWidth = $(".choice-List").width();
+        var ulWidth = choiceList.length * 100;
+        if (ulWidth > choiceListWidth) {
+            $(".choice-left").css("display", "block");
+            $(".choice-right").css("display", "block");
+        };
+        //更新查看数据
+        // var config = {
+        //     url: prefix + '/detail/' + id,
+        //     type: 'get',
+        //     dataType: 'json',
+        //     success: function (result) {
+        //         $("#projectName").text(result.projectName);
+        //         $('.layui-layer-iframes').attr("src", prefix + '/projectDetail/' + id);
+        //     }
+        // };
+        // $.ajax(config)
+        $('.layui-layer-iframes').attr("src", prefix + '/projectOverview/' + id);
+    }
+
+    //跳转至指定iframe
+    function  goDetails(url,obj) {1
+        var iframes = $('.layui-layer-iframes')
+        iframes.attr("src", prefix + "/" + url + "/" + optProjectId);
+        $(obj).addClass('choice-li-active').siblings().removeClass('choice-li-active');
+    }
+</script>
+
+</body>
+</html>

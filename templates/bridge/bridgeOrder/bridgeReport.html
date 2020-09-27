@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('报告上传')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal" id="form-oaDeptTrain-add" th:object="${bridgeOrderVo}">
+			<input type="hidden" th:value="*{order.id}" id="id">
+			<div class="col-sm-8">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">委托单编号</label>
+					<div class="col-sm-10">
+						<input type="text" th:value="*{order.code}" class="form-control" readonly>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-8">
+				<div class="form-group" style="height: 80px">
+					<label class="col-sm-2 control-label">报告附件</label>
+					<div class="col-sm-10">
+						<div class="file-loading">
+							<input id="uploadFileId" type="file" multiple>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+		<div class="row">
+		<div class="col-sm-offset-6 col-sm-6">
+			<br>
+			<button type="button" class="btn btn-sm btn-primary"
+				onclick="submitHandler()">
+				<i class="fa fa-check"></i>保 存
+			</button>
+			&nbsp;
+			<button type="button" class="btn btn-sm btn-danger"
+				onclick="closeItem()">
+				<i class="fa fa-reply-all"></i>关 闭
+			</button>
+			<br>
+		</div>
+	</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+	    var prefix = ctx + "bridge/bridgeOrder";
+		//上传附件
+		var attachmentList = new Array();
+        //图片反显出来
+        $(function () {
+        	var config = {
+        	        url: ctx+"bridge/bridgeAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": [[${bridgeOrderVo.order.id}]]},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        		}
+        	        		var option1={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+		     			downFile();
+        	        }
+        	    };
+        	    $.ajax(config)
+	    });
+		
+		function submitHandler() {
+			var data={}
+			data.orderId=$('#id').val()
+			data.attachmentList=attachmentList
+			console.log(data)
+			//$.operate.saveJsonTab(prefix + "/bridgeReportSave",data);
+		}
+	</script>
+</body>
+</html>

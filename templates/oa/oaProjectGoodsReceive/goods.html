@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('工程物资列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								物资类型：<input type="text" name="goodsType"/>
+							</li>
+
+							<li>
+								物资名称：<input type="text" name="goodsName"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/oaProjectGoods";
+        var datas = [[${@dict.getType('oa_project_goods_type')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                queryParams: queryParams,
+                modalName: "工程物资",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+					{
+						field : 'id',
+						title : 'id',
+						visible: false
+					},
+					{
+						field : 'code',
+						title : '物资编号',
+						sortable: true
+					},
+					{
+						field : 'companyName',
+						title : '存放公司',
+						sortable: true
+					},
+					{
+						field : 'deptName',
+						title : '存放部门',
+						sortable: true
+					},
+					{
+						field : 'location',
+						title : '存放地点',
+						sortable: true
+					},
+					{
+						field : 'userName',
+						title : '保管人',
+						sortable: true
+					},
+					{
+						field : 'goodsName',
+						title : '物资名称',
+						sortable: true
+					},
+					{
+						field : 'unit',
+						title : '单位',
+						sortable: true
+					},
+					{
+						field : 'price',
+						title : '单价',
+						sortable: true
+					},
+					{
+						field : 'totalStock',
+						title : '总库存',
+						sortable: true
+					},
+					{
+						field : 'inventoryQuantity',
+						title : '入库数量',
+						sortable: true,
+					},
+					{
+						field : 'effect',
+						title : '是否有效',
+						sortable: true,
+					},
+					{
+						field : 'inDate',
+						title : '入库日期',
+						sortable: true
+					},
+					{
+						field : 'projectName',
+						title : '所属项目：',
+						sortable: true
+					},
+					{
+						field : 'projectId',
+						title : '所属项目ID：',
+						sortable: false
+					},
+					{
+						field : 'contractName',
+						title : '关联合同：',
+						sortable: true
+					},
+					{
+						field : 'contractId',
+						title : '关联合同ID：',
+						sortable: false
+					},
+					{
+						field : 'remark',
+						title : '备注',
+						sortable: true
+					}]
+            };
+            $.table.init(options);
+        });
+        
+        function queryParams(params) {
+			var search = $.table.queryParams(params);
+			search.goodsType = [[${type}]];
+			search.projectId = [[${projectId}]];
+			search.contractId = [[${contractId}]];
+			return search;
+		}
+        
+        /**选择物资记录*/
+        function submitHandler() {
+			var rows = $('#' + $.table._option.id).bootstrapTable('getSelections');
+			if (rows.length == 0) {
+       			$.modal.alertWarning("请至少选择一条记录");
+       			return;
+       		}
+			$.modal.close();
+			return rows;
+		}
+        
+    </script>
+</body>
+</html>

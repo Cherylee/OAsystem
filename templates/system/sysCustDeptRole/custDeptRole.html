@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('部门与角色关系列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:sysCustDeptRole:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:sysCustDeptRole:remove')}]];
+        var prefix = ctx + "system/sysCustDeptRole";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "部门与角色关系",
+                clickToSelect : true,
+		        showExport: true,
+		        queryParams:{'userId':[[${user.userId}]]},
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'userId', 
+					title : '用户id',
+					sortable: true
+				},
+				{
+					field : 'userName', 
+					title : '用户姓名',
+					sortable: true
+				},
+				{
+					field : 'deptId', 
+					title : '公司id',
+					sortable: true
+				},
+				{
+					field : 'deptName', 
+					title : '公司名称',
+					sortable: true
+				},
+				{
+					field : 'roleId', 
+					title : '角色id',
+					sortable: true
+				},
+				{
+					field : 'roleName', 
+					title : '角色名称',
+					sortable: true
+				}]
+            };
+            $.table.init(options);
+        });
+        //回显
+	    function submitHandler(){
+		    var target =$('#bootstrap-table').bootstrapTable('getSelections');
+	     	if ($.table.selectColumns("id").length == 0) {
+	 			$.modal.alertWarning("请至少选择一条记录");
+	 			return;
+	 		}
+	     	if($.table.selectColumns("id").length >1 ){
+	     		$.modal.alertWarning("只能选择一条记录哦！");
+	 			return;
+	     	}
+			$.modal.close();
+			return target[0];
+	    }
+    </script>
+</body>
+</html>

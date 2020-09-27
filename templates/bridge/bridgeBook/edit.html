@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改委托书')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeBook-edit" th:object="${bridgeBook}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">委托单名称：</label>
+				<div class="col-sm-8">
+					<input id="name" name="name" th:field="*{name}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">委托单类型：</label>
+				<div class="col-sm-8">
+					<input id="orderType" name="orderType" th:field="*{orderType}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+	</div>
+	<!-- 关联检测大类 -->
+	<div class="col-sm-6 select-table table-striped">
+		<div class="btn-group-sm" id="toolbar1" role="group">
+			<a class="btn btn-warning" data-toggle="modal" onclick="addDetail()"> <i class="fa fa-plus"></i> 添加关联检测大类 </a>
+			<a class="btn btn-danger" onclick="removeRowAll('codeTypeRelTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+		</div>
+		<div class="fixed-table-container">
+			<table id="codeTypeRelTable" data-mobile-responsive="true"></table>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-6 col-sm-6">
+				<button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+
+				<button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- 新增关联检测大类弹出框 -->
+	<div class="modal inmodal fade" id="detailModel" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body ">
+					<form class="form-horizontal m" id="form-detailModel-add">
+						<div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">委托单类型：</label>
+								<div class="col-sm-8">
+									<input id="orderTypeRel" name="orderType" class="form-control type"
+										   th:value="${bridgeBook.orderType}" type="text" disabled="disabled">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">检测大类编码：</label>
+								<div class="col-sm-8">
+									<input id="itemCode" name="itemCode" class="form-control" type="text">
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToCodeTypeRelTable()">保存</button>
+					<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    </div>
+
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "bridge/bridgeBook";
+		$("#form-bridgeBook-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+				var data = {};
+				data.bridgeBook = $('#form-bridgeBook-edit').serializeObject();
+				data.relList = $('#codeTypeRelTable').bootstrapTable('getData');
+				$.operate.saveJsonTab(prefix + "/edit", data);
+	        }
+	    }
+		var options = {
+			id : 'codeTypeRelTable',
+			url : ctx + 'bridge/bridgeCodeTypeRel/list',
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			uniqueId : 'itemCode',
+			modalName : "关联明细",
+			showExport : false,
+			clickToSelect : true,
+			queryParams : {"orderType" : [[${bridgeBook.orderType}]]},
+			columns : [
+				{
+					field : 'orderType',
+					title : '委托单类型',
+					visible : false
+				},
+				{
+					field : 'itemCode',
+					title : '检测大类代码'
+				},
+				{
+					title : '操作',
+					formatter : function(value, row, index) {
+						return	'<a class="btn btn-danger" onclick="removeRow(\'codeTypeRelTable\',\'' + row.itemCode + '\')">删除</a> '
+					}
+				} ]
+
+		};
+		$(function() {
+			$.table.init(options);
+		});
+
+		//添加明细信息
+		function addDetail(){
+			$.form.reset('form-detailModel-add');//清空原有数据
+			$('#detailModel').modal("show");
+			$(".type").attr("disabled","disabled");
+		}
+
+		/* 删除指定表格行 */
+		function removeRow(id, rowId) {
+			$.modal.confirm("确定删除该行数据吗?", function() {
+				$("#" + id).bootstrapTable('removeByUniqueId', rowId);
+			});
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$.modal.confirm("确定删除所有行吗?", function() {
+				$("#" + id).bootstrapTable('removeAll');
+			});
+		}
+
+		//将关联信息填入到关联明细中
+		function saveToCodeTypeRelTable(){
+			$(".type").attr("disabled",false);
+			var formData = $('#form-detailModel-add').serializeObject();
+			$("#codeTypeRelTable").bootstrapTable('insertRow', {
+				index : 0, // 你想插入到哪，0表示第一行
+				row : formData
+			})
+		}
+	</script>
+</body>
+</html>

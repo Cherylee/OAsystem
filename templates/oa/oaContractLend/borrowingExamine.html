@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('合同申请')" />
+<style type="text/css">
+table {
+	background: #f5f5f5;
+}
+
+caption {
+	font-size: 16px !important;
+}
+.table>tbody>tr>td.headTable{
+background:#eaeaea
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content" th:object="${vo}">
+	  <input type="hidden" id="currentTime" class="currentTime"> 
+	  <form id="form-oaContract-examine">
+			<!-- 提交审核意见 -->
+			 <input type="hidden" id="taskId" name="taskId" th:value="*{curDealMap.taskId}">  
+			 <input type="hidden" id="pass" name="pass"> 
+			 <input type="hidden" id="opinion" name="opinion"> 
+		</form>
+		<form id="form-stateChange">
+		      <!-- 确认操作 -->		      
+			  <input type="hidden" id="id" name="id" th:value="*{oaContractLend.id}"> 
+			  <input type="hidden" id="status" name="status">
+			  <input type="hidden" id="backDate" name="backDate">
+			  <input type="hidden" id="placeDate" name="placeDate">
+		</form>
+	     <!--按钮  -->
+		<div class="row">
+			<div class="col-sm-offset-4 col-sm-4 text-center" th:unless="*{oaContractLend.status=='2'}">
+				<button type="button" class="btn btn-sm btn-info" onclick="urge()" >催办</button>				
+			</div>
+		</div>
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-2 col-sm-8 clearfix">
+				<table class="table table-condensed">
+					<tr>
+						<td>合同流水号:[[*{oaContractLend.serialNum}]]</td>						
+						<td>当前处理人:[[*{dealUser}]]</td>
+						<td>编号: [[*{oaContractLend.lendCode}]]</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body">
+					    <!-- 借阅申请 -->
+						<table class="table table-bordered">
+							<caption>
+								<strong>借阅申请</strong>
+							</caption>
+							<tbody>
+							    <tr>
+							    <td colspan="6" class="text-center headTable"><strong>合同借阅申请单</strong></td>
+							    </tr>
+								<tr>
+									<td class="active">申请人</td>
+									<td>[[*{oaContractLend.applier}]]</td>
+									<td class="active">申请部门</td>
+									<td>[[*{oaContractLend.deptName}]]</td>
+									<td class="active">申请日期</td>
+									<td><span th:text="*{#dates.format(oaContractLend.createTime, 'yyyy-MM-dd')}"></span></td>
+								</tr>
+								<tr>
+									<td class="active">合同编号</td>
+									<td>[[*{oaContractLend.contractCode}]]</td>
+									<td class="active">合同名称</td>
+									<td colspan="3">[[*{oaContractLend.contractName}]]</td>									
+								</tr>								
+								<tr>
+									<td class="active">借阅人承诺</td>
+									<td colspan="5">[[*{oaContractLend.promise}]]</td>
+								</tr>
+								<tr>
+									<td class="active">合同借阅文本</td>
+									<td colspan="5">[[*{oaContractLend.lendDoc}]]</td>
+								</tr>
+								<tr>
+									<td class="active">借阅期间</td>
+									<td colspan="5"><span th:text="*{#dates.format(oaContractLend.lendStart, 'yyyy-MM-dd')}"></span> 到  <span th:text="*{#dates.format(oaContractLend.lendEnd, 'yyyy-MM-dd')}"></span></td>
+								</tr>								
+							</tbody>
+						</table>
+						<!-- 部门经理审核 -->
+						<table class="table table-bordered" >
+							<caption>
+								<strong>部门经理审核</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%">部门经理审核</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">审核日期</td>
+								</tr>
+								<tr th:each="ea : *{hisNodeList.key0}" th:if="${ea.message != ''}">
+									<td>[[${ea.userName}]]</td>
+									<td>
+									   <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+							   
+									</td>
+									<td>[[${ea.startTime}]]</td>
+								</tr>
+								<tr  th:if="*{nodeFlag == 'key0'}">
+								    <td>[[*{hisNodeList.key0[0].userName}]]</td>
+								    <td>
+								       
+									        <div th:if="${vo.nodeFlag} eq 'key0' and ${vo.curUser.userId} eq ${vo.curDealMap.assignee}">
+										       <span class="par_btn">
+												  <button type="button" class="btn btn-sm  btn-info" onclick="Agree(this)">同意</button> &nbsp;
+												  <button type="button" class="btn btn-sm btn-danger" onclick="Reject(this)">驳回</button>
+											   </span> 
+											   <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info" onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											   </span>
+										    </div>
+									
+								    </td>
+								    <td><span class="currentTime"></span></td>
+								</tr>
+
+							</tbody>
+						</table>
+						<!-- 法务审核 -->
+						<table class="table table-bordered" >
+							<caption>
+								<strong>法务审核</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%">法务审核</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">审核日期</td>
+								</tr>
+								<tr  th:each="ea : *{hisNodeList.key1}">
+									<td>[[${ea.userName}]]</td>
+									<td>
+									   <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+									   <div th:unless="${ea.message != ''}">
+									        <div th:if="${vo.nodeFlag} eq 'key1' and ${vo.curUser.userId==__${ea.userId}__}">
+										       <span class="par_btn">
+												  <button type="button" class="btn btn-sm  btn-info" onclick="Agree(this)">同意</button> &nbsp;
+												  <button type="button" class="btn btn-sm btn-danger" onclick="Reject(this)">驳回</button>
+											   </span> 
+											   <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info" onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											   </span>
+										    </div>
+									   </div>
+									</td>
+									<td>[[${ea.startTime}]]</td>
+								</tr>
+
+							</tbody>
+						</table>
+						<!-- 借出执行 -->
+						<table class="table table-bordered" >
+							<caption>
+								<strong>借出执行</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%">合同归档人</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">审核日期</td>
+								</tr>
+								<tr>
+									<td>[[*{archivingNode.archivingName}]]</td>
+									<td>
+									   <div th:if="*{oaContractLend.status} eq '11' or *{oaContractLend.status} eq '12' or *{oaContractLend.status} eq '10'">已借出 </div>
+									   <div th:if="*{oaContractLend.status} eq '2' and *{archivingNode.archiving} eq *{curUser.userId}">
+									       <button type="button" class="btn btn-sm  btn-info" onclick="submit(this,'11','确定已借出？',1)">确定</button> &nbsp;
+									   </div>
+									</td>
+									<td><span class="currentTime"></span></td>
+								</tr>
+
+							</tbody>
+						</table>
+						<!-- 归还确认 -->
+						<table class="table table-bordered" >
+							<caption>
+								<strong>归还确认</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%">借阅申请人</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">归还日期</td>
+								</tr>
+								<tr>
+									<td>[[*{lendUser.userName}]]</td>
+									<td>
+									   <div th:if="*{oaContractLend.status} eq '12' or *{oaContractLend.status} eq '10'">已归还 </div>
+									   <div th:if="*{oaContractLend.status} eq '11' and *{lendUser.userId} eq *{curUser.userId}">
+									       <button type="button" class="btn btn-sm  btn-info" onclick="submit(this,'12','确定已归还？',2)">确定</button> &nbsp;
+									   </div>
+									</td>
+									<td>[[*{oaContractLend.backDate}]]</td>
+								</tr>
+
+							</tbody>
+						</table>
+						<!-- 归档-->
+						<table class="table table-bordered" >
+							<caption>
+								<strong>归档</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%">合同归档人</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">归档日期</td>
+								</tr>
+								<tr>
+									<td>[[*{archivingNode.archivingName}]]</td>
+									<td>
+									   <div th:if="*{oaContractLend.status} eq '10'">已归档 </div>
+									   <div th:if="*{oaContractLend.status} eq '12' and *{archivingNode.archiving} eq *{curUser.userId}">
+									       <button type="button" class="btn btn-sm  btn-info" onclick="submit(this,'10','确定已归档？',3)">确定</button> &nbsp;
+									   </div>
+									</td>
+									<td>[[*{oaContractLend.placeDate}]]</td>
+								</tr>
+
+							</tbody>
+						</table>
+					
+					
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+	</div>
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+	    var prefix = ctx + "oa/oaContractLend";
+		console.log([[${vo}]])
+		//同意操作
+		function Agree(obj){
+			var par=$(obj).parents('.par_btn')
+			btnHandle(obj,par,'Y')
+		}
+		//驳回操作
+		function Reject(obj){
+			var par=$(obj).parents('.par_btn')
+			btnHandle(obj,par,'N')
+		}
+		//按钮操作
+		function btnHandle(obj,id,flag){			
+			layer.prompt({title: '请写下您的审核意见', formType: 2}, function(text, index){
+	    	    layer.close(index);
+	    	    //console.log(text)
+	    	    id.html(text)
+	    	    $('.btnshow').removeClass('hide')
+	    	    $('#pass').val(flag)
+	    	    $('#opinion').val(text)	    	    
+	    	  });
+		}
+		//提交审核意见
+		function submitHandler1(id) {
+			var config = {
+        	        url: prefix + "/completeCurUserTask",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: $('#'+id).serialize(),
+        	        beforeSend: function () {
+        	        	$.modal.loading("正在处理中，请稍后...");
+        	        },
+        	        success: function(result) {
+        	        	
+        	        	$.modal.closeLoading();
+        	        	refreshItem();
+        	        }
+        	    };
+        	    $.ajax(config)	
+			
+		}
+		//状态更改
+        function stateChange(state,backDate,placeDate){
+        	$('#status').val(state)
+        	$('#backDate').val(backDate)
+        	$('#placeDate').val(placeDate)
+        	$.operate.saveTab(prefix + "/statusChange", $('#form-stateChange').serialize());
+    			//$.ajax(config)
+        }
+		//确认操作
+		function submit(obj,state,text,id){
+			var cTime=$('#currentTime').val();//获取当前时间
+			$.modal.confirm(text, function() {
+				if(id==1){//已借出
+					stateChange(state,'','')
+				}else if(id==2){//已归还
+					$('#backDate').val(cTime);
+					stateChange(state,cTime,'');
+				}else if(id==3){//已归档
+					$('#placeDate').val(cTime);
+					stateChange(state,'',cTime);
+				}
+				
+	    	});
+		}
+		function currentDate(obj){
+		    var myDate = new Date;
+		    var year = myDate.getFullYear(); //获取当前年
+		    var mon = myDate.getMonth() + 1; //获取当前月
+		    var date = myDate.getDate(); //获取当前日
+		    // var h = myDate.getHours();//获取当前小时数(0-23)
+		    // var m = myDate.getMinutes();//获取当前分钟数(0-59)
+		    // var s = myDate.getSeconds();//获取当前秒
+		    /* var week = myDate.getDay();
+		    var weeks = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]; */
+		   /*  console.log(year + "-" + mon + "-" + date) */
+		    obj.html(year + "-" + mon + "-" + date);
+	    }
+		 var currentTime=function(){
+			   if($('.currentTime').length>0){
+				  $(".currentTime").each(function (index, item) {
+					var thisObj=$(item);
+					currentDate(thisObj)
+				  })
+			    }
+		    }
+	  $(function(){
+		  currentTime();
+	  })
+	  
+	 //催办
+	function urge(){
+		var id=[[${vo.oaContractLend.id}]];
+		$.operate.get(prefix + "/urge/"+id);
+	}
+	</script>
+</body>
+</html>

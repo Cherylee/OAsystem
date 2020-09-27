@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('项目评分')" />
+</head>
+<body class="white-bg">
+    <div>
+        <form class="form-horizontal m" id="form-sysProScore-edit" th:object="${sysProScore}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+            <input id="status" name="status" value="1"  type="hidden">
+                <div class="ibox-title">
+                    <h5>项目评分</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span style="color: red;">*</span>项目评分：</label>
+                                <div class="col-sm-8">
+                                    <input id="score" name="score" class="form-control" type="number" required="required" th:max="100"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">评分备注：</label>
+                                <div class="col-sm-8">
+                                    <input id="remark" name="remark" class="form-control" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </form>
+        <div class="row">
+            <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                <button type="button" class="btn btn-sm btn-primary" onclick="editScore()">评分</button>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/sysProScore";
+        $("#form-sysProScore-edit").validate({
+            rules:{
+                xxxx:{
+                    required:true,
+                },
+            },
+            focusCleanup: true
+        });
+        function editScore() {
+            if ($.validate.form()) {
+                var data = $('#form-sysProScore-edit').serializeObject();
+                // console.log(data)
+                $.operate.saveJson(prefix + "/edit", data);
+            }
+        }
+
+    </script>
+</body>
+</html>

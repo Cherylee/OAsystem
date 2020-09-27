@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增出差')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaTravel-add">
+                        <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>出差申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人</td>
+                                <td>
+                                    <input name="proposer" type="hidden" id="proposer" th:value="${user.userId}"/>
+                                    <input th:value="${user.userName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" name="companyName" id="companyName" class="form-control" readonly
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:value="${company.deptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>归属部门</td>
+                                <td>
+                                    <input id="treeId" name="deptId" class="form-control" type="hidden"
+                                           th:value="${user.dept.deptId}">
+                                    <input id="treeName" name="deptName" class="form-control" readonly type="text"
+                                           onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:value="${user.dept.deptName}">
+                                </td>
+                                <td class="active"><span style="color: red; ">*</span>出差开始时间</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="applyTimeFrom" name="applyTimeFrom" class="form-control time-input"
+                                               type="text" required="required" data-callback="limitTime" data-mark="2">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>出差结束时间</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="applyTimeTo" name="applyTimeTo" class="form-control time-input"
+                                               type="text" required="required" data-callback="limitTime" data-mark="1">
+                                    </div>
+                                </td>
+                                <td class="active"><span style="color: red; ">*</span>出差天数</td>
+                                <td>
+                                    <input id="applyDays" name="applyDays" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>出差原因</td>
+                                <td>
+                                    <input id="applyReason" name="applyReason" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                                <td class="active"><span style="color: red; ">*</span>是否公司购票</td>
+                                <td>
+                                    <select class="form-control" name="isCompanyTicket"
+                                            th:with="type=${@dict.getType('sys_yes_no')}" required="required">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>是否借款</td>
+                                <td>
+                                    <select class="form-control" id="isBorrowMoney" name="isBorrowMoney"
+                                            th:with="type=${@dict.getType('sys_yes_no')}" required="required">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active"><span style="color: red; ">*</span>出差目的地</td>
+                                <td>
+                                    <input id="travelDestination" name="travelDestination" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>乘坐交通工具</td>
+                                <td>
+                                    <select class="form-control" name="vehicle"
+                                            th:with="type=${@dict.getType('oa_travel_tool')}" required="required">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">预算</td>
+                                <td>
+                                    <input id="budget" name="budget" class="form-control" type="number">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>职务代理人</td>
+                                <td>
+                                    <input type="hidden" name="deputy" id="deputy">
+                                    <input id="deputyName" name="deputyName" class="form-control" type="text"
+                                           onclick="selectUser('deputy','deputyName')">
+                                </td>
+                                <td class="active">备注</td>
+                                <td>
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript">
+    var prefix = ctx + "oa/oatravel"
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/add", $('#form-oaTravel-add').serialize());
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        $.operate.saveTab(prefix + "/saveDraft", $('#form-oaTravel-add').serialize());
+    }
+
+    //时长计算
+    var dataTime = {};
+
+    function limitTime(value, dataT, mark) {
+        if (mark == '2') {
+            dataTime.startTime = value
+        } else {
+            dataTime.endTime = value
+        }
+        if (dataTime.startTime != '' && dataTime.endTime != ''
+            && dataTime.startTime != undefined && dataTime.endTime != undefined) {
+            var config = {
+                contentType: "application/json;charset=UTF-8",
+                url: ctx + "oa/oatravel/calculateDays",
+                type: "post",
+                dataType: "json",
+                data: JSON.stringify(dataTime),
+                success: function (result) {
+                    if (result.retCode != '200') {
+                        $("#applyDays").val('');
+                        $.modal.alertWarning(result.msg);
+                    } else {
+                        $("#applyDays").val(result.time);
+                    }
+                }
+            };
+            $.ajax(config)
+        }
+    }
+
+    /*选择用户*/
+    function selectUser() {
+        var options = {
+            title: '选择用户',
+            width: "800",
+            url: ctx + "oa/oaApplyTemplate/selectUser",
+            callBack: doSelected
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSelected(index, layero) {
+        //row = $('#' + $.table._option.id).bootstrapTreeTable('getSelections')[0]
+        var table = layero.find("iframe")[0].contentWindow.$.table;
+        $("#deputy").val(table.selectColumns("userId"));
+        $("#deputyName").val(table.selectColumns("userName")[0]);
+        layer.close(index);
+    }
+</script>
+</body>
+</html>

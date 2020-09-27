@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:include="include :: header('项目月报')" />
+<th:block th:include="include :: sysProCss" />
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .basic-table2 td{
+            background-color: #F0F0F0;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="col-md-12">
+        <div class="col-md-12">
+            <div class="box-center-title">
+                项目月报<hr>
+            </div>
+            <div class="col-md-12 choice-List" style="border: 0px">
+                <ul>
+                    <li th:each="monthList,loopStatus : ${sysProjectPlanMonthList}" th:onclick="updateMonthly([[${loopStatus.index}]])"
+                        th:class="${loopStatus.index==0}?'choice-li choice-li-active':'choice-li'">[[${monthList.year}]]年[[${monthList.month}]]月</li>
+
+                </ul>
+            </div>
+            <div class="col-md-12 choice-List" style="border: 0px">
+                <ul>
+                    <li class="btn btn-success" onclick="addMonthly()" th:if="${isManager||isAdmin}"><i class="fa fa-plus"></i>添加月报</li>
+                    <li class="btn btn-primary hide" onclick="updateReport()" th:if="${isManager||isAdmin}"><i class="fa fa-edit"></i>编辑月报</li>
+                    <li class="btn btn-danger hide" onclick="deleteReport()" th:if="${isAdmin}"><i class="fa fa-remove"></i>删除月报</li>
+            </div>
+            <div>
+                <form id="monthly-content">
+                    <input type="hidden" name="id">
+                    <table class="basic-table basic-table2">
+                    <tr>
+                        <td colspan="2">项目经理</td>
+                        <td><input disabled name="projectManager" type="text"  class="monthly-input"></td>
+                        <td>项目总工</td>
+                        <td><input disabled name="projectDirector" type="text" class="monthly-input"></td>
+                        <td>现场负责人</td>
+                        <td>
+                            <input th:unless="${oaProject.scenePerson==null}" disabled th:value="${oaProject.scenePerson}" type="text" class="monthly-input">
+                            <input th:if="${oaProject.scenePerson==null}" disabled name="fieldSupervisor" type="text" class="monthly-input">
+                        </td>
+                        <td>工期</td>
+                        <td>
+                            <input th:unless="${oaProject.timeLimit==null}" disabled th:value="${oaProject.timeLimit}" type="text" class="monthly-input">
+                            <input th:if="${oaProject.timeLimit==null}" disabled name="time" type="text" class="monthly-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">建设单位</td>
+                        <td colspan="2">
+                            <input  th:unless="${oaProject.developer==null}" disabled th:value="${oaProject.developer}" type="text" class="monthly-input">
+                            <input  th:if="${oaProject.developer==null}" disabled name="constructionUnit" type="text" class="monthly-input">
+                        </td>
+                        <td>监理单位</td>
+                        <td colspan="2"><input disabled name="supervisingUnit" type="text" class="monthly-input"></td>
+                        <td>项目负责人</td>
+                        <td>
+                            <input  disabled th:value="${oaProject.managerName}" type="text" class="monthly-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">工程概况</td>
+                        <td colspan="7">
+                            <input  th:unless="${oaProject.situation==null}" disabled th:value="${oaProject.situation}" type="text" class="monthly-input">
+                            <input  th:if="${oaProject.situation==null}" disabled name="projectProfile" type="text" class="monthly-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">工程总价（元）</td>
+                        <td>本月计划完成额（万元）</td>
+                        <td><input disabled name="thisMonthPlan" type="text" class="monthly-input"></td>
+                        <td>下月计划完成额（万元）</td>
+                        <td><input disabled name="lastMonthPlan" type="text" class="monthly-input"></td>
+                        <td>本月实际完成额（万元）</td>
+                        <td colspan="2"><input disabled name="thisMonthRealityComplete" type="text" class="monthly-input"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">本月经计量完成额（万元）</td>
+                        <td>累计经计量金额（万元）</td>
+                        <td>经计量累计完成比例（%）</td>
+                        <td>业主本月支付进度款（万元）</td>
+                        <td>累计到款额（万元）</td>
+                        <td>累计到款比（%）</td>
+                        <td>累计向项目部拨付工程款（万元）</td>
+                        <td>累计向项目部拨付工程款比例（%）</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input disabled name="thisMonthMeasureComplete" type="text" class="monthly-input"></td>
+                        <td><input disabled name="measuringTheAmount" type="text" class="monthly-input"></td>
+                        <td><input disabled name="measuringTheRatio" type="text" class="monthly-input"></td>
+                        <td><input disabled name="progressPayment" type="text" class="monthly-input"></td>
+                        <td><input disabled name="accumulatedAmount" type="text" class="monthly-input"></td>
+                        <td><input disabled name="accumulatedAmountRatio" type="text" class="monthly-input"></td>
+                        <td><input disabled name="paymentProjectFunds" type="text" class="monthly-input"></td>
+                        <td><input disabled name="paymentProjectFundsRatio" type="text" class="monthly-input"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">主控项目</td>
+                        <td colspan="7">情况分析</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="width: 2%">项目施工进度</td>
+                        <td>本月计划完成进度</td>
+                        <td colspan="7"><textarea name="thisPlanFinish" rows="3" disabled="disabled" class="col-md-12 text-box2" id="projectPlan"></textarea> </td>
+                    </tr>
+                    <tr>
+                        <td>本月实际完成进度</td>
+                        <td colspan="7"><textarea name="thisPlanReality" rows="3" disabled="disabled" class="col-md-12 text-box2" id="projectReality"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>下月计划完成</td>
+                        <td colspan="7"><textarea name="lastPlanFinish" rows="3" disabled="disabled" class="col-md-12 text-box2" id="nextMonthPlan"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">安全、文明施工及环境保护情况</td>
+                        <td colspan="7"><textarea name="conditions" rows="6" disabled="disabled" class="col-md-12 text-box2" ></textarea></td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2" style="width: 2%">施工质量情况</td>
+                        <td >质量缺陷处理</td>
+                        <td colspan="7"><textarea name="massDefect" rows="3" disabled="disabled" class="col-md-12 text-box2" ></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>质量验收情况</td>
+                        <td colspan="7"><textarea name="qualityAcceptance" rows="3" disabled="disabled" class="col-md-12 text-box2"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2" style="width: 2%">工程款</td>
+                        <td >完税情况</td>
+                        <td colspan="7"><textarea name="paymentConditions" rows="3" disabled="disabled" class="col-md-12 text-box2" ></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>支付成本</td>
+                        <td colspan="7"><textarea name="defrayment" rows="3" disabled="disabled" class="col-md-12 text-box2"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">上月各级单位检查落实情况</td>
+                        <td colspan="7"><textarea name="checkSituation" rows="3" disabled="disabled" class="col-md-12 text-box2" ></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">本月上级单位文件往来情况</td>
+                        <td colspan="7"><textarea name="fileSituation" rows="3" disabled="disabled" class="col-md-12 text-box2" ></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">需要公司帮助协调处理事宜</td>
+                        <td colspan="7"><textarea name="handleTheAffair" rows="3" disabled="disabled" class="col-md-12 text-box2" ></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">备注</td>
+                        <td colspan="7"><input disabled name="reamrk" type="text" class="monthly-input"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">填报人</td>
+                        <td colspan="2"><input disabled name="informant" type="text" class="monthly-input"></td>
+                        <td colspan="2">审阅(项目实际负责人)：</td>
+                        <td colspan="2"><input disabled name="actualPerson" type="text" class="monthly-input" placeholder="项目实际负责人："></td>
+                    </tr>
+                </table>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="box-center-title">
+                项目日报<hr>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-2"></div>
+                <div class="col-md-8 cld_table">
+                    <h2 class="col-md-12" style="text-align: center"><span class="cld_year"></span>年<span class="cld_month"></span>月</h2>
+                    <table class="dateReport-table col-md-12">
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 项目月报弹出框 -->
+<div class="modal inmodal fade" id="monthly-popup" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div>
+                <form class="form-horizontal m" id="form-monthly-add">
+                    <input type="hidden"  name="id">
+                    <input type="hidden" name="projectId" th:value="${monthProjectId}">
+                    <div class="row">
+                        <div class="col-sm-12 hidden monthly">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label"><span style="color: red;">*</span>选择月份：</label>
+                                <div class="col-sm-9">
+                                    <input type="month" name="date" id="monthlyDate" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table table-bordered table-condensed">
+                            <tr>
+                                <td class="active">项目经理</td>
+                                <td><input   name="projectManager" type="text" class="form-control"></td>
+                                <td class="active">项目总工</td>
+                                <td><input   name="projectDirector" type="text" class="form-control"></td>
+                            </tr>
+                            <tr th:if="${oaProject.scenePerson==null || oaProject.timeLimit==null}">
+                                <td class="active" th:if="${oaProject.scenePerson==null}">现场负责人</td>
+                                <td><input th:if="${oaProject.scenePerson==null}"  name="fieldSupervisor" type="text" class="form-control"></td>
+                                <td class="active" th:if="${oaProject.timeLimit==null}">工期</td>
+                                <td><input th:if="${oaProject.timeLimit==null}"   name="time" type="text" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active" th:if="${oaProject.developer==null}">建设单位</td>
+                                <td ><input th:if="${oaProject.developer==null}" name="constructionUnit" type="text" class="form-control"></td>
+                                <td class="active">监理单位</td>
+                                <td><input   name="supervisingUnit" type="text" class="form-control"></td>
+                            </tr>
+                            <tr  th:if="${oaProject.situation==null}">
+                                <td class="active">工程概况</td>
+                                <td colspan="3"><input name="projectProfile" type="text" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">本月计划完成额（万元）</td>
+                                <td><input   name="thisMonthPlan" type="number" class="form-control"></td>
+                                <td class="active">下月计划完成额（万元）</td>
+                                <td><input   name="lastMonthPlan" type="number" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">本月实际完成额（万元）</td>
+                                <td><input   name="thisMonthRealityComplete" type="number" class="form-control"></td>
+                                <td class="active">本月经计量完成额（万元）</td>
+                                <td><input   name="thisMonthMeasureComplete" type="number" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">累计经计量金额（万元）</td>
+                                <td><input   name="measuringTheAmount" type="number" class="form-control"></td>
+                                <td class="active">经计量累计完成比例（%）</td>
+                                <td><input   name="measuringTheRatio" type="number" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">业主本月支付进度款（万元）</td>
+                                <td><input   name="progressPayment" type="number" class="form-control"></td>
+                                <td class="active">累计到款额（万元）</td>
+                                <td><input   name="accumulatedAmount" type="number" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">累计到款比（%）</td>
+                                <td><input   name="accumulatedAmountRatio" type="number" class="form-control"></td>
+                                <td class="active">累计向项目部拨付工程款（万元）</td>
+                                <td><input   name="paymentProjectFunds" type="number" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">累计向项目部拨付工程款比例（%）</td>
+                                <td colspan="3"><input   name="paymentProjectFundsRatio" type="number" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">本月计划完成进度</td>
+                                <td colspan="3"><textarea name="thisPlanFinish" rows="3" class="form-control"></textarea> </td>
+                            </tr>
+                            <tr>
+                                <td class="active">本月实际完成进度</td>
+                                <td colspan="3"><textarea name="thisPlanReality" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">下月计划完成</td>
+                                <td colspan="3"><textarea name="lastPlanFinish" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">安全、文明施工及环境保护情况</td>
+                                <td colspan="3"><textarea name="conditions" rows="6" class="form-control" ></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">质量缺陷处理</td>
+                                <td colspan="3"><textarea name="massDefect" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">质量验收情况</td>
+                                <td colspan="3"><textarea name="qualityAcceptance" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">完税情况</td>
+                                <td colspan="3"><textarea name="paymentConditions" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">支付成本</td>
+                                <td colspan="3"><textarea name="defrayment" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">上月各级单位检查落实情况</td>
+                                <td colspan="3"><textarea name="checkSituation" rows="3"  class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">本月上级单位文件往来情况</td>
+                                <td colspan="3"><textarea name="fileSituation" rows="3"  class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">需要公司帮助协调处理事宜</td>
+                                <td colspan="3"><textarea name="handleTheAffair" rows="3" class="form-control"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注</td>
+                                <td colspan="3"><input  name="reamrk" type="text" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td class="active">填报人</td>
+                                <td><input  name="informant" type="text" class="form-control"></td>
+                                <td class="active">审阅</td>
+                                <td><input  name="actualPerson" type="text" class="form-control" placeholder="项目实际负责人："></td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary hidden"  id="insertMonthly" onclick="insertMonthly()">保存</button>
+                <button type="button" class="btn btn-primary hidden" data-dismiss="modal" id="editMonthly" onclick="editMonthly()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + 'oa/sysProjectPlanMonth';
+    var prefix2 = ctx + 'oa/sysProjectSchedule';
+    var monthlyList =[[${sysProjectPlanMonthList}]];
+    var monthlyReport;
+    var dateReportList=[];
+    $(document).ready(function () {
+        //导航栏样式
+        var choiceBoxList = $(".choice-box");
+        var choiceList = $(".choice-li");
+        choiceList.click(function () {
+            var obj = $(this);
+            obj.addClass('choice-li-active').siblings().removeClass('choice-li-active');
+            choiceBoxList.eq(obj.index()).addClass('choice-box-active').siblings().removeClass('choice-box-active');
+        });
+    });
+
+    //默认显示列表第一个月
+    if (monthlyList.length!=0){
+        monthlyReport=monthlyList[0];
+        if(monthlyReport.allowEdit=='true'){
+            $('.btn-primary').removeClass('hide');
+            $('.btn-danger').removeClass('hide');
+        }
+        $('#monthly-content').loadData(monthlyReport);
+        var oneData = new Object();
+        oneData.date=monthlyReport.date+"-01";
+        oneData.projectId=monthlyReport.projectId;
+        getDateReport(oneData);
+        setTimeout(" riliTableHtml(monthlyReport.year,monthlyReport.month);","800");
+    }
+
+
+
+
+
+    //选择月份
+    function updateMonthly(index) {
+        monthlyReport=monthlyList[index];
+        if(monthlyReport.allowEdit=='true'){
+            $('.btn-primary').removeClass('hide');
+            $('.btn-danger').removeClass('hide');
+        }else{
+            $('.btn-primary').addClass('hide');
+            $('.btn-danger').addClass('hide');
+        }
+        $('#monthly-content').loadData(monthlyReport);
+        oneData.date=monthlyReport.date+"-01";
+        oneData.projectId=monthlyReport.projectId;
+        getDateReport(oneData);
+        setTimeout("riliTableHtml(monthlyReport.year,monthlyReport.month)","800");
+
+
+    }
+
+
+
+    //TODO 生成日历表填充到日历里
+    function riliTableHtml(year, month) {
+        $('.cld_year').html(year); //当前年
+        $('.cld_month').html(month); //当前月
+        console.log(dateReportList);
+        //当前月的第一天的日期
+        var firstDay = new Date(year, (month - 1), 1);
+        //第一天是星期几
+        var weekday = firstDay.getDay();
+        /**求当前月一共有多少天
+         *new Date(year,month,0) ： month是当前月，day为0即我们所需的当前月的最后一天。
+         *getDate（）则返回这个日期对象是一个月中的第几天，我们由最后一天得知这个月一共有多少天
+         **/
+        var days = new Date(year, month, 0).getDate();
+        var res = [];
+        //输出第一天之前的空格
+        for (var i = 0; i < weekday; i++) {
+            res.push('');
+        }
+
+        for (var j = 1; j <= days; j++) {
+            var data = new Array();
+            data.date=j;
+            if (dateReportList.length != 0){
+                if(dateReportList.some(item=>{
+                    if (item.day==j){
+                        data.id=item.id;
+                        return true
+                    }
+                })){
+                    data.status=true;
+                    res.push(data);
+                }else {
+                    data.status=false;
+                    data.id='';
+                    res.push(data);
+                }
+            }else {
+                data.status=false;
+                data.id='';
+                res.push(data);
+            }
+
+
+        }
+        if(weekday==0){
+            var tabHtml = '<tr><td>日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td>六</td></tr>';
+        }else {
+            var tabHtml = '<tr><td>日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td>六</td></tr><tr><td colspan="'+weekday+'"></td>';
+        }
+
+
+        for (var i = weekday; i < res.length; i++) {
+            var td = '<td onclick="addDateReport('+ res[i].date +')" class="dateReport-td">' + res[i].date + '</td>';
+            var tdActive = '<td onclick="editDateReport(\''+res[i].id+'\')" class="dateReport-active">'+res[i].date+'</td>';
+            if (res[i].status){
+                if (i % 7 == 0) {
+                    tabHtml += '<tr>' + tdActive;
+                } else if ((i + 1) % 7 == 0) {
+                    tabHtml += tdActive + '</tr>';
+                } else {
+                    tabHtml += tdActive;
+                }
+            } else {
+                if (i % 7 == 0) {
+                    tabHtml += '<tr>' + td;
+                } else if ((i + 1) % 7 == 0) {
+                    tabHtml += td + '</tr>';
+                } else {
+                    tabHtml += td;
+                }
+            }
+
+        }
+        $('.cld_table tbody').html(tabHtml); //填充到DOM里
+    }
+    
+    //添加月份
+    function addMonthly() {
+        $.form.reset('form-monthly-add');//清空原有数据
+        $('#monthly-popup').modal('show');
+        $('.monthly').removeClass('hidden');
+        $('#insertMonthly').removeClass('hidden');
+        $('#editMonthly').addClass('hidden');
+    }
+    function insertMonthly() {
+        var data = $('#form-monthly-add').serializeObject();
+        $('input[id="monthlyDate"]').attr("required", "true");
+        if ($.validate.form()) {
+            interfaces(prefix + "/add", data);
+        }
+    }
+
+
+    //修改当前月份报表弹窗
+    function updateReport(){
+        $.form.reset('form-monthly-add');//清空原有数据
+        $('#monthly-popup').modal('show');
+        $('.monthly').addClass('hidden');
+        $('#insertMonthly').addClass('hidden');
+        $('#editMonthly').removeClass('hidden');
+        $('#form-monthly-add').loadData(monthlyReport);
+    }
+
+    function editMonthly() {
+        var data = $('#form-monthly-add').serializeObject();
+        console.log(data);
+        interfaces(prefix + "/edit", data);
+    }
+    //删除月报
+    function deleteReport() {
+        var data = $('#monthly-content').serializeObject();
+        console.log(data.id);
+        interfaces(prefix + "/remove", data);
+    }
+    //添加日报
+    function addDateReport(date) {
+        var date2 = monthlyReport.date+'-'+date;
+        $.modal.openFullS('添加日报', prefix2+"/addDateReport/"+date2+'/'+monthlyReport.projectId);
+    }
+
+    //查看日报
+    function editDateReport(id) {
+        $.modal.openFullS('查看日报', prefix2+"/editDateReport/"+id);
+    }
+
+    //保存修改接口   刷新iframe
+    function interfaces(url, data) {
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: url,
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.saveSuccess(result);
+                if (result.code=='0'){
+                    window.parent.func();
+                }
+
+            }
+        };
+        $.ajax(config)
+    }
+
+    //通过月份获取日报列表
+    function getDateReport(data2) {
+        var configs = {
+            contentType: "application/json;charset=UTF-8",
+            url: ctx +'oa/sysProjectDailyPlan/list',
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data2),
+            success: function (result) {
+                dateReportList=result;
+            }
+        };
+        $.ajax(configs);
+    }
+</script>
+</body>
+</html>

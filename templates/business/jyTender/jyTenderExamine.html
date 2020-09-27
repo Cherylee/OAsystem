@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('招标审核')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style type="text/css">
+
+
+caption {
+	font-size: 16px !important;
+}
+
+.table>tbody>tr>td.headTable {
+	background: #eaeaea
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated  fadeInRight ibox-content" th:object="${vo}">
+		<form id="form-oaContract-examine">
+			<!-- 提交审核意见 -->
+			 <input type="hidden" id="taskId" name="taskId" th:value="*{curDealMap.taskId}">  
+			 <input type="hidden" id="pass" name="pass"> 
+			 <input type="hidden" id="opinion" name="opinion"> 
+		</form>
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<h4>当前状态:<span class="status"></span></h4>
+				<div class="panel panel-default">
+
+					<div class="panel-body">
+						<!-- 投标 申请 -->
+						<table class="table table-bordered">
+							<caption>
+								<strong th:text="*{jyTender.ytSecondApply=='N'&&jyTender.ytApply=='Y'}?'买标申请':'投标申请'">[[ ]]</strong>
+							</caption>
+							<tbody>
+								<tr>
+									<td class="active">申请人</td>
+									<td>[[*{jyTender.applier}]]</td>
+									<td class="active">申请部门</td>
+									<td>[[*{jyTender.deptName}]]</td>
+									<td class="active">申请日期</td>
+									<td><span
+										th:text="*{#dates.format(jyTender.createTime, 'yyyy-MM-dd')}"></span></td>
+								</tr>
+								<tr>
+									<td class="active">投标方式</td>
+									<td><span class="bidtype"></span></td>
+									<td class="active">工程类型</td>
+									<td><span class="engtype"></span></td>
+									<td class="active">投资总额</td>
+									<td>[[*{jyTender.investAmount}]]</td>
+								</tr>
+								<tr>
+									<td class="active">开标时间</td>
+									<td><span
+										th:text="*{#dates.format(jyTender.openTenderDate, 'yyyy-MM-dd')}"></span></td>
+									<td class="active">建安费</td>
+									<td>[[*{jyTender.biddingDesignCost}]]</td>
+									<td class="active">保证金</td>
+									<td>[[*{jyTender.deposit}]]</td>
+								</tr>
+								<tr>
+									<td class="active">资质要求</td>
+									<td>[[*{jyTender.qualifications}]]</td>
+									<td class="active">业绩要求</td>
+									<td>[[*{jyTender.kpiRequire}]]</td>
+									<td class="active">评标办法</td>
+									<td>[[*{jyTender.evaluationMethod}]]</td>
+								</tr>
+								<tr>
+									<td class="active">项目规模</td>
+									<td>[[*{jyTender.projectScale}]]</td>
+									<td class="active">工期</td>
+									<td>[[*{jyTender.timeLimit}]]</td>
+									<td class="active">建设单位</td>
+									<td>[[*{jyTender.constructUnit}]]</td>
+								</tr>
+								<tr>
+									<td class="active">招标公告网址</td>
+									<td colspan="5"><a th:href="*{jyTender.tenderDoc}" target="_blank">[[*{jyTender.tenderDoc}]]</a></td>
+								</tr>
+								<tr>
+									<td class="active">负责人要求</td>
+									<td>[[*{jyTender.builderName}]]</td>
+									<td class="active">工程名称</td>
+									<td>[[*{jyTender.projectName}]]</td>
+									<td class="active">备注</td>
+									<td >[[*{jyTender.remark}]]</td>
+								</tr>
+								
+							</tbody>
+						</table>
+						<!-- 副经 理审核 -->
+						<table class="table table-bordered">
+							<caption>
+								<strong th:if="${vo.curUser.companyId == 126}">生产经营部经理审核</strong>
+								<strong th:unless="${vo.curUser.companyId == 126}">副经理审核</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%" th:if="${vo.curUser.companyId == 126}">生产经营部经理审核</td>
+									<td width="20%" th:unless="${vo.curUser.companyId == 126}">副经理审核</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">审核日期</td>
+
+								</tr>
+								<tr th:each="ea : *{hisNodeList.key0}" th:if="${ea.message != ''}">
+									<td>[[${ea.userName}]]</td>
+									<td>
+									   <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+							   
+									</td>
+									<td>[[${ea.startTime}]]</td>
+								</tr>
+								<tr  th:if="*{nodeFlag == 'key0'}">
+								    <td>[[*{hisNodeList.key0[0].userName}]]</td>
+								    <td>
+								       
+									        <div th:if="${vo.nodeFlag} eq 'key0' and ${vo.curUser.userId} eq ${vo.curDealMap.assignee}">
+										       <span class="par_btn">
+												  <button type="button" class="btn btn-sm  btn-info" onclick="Agree(this)">同意</button> &nbsp;
+												  <button type="button" class="btn btn-sm btn-danger" onclick="Reject(this)">驳回</button>
+											   </span> 
+											   <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info" onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											   </span>
+										    </div>
+									
+								    </td>
+								    <td><span class="currentTime"></span></td>
+								</tr>
+
+							</tbody>
+						</table>
+
+						<!-- 经 理审核 -->
+						<table class="table table-bordered">
+							<caption>
+								<strong th:if="${vo.curUser.companyId == 126}">总经理审核</strong>
+								<strong th:unless="${vo.curUser.companyId == 126}">经理审核</strong>
+							</caption>
+
+							<tbody>
+								<tr class="active">
+									<td width="20%" th:if="${vo.curUser.companyId == 126}">总经理审核</td>
+									<td width="20%" th:unless="${vo.curUser.companyId == 126}">经理审核</td>
+									<td width="50%">审核意见</td>
+									<td width="30%">审核日期</td>
+
+								</tr>
+								<tr  th:each="ea : *{hisNodeList.key1}">
+									<td>[[${ea.userName}]]</td>
+									<td>
+									   <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+									   <div th:unless="${ea.message != ''}">
+									        <div th:if="${vo.nodeFlag} eq 'key1' and ${vo.curUser.userId==__${ea.userId}__}">
+										       <span class="par_btn">
+												  <button type="button" class="btn btn-sm  btn-info" onclick="Agree(this)">同意</button> &nbsp;
+												  <button type="button" class="btn btn-sm btn-danger" onclick="Reject(this)">驳回</button>
+											   </span> 
+											   <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info" onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											   </span>
+										    </div>
+									   </div>
+									</td>
+									<td>[[${ea.startTime}]]</td>
+								</tr>
+							</tbody>
+						</table>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script th:inline="javascript">
+var prefix = ctx + "business/jyTender";
+
+$(function() {
+	/* var downloadConfig = new Array();
+	var down = {};
+	down.key = [[${vo.jyTender.tenderDoc}]];
+	downloadConfig.push(down);
+	var deleteExtraData = {
+			"fileName" : [[${vo.jyTender.tenderDoc}]],
+			"tableName" : "oa_attachment"
+	};
+	 var imgsUrl = new Array();
+	 imgsUrl.push([[${vo.jyTender.tenderDoc}]]);
+	 uploadFunction('uploadFileId',null,null,deleteExtraData,imgsUrl,downloadConfig); */
+	 
+});
+
+
+//回显字典 封装的公用方法
+		function dictV(id,d,v){//d:字典名 v:键值
+			$(id).html($.table.selectDictLabel(d, v));
+		}
+//同意操作
+function Agree(obj){
+	var par=$(obj).parents('.par_btn')
+	btnHandle(obj,par,'Y')
+}
+//驳回操作
+function Reject(obj){
+	var par=$(obj).parents('.par_btn')
+	btnHandle(obj,par,'N')
+}
+//按钮操作
+function btnHandle(obj,id,flag){			
+	layer.prompt({title: '请写下您的审核意见',formType: 2}, function(text, index){
+	    layer.close(index);
+	    //console.log(text)
+	    id.html(text)
+	    $('.btnshow').removeClass('hide')
+	    $('#pass').val(flag)
+	    $('#opinion').val(text)	    	    
+	  });
+}
+//提交审核意见
+function submitHandler1(id) {
+	var config = {
+	        url: prefix + "/completeCurUserTask",
+	        type: "post",
+	        dataType: "json",
+	        data: $('#'+id).serialize(),
+	        beforeSend: function () {
+	        	$.modal.loading("正在处理中，请稍 后...");
+	        },
+	        success: function(result) {
+	        	
+	        	$.modal.closeLoading();
+	        	refreshItem();
+				$.operate.successCallback(result);
+	        }
+	    };
+	    $.ajax(config)	
+	
+}
+//状态更改
+function stateChange(state,backDate,placeDate){
+	$('#status').val(state)
+	$('#backDate').val(backDate)
+	$('#placeDate').val(placeDate)
+	$.operate.saveTab(prefix + "/statusChange", 
+
+$('#form-stateChange').serialize());
+		//$.ajax(config)
+}
+//确认操作
+function submit(obj,state,text,id){
+	var cTime=$('#currentTime').val();//获取当前时间
+	$.modal.confirm(text, function() {
+		if(id==1){//已借出
+			stateChange(state,'','')
+		}else if(id==2){//已归还
+			$('#backDate').val(cTime);
+			stateChange(state,cTime,'');
+		}else if(id==3){//已归档
+			$('#placeDate').val(cTime);
+			stateChange(state,'',cTime);
+		}
+		
+	});
+}
+//催办
+function tenderUrge(){
+	var id=[[${vo.jyTender.id}]];
+	$.operate.get(prefix + "/tenderUrge/"+id);
+}
+function currentDate(obj){
+    var myDate = new Date;
+    var year = myDate.getFullYear(); //获取当前年
+    var mon = myDate.getMonth() + 1; //获取当前月
+    var date = myDate.getDate(); //获取当前日
+    // var h = myDate.getHours();//获取当前小时数(0-23)
+    // var m = myDate.getMinutes();//获取当前分钟数(0-59)
+    // var s = myDate.getSeconds();//获取当前秒
+    /* var week = myDate.getDay();
+    var weeks = ["星期日", "星期一", "星期二", "星期三", "
+
+星期四", "星期五", "星期六"]; */
+   /*  console.log(year + "-" + mon + "-" + date) */
+    obj.html(year + "-" + mon + "-" + date);
+}
+ var currentTime=function(){
+	   if($('.currentTime').length>0){
+		  $(".currentTime").each(function (index, item) {
+			var thisObj=$(item);
+			currentDate(thisObj)
+		  })
+	    }
+    }
+$(function(){
+  currentTime();
+  //回显
+  dictV('.status',[[${@dict.getType('oa_ApplyStatusContract')}]],[[${vo.jyTender.status}]])
+  dictV('.bidtype',[[${@dict.getType('business_project_type')}]],[[${vo.jyTender.tenderType}]])
+  dictV('.engtype',[[${@dict.getType('business_engineer_type')}]],[[${vo.jyTender.proType}]])
+  $('.tenderDoc').click(function(){
+	  var url=$(this).attr('name');
+	  downFile(url)
+  })
+})
+
+</script>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增人员薪资')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaUserSalary-add">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>人员薪资</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">用户</td>
+									<td>
+										<input id="deptId" name="deptId" class="form-control" type="hidden">
+										<input id="userId" name="userId" class="form-control" type="hidden">
+										<input id="userName" name="userName" class="form-control" type="text"
+											   onclick="selectUserById('userId','userName',['hireDate','deptId','deptName'])">
+									</td>
+									<td class="active">入职日期</td>
+									<td>
+										<div class="input-group data">
+											<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+											<input id="hireDate" name="hireDate" class="form-control time-input" type="text">
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">是否本市户口</td>
+									<td>
+										<select name="cityAccount" class="form-control" th:with="type=${@dict.getType('sys_yes_no')}">
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">基本工资</td>
+									<td>
+										<input id="basePay" name="basePay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">岗位工资</td>
+									<td>
+										<input id="postPay" name="postPay" class="form-control" type="number">
+									</td>
+									<td class="active">绩效工资</td>
+									<td>
+										<input id="meritPay" name="meritPay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">外派补贴</td>
+									<td>
+										<input id="placePay" name="placePay" class="form-control" type="number">
+									</td>
+									<td class="active">持证补贴</td>
+									<td>
+										<input id="certifiedPay" name="certifiedPay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">兼岗补贴</td>
+									<td>
+										<input id="partPostPay" name="partPostPay" class="form-control" type="number">
+									</td>
+									<td class="active">通讯补贴</td>
+									<td>
+										<input id="phonePay" name="phonePay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">防暑降温补贴</td>
+									<td>
+										<input id="highTemperPay" name="highTemperPay" class="form-control" type="number">
+									</td>
+									<td class="active">其他</td>
+									<td>
+										<input id="otherPay" name="otherPay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">其他奖金</td>
+									<td>
+										<input id="otherBonusPay" name="otherBonusPay" class="form-control" type="number">
+									</td>
+									<td class="active">年终奖金</td>
+									<td>
+										<input id="yearBonusPay" name="yearBonusPay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">社会保险缴纳基数</td>
+									<td>
+										<input id="socialBase" name="socialBase" class="form-control" type="number">
+									</td>
+									<td class="active">公积金缴纳基数</td>
+									<td>
+										<input id="commonBase" name="commonBase" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">病假时数</td>
+									<td>
+										<input id="sickHours" name="sickHours" class="form-control" type="number">
+									</td>
+									<td class="active">事假时数</td>
+									<td>
+										<input id="absenceHours" name="absenceHours" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">迟到次数</td>
+									<td>
+										<input id="lateTimes" name="lateTimes" class="form-control" type="number">
+									</td>
+									<td class="active">其他考勤扣款</td>
+									<td>
+										<input id="otherWorkPay" name="otherWorkPay" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">其他扣款</td>
+									<td>
+										<input id="otherDeduction" name="otherDeduction" class="form-control" type="number">
+									</td>
+									<td class="active">个人所得税</td>
+									<td>
+										<input id="personTax" name="personTax" class="form-control" type="number">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">考勤扣款备注</td>
+									<td>
+										<input id="workPayRemark" name="workPayRemark" class="form-control" type="text">
+									</td>
+									<td class="active">其他扣款备注</td>
+									<td>
+										<input id="otherDeductionRemark" name="otherDeductionRemark" class="form-control" type="text">
+									</td>
+								</tr>
+
+
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>保 存
+								</button>
+								&nbsp;
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript">
+		var prefix = ctx + "oa/oaUserSalary"
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.saveTab(prefix + "/add", $('#form-oaUserSalary-add')
+						.serialize());
+			}
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('经营部审批节点设定列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<!-- <li>
+								副经理id：<input type="text" name="deputyManagerId"/>
+							</li>
+
+							<li>
+								姓名：<input type="text" name="deputyManagerName"/>
+							</li>
+
+							<li>
+								总经理id：<input type="text" name="managerId"/>
+							</li>
+
+							<li>
+								总经理姓名：<input type="text" name="managerName"/>
+							</li> -->
+
+							<li>
+								申请部门：<input type="hidden" name="deptId"  id="treeId" /> 
+						<input type="text" id="treeName" name="deptName" 
+						onclick="selectDeptTree('treeId','treeName')"  />
+							</li>
+
+							<!-- <li>
+								申请部门名称：<input type="text" name="deptName"/>
+							</li>
+
+							<li>
+								创建日期：<input type="text" name="createTime"/>
+							</li>
+
+							<li>
+								创建人：<input type="text" name="createBy"/>
+							</li>
+
+							<li>
+								修改日期：<input type="text" name="updateTime"/>
+							</li>
+
+							<li>
+								修改人：<input type="text" name="updateBy"/>
+							</li> -->
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="business:jyApproveNode:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="business:jyApproveNode:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="business:jyApproveNode:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="business:jyApproveNode:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('business:jyApproveNode:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:jyApproveNode:remove')}]];
+        var prefix = ctx + "business/jyApproveNode";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "经营部审批节点设定",
+                sortName: "createTime",
+    		    sortOrder: "desc",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'deputyManagerId', 
+					title : '副经理id',
+					sortable: true
+				},
+				{
+					field : 'deputyManagerName', 
+					title : '姓名',
+					sortable: true
+				},
+				{
+					field : 'managerId', 
+					title : '部门经理id',
+					sortable: true
+				},
+				{
+					field : 'managerName', 
+					title : '部门经理姓名',
+					sortable: true
+				},
+				{
+					field : 'deptId', 
+					title : '申请部门id',
+					sortable: true
+				},
+				{
+					field : 'deptName', 
+					title : '申请部门名称',
+					sortable: true
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					sortable: true
+				},
+				{
+					field : 'createBy', 
+					title : '创建人',
+					sortable: true
+				},
+				{
+					field : 'updateTime', 
+					title : '修改日期',
+					sortable: true,
+					visible:false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改人',
+					sortable: true,
+					visible:false
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        /*用户管理-新增-选择部门树*/
+		function selectDeptTree(id, deptName) {
+			divDeptId = id;
+			divDeptName = deptName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#" + divDeptId).val(body.find('#treeId').val());
+				$("#" + divDeptName).val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+    </script>
+</body>
+</html>

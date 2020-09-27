@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('项目付款')"/>
+</head>
+<body>
+<div class="col-sm-12 select-table table-striped">
+    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "yt/ytAllocateRecord";
+    var type=[[${@dict.getType('yt_allocateRecord_type')}]];
+    $(function() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "禹涛项目拨款记录",
+            showExport: true,
+            queryParams:{'projectId':[[${ytProjectMain.id}]]},
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field : 'id',
+                    title : 'id',
+                    visible: false
+                },
+                {
+                    field : 'projectName',
+                    title : '关联工程',
+                    sortable: true
+                },
+                {
+                    field : 'amount',
+                    title : '拨款金额',
+                    sortable: true
+                },
+                {
+                    field : 'alloDate',
+                    title : '拨款时间',
+                    sortable: true
+                },
+                {
+                    field : 'type',
+                    title : '拨款类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(type, value);
+                    }
+                },
+                {
+                    field : 'remark',
+                    title : '备注',
+                    sortable: true
+                }]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

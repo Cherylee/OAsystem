@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('投标公告列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" id="companyId" name="companyId"/> <input
+                                type="text" id="companyName"
+                                onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+                        </li>
+                        <li>
+                            <input type="text" name="applier" placeholder="申请人"/>
+                        </li>
+                        <li class="select-time">
+                            <label>开标时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                   name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                   name="params[endTime]"/>
+                        </li>
+                        <li>
+                            <select id="status" name="status"
+                                    th:with="type=${@dict.getType('business_bidstatus')}">
+                                <option value="">投标状态</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <!-- <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="business:jyTenderNotice:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary btn-edit disabled" onclick="$.operate.edit()" shiro:hasPermission="business:jyTenderNotice:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="business:jyTenderNotice:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a> -->
+            <a class="btn btn-warning" onclick="$.table.exportExcel()"
+               shiro:hasPermission="business:jyTenderNotice:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('business:jyTenderNotice:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('business:jyTenderNotice:remove')}]];
+    var businessStatus = [[${@dict.getType('business_bidstatus')}]];
+    var ytStatus = [[${@dict.getType('yt_project_state')}]];
+    var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+    var prefix = ctx + "business/jyTenderNotice";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "投标公告",
+            showExport: true,
+            showFooter: true,
+            clickToSelect: true,
+            sortName: "createTime",
+            sortOrder: "desc",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'companyName',
+                    title: '申请公司',
+                    sortable: true
+                },
+                {
+                    field: 'deptName',
+                    title: '申请部门',
+                    sortable: true
+                },
+                {
+                    field: 'applier',
+                    title: '申请人',
+                    sortable: true
+                },
+                {
+                    field: 'projectName',
+                    title: '工程名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = null;
+                        if (value) {
+                            text = $.table.tooltip(value, 5, "open");
+                        } else {
+                            text = '暂无编号'
+                        }
+
+                        return '<a onclick="openExamine(\'' + row.tenderId + '\')">' + text + '</a>'
+                    }
+                },
+                {
+                    field: 'status',
+                    title: '投标状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(businessStatus, value);
+                    }
+                },
+                {
+                    field: 'projectAmount',
+                    title: '工程造价',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'openTenderDate',
+                    title: '开标时间',
+                    sortable: true
+                },
+                {
+                    field: 'promiseMoney',
+                    title: '保证金金额',
+                    sortable: true,
+                    footerFormatter: function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            if (value[i].promiseMoney == null) {
+                                value[i].promiseMoney = 0
+                            }
+                            sumBalance += parseFloat(value[i].promiseMoney);
+                        }
+                        return '合计:' + sumBalance;
+                    },
+                    formatter: function (value, row, index) {
+                        var num = row.promiseMoney
+                        if (!row.promiseMoney) {
+                            num = 0
+                        }
+                        return num
+                    }
+                },
+                {
+                    field: 'closedAccountDate',
+                    title: '到账截止日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'builderName',
+                    title: '建造师',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'consignor',
+                    title: '委托人',
+                    sortable: true
+                },
+                {
+                    field: 'tenderId',
+                    title: '投标申请id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'marginStatus',
+                    title: '保证金状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oaStatus, value);
+                    }
+                },
+                {
+                    field: 'createTime',
+                    title: '创建日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createBy',
+                    title: '创建人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '修改日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '修改人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'winFlag',
+                    title: '是否已中标',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'ytTenderState',
+                    title: '投标状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ytStatus, value);
+                    }
+                },
+                {
+                    title: '申请',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (row.gid == null || row.gid == '') {
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="openDespo(\'' + row.id + '\')">保证金申请</a> ');
+                        } else {
+                            actions.push('<a class="btn btn-info btn-xs " href="#" onclick="backMargin(\'' + row.id + '\')">退保证金 </a>  ');
+                        }
+                        if ([[${isYtUser}]] == 'Y') {
+                            actions.push('<a class="btn btn-primary btn-xs " href="#" onclick="openOaPaymentAdd(\'' + row.id + '\')">付款申请 </a>  ');
+                        }
+                        actions.push('<a class="btn btn-success btn-xs " href="#" onclick="openJie(\'' + row.tenderId + '\')">借证申请</a> ');
+                        return actions.join('');
+                    }
+                },
+                {
+                    title:'查看相关单据',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-primary btn-xs " href="#" onclick="openOaPayment(\'' + row.id + '\')">查看付款单</a> ');
+                        actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="openOaMargin(\'' + row.id + '\')">查看保证金</a> ');
+                        return actions.join('');
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (row.ytTender == 'Y') {//禹涛记录专属
+                            var ifedit = 'disabled';
+                            var shenhe = ''
+                            //资格商务标
+                            if (row.bizOptAuth == 'Y') {
+                                actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="gotoBidBusiness(\'' + row.id + '\')">资格商务标</a> ');
+                            }
+                            //技术标
+                            if (row.techOptAuth == 'Y') {
+                                actions.push('<a class="btn btn-success btn-xs " href="#" onclick="gotoBidTechnology(\'' + row.id + '\')">技术标申请</a> ');
+                            }
+                            if (row.ytTenderState == '00' || row.ytTenderState == '04') {
+                                ifedit = ''
+                                shenhe = 'disabled'
+                            }
+                            if (row.ytTenderState == '07') {
+                                shenhe = 'disabled'
+                            }
+                        }
+                        if (row.winFlag == '1') {
+                            actions.push('<a class="btn btn-default btn-xs " style="cursor: default;" >中标</a> ');
+                        } else {
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="markWinTender(\'' + row.tenderId + '\')">中标</a> ');
+                        }
+
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //禹涛打开审核界面
+    function detailTab(id) {
+        $.modal.openTab("审核界面", ctx + "business/jyTenderNotice/ytTenderDetail/" + id);
+    }
+
+    //禹涛打开编辑界面
+    function editTab(id) {
+        $.modal.openTab("编辑", ctx + "business/jyTenderNotice/ytProjectEdit/" + id);
+    }
+
+    //资格商务标
+    function gotoBidBusiness(id) {
+        $.modal.openTab("资格商务标", ctx + "business/jyTenderNotice/toYtTenderBiz/" + id);
+    }
+
+    //技术标
+    function gotoBidTechnology(id) {
+        $.modal.openTab("技术标申请", ctx + "business/jyTenderNotice/toYtTenderTech/" + id);
+    }
+
+    //禹涛提交
+    function changeState(id) {
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: ctx + "yt/ytProjectMain/changeState",
+            type: "get",
+            data: {'id': id, 'state': '07', 'bidState': ''},
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.modal.closeLoading();
+                $.operate.ajaxSuccess(result);
+            }
+        };
+
+        $.ajax(config)
+    }
+
+    //打开合同审核界面
+    function openExamine(id) {
+        $.modal.openTab("投标详情", ctx + "business/jyTender/toJyTenderExamine/" + id);
+    }
+
+    //标记已经中标
+    function markWinTender(id) {
+
+        $.operate.get(ctx + "business/jyTender/markWinTender/" + id);
+
+    }
+
+    //打开保证金申请界面
+    function openDespo(id) {
+        $.modal.openTab("保证金申请", prefix + "/toMarginAdd/" + id);
+    }
+
+    //打开借证申请界面
+    function openJie(id) {
+        $.modal.openTab("借证申请", ctx + "oa/oaCertificatesBorrow/add");
+    }
+
+    //退保证金操作
+    function backMargin(id) {
+        $.modal.openTab("退保证金", ctx + "oa/oaMargin/toMarginBack/" + id)
+    }
+
+    //打开付款申请界面
+    function openOaPaymentAdd(id) {
+        $.modal.openTab("付款申请", ctx + "oa/oaPayment/ytAdd/" + id)
+    }
+
+    //查看想关联的付款单
+    function openOaPayment(id) {
+        var options = {
+            title: '关联付款单',
+            width: "1200",
+            url: ctx + 'oa/oaPayment/toYtOaPaymentList/'+id
+        };
+        $.modal.openOptions(options);
+    }
+
+    //查看想关联的保证金
+    function openOaMargin(id) {
+        var options = {
+            title: '关联保证金',
+            width: "1200",
+            url: ctx + 'oa/oaMargin/toYtOaMarginList/'+id
+        };
+        $.modal.openOptions(options);
+    }
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+</script>
+</body>
+</html>

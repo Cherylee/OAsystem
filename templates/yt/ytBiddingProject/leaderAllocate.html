@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('项目专业分配比例')"/>
+    <style type="text/css">
+        .table-bot {
+            margin-bottom: 0 !important;
+        }
+
+        .form-inline .form-group {
+            display: inline-block;
+            margin-bottom: 0;
+            vertical-align: middle;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            border-left: 1px solid #ddd;
+        }
+        .addbox:last-child{
+            border-bottom: 1px solid #ddd;
+        }
+
+        .scaleTrClass {
+            /* background:#f9f9f9; */
+
+        }
+
+        .form-inline {
+            padding-left: 20px;
+        }
+
+        .mar-top {
+            margin-top: 20px;
+        }
+
+        .addbox {
+            /*border-bottom: 1px solid #ddd;*/
+            /*padding: 10px*/
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <div class="row">
+
+        <div class="col-sm-offset-1 col-sm-10">
+            <!-- 分配比例  -->
+            <div class="panel panel-default">
+                <!-- 添加  -->
+                <div class="panel-body addLeaderAllocate " th:if="${#arrays.isEmpty(ytLeaderAllocateVoList)}">
+                    <input type="hidden" id="projectId" name="projectId" th:value="${ytProjectMain.id}">
+                    <h3 class="thisState"></h3>
+                    <table class="table table-bordered table-bot">
+                        <caption>
+                            <strong>分配比例</strong>
+                        </caption>
+                        <tbody>
+                        <tr>
+                            <td class="active text-center" colspan="6">项目专业分配比例 &nbsp;
+                                <a class="btn btn-white btn-bitbucket btn-xs" id="addTrScale">
+                                    <i class="glyphicon glyphicon-plus"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div id="scaleTable"></div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button class="btn btn-sm btn-info mar-top" id="saveBtn">确认提交</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 编辑 -->
+                <div class="panel-body editLeaderAllocate" th:unless="${#arrays.isEmpty(ytLeaderAllocateVoList)}">
+                    <h3 class="thisState"></h3>
+                    <table class="table table-bordered table-bot">
+                        <caption>
+                            <strong>修改分配比例</strong>
+                        </caption>
+                        <tbody>
+                        <tr>
+                            <td class="active text-center" colspan="6">项目专业分配比例 &nbsp;
+                                <a class="btn btn-white btn-bitbucket btn-xs" id="editTrScale">
+                                    <i class="glyphicon glyphicon-plus"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div id="editScaleTable">
+                        <table class="table table-bordered mainDetail" th:each="list : ${ytLeaderAllocateVoList}">
+                            <thead>
+                            <tr class="active">
+                                <th>工程</th>
+                                <th>比例（%）</th>
+                                <th>工期</th>
+                                <th>专业产值（万）</th>
+                                <th>有效产值（万）</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tr class="active" th:object="${list.ytLeaderAllocateMain}">
+                                <td class="item">
+                                    <input type="hidden" id="projectId" name="projectId" th:value="*{projectId}">
+                                    <input type="hidden" name="id" th:value="*{id}">
+                                    <input type="hidden" name="state" value="01">
+                                    <select name="item" class="form-control" th:with="type=${@dict.getType('yt_project_type')}">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}" th:selected="*{item} == ${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="proportion">
+                                    <input type="number" class="form-control" min="1" max="10"
+                                           th:value="*{proportion}" name="proportion" placeholder="比例">
+                                </td>
+                                <td class="date">
+                                    <div class="input-daterange input-group">
+                                        <input type="text" class="input-sm form-control time-input-data" name="startTime"
+                                               placeholder="开始时间" th:value="*{#dates.format(startTime, 'yyyy-MM-dd')}">
+                                        <span class="input-group-addon">到</span>
+                                        <input type="text" class="input-sm form-control time-input-data" name="endTime"
+                                               placeholder="结束时间" th:value="*{#dates.format(endTime, 'yyyy-MM-dd')}">
+                                    </div>
+                                </td>
+                                <td class="totalValue">
+                                    <input type="text" class="form-control" name="totalValue" placeholder="专业产值(万)" th:value="*{totalValue}">
+                                </td>
+                                <td class="effectiveValue">
+                                    <input type="text" class="form-control" name="effectiveValue" placeholder="有效产值(万)" th:value="*{effectiveValue}">
+                                </td>
+                                <td><a class="deleTaThis">删除</a></td>
+                            </tr>
+                            <tr class="scaleTrClass">
+                                <td colspan="6">
+                                    <div class="form-inline form-inline-scale">
+                                        <a class="addStageScaleThis"><h4> 阶段比重 <i class="glyphicon glyphicon-plus"></i>
+                                        </h4></a>
+                                        <div class="add_stage" th:each="lis : ${list.ytLeaderAllocateStageList}">
+                                            <input th:value="*{lis.mainId}" name="mainId" type="hidden">
+                                            <div class="form-group ">
+                                                <input th:value="*{lis.id}" name="id" type="hidden">
+                                                <input type="number" min="1" max="10" class="form-control" th:value="*{lis.num}" name="num" placeholder="排序">
+                                            </div>
+                                            <div class="form-group ">
+                                                <select name="stageCode" class="form-control" th:with="type=${@dict.getType('yt_project_stage')}">
+                                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"
+                                                            th:selected="*{lis.stageCode} == ${dict.dictValue}"></option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group ">
+                                                <input type="text" class="form-control col-sm-4" name="proportion"
+                                                       placeholder="阶段比重（%）" th:value="*{lis.proportion}">
+                                            </div>
+                                            <div class="form-group ">
+                                                <a class="deleTrdThis"> &nbsp; 删除 </a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button class="btn btn-sm btn-info mar-top" id="editSaveBtn">确认修改</button>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- -展示  生产经营部经理确认分配-->
+                <div class="panel-body detailLeaderAllocate">
+                    <h3 class="thisState"></h3>
+                    <table class="table table-bordered table-bot">
+                        <caption>
+                            <strong>分配比例详情</strong>
+                        </caption>
+                        <tbody>
+                        <tr>
+                            <td class="active text-center" colspan="6">项目专业分配比例 &nbsp;</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div id="editScaleTable">
+                        <table class="table table-bordered mainDetail"
+                               th:each="list : ${ytLeaderAllocateVoList}">
+                            <thead>
+                            <tr class="active">
+                                <th>工程</th>
+                                <th>比例（%）</th>
+                                <th>工期</th>
+                                <th>专业产值（万）</th>
+                                <th>有效产值（万）</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tr class="active" th:object="${list.ytLeaderAllocateMain}">
+                                <td class="item">
+                                    [[*{itemName}]]
+                                </td>
+                                <td class="proportion">[[*{proportion}]]</td>
+                                <td class="date">
+                                    [[*{#dates.format(startTime, 'yyyy-MM-dd')}]] 到 [[*{#dates.format(endTime, 'yyyy-MM-dd')}]]
+                                </td>
+                                <td class="totalValue">[[*{totalValue}]]</td>
+                                <td class="effectiveValue">[[*{effectiveValue}]]</td>
+                                <td></td>
+                            </tr>
+                            <tr class="scaleTrClass">
+                                <td colspan="6">
+                                    <h4> 阶段比重 </h4>
+                                    <table class="table table-bordered" style="width: 25%">
+                                        <thead>
+                                        <tr class="active">
+                                            <th width="50%">阶段</th>
+                                            <th class="hidden">序号</th>
+                                            <th>比例</th>
+                                        </tr>
+                                        </thead>
+                                        <tr th:each="lis : ${list.ytLeaderAllocateStageList}">
+                                            <td>[[*{lis.stageName}]]</td>
+                                            <td class="hidden">[[*{lis.stageCode}]]</td>
+                                            <td>[[*{lis.proportion}]]</td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="row role1Flag" th:if="${flag} == 3">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button class="btn btn-sm btn-info mar-top" onclick="comfirmEenter('02')">确认</button>
+                            <button class="btn btn-sm btn-danger mar-top" onclick="comfirmEenter('03')">驳回</button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script th:inline="javascript">
+    var role1Flag = [[${@permission.hasPermi('yt:ytProjectMain:biddingProject:role1')}]];//生产经营部经理权限
+    $('.role1Flag').addClass(role1Flag)
+    //console.log([[${allocateMain}]])
+    var prefix = ctx + "yt/ytProjectMain";
+
+
+    //生产经营部经理确认驳回
+    function comfirmEenter(state) {
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + "/leaderAllocate/edit",
+            type: "post",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.successTabCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+    //删除tr
+    function deleteTr(aObject) {
+        aObject.remove();
+    }
+
+    //保存数据函数
+    function saveDataTable(leadADateList) {
+        var obj = $(".mainDetail")
+        for (var i = 0; i < obj.length; i++) {
+            var leadADate = {
+                'ytLeaderAllocateMain': '',
+                'ytLeaderAllocateStageList': []
+            }
+            var trData = {
+                'projectId': '',
+                'id': '',
+                'item': '',
+                'proportion': '',
+                'startTime': '',
+                'endTime': '',
+                'totalValue': '',
+                'effectiveValue': '',
+                'state': ''
+            }
+            trData.serialNum = obj.eq(i).children().find("input[name='serialNum']").val();
+            trData.projectId = obj.eq(i).children().find("input[name='projectId']").val();
+            trData.id = obj.eq(i).children().find("input[name='id']").val();
+            trData.item = obj.eq(i).children().find("select[name='item']").val();
+            trData.proportion = obj.eq(i).children().find("input[name='proportion']").val();
+            trData.startTime = obj.eq(i).children().find("input[name='startTime']").val();
+            trData.endTime = obj.eq(i).children().find("input[name='endTime']").val();
+            trData.totalValue = obj.eq(i).children().find("input[name='totalValue']").val();
+            trData.effectiveValue = obj.eq(i).children().find("input[name='effectiveValue']").val();
+            trData.state = obj.eq(i).children().find("input[name='state']").val();
+            leadADate.ytLeaderAllocateMain = trData;
+            var stageObjList = obj.eq(i).children().find(".add_stage");
+            var sumProportion = 0;
+            for (var a = 0; a < stageObjList.length; a++) {
+                var stageObjListData = {
+                    "mainId": '',
+                    "id": '',
+                    'num': '',
+                    'stageCode': '',
+                    'proportion': ''
+                }
+                stageObjListData.mainId = stageObjList.eq(a).find("input[name='mainId']").val();
+                stageObjListData.id = stageObjList.eq(a).find("input[name='id']").val();
+                stageObjListData.num = stageObjList.eq(a).find("input[name='num']").val();
+                stageObjListData.stageCode = stageObjList.eq(a).find("select[name='stageCode']").val();
+                stageObjListData.proportion = stageObjList.eq(a).find("input[name='proportion']").val();
+                sumProportion += parseFloat(stageObjListData.proportion);
+                leadADate.ytLeaderAllocateStageList.push(stageObjListData)
+            }
+
+            if (sumProportion == 100) {
+                leadADateList.push(leadADate)
+                console.log(leadADateList)
+            } else {
+                var GC = $.table.selectDictLabel([[${@dict.getType('yt_project_type')}]],trData.item );
+                GC = $(GC).html();
+                $.modal.alertWarning(GC+'阶段比重分配错误！');
+                return null
+            }
+
+        }
+        return leadADateList
+    }
+
+    // 字段返回数据
+    function returnSelect(dict) {
+        var addSelect = '';
+        for (var i = 0; i < dict.length; i++) {
+            addSelect += '<option value="' + dict[i].dictValue + '">' + dict[i].dictLabel + '</option>';
+        }
+        return addSelect;
+    }
+
+    //封装
+    function addSaveData(option) {
+        $("#" + option.btnAddTableId).click(function () {
+            var $tr = $('<table class="table table-bordered mainDetail" >' +
+                '<thead>' +
+                '<tr class="active">' +
+                '<th>工程</th>' +
+                '<th>比例（%）</th>' +
+                '<th>工期</th>' +
+                '<th>专业产值（万）</th>' +
+                '<th>有效产值（万）</th>' +
+                '<th>操作</th>' +
+                '</tr>' +
+                '</thead>' +
+                '<tr class="active">' +
+                '<td class="item">' +
+                '<input type="hidden" name="serialNum" value="1">'+
+                '<input type="hidden" id="projectId" name="projectId" value="' + [[${ytProjectMain.id}]] + '"><select name="item" class="form-control">' + returnSelect([[${@dict.getType('yt_project_type')}]]) + '</select></td>' +
+                '<td class="proportion"><input type="number" class="form-control"  min="1" max="10" name="proportion" placeholder="比例"></td>' +
+                '<td class="date"><div class="input-daterange input-group"><input type="text" class="input-sm form-control time-input-data" name="startTime" placeholder="开始时间"><span class="input-group-addon">到</span><input type="text" class="input-sm form-control time-input-data" name="endTime" placeholder="结束时间"></div></td>' +
+                '<td class="totalValue"><input type="text" class="form-control" name="totalValue" placeholder="专业产值(万)"></td>' +
+                '<td class="effectiveValue"><input type="text" class="form-control" name="effectiveValue" placeholder="有效产值(万)"></td>' +
+                '<td><a class="deleTr" >删除</a></td>' +
+                '</tr>' +
+                '<tr class="scaleTrClass">' +
+                '<td colspan="6">' +
+                '<div class="form-inline form-inline-scale">' +
+                '<a class="addStageScale"><h4>阶段比重 <i class="glyphicon glyphicon-plus"></i></h4></a>' +
+                '</div>' +
+                '</td>' +
+                '</tr>' +
+                '</table>');
+            var $table = $("#" + option.boxId);
+            $table.append($tr);
+            var serialNumList = $tr.parent().find('input[name="serialNum"]');
+            if (serialNumList.length>1){
+                var serialNum = parseInt(serialNumList.eq(serialNumList.length-2).val())+1;
+                serialNumList.eq(serialNumList.length-1).val(serialNum);
+            }
+            console.log(serialNum);
+            $tr.children().find('.addStageScale').click(function () {
+                var $addDiv = $('<div class="add_stage">' +
+                    '<div class="form-group ">' +
+                    '<input type="number"  min="1" max="10" class="form-control" name="num" placeholder="排序">' +
+                    '</div>' +
+                    '<div class="form-group ">' +
+                    '<select name="stageCode" class="form-control">' + returnSelect([[${@dict.getType('yt_project_stage')}]]) + '</select>' +
+                    '</div>' +
+                    '<div class="form-group ">' +
+                    '<input type="text" class="form-control col-sm-4" name="proportion" placeholder="阶段比重（%）">' +
+                    '</div>' +
+                    '<div class="form-group ">' +
+                    '<a class="deleTrd"> &nbsp; 删除</button></a>' +
+                    '</div>' +
+                    '</div>')
+                var $objB = $(this).parent('.form-inline-scale');
+                $objB.append($addDiv);
+                //内部删除
+                $addDiv.find('.deleTrd').click(function () {
+                    deleteTr($addDiv);
+                });
+                $addDiv.find('input[name="proportion"]').bind("input propertychange" , function () {
+                    var obj = $(this);
+                    var proportionList = obj.parent().parent().parent().find('input[name="proportion"]')
+                    console.log(proportionList)
+                })
+            })
+            //外部删除
+            $tr.children().find('.deleTr').click(function () {
+                $.modal.confirm("您确定要删除吗？", function () {
+                    deleteTr($tr)
+                });
+            });
+            dataTime()//时间插件
+            $("input[name='proportion']").blur(function (event) {
+                var calData = {};
+                calData.projectType = $tr.children().find('select[name="item"]').val();
+                calData.proportion = $(this).val();
+                calData.designCost = [[${allocateMain}]].designCost;
+                calData.isEstimate = [[${allocateMain}]].isEstimate;
+                calData.difficultRatio = [[${allocateMain}]].remark;
+                var _this = $(this)
+                var config = {
+                    contentType: "application/json;charset=UTF-8",
+                    url: ctx + "yt/ytProjectMain/leaderAllocate/cal",
+                    type: "post",
+                    data: JSON.stringify(calData),
+                    beforeSend: function () {
+                        $.modal.loading("正在处理中，请稍后...");
+                    },
+                    success: function (result) {
+                        $.modal.closeLoading();
+                        _this.parents().siblings('.totalValue').find('input[name="totalValue"]').val(result.data.projectValue);
+                        _this.parents().siblings('.effectiveValue').find('input[name="effectiveValue"]').val(result.data.effectiveValue);
+                    }
+                };
+                $.ajax(config);
+            });
+        })
+        //点击操作提交
+        $('#' + option.saveBtn).click(function () {
+            var leadADateList = []
+            var data = saveDataTable(leadADateList)
+            // console.log(data)
+            if (data != null){
+                var config = {
+                    contentType: "application/json;charset=UTF-8",
+                    url: option.url,
+                    type: "post",
+                    data: JSON.stringify(data),
+                    beforeSend: function () {
+                        $.modal.loading("正在处理中，请稍后...");
+                    },
+                    success: function (result) {
+                        $.operate.successTabCallback(result);
+                    }
+                };
+                $.ajax(config)
+            }
+
+        })
+
+    }
+
+    //状态修改函数
+    function comfirmEenter(state) {
+        var data = {'projectId': [[${ytProjectMain.id}]], 'state': state}
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + "/leaderAllocate/changeState",
+            type: "post",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.successTabCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+    //状态回显
+    function stateHui(state) {
+        var stateName = null;
+        if (state == '01') {
+            stateName = '审核中'
+        } else if (state == '02') {
+            stateName = '审核通过'
+        } else if (state == '03') {
+            stateName = '驳回'
+        }
+        return stateName;
+    }
+
+    //预读函数
+    $(function () {
+        var optionAdd = {
+            btnAddTableId: 'addTrScale',//总的添加按钮 添加整个table
+            boxId: 'scaleTable',//内容 盒子，装所有内容的div
+            saveBtn: 'saveBtn',//保存按钮
+            url: prefix + "/leaderAllocate/add"//请求的地址
+        }
+        if ($(".addLeaderAllocate").length > 0) {
+            addSaveData(optionAdd);
+        }
+        var optionEdit = {
+            btnAddTableId: 'editTrScale',//总的添加按钮 添加整个table
+            boxId: 'editScaleTable',//内容 盒子，装所有内容的div
+            saveBtn: 'editSaveBtn',//保存按钮
+            url: prefix + "/leaderAllocate/edit"//请求的地址
+        }
+        if ($(".editLeaderAllocate").length > 0) {
+            addSaveData(optionEdit);
+            //权限
+            var lis = [[${ytLeaderAllocateVoList}]];
+            var lisMa = lis[0].ytLeaderAllocateMain;
+            if (lisMa.state == '01' || lisMa.state == '02') {
+                $('.editLeaderAllocate').html('')
+            }
+
+
+        }
+        //状态展示
+        var lis = [[${ytLeaderAllocateVoList}]];
+        if ($.common.isEmpty(lis) == false) {
+            var lisMa = lis[0].ytLeaderAllocateMain;
+            $('.thisState').text(stateHui(lisMa.state))
+        }
+        if ($.common.isEmpty(lis) == true || lisMa.state == '03') {
+            $('.detailLeaderAllocate').html('')
+        }
+
+
+        //删除阶段
+        $('.deleTrdThis').click(function () {
+            $(this).parent().parent('.add_stage').remove()
+        })
+        $('.deleTaThis').click(function () {
+            $(this).parent().parent().parent().parent('.mainDetail').remove()
+        })
+        //添加阶段
+        $('.addStageScaleThis').click(function () {
+            var $addDiv = $('<div class="add_stage">' +
+                '<div class="form-group ">' +
+                '<input type="number"  min="1" max="10" class="form-control" name="num" placeholder="排序">' +
+                '</div> ' +
+                '<div class="form-group ">' +
+                '<select name="stageCode" class="form-control">' + returnSelect([[${@dict.getType('yt_project_stage')}]]) + '</select>' +
+                '</div> ' +
+                '<div class="form-group ">' +
+                '<input type="text" class="form-control col-sm-4" name="proportion" placeholder="阶段比重（%）">' +
+                '</div> ' +
+                '<div class="form-group ">' +
+                '<a class="deleTrd"> &nbsp; 删除</button></a>' +
+                '</div>' +
+                '</div>')
+            var $objB = $(this).parent('.form-inline-scale');
+            $objB.append($addDiv);
+            //内部删除
+            $addDiv.find('.deleTrd').click(function () {
+                deleteTr($addDiv);
+            });
+        })
+
+
+    })
+
+    //时间框
+    function dataTime() {
+        if ($(".time-input-data").length > 0) {
+            layui.use('laydate', function () {
+                var com = layui.laydate;
+                $(".time-input-data").each(function (index, item) {
+                    var time = $(item);
+                    // 控制控件外观
+                    var type = time.attr("data-type") || 'date';
+                    // 控制回显格式
+                    var format = time.attr("data-format") || 'yyyy-MM-dd';
+                    // 控制日期控件按钮
+                    var buttons = time.attr("data-btn") || 'clear|now|confirm', newBtnArr = [];
+                    // 日期控件选择完成后回调处理
+                    var callback = time.attr("data-callback") || {};
+                    if (buttons) {
+                        if (buttons.indexOf("|") > 0) {
+                            var btnArr = buttons.split("|"), btnLen = btnArr.length;
+                            for (var j = 0; j < btnLen; j++) {
+                                if ("clear" === btnArr[j] || "now" === btnArr[j] || "confirm" === btnArr[j]) {
+                                    newBtnArr.push(btnArr[j]);
+                                }
+                            }
+                        } else {
+                            if ("clear" === buttons || "now" === buttons || "confirm" === buttons) {
+                                newBtnArr.push(buttons);
+                            }
+                        }
+                    } else {
+                        newBtnArr = ['clear', 'now', 'confirm'];
+                    }
+                    com.render({
+                        elem: item,
+                        theme: 'molv',
+                        trigger: 'click',
+                        type: type,
+                        format: format,
+                        btns: newBtnArr,
+                        done: function (value, data) {
+                            if (typeof window[callback] != 'undefined' && window[callback] instanceof Function) {
+                                window[callback](value, data);
+                            }
+                        }
+                    });
+                });
+            });
+        }
+    }
+
+    //结束
+</script>
+</body>
+</html>

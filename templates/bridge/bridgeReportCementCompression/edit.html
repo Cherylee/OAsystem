@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改水泥混凝土抗压强度试验检测记录')" />
+    <style>
+        .form-control{
+            padding: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-bridgeReportCementCompression-edit" th:object="${bridgeReportCementCompressionVo.bridgeReportCementCompression}">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>水泥混凝土抗压强度试验检测记录表</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">检测单位名称</td>
+                                <td width="35%">
+                                    <input type="hidden" name="id" th:value="*{id}">
+                                    <input type="hidden" name="taskId" th:value="*{taskId}">
+                                    <input type="hidden" name="orderId" th:value="*{orderId}">
+                                    <input name="testingUnitName" class="form-control" type="text" value="厦门百川建设工程检测有限公司">
+                                </td>
+                                <td class="active">记录编号</td>
+                                <td>
+                                    <input name="code" class="form-control" type="text" th:value="*{code}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">工程部位/用途</td>
+                                <td>
+                                    <input name="way" class="form-control" type="text" th:value="*{way}">
+                                </td>
+                                <td class="active">委托/任务编号</td>
+                                <td>
+                                    <input name="entrustCode" class="form-control" type="text" th:value="*{entrustCode}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">样品名称</td>
+                                <td>
+                                    <input name="sampleName" class="form-control" type="text" th:value="*{sampleName}">
+                                </td>
+                                <td class="active">试件尺寸(mm)</td>
+                                <td>
+                                    <select name="size" id="size" class="form-control" th:value="*{size}"
+                                            th:with="type=${@dict.getType('bridge_sample_size')}" readonly>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">试验依据</td>
+                                <td>
+                                    <input name="according" class="form-control" type="text" th:value="*{according}">
+                                </td>
+                                <td class="active">养护方式</td>
+                                <td>
+                                    <select name="curingWay" id="curingWay" class="form-control" th:value="*{curingWay}"
+                                            th:with="type=${@dict.getType('bridge_order_curing')}" readonly>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">试验条件</td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td>温度:</td>
+                                            <td><input name="temperature" class="form-control" type="number" th:value="*{temperature}"></td>
+                                            <td>℃,&nbsp;&nbsp;&nbsp;相对湿度:</td>
+                                            <td><input name="humidity" class="form-control" type="number" th:value="*{humidity}"></td>
+                                            <td>%</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="active">试验日期</td>
+                                <td>
+                                    <input id="trialDate" name="trialDate" class="form-control currentTime time-input" type="text" readonly>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <!-- 主要仪器 -->
+
+                    <div class=" table-striped">
+                        <div class="btn-group-sm" id="toolbar-sample" role="group" style="margin-bottom: 10px">
+                            <br>
+                            <a class="btn btn-success" id="addSample" onclick="addInstrument(1)"> <i class="fa fa-plus"></i>
+                                添加主要仪器
+                            </a>
+                        </div>
+                        <table class="table table-bordered table-condensed" style="text-align: center" id="bridgeInstrument">
+                            <tr>
+                                <td class="active">管理编号</td>
+                                <td class="active">仪器名称</td>
+                                <td class="active">有效期至</td>
+                                <td class="active">操作</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class=" table-striped">
+                        <div class="btn-group-sm" id="toolbar-testing" role="group" style="margin-bottom: 10px">
+                            <br>
+                            <a class="btn btn-success" id="addTesting" onclick="addTesting(1)"> <i class="fa fa-plus"></i>
+                                添加样品检测数据
+                            </a>
+                        </div>
+                        <table class="table table-bordered table-condensed" style="text-align: center" id="bridgeTesting">
+                            <tr>
+                                <td class="active" rowspan="3">样品编号</td>
+                                <td class="active" rowspan="3">强度等级</td>
+                                <td class="active" rowspan="3" width="10%">制作日期</td>
+                                <td class="active" rowspan="3" width="10%">试验日期</td>
+                                <td class="active" rowspan="3">龄期<br/>(d)</td>
+                                <td class="active" rowspan="3">试件编号</td>
+                                <td class="active" colspan="4">边长(mm)</td>
+                                <td class="active" rowspan="3">高度<br/>(mm)</td>
+                                <td class="active" rowspan="2" colspan="2">平面度(mm)</td>
+                                <td class="active" rowspan="2" colspan="2">夹角(°)</td>
+                                <td class="active" rowspan="3">面积A<br/>(mm2)</td>
+                                <td class="active" rowspan="3"><span style="color: red;">*</span>破坏荷载<br/>(kN)</td>
+                                <td class="active" rowspan="3">尺寸换算系数</td>
+                                <td class="active" rowspan="3">单块强度<br/>(MPa)</td>
+                                <td class="active" rowspan="3">强度代表值<br/>(MPa)</td>
+                                <td class="active" rowspan="3">操作</td>
+                            </tr>
+                            <tr>
+                                <td class="active" colspan="2">上压面</td>
+                                <td class="active" colspan="2">下压面</td>
+                            </tr>
+                            <tr>
+                                <td class="active">纵向</td>
+                                <td class="active">横向</td>
+                                <td class="active">纵向</td>
+                                <td class="active">横向</td>
+                                <td class="active">上压面</td>
+                                <td class="active">下压面</td>
+                                <td class="active">上压面</td>
+                                <td class="active">下压面</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>报告预览
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "bridge/bridgeReportCementCompression";
+		$("#form-bridgeReportCementCompression-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+        //主要仪器记录
+        var instrumentHtml =
+            '                 <tr class="testing-instrument">\n' +
+            '                    <td>\n' +
+            '                       <input type="hidden" name="instrumentId">\n' +
+            '                       <input name="code" type="text" class="form-control">\n' +
+            '                    </td>\n' +
+            '                    <td><input name="instrumentName" type="text" class="form-control"></td>\n' +
+            '                    <td><input name="validityDate" type="text" class="form-control time-input instrumentTime"></td>\n' +
+            '                    <td><a class="deleteInstrument" href="#">删除</a></td>\n' +
+            '                 </tr>\n';
+
+        //注册删除事件
+        var deleteInstrument = function(){
+            $('.deleteInstrument').click(function () {
+                var obj=$(this);
+                obj.parent().parent().remove()
+            })
+        };
+
+        //注册时间事件
+        var getInstrumentTime = function () {
+            if($('.instrumentTime').length>0){
+                $(".instrumentTime").each(function (index, item) {
+                    if (index == $('.instrumentTime').length-1){
+                        var thisObj=$(item);
+                        currentDate(thisObj)
+                    }
+                })
+            }
+            //动态添加注册时间组件时间
+            dynamicDate()
+        };
+
+        function addInstrument(index) {
+            $('#bridgeInstrument').append(instrumentHtml);
+            deleteInstrument();
+            if (index == 1){
+                getInstrumentTime();
+            }
+
+        }
+        var instrumentList = [[${bridgeReportCementCompressionVo.bridgeReportCementCompressionInstrumentList}]];
+        console.log(instrumentList)
+        //显示默认带入的值
+        for (let i in instrumentList) {
+            addInstrument(0);
+            var testingInstrument = $('.testing-instrument');
+            testingInstrument.eq(i).find("input[name='instrumentId']").val(instrumentList[i].instrumentId);
+            testingInstrument.eq(i).find("input[name='code']").val(instrumentList[i].code);
+            testingInstrument.eq(i).find("input[name='instrumentName']").val(instrumentList[i].instrumentName);
+            testingInstrument.eq(i).find("input[name='validityDate']").val(instrumentList[i].validityDate);
+        }
+
+
+        //样品检测数据记录
+        var testingHtml = '<tbody class="testing-sample">\n' +
+            '              <tr class="testing-sample-detail">\n' +
+            '                  <td rowspan="3">\n' +
+            '                      <input type="hidden" name="sampleId">\n' +
+            '                      <input name="code" type="text" class="form-control">\n' +
+            '                  </td>\n' +
+            '                  <td rowspan="3"><input name="level" type="text" class="form-control"></td>\n' +
+            '                  <td rowspan="3"><input name="manufactureDate" type="text" class="form-control time-input" data-mark="0"></td>\n' +
+            '                  <td rowspan="3"><input name="trialDate" type="text" class="form-control time-input currentTime" data-mark="1"></td>\n' +
+            '                  <td rowspan="3"><input name="age" type="text" class="form-control"></td>\n' +
+            '                  <td>1</td>\n' +
+            '                  <td><input name="upLengthwaysLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upCrosswiseLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downLengthwaysLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downCrosswiseLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="height" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upPlaneness" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downPlaneness" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upAngle" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downAngle" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="area" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="failureLoad" type="text" class="form-control" required="required"></td>\n' +
+            '                  <td><input name="coefficient" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="intensity" type="text" class="form-control"></td>\n' +
+            '                  <td rowspan="3"><input name="intensityRepresentative" type="text" class="form-control"></td>\n' +
+            '                  <td rowspan="3"><a class="deleteTesting" href="#">删除</a></td>\n' +
+            '              </tr>\n' +
+            '              <tr class="testing-sample-detail">\n' +
+            '                  <td>2</td>\n' +
+            '                  <td><input name="upLengthwaysLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upCrosswiseLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downLengthwaysLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downCrosswiseLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="height" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upPlaneness" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downPlaneness" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upAngle" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downAngle" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="area" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="failureLoad" type="text" class="form-control" required="required"></td>\n' +
+            '                  <td><input name="coefficient" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="intensity" type="text" class="form-control"></td>\n' +
+            '               </tr>\n' +
+            '               <tr class="testing-sample-detail">\n' +
+            '                  <td>3</td>\n' +
+            '                  <td><input name="upLengthwaysLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upCrosswiseLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downLengthwaysLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downCrosswiseLength" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="height" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upPlaneness" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downPlaneness" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="upAngle" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="downAngle" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="area" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="failureLoad" type="text" class="form-control" required="required"></td>\n' +
+            '                  <td><input name="coefficient" type="text" class="form-control"></td>\n' +
+            '                  <td><input name="intensity" type="text" class="form-control"></td>\n' +
+            '               </tr>\n' +
+            '               </tbody>';
+
+
+
+
+        //注册删除事件
+        var deleteTesting = function(){
+            $('.deleteTesting').click(function () {
+                var obj=$(this);
+                obj.parent().parent().parent().remove()
+            })
+        };
+
+        //注册时间事件
+        var getTime = function () {
+            if($('.currentTime').length>0){
+                $(".currentTime").each(function (index, item) {
+                    if (index == $('.currentTime').length-1){
+                        var thisObj=$(item);
+                        currentDate(thisObj)
+                    }
+                })
+            }
+
+            dynamicDate();
+        };
+
+
+        //注册输入破坏荷载触发事件
+        var inputFailureLoad = function () {
+            $('input[name = "failureLoad"]').bind("input propertychange" , function () {
+                var obj = $(this);
+                var failureLoad = obj.val();
+                var area = obj.parent().parent().find("input[name='area']").val();
+                var coefficient = obj.parent().parent().find("input[name='coefficient']").val();
+                var intensity = parseFloat(failureLoad)*1000/parseFloat(area)*parseFloat(coefficient);
+                intensity = evenRound(intensity,1);
+                obj.parent().parent().find("input[name='intensity']").val(intensity);
+                getIntensityRepresentative(obj);
+            })
+        };
+
+        //注册单块强度数据变化触发事件
+        var intensityChange = function () {
+            $('input[name = "intensity"]').bind("input propertychange" , function () {
+                var obj = $(this);
+                getIntensityRepresentative(obj);
+            })
+        };
+        function getIntensityRepresentative (obj){
+            var intensityList = obj.parent().parent().parent().find("input[name='intensity']");
+            var intensityNumberList = [];
+            for (var i=0; i<intensityList.length;i++){
+                var intensityNumber = intensityList.eq(i).val();
+                if (intensityNumber != '') {
+                    intensityNumberList.push(parseFloat(intensityList.eq(i).val()))
+                } else {
+                    intensityNumberList.push(0)
+                }
+
+            }
+            intensityNumberList.sort(function (a, b) {
+                return a-b
+            });
+            var minDisparity = (intensityNumberList[1]-intensityNumberList[0])/intensityNumberList[1];
+            var maxDisparity = (intensityNumberList[2]-intensityNumberList[1])/intensityNumberList[1];
+            var result = '';
+            if (minDisparity>0.15 && maxDisparity>0.15) {
+                result = '无效';
+            } else if (minDisparity>0.15 || maxDisparity>0.15) {
+                result = intensityNumberList[1]
+            } else {
+                result = evenRound((intensityNumberList[0]+intensityNumberList[1]+intensityNumberList[2])/3 ,1)
+            }
+            obj.parent().parent().parent().find("input[name='intensityRepresentative']").val(result);
+        }
+
+        function addTesting(index) {
+            $('#bridgeTesting').append(testingHtml);
+            deleteTesting();
+            getTime();
+            inputFailureLoad();
+            intensityChange();
+            var testingSample = $('.testing-sample');
+            var area =  getArea([[${bridgeReportCementCompressionVo.bridgeReportCementCompression.size}]]);
+            var coefficient = getCoefficient([[${bridgeReportCementCompressionVo.bridgeReportCementCompression.size}]]);
+            testingSample.eq(testingSample.length-1).find("input[name='area']").val(area);
+            testingSample.eq(testingSample.length-1).find("input[name='coefficient']").val(coefficient);
+        }
+
+        var testinList = [[${bridgeReportCementCompressionVo.bridgeReportCementCompressionSampleList}]]
+        //显示默认带入的值
+        for (let i in testinList) {
+            addTesting(0);
+            var testingSample = $('.testing-sample');
+            testingSample.eq(i).find("input[name='sampleId']").val(testinList[i].sampleId);
+            testingSample.eq(i).find("input[name='code']").val(testinList[i].code);
+            testingSample.eq(i).find("input[name='level']").val(testinList[i].level);
+            testingSample.eq(i).find("input[name='manufactureDate']").val(testinList[i].manufactureDate);
+            testingSample.eq(i).find("input[name='trialDate']").val(testinList[i].trialDate);
+            testingSample.eq(i).find("input[name='age']").val(testinList[i].age);
+            testingSample.eq(i).find("input[name='intensityRepresentative']").val(testinList[i].intensityRepresentative);
+            var sampleDetailList = testingSample.eq(i).children('.testing-sample-detail');
+            var sampleDetail = testinList[i].bridgeReportCementCompressionSampleDetailList;
+            for (let j in sampleDetail) {
+                sampleDetailList.eq(j).find("input[name='upLengthwaysLength']").val(sampleDetail[j].upLengthwaysLength);
+                sampleDetailList.eq(j).find("input[name='upCrosswiseLength']").val(sampleDetail[j].upCrosswiseLength);
+                sampleDetailList.eq(j).find("input[name='downLengthwaysLength']").val(sampleDetail[j].downLengthwaysLength);
+                sampleDetailList.eq(j).find("input[name='downCrosswiseLength']").val(sampleDetail[j].downCrosswiseLength);
+                sampleDetailList.eq(j).find("input[name='height']").val(sampleDetail[j].height);
+                sampleDetailList.eq(j).find("input[name='upPlaneness']").val(sampleDetail[j].upPlaneness);
+                sampleDetailList.eq(j).find("input[name='downPlaneness']").val(sampleDetail[j].downPlaneness);
+                sampleDetailList.eq(j).find("input[name='upAngle']").val(sampleDetail[j].upAngle);
+                sampleDetailList.eq(j).find("input[name='downAngle']").val(sampleDetail[j].downAngle);
+                sampleDetailList.eq(j).find("input[name='area']").val(sampleDetail[j].area);
+                sampleDetailList.eq(j).find("input[name='failureLoad']").val(sampleDetail[j].failureLoad);
+                sampleDetailList.eq(j).find("input[name='coefficient']").val(sampleDetail[j].coefficient);
+                sampleDetailList.eq(j).find("input[name='intensity']").val(sampleDetail[j].intensity);
+            }
+        }
+
+        //获取需要传输数据
+        function getData() {
+            var data = {};
+            data.bridgeReportCementCompression= $('#form-bridgeReportCementCompression-edit').serializeObject();
+            var testingSampleList = $('.testing-sample');
+            var testingInstrumentList = $('.testing-instrument');
+            var bridgeReportCementCompressionSampleList = [];
+            var bridgeReportCementCompressionInstrumentList = [];
+            //获取样品记录数据
+            for (var i=0; i<testingSampleList.length;i++){
+                var testingSampleData = {};
+                var sampleDetailData = [];
+                var sampleDetailList = testingSampleList.eq(i).children('.testing-sample-detail');
+                for (var j=0; j<sampleDetailList.length; j++) {
+                    var sampleDetail = {};
+                    sampleDetail.upLengthwaysLength=sampleDetailList.eq(j).find("input[name='upLengthwaysLength']").val();
+                    sampleDetail.upCrosswiseLength=sampleDetailList.eq(j).find("input[name='upCrosswiseLength']").val();
+                    sampleDetail.downLengthwaysLength=sampleDetailList.eq(j).find("input[name='downLengthwaysLength']").val();
+                    sampleDetail.downCrosswiseLength=sampleDetailList.eq(j).find("input[name='downCrosswiseLength']").val();
+                    sampleDetail.height=sampleDetailList.eq(j).find("input[name='height']").val();
+                    sampleDetail.upPlaneness=sampleDetailList.eq(j).find("input[name='upPlaneness']").val();
+                    sampleDetail.downPlaneness=sampleDetailList.eq(j).find("input[name='downPlaneness']").val();
+                    sampleDetail.upAngle=sampleDetailList.eq(j).find("input[name='upAngle']").val();
+                    sampleDetail.downAngle=sampleDetailList.eq(j).find("input[name='downAngle']").val();
+                    sampleDetail.area=sampleDetailList.eq(j).find("input[name='area']").val();
+                    sampleDetail.failureLoad=sampleDetailList.eq(j).find("input[name='failureLoad']").val();
+                    sampleDetail.coefficient=sampleDetailList.eq(j).find("input[name='coefficient']").val();
+                    sampleDetail.intensity=sampleDetailList.eq(j).find("input[name='intensity']").val();
+                    sampleDetailData.push(sampleDetail)
+                }
+                testingSampleData.sampleId = testingSampleList.eq(i).find("input[name='sampleId']").val();
+                testingSampleData.code = testingSampleList.eq(i).find("input[name='code']").val();
+                testingSampleData.level = testingSampleList.eq(i).find("input[name='level']").val();
+                testingSampleData.manufactureDate = testingSampleList.eq(i).find("input[name='manufactureDate']").val();
+                testingSampleData.trialDate = testingSampleList.eq(i).find("input[name='trialDate']").val();
+                testingSampleData.age = testingSampleList.eq(i).find("input[name='age']").val();
+                testingSampleData.intensityRepresentative = testingSampleList.eq(i).find("input[name='intensityRepresentative']").val();
+                testingSampleData.bridgeReportCementCompressionSampleDetailList = sampleDetailData;
+                bridgeReportCementCompressionSampleList.push(testingSampleData);
+            }
+            //获取仪器记录数据
+            for (var i=0; i<testingInstrumentList.length;i++){
+                var testingInstrumentData = {};
+                testingInstrumentData.instrumentId = testingInstrumentList.eq(i).find("input[name='instrumentId']").val();
+                testingInstrumentData.code = testingInstrumentList.eq(i).find("input[name='code']").val();
+                testingInstrumentData.instrumentName = testingInstrumentList.eq(i).find("input[name='instrumentName']").val();
+                testingInstrumentData.validityDate = testingInstrumentList.eq(i).find("input[name='validityDate']").val();
+                bridgeReportCementCompressionInstrumentList.push(testingInstrumentData);
+            }
+            if (bridgeReportCementCompressionInstrumentList.length>3){
+                bridgeReportCementCompressionInstrumentList = bridgeReportCementCompressionInstrumentList.slice(0,3)
+            }else if(bridgeReportCementCompressionInstrumentList.length<3){
+                for (var i=bridgeReportCementCompressionInstrumentList.length; i<3; i++){
+                    var testingInstrumentData = {};
+                    testingInstrumentData.instrumentId = null;
+                    testingInstrumentData.code = null;
+                    testingInstrumentData.instrumentName = null;
+                    testingInstrumentData.validityDate = null;
+                    bridgeReportCementCompressionInstrumentList.push(testingInstrumentData)
+                }
+            }
+            data.bridgeReportCementCompressionSampleList = bridgeReportCementCompressionSampleList;
+            data.bridgeReportCementCompressionInstrumentList = bridgeReportCementCompressionInstrumentList;
+            return data;
+        }
+
+        //保存草稿
+        function saveDraft() {
+            var data = getData();
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+
+        //提交
+        function submitHandler() {
+            if ($.validate.form()) {
+                var data = getData();
+                console.log(data)
+                var url = prefix + "/edit";
+                var config = {
+                    contentType : "application/json;charset=UTF-8",
+                    url : url,
+                    type : "post",
+                    dataType: "json",
+                    data : JSON.stringify(data),
+                    beforeSend : function() {
+                        $.modal.loading("正在处理中，请稍后...");
+                    },
+                    success : function(result) {
+                        console.log(result)
+                        $.modal.closeLoading();
+                        var id = $("input[name='id']").val();
+                        createMenuItem(prefix+'/report/'+id, '预览报告');
+                    }
+                };
+                $.ajax(config);
+            }
+        }
+	</script>
+</body>
+</html>

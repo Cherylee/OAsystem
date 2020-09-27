@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改进项发票明细')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysProIncomeBillDetail-edit" th:object="${sysProIncomeBillDetail}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">主表id：</label>
+				<div class="col-sm-8">
+					<input id="parentId" name="parentId" th:field="*{parentId}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">发票编号：</label>
+				<div class="col-sm-8">
+					<input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">开票日期：</label>
+				<div class="col-sm-8">
+					<input id="billingDate" name="billingDate" th:field="*{billingDate}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">发票金额：</label>
+				<div class="col-sm-8">
+					<input id="invoiceAmount" name="invoiceAmount" th:field="*{invoiceAmount}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">发票税额：</label>
+				<div class="col-sm-8">
+					<input id="invoiceTax" name="invoiceTax" th:field="*{invoiceTax}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">价税合计：</label>
+				<div class="col-sm-8">
+					<input id="totalMoney" name="totalMoney" th:field="*{totalMoney}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProIncomeBillDetail";
+		$("#form-sysProIncomeBillDetail-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-sysProIncomeBillDetail-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

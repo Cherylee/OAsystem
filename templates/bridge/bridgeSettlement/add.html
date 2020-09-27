@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增费用结算')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeSettlement-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程id：</label>
+            <div class="col-sm-8">
+            	<input id="projectId" name="projectId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">结算日期：</label>
+            <div class="col-sm-8">
+            	<input id="settlementDate" name="settlementDate" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">结算编号：</label>
+            <div class="col-sm-8">
+            	<input id="settlementCode" name="settlementCode" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同编号：</label>
+            <div class="col-sm-8">
+            	<input id="contractCode" name="contractCode" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同金额：</label>
+            <div class="col-sm-8">
+            	<input id="contractAmount" name="contractAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">累计收款：</label>
+            <div class="col-sm-8">
+            	<input id="cumulateAmount" name="cumulateAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">本次收款：</label>
+            <div class="col-sm-8">
+            	<input id="currentAmount" name="currentAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">待收款：</label>
+            <div class="col-sm-8">
+            	<input id="waitAmount" name="waitAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">发票号：</label>
+            <div class="col-sm-8">
+            	<input id="billNum" name="billNum" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否完成收款（Y是，N否）：</label>
+            <div class="col-sm-8">
+            	<input id="isComplete" name="isComplete" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建者：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建时间：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新者：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新时间：</label>
+            <div class="col-sm-8">
+            	<input id="updateTime" name="updateTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "bridge/bridgeSettlement"
+		$("#form-bridgeSettlement-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-bridgeSettlement-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

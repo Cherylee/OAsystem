@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('中标项目移交单')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaWinBidTurnOver-edit" th:object="${oaWinBidTurnOver}">
+                        <input id="id" name="id" th:field="*{id}"  type="hidden">
+                        <input id="taskId" name="taskId"
+                               th:value="${taskId}" type="hidden">
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>中标项目移交单</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">项目：</td>
+                                <td>
+                                    [[*{projectName}]]
+                                </td>
+                                <td class="active">编号：</td>
+                                <td>
+                                    [[*{code}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>
+                                    [[*{userName}]]
+                                </td>
+                                <td class="active">公司名称：</td>
+                                <td>
+                                    [[*{companyName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">部门名称：</td>
+                                <td>
+                                    [[*{deptName}]]
+                                </td>
+                                <td class="active">申请日期：</td>
+                                <td>
+                                    [[${#dates.format(oaWinBidTurnOver.applyTime, 'yyyy-MM-dd')}]]
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <td class="active">项目名称：</td>
+                                <td colspan="3">
+                                    [[*{projectName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">中标公告网址：</td>
+                                <td>
+                                    [[*{winBidUrl}]]
+                                </td>
+                                <td class="active">方式：</td>
+                                <td>
+                                    <select class="form-control" name="type" th:with="type=${@dict.getType('oa_win_bid_type')}"
+                                            th:field="*{type}" disabled="disabled">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">建设单位：</td>
+                                <td>
+                                    [[*{constructUnit}]]
+                                </td>
+                                <td class="active">中标单位：</td>
+                                <td>
+                                    [[*{winUnit}]]
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">中标日期：</td>
+                                <td>
+                                    [[${#dates.format(oaWinBidTurnOver.winBidTime, 'yyyy-MM-dd')}]]
+                                </td>
+                                <td class="active">建造师：</td>
+                                <td>
+                                    [[*{buildPerson}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注：</td>
+                                <td>
+                                    [[*{typeRemark}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">工程类型：</td>
+                                <td>
+                                    <select class="form-control" name="proType" th:with="type=${@dict.getType('business_engineer_type')}"
+                                            th:field="*{proType}" disabled="disabled">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">资质要求：</td>
+                                <td>
+                                    [[*{qualifications}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">中标价：</td>
+                                <td>
+                                   [[*{winBidMoney}]]
+                                </td>
+                                <td class="active">工期：</td>
+                                <td>
+                                    [[*{timeLimit}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">履约担保金额：</td>
+                                <td>
+                                    [[*{performanceAmount}]]
+                                </td>
+                                <td class="active">履约担保方式：</td>
+                                <td>
+                                    [[*{performanceWay}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注：</td>
+                                <td colspan="3">
+                                    [[*{remark}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="active">附件：</td>
+                            </tr>
+                            <tr th:each="file,fileStat : ${@dict.getType('oa_jy_change_type')}">
+                                <td class="active">[[${file.dictLabel}]]：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input th:id="uploadFileId+${fileStat.index+1}" type="file" multiple disabled="disabled">
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${oaWinBidTurnOver.id}]],'oa/oaWinBidTurnOver/copy','flag')">
+                                抄送</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="approveTaskId" data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaWinBidTurnOver";
+    //流程
+    var data = {};
+    data.procInstId = [[${oaWinBidTurnOver.procInstId}]];
+    data.id = [[${oaWinBidTurnOver.id}]];
+    selectActProcessList(data, 'approveTaskId');
+    //同意
+    function agree(){
+        $.modal.open("同意备注", ctx+"oa/task/agree/"+$("#taskId").val()+"/270/oa_win_bid_turn_over/"+[[${oaWinBidTurnOver.id}]]);
+    }
+
+    //不同意
+    function disagree(){
+        $.modal.open("不同意原因", ctx+"oa/task/disagree/"+$("#taskId").val()+"/270/oa_win_bid_turn_over/"+[[${oaWinBidTurnOver.id}]]);
+    }
+
+    //返回
+    function backAway() {
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+    //获取附件集合
+    var cType=[[${@dict.getType('oa_jy_change_type')}]];
+
+    //附件
+    var attachmentList = new Array();
+    var config = {
+        url: ctx+"oa/oaAttachment/selectAttach",
+        type: "post",
+        dataType: "json",
+        data: {"objectId": [[${oaWinBidTurnOver.id}]],"sourceTable":"oa_win_bid_turn_over"},
+        success: function(result) {
+            var attachList = result.data;
+            var imgsList=[]
+            //分别封装后台传过来的附件集合
+            //按照type封装
+            for (var i=0;i<attachList.length;i++){
+                for (var t=0;t<cType.length;t++){
+                    if(attachList[i].type==t+1){
+                        var bl=false//是否有相同type
+                        // 判断是否有相同type
+                        var num=0
+                        for (var l=0;l<imgsList.length;l++){
+                            if(imgsList[l].type==attachList[i].type){
+                                bl=true
+                                num=l
+                            }
+                        }
+                        if( bl==true){//找到相同的type
+                            imgsList[num].attachmentList.push({
+                                'attachmentName':attachList[i].attachmentName,
+                                'attachmentUrl':attachList[i].attachmentUrl,
+                                'fileName':attachList[i].fileName
+                            })
+                        }else{//没有找到相同的type
+                            imgsList.push({
+                                'type':attachList[i].type,
+                                'attachmentList':[{
+                                    'attachmentName':attachList[i].attachmentName,
+                                    'attachmentUrl':attachList[i].attachmentUrl,
+                                    'fileName':attachList[i].fileName
+                                }]
+                            })
+                        }
+                    }
+                }
+            }
+            console.log(imgsList)
+            //没有附件的
+            for (var t=0;t<cType.length;t++) {
+                var bl=false;
+                for (var y=0;y<imgsList.length;y++){
+                    if(cType[t].dictValue==imgsList[y].type){
+                        bl=true;
+                    }
+                }
+                if(bl==false){
+                    var option2={
+                        id:'uploadFileId'+cType[t].dictValue,
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        deleteExtraData:null,
+                        imgsUrl:new Array(),
+                        initialPreviewConfig:null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+            //分别循环封装好的附件集合
+            for(var t=0;t<imgsList.length;t++){
+                var imgsUrl = new Array();
+                var attachs=imgsList[t].attachmentList
+                if(attachs!=null && attachs.length>0){
+                    var downloadConfig = new Array();
+                    for(var i=0; i<attachs.length; i++){
+                        var down = {};
+                        var attach = attachs[i];
+                        imgsUrl.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if(isAssetTypeAnImage(attach.attachmentName)){
+                            down.type = 'image';
+                        }else{
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        // attachmentList.push({"objectId":[[${oaWinBidTurnOver.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+                    }
+                    var option1={
+                        id:'uploadFileId'+imgsList[t].type,
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl:imgsUrl,
+                        downloadConfig:downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                }
+
+            }
+        }
+    };
+    $(function(){
+        $.ajax(config)
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('主负责人分配')" />
+<style type="text/css">
+.table-bot {
+	margin-bottom: 0 !important;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body addAllocate" th:if="${ytProjectAllocateVo.ytProjectAllocateMain} == null">
+						<!-- 合同申请 -->
+						<form id="form-ytProjectAllocateMain-add">
+							<input type="hidden" id="projectId" name="projectId"
+								th:value="${ytProjectAllocateVo.ytProjectMain.id}">
+							<table class="table table-bordered table-bot">
+								<caption>
+									<strong>生产经营部经理分配</strong>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">设计费用（万元）</td>
+										<td><input type="text" class="form-control"
+											id="designCost" name="designCost"
+											th:value="${ytProjectAllocateVo.ytProjectMain.biddingDesignCost}"></td>
+										<td class="active">是否预估</td>
+										<td><select name="isEstimate" class="form-control"
+											th:with="type=${@dict.getType('sys_yes_no')}">
+												<option value="">-----所有-----</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+										<td class="active">难度系数</td>
+										<td><input type="text" class="form-control" id="remark"
+											name="remark"></td>
+									</tr>
+									<tr>
+										<td class="active text-center" colspan="6">项目负责人</td>
+									</tr>
+									<tr>
+										<td class="active">项目分管</td>
+										<td colspan="2"><input type="hidden" id="projectManagerId"
+											name="projectManagerId"> <input type="text"
+											class="form-control" id="projectManagerName" name=""
+											onclick="selectUserById('projectManagerId','projectManagerName')">
+										</td>
+										<td class="active">主体项目负责人</td>
+										<td colspan="2"><input type="hidden"
+											id="principleLeaderId" name="principleLeaderId"> <input
+											type="text" class="form-control" id="principleLeaderName"
+											name=""
+											onclick="selectUserById('principleLeaderId','principleLeaderName')"></td>
+									</tr>
+									<tr>
+										<td class="active">主体项目副负责人</td>
+										<td colspan="2"><input type="hidden" id="deputyLeaderId"
+											name="deputyLeaderId"> <input type="text"
+											class="form-control" id="deputyLeaderName" name=""
+											onclick="selectUserById('deputyLeaderId','deputyLeaderName')"></td>
+										<td class="active">测绘负责人</td>
+										<td colspan="2"><input type="hidden" id="measureLeaderId"
+											name="measureLeaderId"> <input type="text"
+											class="form-control" id="measureLeaderName" name=""
+											onclick="selectUserById('measureLeaderId','measureLeaderName')"></td>
+									</tr>
+									<tr>
+										<td class="active">勘察负责人</td>
+										<td colspan="2"><input type="hidden" id="surveyLeaderId"
+											name="surveyLeaderId"> <input type="text"
+											class="form-control" id="surveyLeaderName" name=""
+											onclick="selectUserById('surveyLeaderId','surveyLeaderName')"></td>
+										<td class="active">其他负责人</td>
+										<td colspan="2"><input type="hidden" id="otherLeaderId"
+											name="otherLeaderId"> <input type="text"
+											class="form-control" id="otherLeaderName" name=""
+											onclick="selectUserById('otherLeaderId','otherLeaderName')"></td>
+									</tr>
+									<tr>
+										<td class="active text-center" colspan="6">工期 &nbsp; <a
+											class="btn btn-white btn-bitbucket btn-xs" id="addTr"> <i
+												class="glyphicon glyphicon-plus"></i></a></td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<table class="table table-bordered " id="usertable">
+						   <thead>
+						     <tr class="active">
+						      <th>序号</th>
+						      <th>阶段</th>
+						      <th>开始时间</th>
+						      <th>结束时间</th>
+						      <th>操作</th>
+						     </tr>
+						   </thead>
+						</table>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button class="btn btn-sm btn-info" id="saveBtn">确认</button>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 编辑 -->
+					<div class="panel-body editAllocate" th:if="${ytProjectAllocateVo.ytProjectAllocateMain} != null">
+					     <!-- 合同申请 -->
+						<form id="form-ytProjectAllocateMain-edit">
+							<input type="hidden" id="projectId" name="projectId"
+								th:value="${ytProjectAllocateVo.ytProjectMain.id}">
+							<input type="hidden" id="id" name="id"
+								th:value="${ytProjectAllocateVo.ytProjectAllocateMain.id}">
+							<table class="table table-bordered table-bot" th:object="${ytProjectAllocateVo.ytProjectAllocateMain}">
+								<caption>
+									<strong>生产经营部经理分配修改</strong>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">设计费用（万元）</td>
+										<td><input type="text" class="form-control"
+											id="designCost" name="designCost"
+											th:value="*{designCost}"></td>
+										<td class="active">是否预估</td>
+										<td><select name="isEstimate" class="form-control"
+											th:with="type=${@dict.getType('sys_yes_no')}" >
+												<option value="">-----所有-----</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}" th:selected="*{isEstimate} == ${dict.dictValue}"></option>
+										</select></td>
+										<td class="active">难度系数</td>
+										<td><input type="text" class="form-control" id="remark"
+											name="remark" th:value="*{remark}"></td>
+									</tr>
+									<tr>
+										<td class="active text-center" colspan="6">项目负责人</td>
+									</tr>
+									<tr>
+										<td class="active">项目分管</td>
+										<td colspan="2"><input type="hidden" id="projectManagerId"
+											name="projectManagerId" > <input type="text"
+											class="form-control" id="projectManagerName" name="projectManagerName"
+											onclick="selectUserById('projectManagerId','projectManagerName')" th:value="*{projectManagerName}">
+										</td>
+										<td class="active">主体项目负责人</td>
+										<td colspan="2"><input type="hidden"
+											id="principleLeaderId" name="principleLeaderId" th:value="*{principleLeaderId}"> <input
+											type="text" class="form-control" id="principleLeaderName"
+											name="principleLeaderName"
+											onclick="selectUserById('principleLeaderId','principleLeaderName')" th:value="*{principleLeaderName}"></td>
+									</tr>
+									<tr>
+										<td class="active">主体项目副负责人</td>
+										<td colspan="2"><input type="hidden" id="deputyLeaderId"
+											name="deputyLeaderId" th:value="*{deputyLeaderId}"> <input type="text"
+											class="form-control" id="deputyLeaderName" name="deputyLeaderName" th:value="*{deputyLeaderName}"
+											onclick="selectUserById('deputyLeaderId','deputyLeaderName')"></td>
+										<td class="active">测绘负责人</td>
+										<td colspan="2"><input type="hidden" id="measureLeaderId" th:value="*{measureLeaderId}"
+											name="measureLeaderId"> <input type="text"
+											class="form-control" id="measureLeaderName" name="measureLeaderName"
+											onclick="selectUserById('measureLeaderId','measureLeaderName')" th:value="*{measureLeaderName}"></td>
+									</tr>
+									<tr>
+										<td class="active">勘察负责人</td>
+										<td colspan="2"><input type="hidden" id="surveyLeaderId"
+											name="surveyLeaderId" th:value="*{surveyLeaderId}"> <input type="text" 
+											class="form-control" id="surveyLeaderName" name="surveyLeaderName"
+											onclick="selectUserById('surveyLeaderId','surveyLeaderName')" th:value="*{surveyLeaderName}"></td>
+										<td class="active">其他负责人</td>
+										<td colspan="2"><input type="hidden" id="otherLeaderId" th:value="*{otherLeaderId}"
+											name="otherLeaderId"> <input type="text"
+											class="form-control" id="otherLeaderName" name="otherLeaderName"
+											onclick="selectUserById('otherLeaderId','otherLeaderName')" th:value="*{otherLeaderName}"></td>
+									</tr>
+									<tr>
+										<td class="active text-center" colspan="6">工期 &nbsp; <a
+											class="btn btn-white btn-bitbucket btn-xs" id="editTr"> <i
+												class="glyphicon glyphicon-plus"></i></a></td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<table class="table table-bordered " id="editUsertable" >
+						   <thead>
+						     <tr class="active">
+						      <th>序号</th>
+						      <th>阶段</th>
+						      <th>开始时间</th>
+						      <th>结束时间</th>
+						      <th>操作</th>
+						     </tr>
+						   </thead>
+						   <tbody>
+						     <tr th:each="list : ${ytProjectAllocateVo.ytProjectAllocateDetailList}" class="mainDetail">
+						       <td class="stage"><input type="number"  min="1" max="10" th:value="*{list.num}" class="form-control" name="num" placeholder="输入阶段排序"></td>
+						       <td>
+						           <input type="hidden"  th:value="*{list.id}"  name="id"/>
+						           <select name="projectStage" class="form-control"  th:with="type=${@dict.getType('yt_project_stage')}">
+							             <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:selected="*{list.projectStage} == ${dict.dictValue}"></option>
+						           </select>
+						       </td>
+		                       <td><input type="text" class="form-control time-input-data" th:value="${#dates.format(list.stageStartTime, 'yyyy-MM-dd')}" name="stageStartTime" placeholder="阶段开始时间"></td>
+		                       <td><input type="text" class="form-control time-input-data" name="stageEndTime" th:value="${#dates.format(list.stageEndTime, 'yyyy-MM-dd')}" placeholder="阶段结束时间"></td>
+		                       <td ><a class="delethis">删除</a></td>
+						     </tr>
+						   </tbody>
+						</table>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button class="btn btn-sm btn-info" id="editSaveBtn">确认</button>
+							</div>
+						</div>
+					</div>		
+								
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+	    var prefix = ctx + "yt/ytProjectMain";
+		//删除tr
+		function deleteTr(aObject) {
+        $.modal.confirm("您确定要删除"+aObject.children(".stage").children().val()+"阶段的值吗？",function(){
+        	aObject.remove();
+        });
+        return false; 
+        }
+	// 字段返回数据 
+		function returnSelect(dict){
+			var addSelect='';
+			for(var i=0;i<dict.length;i++){
+				addSelect+='<option value="'+dict[i].dictValue+'">'+dict[i].dictLabel+'</option>';
+			}
+			return addSelect;
+		}
+	 //保存数据
+	   function saveDataTable(){
+		   var obj=$(".mainDetail")
+		   var tableData=[]
+		   
+		   for(var i=0;i<obj.length;i++){
+			   var trData={
+					   'id':'',
+					   'num':'',
+					   'projectStage':'',
+					   'stageStartTime':'',
+					   'stageEndTime':''
+			   }
+			   trData.id=obj.eq(i).children().find("input[name='id']").val();
+			   trData.num=obj.eq(i).children().find("input[name='num']").val();
+			   trData.projectStage=obj.eq(i).children().find("select[name='projectStage']").val();
+			   trData.stageStartTime=obj.eq(i).children().find("input[name='stageStartTime']").val();
+			   trData.stageEndTime=obj.eq(i).children().find("input[name='stageEndTime']").val();			  
+			   tableData.push(trData)
+		   }
+		   return tableData
+	   }
+		/*封装 动态添加tr 保存数据 */
+		function activeAddData(option){
+			$("#"+option.addBtnId).click(function(){
+				var $tr = $('<tr class="mainDetail">'+
+				'<td class="stage"><input type="number"  min="1" max="10" class="form-control" name="num" placeholder="输入阶段排序"></td>'+
+		        '<td ><select name="projectStage" class="form-control">'+returnSelect([[${@dict.getType('yt_project_stage')}]])+'</select></td>'+
+		        '<td><input type="text" class="form-control time-input-data" name="stageStartTime" placeholder="阶段开始时间"></td>'+
+		        '<td><input type="text" class="form-control time-input-data" name="stageEndTime" placeholder="阶段结束时间"></td>'+
+		        '<td class="dele"><a href="">删除</a></td>'+
+		        '</tr>');
+		        var $table = $("#"+option.tableId)
+		        $table.append($tr);
+		        $tr.children('.dele').children().click(function(){
+		              return deleteTr($tr);
+		          });
+		        dataTime()
+			})
+			//点击操作提交
+			$('#'+option.saveBtn).click(function(){
+				var data={
+							'ytProjectAllocateMain':'',
+							'ytProjectAllocateDetailList':[]
+						
+				}
+				data.ytProjectAllocateMain=$('#'+option.form).serializeObject()	
+				data.ytProjectAllocateDetailList=saveDataTable()
+				//console.log(data)
+				var config = {
+						contentType : "application/json;charset=UTF-8",
+						url : option.url,
+						type : "post",
+						data : JSON.stringify(data),
+						beforeSend : function() {
+							$.modal.loading("正在处理中，请稍后...");
+						},
+						success : function(result) {
+							$.operate.successTabCallback(result);
+						}
+					};
+					$.ajax(config)
+
+			})	
+		}
+		
+		
+		
+		//预读函数 
+		$(function(){
+			
+			//添加数据
+			var optionAdd={
+					addBtnId:'addTr',
+					tableId:'usertable',
+					saveBtn:'saveBtn',
+					url:prefix + "/managerAllocate/add",
+					form:'form-ytProjectAllocateMain-add'
+			}
+			
+			 if($('.addAllocate').length > 0){
+				activeAddData(optionAdd)
+			} 
+			//修改数据
+			var optionEdit={
+					addBtnId:'editTr',
+					tableId:'editUsertable',
+					saveBtn:'editSaveBtn',
+					url:prefix + "/managerAllocate/edit",
+					form:'form-ytProjectAllocateMain-edit'
+			}
+			if($('.editAllocate').length > 0){
+				activeAddData(optionEdit)
+			}
+			
+			
+			//删除阶段
+			$('.delethis').click(function(){
+			   $(this).parent().parent('.mainDetail').remove()
+			})
+			
+			
+		})
+		
+		//时间框
+			function dataTime(){
+			if ($(".time-input-data").length > 0) {
+				layui
+						.use(
+								'laydate',
+								function() {
+									var com = layui.laydate;
+									$(".time-input-data")
+											.each(
+													function(
+															index,
+															item) {
+														var time = $(item);
+														// 鎺у埗鎺т欢澶栬
+														var type = time
+																.attr("data-type")
+																|| 'date';
+														// 鎺у埗鍥炴樉鏍煎紡
+														var format = time
+																.attr("data-format")
+																|| 'yyyy-MM-dd';
+														// 鎺у埗鏃ユ湡鎺т欢鎸夐挳
+														var buttons = time
+																.attr("data-btn")
+																|| 'clear|now|confirm', newBtnArr = [];
+														// 鏃ユ湡鎺т欢閫夋嫨瀹屾垚鍚庡洖璋冨鐞�
+														var callback = time
+																.attr("data-callback")
+																|| {};
+														if (buttons) {
+															if (buttons
+																	.indexOf("|") > 0) {
+																var btnArr = buttons
+																		.split("|"), btnLen = btnArr.length;
+																for (var j = 0; j < btnLen; j++) {
+																	if ("clear" === btnArr[j]
+																			|| "now" === btnArr[j]
+																			|| "confirm" === btnArr[j]) {
+																		newBtnArr
+																				.push(btnArr[j]);
+																	}
+																}
+															} else {
+																if ("clear" === buttons
+																		|| "now" === buttons
+																		|| "confirm" === buttons) {
+																	newBtnArr
+																			.push(buttons);
+																}
+															}
+														} else {
+															newBtnArr = [
+																	'clear',
+																	'now',
+																	'confirm' ];
+														}
+														com
+																.render({
+																	elem : item,
+																	theme : 'molv',
+																	trigger : 'click',
+																	type : type,
+																	format : format,
+																	btns : newBtnArr,
+																	done : function(
+																			value,
+																			data) {
+																		if (typeof window[callback] != 'undefined'
+																				&& window[callback] instanceof Function) {
+																			window[callback]
+																					(
+																							value,
+																							data);
+																		}
+																	}
+																});
+													});
+								});
+			}
+			}
+			
+			//结束
+		
+		
+	</script>
+</body>
+</html>

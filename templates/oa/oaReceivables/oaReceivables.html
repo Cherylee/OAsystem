@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('收款申请列表')" />
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" id="CompanyId"
+                                   name="companyId"/> <input type="text" id="CompanyName"
+                                                             onclick="selectDeptTree('CompanyId','CompanyName','0')"
+                                                             placeholder="申请公司"/>
+                        </li>
+
+                        <li>
+                            <input type="text" name="userName" class="form-control" placeholder="申请人"/>
+                        </li>
+                        <li>
+                            <select id="detailFlag" name="detailFlag"
+                                    th:with="type=${@dict.getType('oa_receivable_flag')}">
+                                <option value="">收款类型</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <select id="applyStatus" name="applyStatus"
+                                    th:with="type=${@dict.getType('oa_leave_status')}">
+                                <option value="">状态</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+
+                        <li class="select-time">
+                            <label>收款时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaReceivables:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary btn-edit disabled" onclick="editTabs()"
+               shiro:hasPermission="oa:oaReceivables:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaReceivables:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+            <a class="btn btn-warning" onclick="printing()"><i class="fa fa-download"></i>&nbsp;批量打印</a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaReceivables:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaReceivables:remove')}]];
+    var prefix = ctx + "oa/oaReceivables";
+    var applyState=[[${@dict.getType('oa_leave_status')}]];
+    var detailFlag=[[${@dict.getType('oa_receivable_flag')}]];
+    $(function() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add/"+[[${flag}]],
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            oaInterestDetailUrl:prefix+"/interestDetail/{id}",
+            oaRepaymentDetailUrl:prefix+"/repamentDetail/{id}",
+            modalName: "收款申请",
+            sortName: "createTime",
+            showFooter: true,
+            sortOrder: "desc",
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field : 'id',
+                    title : 'id',
+                    visible: false
+                },
+                {
+                    field : 'code',
+                    title : '编号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editTab(\'' + row.id + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'companyId',
+                    title : '所属公司id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field : 'userName',
+                    title : '申请人',
+                    sortable: true
+                },
+                {
+                    field : 'companyName',
+                    title : '公司',
+                    sortable: true
+                },
+                {
+                    field : 'proposer',
+                    title : '申请人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field : 'deptId',
+                    title : '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field : 'deptName',
+                    title : '申请部门',
+                    sortable: true
+                },
+                {
+                    field : 'status',
+                    title : '状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(applyState, value);
+                    }
+                },
+                {
+                    field : 'applyDate',
+                    title : '申请日期',
+                    sortable: true
+                },
+                {
+                    field : 'money',
+                    title : '收款金额',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            if(value[i].money){
+                                sumBalance += parseFloat(value[i].money);
+                            }
+                        }
+                        return   '合计:'+sumBalance;
+                    }
+                },
+                {
+                    field : 'moneyUpcase',
+                    title : '金额大写',
+                    sortable: true
+                },
+                {
+                    field : 'reason',
+                    title : '收款事由',
+                    sortable: true
+                },
+                {
+                    field : 'receivablesDate',
+                    title : '收款日期',
+                    sortable: true
+                },
+                {
+                    field : 'procInstId',
+                    title : '流程id',
+                    sortable: true
+                },
+
+                {
+                    field : 'remark',
+                    title : '备注',
+                    sortable: true
+                },
+                {
+                    field : 'detailFlag',
+                    title : '收款类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(detailFlag, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        var classN='btn-info'
+                        var text='查看详情'
+                        var edit=''
+                        if(row.detailFlag=='1'){
+                            actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="openInterest(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+                        }else if(row.detailFlag=='2'){
+                            actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="openRepayment(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+                        }
+                        if(row.status=='3'||row.status=='99'){
+                            if (row.allowedEdit==true)
+                            {
+                                edit=editFlag
+                                text='编辑'
+                                classN='btn-success'
+                                if(row.detailFlag=='0'){
+                                    actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+                                }
+
+                            }
+                        }else
+                        {
+
+                            if(row.detailFlag=='0'){
+                                actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+                            }
+
+                        }
+                        if(row.status=='99'&&row.allowedEdit==true&&row.detailFlag=='0'){
+                            // actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+                        }
+                        if(row.status=='0'&&row.allowedEdit==true){
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+    //打开利息详情
+    function openInterest(id){
+        var url = $.table._option.oaInterestDetailUrl.replace("{id}", id);
+        $.modal.openTab("利息详情", url);
+    }
+    //打开收款详情
+    function openRepayment(id){
+        var url = $.table._option.oaRepaymentDetailUrl.replace("{id}", id);
+        $.modal.openTab("收款详情", url);
+    }
+    //回显
+    function submitHandler(){
+        var target =$('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if($.table.selectColumns("id").length >1 ){
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+    //打印
+    function printing() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+        if (target.length == 0) {
+            $.modal.alertWarning("请选择一条记录");
+        } else {
+            var number = 0;
+            var idList = [];
+            for (var i = 0; i < target.length; i++) {
+                if (target[i].status == '2'||target[i].status == '16'){
+                    idList.push(target[i].id);
+                } else {
+                    number = number + 1
+                }
+            }
+            if (number==0){
+                $.modal.openFullS('批量打印', prefix + "/print/" + idList);
+            }else {
+                $.modal.alertWarning("只可以打印已完成和审批通过的单据");
+            }
+        }
+    }
+</script>
+</body>
+</html>

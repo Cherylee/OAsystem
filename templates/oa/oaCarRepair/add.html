@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增车辆维修保养')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaCarRepair-add">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>车辆维修保养</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">申请人</td>
+                                <td>
+                                    <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control"
+                                           type="hidden">
+                                    <input id="proposerId" th:value="${user.userName}" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>归属公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" id="companyName" name="companyName" class="form-control"
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:value="${company.deptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">归属部门</td>
+                                <td>
+                                    <input name="deptId" type="hidden" id="deptId" th:value="${user.deptId}"/>
+                                    <input th:value="${user.dept.deptName}" autocomplete="off"
+                                           class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>车牌号</td>
+                                <td>
+                                    <input id="carNo" name="carNo" class="form-control" type="text" required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">上次维修日期</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="lastRepairDate" name="lastRepairDate" placeholder="上次维修日期"
+                                               autocomplete="off" class="form-control time-input" type="text">
+                                    </div>
+                                </td>
+                                <td class="active">维修地点</td>
+                                <td>
+                                    <input id="repairLocation" name="repairLocation" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>维修类型</td>
+                                <td>
+                                    <select class="form-control" name="repairType"
+                                            th:with="type=${@dict.getType('oa_car_repair_type')}" required="required">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">情况说明</td>
+                                <td>
+                                    <input id="situationDesc" name="situationDesc" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="btn-group-sm" id="toolbar1" role="group">
+                            <a class="btn btn-success" onclick="insertRow()"> <i
+                                    class="fa fa-plus"></i> 添加维修项目
+                            </a> <a class="btn btn-danger multiple" onclick="removeRow('bootstrap-table')"> <i
+                                class="fa fa-remove"></i> 删除选择行
+                        </a> <a class="btn btn-danger" onclick="removeRowAll('bootstrap-table')"> <i
+                                class="fa fa-remove"></i> 删除所有行
+                        </a>
+                        </div>
+                        <div class="fixed-table-container">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript">
+    var prefix = ctx + "oa/oaCarRepair"
+
+    //提交 草稿
+    function saveDraft() {
+        var data = {
+            "oaCarRepair": '',
+            "oaCarRepairDetailList": []
+        }
+        var form_data = $('#form-oaCarRepair-add').serializeObject();
+        data.oaCarRepair = form_data;
+        data.oaCarRepairDetailList = $("#bootstrap-table")
+            .bootstrapTable('getData');
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: ctx + "oa/oaCarRepair/saveDraft",
+            type: "post",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.successTabCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+    function submitHandler() {
+        var data = {
+            "oaCarRepair": '',
+            "oaCarRepairDetailList": []
+        }
+        if ($.validate.form()) {
+            var form_data = $('#form-oaCarRepair-add').serializeObject();
+            data.oaCarRepair = form_data;
+            data.oaCarRepairDetailList = $("#bootstrap-table")
+                .bootstrapTable('getData');
+            var config = {
+                contentType: "application/json;charset=UTF-8",
+                url: ctx + "oa/oaCarRepair/add",
+                type: "post",
+                data: JSON.stringify(data),
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function (result) {
+                    $.operate.successTabCallback(result);
+                }
+            };
+            $.ajax(config)
+        }
+    }
+
+    //维修项目明细
+    $(function () {
+        var options = {
+            //url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "维修项目",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: true,
+            showExport: false,
+            clickToSelect: true,
+            onEditableSave: onEditableSave,
+            columns: [{
+                radio: true
+            }, {
+                field: 'id',
+                title: 'id',
+                visible: false
+            }, {
+                field: 'repairId',
+                title: '主表id',
+                visible: false
+                /* ,
+                                    editable : {
+                                        type : 'text',
+                                        title : '主表id'
+                                    } */
+            }, {
+                field: 'repairItem',
+                title: '维修保养项目',
+                editable: {
+                    type: 'text',
+                    title: '维修保养项目'
+                }
+            }, {
+                field: 'preMoney',
+                title: '预算',
+                editable: {
+                    type: 'text',
+                    title: '预算'
+                }
+            }, {
+                field: 'remark',
+                title: '备注',
+                editable: {
+                    type: 'text',
+                    title: '备注'
+                }
+            }]
+        };
+        $.table.init(options);
+    });
+
+    function onEditableSave(field, row, oldValue, $el) {
+        alert("字段名：" + field + "，当前值：" + row[field] + "，旧值：" + oldValue);
+    }
+
+    /*新增维修项目*/
+    function insertRow() {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var table_row = {
+            id: randomId,
+            repairId: '',
+            repairItem: '',
+            preMoney: '',
+            remark: ''
+        }
+
+        $("#bootstrap-table").bootstrapTable('insertRow', {
+            index: 0, // 你想插入到哪，0表示第一行
+            row: table_row
+        })
+
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id) {
+        var ids = $.map($('#' + id).bootstrapTable('getSelections'),
+            function (row) {
+                return row["id"];
+            });
+        if (ids.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        $("#" + id).bootstrapTable('remove', {
+            field: 'id',
+            values: ids
+        })
+
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $("#" + id).bootstrapTable('removeAll')
+        idxx = 0;
+    }
+</script>
+</body>
+</html>

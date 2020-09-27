@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('银行账户申请审批')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style>
+.add_btn_mt {
+	margin-top: 15px;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaBankAccount-add" th:object="${oaBankAccount}">
+							<table class="table table-bordered table-condensed">
+								<caption class="text-center">
+									<h2>银行账户</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">申请人</td>
+									<td>
+										<input id="id" name="id" th:field="*{id}" type="hidden">
+										<input id="type" name="type" class="form-control" type="hidden" value="0">
+										[[*{userName}]]
+									</td>
+									<td class="active">公司</td>
+									<td>
+										[[*{companyName}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">归属部门</td>
+									<td>
+										[[*{deptName}]]
+									</td>
+									<td class="active">工程名称</td>
+									<td>
+										[[*{projectName}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">账户类型</td>
+									<td>
+										<select name="accountType" class="form-control" th:field="*{accountType}"
+												th:with="type=${@dict.getType('oa_bankAccount_type')}" disabled
+												id="accountType">
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">印鉴保管人</td>
+									<td>
+										[[*{keeper}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">开户所在地</td>
+									<td>
+										[[*{area}]]
+									</td>
+									<td class="active">开户所在银行</td>
+									<td>
+										[[*{bankName}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">开户理由</td>
+									<td>
+										[[*{reason}]]
+									</td>
+									<td class="active">备注</td>
+									<td>
+										[[*{remark}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">账户预留印鉴</td>
+									<td>
+										[[*{reserveSeal}]]
+									</td>
+									<td class="active">项目部联系人</td>
+									<td>
+										[[*{projectDeptLinkman}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">项目部联系电话</td>
+									<td>
+										[[*{projectDeptPhone}]]
+
+									</td>
+									<td class="active">业主是否指定银行</td>
+									<td>
+										<select name="projectDeptAppoint" class="form-control" th:field="*{projectDeptAppoint}"
+												th:with="type=${@dict.getType('sys_yes_no')}" disabled>
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">指定银行联系电话</td>
+									<td>
+										[[*{projectDeptAppointPhone}]]
+									</td>
+									<td class="active">银行账户名称</td>
+									<td>
+										[[*{accountName}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">银行账号</td>
+									<td>
+										[[*{accountNo}]]
+									</td>
+									<td class="active">最迟办结时间</td>
+									<td>
+										[[*{openAccountDate}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">短信通知</td>
+									<td>
+										[[*{smsMessage}]]
+									</td>
+									<td class="active">对账方式</td>
+									<td>
+										<select name="accountCheckingType" class="form-control" th:field="*{accountCheckingType}"
+												th:with="type=${@dict.getType('oa_checking_type')}" disabled>
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">客户经理电话</td>
+									<td>
+										[[*{accountManagerPhone}]]
+
+									</td>
+									<td class="active">申请日期</td>
+									<td>
+										[[${#dates.format(oaBankAccount.applyTime, 'yyyy-MM-dd HH:mm:ss')}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">营业执照取得时间</td>
+									<td colspan="3">
+										[[${#dates.format(oaBankAccount.licenseTime, 'yyyy-MM-dd HH:mm:ss')}]]
+									</td>
+								</tr>
+								<tr>
+									<td class="active">开户材料</td>
+									<td colspan="3">
+										<div class="file-loading">
+											<input id="uploadFileId" type="file" multiple>
+										</div>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+				<button type="button" class="btn btn-sm btn-success"
+				th:onclick="selectUser('','','0',[[${oaBankAccount.id}]],'oa/oaBankAccount/copy','flag')">
+				抄送</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关闭
+				</button>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<th:block th:include="include :: lastNode" />
+	<script th:inline="javascript">
+	    var prefix = ctx + "oa/oaBankAccount";
+		var lastNodeId=[[${oaBankAccount.id}]];
+		var actDefineId=[[${oaBankAccount.actDefineId}]];
+		var lastStatus=[[${oaBankAccount.status}]];
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/190/oa_bank_account/"+[[${oaBankAccount.id}]]);
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/190/oa_bank_account/"+[[${oaBankAccount.id}]]);
+	    }
+	    //返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		//对应的明细信息
+		$(function() {
+    	        var attachmentList = new Array();
+    	        //回显附件
+    	        var config = {
+            	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+            	        type: "post",
+            	        dataType: "json",
+            	        data: {"objId": [[${oaBankAccount.id}]]},
+            	        success: function(result) {
+    				        var imgsUrl = new Array();
+            	        	var attachList = result.data;
+            	        	if(attachList!=null && attachList.length>0){
+            	        		var downloadConfig = new Array();
+            	        		for(var i=0; i<attachList.length; i++){
+            	        			var down = {};
+            	        			var attach = attachList[i];
+		    	        			imgsUrl.push(attach.attachmentUrl);
+            	        			down.key = attach.attachmentName;
+            	        			down.caption = attach.fileName;
+            	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+            	        			if(isAssetTypeAnImage(attach.attachmentName)){
+    		    	        			down.type = 'image';
+    	    	        			}else{
+    	    	        				down.type = 'object';
+    	    	        			}
+            	        			downloadConfig.push(down);
+            	        		}
+            	        		var option1={
+            	    					id:'uploadFileId',
+            	    					uploadUrl:null,
+            	    					deleteUrl:null,
+            	    					imgsUrl:imgsUrl,
+            	    					downloadConfig:downloadConfig
+            	    			}
+            	        		$.common.uploadFile(option1); 
+            	        	}else{
+            	        		 var option2={
+            	    					id:'uploadFileId',
+            	    					uploadUrl:null,
+            	    					deleteUrl:null,
+            	    					deleteExtraData:null,
+            	    					imgsUrl:new Array(),
+            	    					initialPreviewConfig:null
+            	    			}
+            	        		$.common.uploadFile(option2);  
+            	        	}
+    		     			downFile();
+            	        }
+            	    };
+            	    $.ajax(config)
+            
+        });
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaBankAccount.procInstId}]];
+    	data.id = [[${oaBankAccount.id}]];
+		selectActProcessList(data);
+	</script>
+</body>
+</html>

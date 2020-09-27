@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('已开发票')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body class="white-bg">
+<div class="col-md-12">
+    <div class="box-center">
+        <div class="box-center-title ">
+            <div class="arrow arrow-bottom"></div>
+            进项发票<hr style="left: 69px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="inputInvoice" class=" table table-bordered table-bot" ></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title ">
+            <div class="arrow arrow-bottom"></div>
+            销项发票<hr style="left: 69px;">
+        </div>
+        <div class="hide">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <input type="hidden" name="projectId" th:value="${projectId}">
+                                <select id="invoiceType" name="invoiceType" style="width: 100px;" th:with="type=${@dict.getType('sys_pro_invoice_type')}" class="overview-select-input">
+                                    <option value=""  style="display: none;"  disabled  selected>发票类型：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                开票金额
+                                <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                                -
+                                <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                                元
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class=" select-table table-striped ">
+                <table  id="outputBill" class=" table table-bordered table-bot" ></table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/sysProIncomeBill";
+    var updateUrl2=prefix2 + "/edit/{id}"
+    var prefix3 = ctx + "oa/sysProOutputBill";
+    var updateUrl3=prefix3 + "/edit/{id}"
+    var settlementTypes=[[${@dict.getType('sys_pro_settlement_type')}]];
+
+    $(function () {
+        //箭头方向
+        var arrowList = $(".arrow");
+        arrowList.click(function () {
+            var obj=$(this);
+            obj.toggleClass("arrow-top");
+            obj.toggleClass("arrow-bottom");
+            obj.parent().siblings().toggleClass("hide");
+        })
+
+        var inputInvoice = {
+            id:'inputInvoice',
+            url: prefix + "/selectProIncomeBillData",
+            updateUrl: prefix2 + "/edit/{id}",
+            modalName:'进项发票',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter: true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    title : '',
+                    width:'46px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'code',
+                    title: '编号',
+                    align:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editFullSAdd(\'' + row.id + '\',\'' + updateUrl2 + '\')">'+text+'</a>'
+                    }
+
+                },
+                {
+                    field : 'applyDate',
+                    title:'申请日期',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'billType',
+                    title:'发票类型',
+                    align:'center',
+                    sortable: true,
+                    // formatter: function (value, row, index) {
+                    //     return $.table.selectDictLabel(settlementTypes, value);
+                    // }
+                },
+                {
+                    field : 'taxAmount',
+                    title:'税额总计',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].taxAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'invoiceTaxAmount',
+                    title:'价税总计',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiceTaxAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'accountPaid',
+                    title:'已付款',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].accountPaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'effectiveInvoice',
+                    title:'有效发票',
+                    align:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return row.effectiveInvoice+'张'
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].effectiveInvoice);
+                        }
+                        return sumBalance+"张";
+                    }
+                }]
+        };
+
+
+        var outputBill = {
+            id:'outputBill',
+            url: prefix + "/selectProOutputBillData",
+            modalName:'销项发票',
+            showExport: true,
+            showFooter: true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    title : '',
+                    align:'center',
+                    width:'45px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'code',
+                    title: '编号',
+                    align:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editFullSAdd(\'' + row.id + '\',\'' + updateUrl3 + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'applyDate',
+                    title:'申请日期',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'taxAmount',
+                    title:'发票税额',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].taxAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'billAmount',
+                    title:'发票金额',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].billAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : '',
+                    title:'已到账金额',
+                    align:'center',
+                    sortable: true,
+                },
+                {
+                    field : '',
+                    title:'未到账金额',
+                    align:'center',
+                    sortable: true,
+                },
+                {
+                    title:'款已收清',
+                    align:'center',
+                    sortable: true,
+                    // formatter: function (value, row, index) {
+                    //     if (row.notArrivalAmount==0){
+                    //         return  "<i class='fa fa-check' style='color: #00B83F;font-size: 20px'></i>"
+                    //     } else {
+                    //         return  "<i class='fa fa-close' style='color: red;font-size: 20px'></i>"
+                    //     }
+                    // }
+                }]
+        };
+        $.table.init(outputBill);
+
+        $.table.init(inputInvoice);
+    })
+</script>
+</body>
+</html>

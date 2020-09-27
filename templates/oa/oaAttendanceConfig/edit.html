@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改考勤配置')"/>
+    <script src="//api.map.baidu.com/api?v=2.0&ak=rO4GciXQZVXbmFB8okbWGfx10GCZsYPF"></script>
+    <style>
+        .map {
+            position: relative;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        #allmap {
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        form {
+            overflow: hidden;
+        }
+
+        #result {
+            width: 200px;
+            max-height: 390px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            float: left;
+            z-index: 11;
+            overflow: auto;
+            box-shadow: 0 10px 10px #999;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaAttendanceConfig-edit" th:object="${oaAttendanceConfig}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <table class="table table-bordered table-condensed" >
+                            <caption class="text-center">
+                                <h2>考勤配置</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId"/>
+                                    <input type="text" id="companyName" name="companyName" th:field="*{companyName}" class="form-control" onclick="selectDeptTree('companyId','companyName','0')"/>
+                                </td>
+                                <td class="active">部门</td>
+                                <td>
+                                    <input type="hidden" name="deptId" id="treeId"/>
+                                    <input type="text" id="treeName" name="deptName" th:field="*{deptName}" class="form-control" onclick="selectDeptTree('treeId','treeName','1')"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">经度</td>
+                                <td>
+                                    <input id="longitude" name="longitude" th:field="*{longitude}" class="form-control" type="text" placeholder="点击地图即可获取对应的经纬度">
+                                </td>
+                                <td class="active">纬度</td>
+                                <td>
+                                    <input id="latitude" name="latitude" th:field="*{latitude}" class="form-control" type="text" placeholder="点击地图即可获取对应的经纬度">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">打卡点到公司的距离</td>
+                                <td>
+                                    <input id="distance" name="distance" th:field="*{distance}" class="form-control" type="number">
+                                </td>
+                                <td class="active">上班时间</td>
+                                <td>
+                                    <input id="workTime" name="workTime" th:value=" ${#dates.format(oaAttendanceConfig.workTime, 'HH:mm:ss')}" class="form-control time-input"  data-format="HH:mm:ss" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">下班时间</td>
+                                <td>
+                                    <input id="offTime" name="offTime" th:value=" ${#dates.format(oaAttendanceConfig.offTime, 'HH:mm:ss')}" class="form-control time-input" type="text" data-format="HH:mm:ss">
+                                </td>
+                                <td class="active">备注</td>
+                                <td>
+                                    <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 search-collapse">
+        <form id="keywordForm">
+            <div class="select-list">
+                <ul>
+                    <li>
+                        关键词：<input type="text" name="keyword" value="厦门"/>
+                    </li>
+                    <li>
+                        <a class="btn btn-primary btn-rounded btn-sm" onclick="searchText()"><i
+                                class="fa fa-search"></i>&nbsp;搜索</a>
+                    </li>
+                </ul>
+            </div>
+        </form>
+    </div>
+    <div class="map">
+        <div id="result"></div>
+        <div id="allmap"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <br>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+            <br>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript" th:inline="javascript">
+    console.log([[${oaAttendanceConfig}]])
+    var prefix = ctx + "oa/oaAttendanceConfig";
+    $("#form-oaAttendanceConfig-edit").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/edit", $('#form-oaAttendanceConfig-edit').serialize());
+        }
+    }
+    //地图
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");
+    map.centerAndZoom("厦门", 12);
+    map.enableScrollWheelZoom(true);
+    //檢索
+    var local = new BMap.LocalSearch(map, {
+        renderOptions: {map: map, panel: "result"}
+    });
+
+    //单击获取点击的经纬度
+    map.addEventListener("click", function (e) {
+        // alert(e.point.lng + "," + e.point.lat);
+        $('#longitude').val(e.point.lng)
+        $('#latitude').val(e.point.lat)
+    });
+    //搜索关键词
+    searchText()
+
+    function searchText() {
+        var keyword = $("#keywordForm input[name='keyword']").val()
+        local.search(keyword);
+    }
+</script>
+</body>
+</html>

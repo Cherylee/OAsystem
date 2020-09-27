@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('录入委托单')" />
+<style type="text/css">
+/* .wizard-big.wizard > .content{
+	    height: 501px;
+	} */
+.wizard>.content {
+	background: #f8f8f8;
+}
+
+.wizard>.content>.body ul>li {
+	list-style: none;
+}
+
+.gongbox {
+	background: #fff;
+	padding: 20px 0;
+}
+
+.gongboxcontent {
+	margin: 0 auto;
+	float: none;
+}
+
+.info {
+	width: 55%;
+	min-width: 778px;
+}
+
+.moneybox {
+	border-top: 1px solid #e2e2e2;
+	/* overflow: auto; */
+	/* height: 50px; */
+	clear: both;
+	padding-top: 15px;
+	/* padding-bottom: 15px; */
+	height: 60px;
+	/* line-height: 53px; */
+}
+
+.tabs-container .tabs-left>.nav-tabs {
+	width: 10%;
+}
+
+#money span,#moneyHis span{
+	color: blue;
+	font-weight: 600;
+	display:inline;
+	font-size:18px;
+}
+
+.tabs-container .tabs-left .tab-pane .panel-body {
+	margin-left: 10%;
+	width: 90%;
+}
+.tabs-container .tabs-left .panel-body{
+margin-left: 10%;
+}
+.moreinput {
+	width: 95%;
+	float: left;
+	overflow: hidden;
+	background: #FFFFFF none;
+	border: 1px solid #e5e6e7;
+	border-radius: 1px;
+	color: inherit;
+	display: block;
+	/* padding: 6px 12px; */
+	-webkit-transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+	transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+	font-size: 14px;
+	border-bottom: 0px;
+}
+
+.moreinput input {
+	float: left;
+	border: 0px;
+	border-right: 1px solid #ddd;
+}
+
+.morebtn {
+	width: 5%;
+	float: left;
+	text-align: center;
+	font-size: 16px;
+	padding: 6px 0;
+	font-weight: 400;
+	background: #eee;
+	border: 1px solid #ddd;
+	border-left: 0;
+	cursor: pointer;
+	-webkit-transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+	transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+}
+
+.col-sm-8 .form-group1 {
+	margin-bottom: 0px;
+}
+
+.col-sm-8 .form-group1 .col-sm-2 {
+	padding-left: 0 !important;
+	padding-top: 0 !important;
+}
+
+.select-list {
+	padding: 15px 0;
+}
+
+#sampleMain-form {
+	background: #f5f5f59e;
+	overflow: auto;
+	padding: 25px 0 0 0;
+}
+
+.bridgeExpMethodClass>.checkbox {
+	max-height: 200px;
+	overflow: auto;
+	border: 1px solid #eee;
+	padding: 10px 0px 10px 25px;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="row" id="example">
+		<div class="col-sm-12">
+			<div class="ibox tabs-container">
+				<div class="ibox-content tabs-left">
+					<ul class="nav nav-tabs" id="step">
+						<li class="active"><a href="#tab1" data-toggle="tab">委托基本信息</a></li>
+						<li><a href="#tab2" data-toggle="tab">新增委托单</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="tab1">
+							<div class="panel-body">
+								<form id="form" action=""
+									class="wizard-big wizard clearfix form-horizontal m">
+									<div class="info">
+										<div class="row ">
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>分配部门：</label>
+													<div class="col-sm-8">
+														<input type="hidden" name="deptId" id="treeId" /> <input
+															type="text" id="treeName" name="deptName"
+															class="form-control required"
+															onclick="selectDeptTree('treeId','treeName')"
+															aria-required="true" />
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托来源：</label>
+													<div class="col-sm-8">
+														<select id="source" class="form-control" name="source"
+															th:with="type=${@dict.getType('bridge_order_source')}">
+															<option th:each="dict : ${type}"
+																th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+														</select>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>工程项目：</label>
+													<div class="col-sm-8">
+														<input name="projectId" id="projectId" type="hidden" /> <input
+															id="projectIdname" name="projectIdname"
+															class="form-control" type="text"
+															onclick="selectProject('projectId','projectIdname')">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">项目英文简写：</label>
+													<div class="col-sm-8">
+														<input id="probriefCode" name="probriefCode"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">合同：</label>
+													<div class="col-sm-8">
+														<input id="contractId" name="contractId" type="hidden">
+														<input id="contractCode" name="contractCode"
+															class="form-control" type="text"
+															onclick="selectContract('contractId','contractCode')">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托书：</label>
+													<div class="col-sm-8">
+														<!-- <input id="checkItemId" name="checkItemId"
+															class="form-control required" type="text" onclick="selectCheckItem()" aria-required="true"> -->
+														<input type="hidden" name="bookId" id="bookId"> <input
+															id="orderName" class="form-control" type="text"
+															onclick="selectCheckItem('bookId','orderName')">
+													</div>
+												</div>
+											</div>
+											<!-- <div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">检测项目代码：</label>
+													<div class="col-sm-8">
+														<input id="checkItemcode" name="checkItemcode"
+															class="form-control" type="text"
+															aria-required="true" readonly="readonly">
+													</div>
+												</div>
+											</div> -->
+
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-xs-4 control-label">检验类别：</label>
+													<div class="col-xs-8">
+														<select id="checkType" class="form-control"
+															name="checkType"
+															th:with="type=${@dict.getType('bridge_order_checkType')}" >
+															
+															<option th:each="dict : ${type}"
+																th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+														</select>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托单位：</label>
+													<div class="col-sm-8">
+														<input id="clientUnit" name="clientUnit"
+															class="form-control " type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">施工单位：</label>
+													<div class="col-sm-8">
+														<input id="constructionUnit" name="constructionUnit"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">建设单位：</label>
+													<div class="col-sm-8">
+														<input id="constructUnit" name="constructUnit"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">所属区县：</label>
+													<div class="col-sm-8">
+														<input id="region" name="region" class="form-control"
+															type="text">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">邮政编码：</label>
+													<div class="col-sm-8">
+														<input id="zipCode" name="zipCode" class="form-control"
+															type="text">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-12">
+												<div class="form-group">
+													<label class="col-sm-2 control-label">街道门牌号：</label>
+													<div class="col-sm-10">
+														<input id="street" name="street" class="form-control"
+															type="text">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-12">
+												<div class="form-group">
+													<label class="col-sm-2 control-label">详细地址：</label>
+													<div class="col-sm-10">
+														<input id="detailAddr" name="detailAddr"
+															class="form-control" type="text">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托单位电话：</label>
+													<div class="col-sm-8">
+														<input id="clientUnitPhone" name="clientUnitPhone"
+															class="form-control" type="text">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托单位传真：</label>
+													<div class="col-sm-8">
+														<input id="clientUnitFax" name="clientUnitFax"
+															class="form-control" type="text">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-12">
+												<div class="form-group">
+													<label class="col-sm-2 control-label">委托单位邮箱：</label>
+													<div class="col-sm-10">
+														<input id="clientUnitMail" name="clientUnitMail"
+															class="form-control" type="email">
+													</div>
+												</div>
+											</div>
+
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">联系人姓名：</label>
+													<div class="col-sm-8">
+														<input id="contactPersonName" name="contactPersonName"
+															class="form-control" type="text">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">联系人电话：</label>
+													<div class="col-sm-8">
+														<input id="contactPersonPhone" name="contactPersonPhone"
+															class="form-control" type="text">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">见证单位：</label>
+													<div class="col-sm-8">
+														<input id="witnessUnit" name="witnessUnit"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">见证人姓名：</label>
+													<div class="col-sm-8">
+														<input id="witnessPersonName" name="witnessPersonName"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">见证人证号：</label>
+													<div class="col-sm-8">
+														<input id="witnessPersonCode" name="witnessPersonCode"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">取样员姓名：</label>
+													<div class="col-sm-8">
+														<input id="samplingPersonName" name="samplingPersonName"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">取样员证号：</label>
+													<div class="col-sm-8">
+														<input id="samplingPersonCode" name="samplingPersonCode"
+															class="form-control" type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托人：</label>
+													<div class="col-sm-8">
+														<input id="clientName" name="clientName" class="form-control " type="text" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托日期：</label>
+													<div class="col-sm-8">
+														<div class="input-group data">
+															<span class="input-group-addon"><i
+																class="fa fa-calendar"></i></span> <input id="orderDate"
+																name="orderDate"
+																class="form-control required time-input-data currentTime"
+																type="text" aria-required="true">
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-sm-12">
+
+													<div class="form-group">
+														<div class="col-sm-4 col-sm-offset-2">
+															<button class="btn btn-primary" type="button" id="setep">下一步</button>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+
+						<div class="tab-pane" id="tab2">
+							<div class="panel-body">
+								<form class="form-horizontal" id="book-form">
+									<input name="Id" id="bookId_1" type="hidden" /> <input
+										name="orderType" class="orderType" type="hidden" />
+								</form>
+								<form class="form-horizontal" id="sampleMain-form">
+									<input name="orderType" class="orderType" type="hidden" />
+									<div class="sampleMain_content"></div>
+								</form>
+								<div class="col-sm-12">
+									<div class="row">
+										<div class="select-list">
+											<ul>
+												<li>样品数量：<input id="ordernum" aria-required="true"
+													type="number" value="1" min="1" max="10"></li>
+												<li><button class="btn btn-primary" type="button"
+														id="numclick">确定</button>
+											</ul>
+										</div>
+									</div>
+									<div id="result_container"></div>
+									<textarea id="template-items" style="display: none">
+									<ul class="nav nav-tabs" id="deviceulid">									   
+									   {#foreach $T.data as item}
+										<li class="{$T.item.active}"><a href="#{$T.item.tab}"
+												class="" data-toggle="tab">{$T.item.name}</a></li>										
+										{#/for}
+									</ul>
+									<div class="tab-content">									
+									   {#foreach $T.data as item}
+										<div class="tab-pane {$T.item.active}" id="{$T.item.tab}">
+											<form class="form-horizontal m" id="f{$T.item.tab}">
+												<div class="row sampleList">
+													
+												</div>												
+											</form>
+
+										   <form class="form-horizontal m form_exp"
+													id="f_exp{$T.item.tab}">
+										         <h3 class="col-sm-12">试验参数</h3>
+										         <div class="col-sm-8">
+														<div class="form-group">
+															<label class="col-sm-2 control-label">检测依据：</label>
+															<div class="col-sm-10 bridgeExpMethodClass"
+																id="bridgeExpMethodId{$T.item.tab}"></div>
+														</div>
+												</div>
+												<div class="col-sm-8">
+														<div class="form-group">
+															<label class="col-sm-2 control-label">试验参数：</label>
+															<div class="col-sm-10 bridgeExpParamsClass"
+																id="bridgeExpParamsId{$T.item.tab}"></div>
+														</div>
+												</div>
+												<div class="col-sm-8">
+														<div class="form-group">
+															<label class="col-sm-2 control-label">所需仪器设备：</label>
+															<div class="col-sm-10">
+																<div class="">
+																    <div class="">
+																   <table
+																			class="bootstrap-table{$T.item.tab} table addtable  table-bordered">
+																    <tr>
+																      <th>参数</th>
+																      <th>所需仪器</th>
+																    </tr>
+																   
+																   </table>
+																   </div>
+																</div>
+															</div>
+														</div>
+												</div>
+	
+										   </form>
+
+								        </div>
+								        {#/for}
+								</textarea>
+								</div>
+								<div class="moneybox">
+									<div class="col-sm-8">
+
+										<label class="control-label"><strong>总计：</strong></label>
+
+										<div id="money"></div>
+										<div id="moneyHis"></div>
+
+									</div>
+									<div class="col-sm-8">
+										<label class="control-label"><strong>折扣：</strong></label> <input
+											name="discount" id="discount" type="number">
+									</div>
+									<div class="col-sm-8">
+										<label class="control-label"><strong>结算数量：</strong></label> <input
+											name="countNum" id="countNum" type="number">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row btn_ifshow" style="display: none">
+							<div class="col-sm-12">
+								<div class="form-group">
+									<div class="col-sm-4 col-sm-offset-2">
+										<!-- <button class="btn btn-primary" type="button"
+													onclick="accounts()">结算</button> -->
+										<button class="btn btn-primary" type="button"
+											id="submitHandler">确定</button>
+										<button class="btn btn-warning" type="button"
+											id="setSampleData">导入样品数据</button>
+										</li>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+	</div>
+	</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script>
+		var prefix = ctx + "bridge/bridgeOrder";
+
+		//将表单数据序列化为一个json对象，例如 {"name":"zs", "age":10}
+		// 使用：var jsonObj = $("#formId").serializeObject();
+
+		$.fn.serializeObject = function() {
+			var o = {};
+			var a = this.serializeArray();
+
+			$.each(a, function() {
+				if (o[this.name]) {
+					if (!o[this.name].push) {
+						o[this.name] = [ o[this.name] ];
+					}
+					o[this.name].push(this.value || '');
+
+				} else {
+					o[this.name] = this.value || '';
+				}
+			});
+			return o;
+		};
+
+		/* 保存数据 */
+		var data = {
+			"order" : "",
+			"sampleVoList" : [],
+			"project" : "",
+			"sampleMain":'',
+			"book":'',
+			"costVo":''
+		}
+		/* var checkItem = {//检测项目代码
+			'code' : '',
+			'itemId':''
+		} */
+		var project = {//项目英文简写
+			'briefCode' : ''
+		}
+
+		//提交数据
+		function submitHandler(num) {
+
+			data.sampleVoList=[];
+			var form_data = $('#form').serializeObject();//基础信息表单数据序列化
+			var mainsampleForm_data=$('#sampleMain-form').serializeObject();//sampleMain表单数据序列化
+			var bookForm_data=$('#book-form').serializeObject();//sampleMain表单数据序列化
+			data.order = form_data;
+			data.sampleMain = mainsampleForm_data;
+			data.book = bookForm_data;
+			/* data.sampleVoList = $("#" + id).bootstrapTable('getData'); */
+			//checkItem.code = form_data.checkItemcode//检测项目代码幅值
+			//checkItem.itemId = form_data.checkItemId//检测项目ID幅值
+			project.briefCode = form_data.probriefCode//项目英文简写幅值
+			//像样品数组里面添加数据
+			for (var i = 0; i < num; i++) {//通过for循环，找出添加的几个样品信息
+				var id = i + 1;
+				var formdata = {
+					"sample" : "",
+					// "report" : "",
+					"expMethodList" : [],
+					"expParamsList":[]
+				};
+				//获取三个表单对象
+				var orderF=$('#fortab' + id);
+				// var repF = $('#f_reportortab'+id);
+				var expF = $('#f_exportab'+id);
+				//对当前的样品表单进行验证操作以及数据提取
+				var efdata = orderF.serializeObject();//样品表单数据序列
+				$.each(efdata, function (n, value) {
+					   if ($.isArray(value)) {
+						   var att={
+								   'rey':value+''
+						   }
+						   efdata[n]=att.rey
+						}
+				   });
+				formdata.sample = efdata;
+				//当前报告表单数据提取
+				// var repform = repF.serializeObject();//报告表单序列
+				// formdata.report = repform;
+				//当前实验参数表单数据提取以及必填控制
+				var expform = expF.serializeObject();//实验参数表单
+				if(JSON.stringify(expform)==="{}"){
+					$.modal.alertWarning("试验参数必选");
+					return;
+				}
+				if(typeof(expform.pid)=="undefined"){
+					$.modal.alertWarning("试验参数必选");
+					return;
+				}
+				if(typeof(expform.fid)=="undefined"){
+					$.modal.alertWarning("检测依据必选");
+					return;
+				}
+				/* formdata.expMethodList = expform.fid;
+				formdata.expParamsList = expform.pid; */
+				setParams(expform.fid,formdata.expMethodList)
+				setParams(expform.pid,formdata.expParamsList)
+
+
+
+				/* if($.isArray(expform.fid)){
+					for (var s = 0; s < expform.fid.length; s++) {
+						var expdata = {
+								'expMethod' : '',
+								"expParamsList" : []
+							}
+						expdata.expMethod = {
+							'id' : expform.fid[s]
+						};
+						setParams(expdata,expform.pid,formdata);
+					}
+
+				}else{
+					var expdata = {
+							'expMethod' : '',
+							"expParamsList" : []
+					}
+					expdata.expMethod = {"id":expform.fid};
+					setParams(expdata,expform.pid,formdata);
+				}*/
+
+				data.sampleVoList.push(formdata);
+
+			}
+
+			//data.checkItem = checkItem;//检测项目代码添加进data
+			data.project = project;//项目英文简写添加进data
+			//保存结算数据
+			data.costVo=accountsData
+
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/bridgeOrder/add",
+				type : "post",
+				data : JSON.stringify(data),
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.operate.successTabCallback(result);
+				}
+			};
+			$.ajax(config)
+			/*console.log(JSON.stringify(data))*/
+		}
+
+		//点击结算
+		var sampleOrNot=1;
+		var jsonData={
+			"paramsIds" : [],
+			"discount":0,
+			"countNum":1
+		}
+		var accountsData={
+			"countNum":1,
+			"discount":0,
+			"totalAmount":0,
+			"historyTotalAmount":0
+		}
+
+		function accounts(){
+			jsonData={
+				"paramIds" : [],
+				"discount":0,
+				"countNum":1
+			}
+			if($('#discount').val()==''){
+				jsonData.discount=0;
+			}else{
+				jsonData.discount=parseFloat($('#discount').val())
+			}
+			if($('#countNum').val()=='' || $('#countNum').val()=='NaN'){
+				jsonData.countNum=1;
+			}else{
+				jsonData.countNum=parseInt($('#countNum').val())
+			}
+
+			accountsData.discount=jsonData.discount;
+			accountsData.countNum = jsonData.countNum;
+
+			var pidArry=[]
+			for(var i=0;i<num;i++){
+				var id=i+1;
+				var objTable=$('#f_exportab'+id).serializeObject();//实验参数表单
+				var pid=objTable.pid;
+				if(pid){
+
+				if($.isArray(pid)){
+					var ary=[];
+					ary=pid
+					var pidArry1=pidArry.concat(ary)
+					pidArry=pidArry1
+				}else{
+					var ary='';
+					ary=pid
+					pidArry.push(ary)
+				}
+				}
+			}
+			Settlement(pidArry)
+		}
+
+		function Settlement(pidArry){
+
+			if($.isArray(pidArry)){
+				jsonData.paramIds=pidArry
+			}else{
+				jsonData.paramIds.push(pidArry);
+			}
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/bridgeOrder/calAmt",
+				type : "post",
+				data : JSON.stringify(jsonData),
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					var resultMoney=result.data;
+					accountsData.totalAmount=resultMoney.totalAmount.toFixed(4);
+					accountsData.historyTotalAmount=resultMoney.historyTotalAmount.toFixed(4);
+					$('#money').html("19版本收费标准：<span>￥"+resultMoney.totalAmount.toFixed(4)+'</span>元')
+					$('#moneyHis').html("07版本收费标准：<span>￥"+resultMoney.historyTotalAmount.toFixed(4)+'</span>元')
+				}
+			};
+
+			$.ajax(config)
+		}
+
+
+		//设置试验参数
+		function setParams(id,formdata){
+			if($.isArray(id)){
+				for (var h = 0; h < id.length; h++) {
+					var re = {
+						'id' :id[h]
+					}
+					formdata.push(re);
+				}
+			}else{
+				formdata.push({"id":id});
+			}
+
+		}
+
+		/*选择项目工程*/
+		var mid = '';
+		var mname = ''
+		function selectProject(id, name) {
+			mid = id;
+			mname = name;
+			var options = {
+				title : '选择工程项目',
+				width : "1200",
+				url : ctx + "bridge/bridgeOrder/enterOrder",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			/* console.log(result) */
+			$('#' + mname).val(data.name);
+			$('#' + mid).val(data.id);
+			$('#briefCode').val(data.briefCode);
+			$('#clientUnit').val(data.client);
+			$('#probriefCode').val(data.briefCode);
+			$('#constructionUnit').val(data.workingUnit);
+			$('#constructUnit').val(data.constructUnit);
+			$('#clientName').val(data.contactPersonName);
+			$('#witnessUnit').val(data.monitorUnit);
+			$('#witnessPersonName').val(data.witnessPersonName);
+			$('#witnessPersonCode').val(data.witnessPersonCode);
+			$('#samplingPersonName').val(data.samplingPersonName);
+			$('#samplingPersonCode').val(data.samplingPersonCode);
+			$('#contactPersonName').val(data.contactPersonName);
+			$('#contactPersonPhone').val(data.contactPhone);
+
+		}
+
+		//选择部门
+		var divDeptId='';
+		var divDeptName='';
+		function selectDeptTree(id, deptName) {
+			divDeptId = id;
+			divDeptName = deptName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#" + divDeptId).val(body.find('#treeId').val());
+				$("#" + divDeptName).val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+
+		/*选择委托书*/
+		var cid = '';
+		var cname = '';
+		function selectCheckItem(id, name) {
+			cid = id;
+			cname = name;
+			var options = {
+				title : '选择委托书',
+				width : "1200",
+				url : ctx + "bridge/bridgeOrder/bridgeBook",
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerSelect();
+			var data = result;
+			orderType = result.orderType;
+			/* console.log(result);  */
+
+			$('#' + cid).val(data.id);
+			$('#' + cname).val(data.name);
+			$('.orderType').val(data.orderType);
+			$('#bookId_1').val(data.id);
+
+		}
+
+		/*选择合同*/
+		var hid = '';
+		var hname = '';
+		function selectContract(id, name) {
+			hid = id;
+			hname = name;
+			var options = {
+				title : '选择合同',
+				width : "1200",
+				url : ctx + "bridge/bridgeContractInfo",
+				callBack : doSubmit3
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit3(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerSelect();
+			var data = result;
+			$('#' + hid).val(data.id);
+			$('#' + hname).val(data.name);
+		}
+
+		//请求数据，获取实验参数列表
+		function getInstrument(code,checkbox,tableId){
+			var resultdata=null;
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/bridgeMachine/selectMachineParamsByParamsCode/"+code,
+				type : "get",
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					resultdata=result;
+					/* console.log(resultdata) */
+					var html='';
+					var trhtml='';
+					 for(var i=0;i<resultdata.machineList.length;i++){
+						 var rowspannum=result.machineList.length;
+						 if(i==0){
+							 trhtml='<td rowspan="'+resultdata.machineList.length+'">'+resultdata.params.name+'</td><td>'+resultdata.machineList[i].machineName+'</td>';
+						 }else{
+							 trhtml='<td>'+resultdata.machineList[i].machineName+'</td>';
+						 }
+						 html+='<tr class="'+code+'">'+trhtml+'</tr>'
+					 }
+					 tableId.append(html);
+				}
+			};
+			$.ajax(config)
+
+		}
+
+		var orderType = null;
+		//样品个数全局变量
+		var num = 0;
+
+		//预读函数
+		$(function() {
+
+			//先把第二步骤隐藏起来
+			$("#step>li").eq(1).hide();
+			$('.moreinput:last').css('border-bottom','solid 1px #e5e6e7')
+			//设置数据类型
+			var jsondata = {
+				'data' : []
+			};
+			var itemdata = {
+				'itemdata' : []
+			}
+
+
+			//点击下一步的操作
+			$("#form").validate({
+				rules:{
+					contactPersonPhone:{//联系人电话
+						isPhone:true
+					},
+					clientUnitPhone:{
+						isTel:true
+					}
+				},
+				focusCleanup: true
+			});
+			$('#setep').click(function() {
+
+				if ($.validate.form()) {
+					$("#step>li").eq(1).show();
+					$("#step>li").eq(1).children().tab("show");
+					$('a[href="#tab1"]').on('show.bs.tab', function(e) {
+						  e.preventDefault();
+					});
+					$('#numclick').click();
+					//设置样品集合
+					var code=$('#bookId').val();
+					setSampleList(code);
+			   }
+			})
+
+			//确认样品数量，动态生成样品模板
+			$('#numclick').click( function() {
+				//把set_l置零
+				set_l=0
+
+			 	//jsondata.data置空
+				jsondata.data = [];
+				$("#deviceulid>li").eq(0).children().tab("show");
+				$('.btn_ifshow').show();
+				//设置样品集合
+				var code=$('#bookId').val();
+				setSampleList(code);
+				//设置标准集合
+				setMethodList(orderType);
+				//设置试验参数集合
+				setParamsList(orderType);
+				var numg = 0;
+				num = $('#ordernum').val();
+				for (var i = 0; i < num; i++) {
+					var fordata = {
+						'name' : '',
+						'tab' : '',
+						'active' : '',
+					}
+					if (i == 0) {
+						fordata.active = 'active'
+					}
+					numg = i + 1
+					fordata.name = '样品' + numg;
+					fordata.tab = 'ortab' + numg;
+					fordata.itemdata = itemdata
+					jsondata.data.push(fordata);
+
+					// 设置模版
+					$("#result_container").setTemplateElement( "template-items");
+					// 填充数据并展示
+					$("#result_container").processTemplate(jsondata);
+
+				}
+			})
+
+			//点击提交数据
+			$('#submitHandler').click(function() {
+				submitHandler(num);
+			});
+
+			//点击计算金额
+			/* $('#accounts').click(function() {
+				accounts();
+			}); */
+			$('#discount').bind('input propertychange', function() {
+				accounts();
+			});
+			$('#countNum').bind('input propertychange', function() {
+				accounts();
+			});
+
+			//控制折扣输入
+			//敲击按键时触发  
+		    $("#discount").bind("keypress", function(event) {  
+			    var event= event || window.event;  
+			    var getValue = $(this).val();  
+			    //控制第一个不能输入小数点"."  
+			    if (getValue.length == 0 && event.which == 46) {   
+			        event.preventDefault();  
+			        return;  
+			    }  
+			    //控制只能输入一个小数点"."  
+			    if (getValue.indexOf('.') != -1 && event.which == 46) {  
+			        event.preventDefault();   
+			        return;  
+			    }
+			    //控制小数点后只能输入两位数
+			    if(getValue.indexOf('.')!=-1 && getValue.length-getValue.indexOf('.')>4){
+			        event.preventDefault();   
+			        return;  
+			    }
+			    //控制只能输入的值  
+			    if (event.which && (event.which < 48 || event.which > 57) && event.which != 8 && event.which != 46) {  
+			        event.preventDefault();  
+			        return;  
+			    }  
+		    })
+		    //失去焦点是触发  
+			$("#discount").bind("blur", function(event) {
+				var value = $(this).val(), reg = /\.$/;
+				if (reg.test(value)) {
+					value = value.replace(reg, "");
+					$(this).val(value);
+				}
+			})
+
+			//材料合同change事件
+			var so=$("#source").val();
+			if(so==0){
+				$('#contractCode').attr('disabled','disabled');
+			}
+			$('#source').change(function(){
+			 var p1=$(this).children('option:selected').val();//这就是selected的值
+			 if(p1==0){
+				$('#contractCode').attr('disabled','disabled');
+			}else{
+				$('#contractCode').attr("disabled",false);
+			}
+			　　　　　
+			});
+			currentTime()
+		});
+
+
+
+		//设置检测依据
+		function setMethodList(orderType){
+			var config = {
+				contentType : "application/x-www-form-urlencoded",
+				url : ctx + "bridge/bridgeExpMethod/getMethodList",
+				type : "post",
+				data : {"orderType":orderType},
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					/* console.log(result) */
+					$.modal.closeLoading();
+					var html = '<div class="checkbox">';
+					for(var i=0; i<result.length; i++){
+						html += ' <label style="width: 100%;"><input type="checkbox" value="'+result[i].id+'" name="fid">'+result[i].name+result[i].code+'</label>';
+					}
+					html += '</div>';
+					/* $("#bridgeExpMethodIdortab"+id).html(html); */
+					$(".bridgeExpMethodClass").html(html);
+				}
+			};
+			$.ajax(config)
+		}
+
+		//设置参数集合
+		function setParamsList(orderType){
+			var config = {
+				//contentType : "application/json",
+				url : ctx + "bridge/bridgeExpParams/getCheckItemList",
+				type : "post",
+				data : {"orderType":orderType},
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					/* console.log(result) */
+
+					var whtml='<table class="table table-bordered"><div class="ox_checkbox">';
+					for(var a=0;a<result.length;a++){
+						whtml+='<tr><th>'+result[a].itemName+'</th>'
+						var html = '<td><div class="checkbox">';
+						for(var i=0; i<result[a].paramsList.length; i++){
+
+							html += ' <label style="width: 25%;"><input type="checkbox" value="'+result[a].paramsList[i].id+'" name="pid" code="'+result[a].paramsList[i].code+'">'+result[a].paramsList[i].name+'</label>';
+						}
+						whtml += html+ '</div></td></tr>';
+					}
+					whtml += '</div></table>';
+
+					/* $("#bridgeExpParamsIdortab"+id).html(html); */
+					$(".bridgeExpParamsClass").html(whtml);
+					paraClick();
+				}
+			};
+
+			$.ajax(config)
+		}
+		//注册参数点击事件
+		var paraClick=function(){
+			//点击实验参数显示对应的一起列表
+			$('input[name="pid"]').click(function(){
+				var ecode=$(this).attr('code');
+				var checkbox=$(this);
+				var tableId=$(this).parents('.form_exp').find('.addtable');
+				if($(this).prop('checked')){
+					getInstrument(ecode,checkbox,tableId);
+				}else{
+					/*  console.log(tableId.find('.'+ecode)) */
+					tableId.find('.'+ecode).remove();
+				}
+				if(sampleOrNot==0){
+					if($(this).parents('.form_exp').attr('id')=='f_exportab1'){
+						accounts()
+					}
+				}else{
+					accounts()
+				}
+			});
+		}
+		//设置动态样品标签内容
+		var set_l=0;
+
+		function setSampleList(code){
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/fileColumn/getColumns/"+code,
+				type : "get",
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					/* console.log(result) */
+					orderType=result.orderType;
+					var html='';
+					var mainHtml='';//mainsample表单数据html
+					var type='';
+					var sear=new RegExp('id');
+					var para=new RegExp('param');
+					if(result.itemCodeList){
+						var itemCodeHtml = '';
+						for(var i=0;i<result.itemCodeList.length;i++){
+							itemCodeHtml+='<option value="'+result.itemCodeList[i]+'">'+result.itemCodeList[i]+'</option>'
+						}
+						html+=  '<div class="col-sm-4">'+
+								'<div class="form-group">'+
+								'<label class="col-sm-4 control-label">样品类别编码：</label>'+
+								'<div class="col-sm-8">'+
+								'<select class="form-control" name = "itemCode">'+itemCodeHtml+'</select>'+
+								'</div>'+
+								'</div>'+
+								'</div>'
+					}
+
+					html+=  '<div class="col-sm-4">'+
+							'<div class="form-group">'+
+							'<label class="col-sm-4 control-label">是否是样品：</label>'+
+							'<div class="col-sm-8">'+
+							'<select class="form-control" name = "sampleOrNot">' +
+								'<option value = "Y">是</option>' +
+								'<option value = "N">否</option>' +
+							'</select>'+
+							'</div>'+
+							'</div>'+
+							'</div>'
+
+					for(var i=0;i<result.columnList.length;i++){
+						var hidden=''
+						if(sear.test(result.columnList[i].lableName)){
+							　　hidden='hide'
+						　　}
+
+						if(result.columnList[i].dict){
+							 var dicthtml='';
+							 for(var a=0;a<result.columnList[i].dictData.length;a++){
+								 dicthtml+='<option value="'+result.columnList[i].dictData[a].dictValue+'">'+result.columnList[i].dictData[a].dictLabel+'</option>'
+							 }
+
+							 if(para.test(result.columnList[i].name)){
+								　　mainHtml+='<div class="col-sm-4 '+hidden+'">'+
+									'<div class="form-group">'+
+									'<label class="col-sm-4 control-label">'+result.columnList[i].lableName+'：</label>'+
+									'<div class="col-sm-8">'+
+										'<select class="form-control" name="'+result.columnList[i].name+'">'+dicthtml+'</select>'+
+									'</div>'+
+								'</div>'+
+								'</div>'
+							　　} else{
+								html+='<div class="col-sm-4 '+hidden+'">'+
+								'<div class="form-group">'+
+								'<label class="col-sm-4 control-label">'+result.columnList[i].lableName+'：</label>'+
+								'<div class="col-sm-8">'+
+									'<select class="form-control" name="'+result.columnList[i].name+'">'+dicthtml+'</select>'+
+								'</div>'+
+							'</div>'+
+							'</div>'
+							　　}
+
+						}else{
+							var data='';
+							var type='';
+
+							if(result.columnList[i].type=='Date'){
+								data='time-input-data currentTime';
+								type='text';
+							}else if(result.columnList[i].type=='String'){
+								type='text';
+							}else if(result.columnList[i].type=='number'){
+								type='number';
+							}
+
+
+							if(para.test(result.columnList[i].name)){
+								mainHtml+='<div class="col-sm-4 '+hidden+'">'+
+								'<div class="form-group">'+
+									'<label class="col-sm-4 control-label">'+result.columnList[i].lableName+'：</label>'+
+									'<div class="col-sm-8">'+
+										'<input id="'+result.columnList[i].name+'" name="'+result.columnList[i].name+'" class="form-control '+data+'"'+
+												'type="'+type+'">'+
+									'</div>'+
+								'</div>'+
+							'</div>'
+							} else{
+
+								if(result.columnList[i].colNum){
+									var inputHtml='';
+									var inputWith=100/result.columnList[i].colNum;
+									//默认第一个多空格的带上添加按钮
+									var set_h='';
+									if(set_l==0){
+										set_h='<div class="morebtn"> + </div>'
+										set_l=1;
+									}else{
+										set_h='';
+
+									}
+									//吧空格循环出来
+									for(var r=0;r<result.columnList[i].colNum;r++){
+
+										inputHtml+='<input style="width:'+inputWith+'%" name="'+result.columnList[i].name+'" class="form-control '+data+'"'+
+											'type="'+type+'">'
+									}
+
+									html+='<div class="col-sm-8">'+
+										'<div class="form-group form-group1">'+
+									'<label class="col-sm-2 control-label">'+result.columnList[i].lableName+'：</label>'+
+									'<div class="col-sm-10">'+
+									   '<div class="moreinput">'+  inputHtml+ '</div>'+
+									   set_h+
+									'</div>'+
+								'</div>'+
+						'</div>'
+
+								}else{
+									html+='<div class="col-sm-4 '+hidden+'">'+
+									'<div class="form-group">'+
+										'<label class="col-sm-4 control-label">'+result.columnList[i].lableName+'：</label>'+
+										'<div class="col-sm-8">'+
+											'<input id="'+result.columnList[i].name+'" name="'+result.columnList[i].name+'" class="form-control '+data+'"'+
+													'type="'+type+'">'+
+										'</div>'+
+									'</div>'+
+								'</div>'
+								}
+
+							}
+						}
+
+					}
+					$('.sampleList').html(html)
+						/*console.log('1')*/
+
+					$('#sampleMain-form .sampleMain_content').html(mainHtml)
+
+					addClickInput();
+					setValue();
+					dateTime();
+					currentTime();
+					//最后一个多数据输入框border显示、
+					$('.moreinput:last').css('border-bottom','1px solid #e5e6e7')
+					$('#fortab1').find('select[name="sampleOrNot"]').change(function(){
+						if($(this).val()=='N'){
+							sampleOrNot=0;
+						}else {
+							sampleOrNot=1;
+						}
+
+					});
+				}
+			};
+			$.ajax(config)
+		}
+
+		//注册点击添加input
+		function addClickInput(){
+			$('.morebtn').click(function(){
+				var this_p=$(this).parent().parent().parent().parent();
+				var obj=this_p.find('.moreinput')
+
+				obj.each(function (index,item) {
+					var num=$(this).children('input').length;
+					var width=100/(num+1);
+					var name=$(this).children('input').eq(0).attr('name');
+					var type=$(this).children('input').eq(0).attr('type');
+					var classList=$(this).children('input').eq(0).attr('class');
+					var html='<input style="width:'+width+'%" name="'+name+'" class="'+classList+'"'+
+						'type="'+type+'">'
+					$(this).append(html);
+					$(this).children('input').css('width',width+'%')
+					dateTime();
+					currentTime();
+				})
+
+			})
+		}
+
+		//将josn对象赋值给form
+		$.fn.loadData = function (obj) {
+			var key, value, tagName, type, arr;
+			for (var x in obj) {
+				if (obj.hasOwnProperty(x)) {
+					key = x;
+					value = obj[x];
+					var this_=this
+					this.find("[name='" + key + "'],[name='" + key + "[]']").each(function (index,item) {
+						tagName = $(this)[0].tagName.toUpperCase();
+						type = $(this).attr('type');
+
+						if (tagName == 'INPUT') {
+							if (type == 'radio') {
+								if ($(this).val() == value) {
+									$(this).attr('checked', true);
+								}
+							} else if (type == 'checkbox') {
+								arr = value.split(',');
+								for (var i = 0; i < arr.length; i++) {
+									if ($(this).val() == arr[i]) {
+										$(this).attr('checked', true);
+										break;
+									}
+								}
+							} else {
+								if($.isArray(value)){
+									$(this).val('');
+								}else{
+									$(this).val(value);
+								}
+
+							}
+						} else if (tagName == 'SELECT' || tagName == 'TEXTAREA') {
+							$(this).val(value);
+						}
+					});
+				}
+			}
+		}
+		//吧样品1的数据带过去样品2
+		var setValue=function(){
+			$('#setSampleData').click(function(){
+				var index=$('#deviceulid>li').length;
+				/* console.log(index) */
+				var fdata=$('#ortab1 form#fortab1').serializeObject();
+				for(var i=1;i<index;i++){
+					var id=i+1;
+					$('form#fortab'+id).loadData(fdata)
+				}
+
+			})
+
+		}
+		function currentDate(obj){
+				var myDate = new Date;
+				var year = myDate.getFullYear(); //获取当前年
+				var mon = myDate.getMonth() + 1; //获取当前月
+				var date = myDate.getDate(); //获取当前日
+				// var h = myDate.getHours();//获取当前小时数(0-23)
+				// var m = myDate.getMinutes();//获取当前分钟数(0-59)
+				// var s = myDate.getSeconds();//获取当前秒
+				/* var week = myDate.getDay();
+				var weeks = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]; */
+			   /*  console.log(year + "-" + mon + "-" + date) */
+				obj.val(year + "-" + mon + "-" + date);
+		}
+		var currentTime=function(){
+			if($('.currentTime').length<=0){
+				$(".currentTime").each(function (index, item) {
+					var thisObj=$(item);
+					currentDate(thisObj)
+				})
+			}
+		}
+
+		var dateTime=function(){
+			//laydate time-input-data 鏃堕棿鎺т欢缁戝畾
+			//laydate time-input-data 鏃堕棿鎺т欢缁戝畾
+			if ($(".time-input-data").length > 0) {
+				layui.use('laydate',function() {
+					var com = layui.laydate;
+					$(".time-input-data").each(
+						function(index,item) {
+							var time = $(item);
+							// 鎺у埗鎺т欢澶栬
+							var type = time.attr("data-type") || 'date';
+							// 鎺у埗鍥炴樉鏍煎紡
+							var format = time.attr("data-format") || 'yyyy-MM-dd';
+							// 鎺у埗鏃ユ湡鎺т欢鎸夐挳
+							var buttons = time.attr("data-btn") || 'clear|now|confirm', newBtnArr = [];
+							// 鏃ユ湡鎺т欢閫夋嫨瀹屾垚鍚庡洖璋冨鐞�
+							var callback = time.attr("data-callback") || {};
+							if (buttons) {
+								if (buttons.indexOf("|") > 0) {
+									var btnArr = buttons.split("|"), btnLen = btnArr.length;
+									for (var j = 0; j < btnLen; j++) {
+										if ("clear" === btnArr[j]
+												|| "now" === btnArr[j]
+												|| "confirm" === btnArr[j]) {
+											newBtnArr.push(btnArr[j]);
+										}
+									}
+								} else {
+									if ("clear" === buttons
+											|| "now" === buttons
+											|| "confirm" === buttons) {
+										newBtnArr.push(buttons);
+									}
+								}
+							} else {
+								newBtnArr = [
+									'clear',
+									'now',
+									'confirm'
+								];
+							}
+							com.render({
+								elem : item,
+								theme : 'molv',
+								trigger : 'click',
+								type : type,
+								format : format,
+								btns : newBtnArr,
+								done : function(value,data) {
+									if (typeof window[callback] != 'undefined'
+											&& window[callback] instanceof Function) {
+										window[callback]
+										(
+											value,
+											data
+										);
+									}
+								}
+							});
+						});
+				});
+			}
+		}
+	</script>
+
+</body>
+</html>

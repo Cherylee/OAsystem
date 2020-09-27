@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: header('新增请假申请')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaLeave-add">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>请假申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人</td>
+                                <td>
+                                    <input name="proposer" type="hidden" id="proposer" th:value="${user.userId}"/>
+                                    <input th:value="${user.userName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" name="companyName" id="companyName" class="form-control" readonly
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:value="${company.deptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>归属部门</td>
+                                <td>
+                                    <input id="treeId" name="deptId" class="form-control" type="hidden"
+                                           th:value="${user.dept.deptId}">
+                                    <input id="treeName" name="deptName" class="form-control" readonly
+                                           type="text" onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:value="${user.dept.deptName}">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>职务代理人</td>
+                                <td>
+                                    <input type="hidden" name="deputy" id="deputy">
+                                    <input id="deputyName" name="deputyName" class="form-control" type="text"
+                                           onclick="selectUserById('deputy','deputyName')">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>请假开始时间</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="applyTimeFrom" name="applyTimeFrom" placeholder="请假开始时间"
+                                               class="form-control time-input"
+                                               type="text" required="required" data-callback="limitTime" data-mark="0">
+                                    </div>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>请假结束时间</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="applyTimeTo" name="applyTimeTo" placeholder="请假结束时间"
+                                               class="form-control time-input"
+                                               type="text" required="required" data-callback="limitTime" data-mark="1">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>请假时数</td>
+                                <td>
+                                    <input id="leaveDays" name="leaveDays" class="form-control" type="text"
+                                           required="required" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>请假类别</td>
+                                <td>
+                                    <select name="leaveType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_leave_type')}" required="required">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">剩余年假</td>
+                                <td>
+                                    <input id="yearHoliday" name="yearHoliday" th:value="${user.yearHoliday}"
+                                           class="form-control" type="text" readonly>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>请假原因</td>
+                                <td>
+                                    <input id="leaveReason" name="leaveReason" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript">
+    var prefix = ctx + "oa/oaLeave"
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/add", $('#form-oaLeave-add')
+                .serialize());
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        $.operate.saveTab(prefix + "/saveDraft", $('#form-oaLeave-add')
+            .serialize());
+    }
+
+    var data = {};
+
+    function limitTime(value, dataT, mark) {
+        if (mark == '0') {
+            data.startTime = value
+        } else {
+            data.endTime = value
+        }
+        if (data.startTime != '' && data.endTime != ''
+            && data.startTime != undefined && data.endTime != undefined) {
+            var config = {
+                contentType: "application/json;charset=UTF-8",
+                url: prefix + "/calculateHour",
+                type: "post",
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (result) {
+                    if (result.retCode != '200') {
+                        $("#leaveDays").val('');
+                        $.modal.alertWarning(result.msg);
+                    } else {
+                        $("#leaveDays").val(result.hours);
+                    }
+                }
+            };
+            $.ajax(config)
+        }
+    }
+</script>
+</body>
+</html>

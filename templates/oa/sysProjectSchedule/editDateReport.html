@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:include="include :: header('项目日报')" />
+<th:block th:include="include :: sysProCss" />
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .textarea-style{
+            min-height: 80px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-dateReport-edit" th:object="${dailyData}">
+        <input type="hidden" name="date" th:value="${#dates.format(dailyData.date, 'yyyy-MM-dd')}">
+        <input type="hidden" name="projectId" th:value="${dailyData.projectId}">
+        <input type="hidden" name="id" th:value="${id}">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">当日工作完成情况：</label>
+                    <div class="col-sm-8">
+                        <textarea name="complete" class="col-md-12 textarea-style" >[[${dailyData.complete}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">今日施工情况：</label>
+                    <div class="col-sm-8">
+                        <textarea name="performance" class="col-md-12 textarea-style" >[[${dailyData.performance}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">明日施工安排：</label>
+                    <div class="col-sm-8">
+                        <textarea name="plan" class="col-md-12 textarea-style" >[[${dailyData.plan}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">机械设备材料班组进退场情况：</label>
+                    <div class="col-sm-8">
+                        <textarea name="intoExitConditions" class="col-md-12 textarea-style" >[[${dailyData.intoExitConditions}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">现场存在需协调解决问题：</label>
+                    <div class="col-sm-8">
+                        <textarea name="question" class="col-md-12 textarea-style" >[[${dailyData.question}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">会议纪要：</label>
+                    <div class="col-sm-8">
+                        <textarea name="meetingSummary" class="col-md-12 textarea-style" >[[${dailyData.meetingSummary}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">附件：</label>
+                    <div class="col-sm-8" id="file">
+                        <div class="file-loading">
+                            <input id="uploadFileId" type="file" multiple>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <div class="btn-group-sm" id="toolbar-progresses" role="group">
+        <br>
+        <a class="btn btn-success" id="addCompletes" > <i class="fa fa-plus"></i>
+            添加当日工作完成情况
+        </a>
+    </div>
+    <div class=" select-table table-striped">
+        <table class="table table-bordered table-bot" id="completes">
+
+        </table>
+    </div>
+    <div class="btn-group-sm" id="toolbar-personnels" role="group">
+        <br>
+        <a class="btn btn-success" id="addPersonnels" > <i class="fa fa-plus"></i>
+            添加现场人员统计
+        </a>
+    </div>
+    <div class=" select-table table-striped">
+        <table class="table table-bordered table-bot" id="personnels">
+
+        </table>
+    </div>
+</div>
+<!--添加当日工作完成情况弹出框-->
+<div class="modal inmodal fade" id="popup-Completes" role="dialog" aria-hidden="true">
+    <input id="completesValue" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-completes-add">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">施工项目：</label>
+                                <div class="col-sm-9">
+                                    <input name="project" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">单位：</label>
+                                <div class="col-sm-9">
+                                    <input name="unit" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">合同量：</label>
+                                <div class="col-sm-9">
+                                    <input name="contractedQuantity" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">当日计划工程量：</label>
+                                <div class="col-sm-9">
+                                    <input name="projectPlan" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">当日实际工程量：</label>
+                                <div class="col-sm-9">
+                                    <input name="projectReality" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">累计完成工程量：</label>
+                                <div class="col-sm-9">
+                                    <input name="completion" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">施工部位：</label>
+                                <div class="col-sm-9">
+                                    <input name="constructionSite" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">投入机械设备、材料、人员：</label>
+                                <div class="col-sm-9">
+                                    <input name="putInto" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="insertCompletes">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--添加现场人员统计弹出框-->
+<div class="modal inmodal fade" id="popup-Personnels" role="dialog" aria-hidden="true">
+    <input id="personnelsValue" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-personnels-add">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">项目部/班部：</label>
+                                <div class="col-sm-10">
+                                    <input name="projectDepartment" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">进场人数：</label>
+                                <div class="col-sm-10">
+                                    <input name="enterNumber" class="form-control" type="number" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">备注：</label>
+                                <div class="col-sm-10">
+                                    <input name="remark" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="insertPersonnels">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: jquery-cxselect-js"/>
+<th:block th:include="include :: bootstrap-fileinput-css"/>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProjectDailyPlan";
+    console.log([[${dailyData}]]);
+
+    $("#form-dateReport-edit").validate({
+        rules:{
+            xxxx:{
+                required:true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            var data = $('#form-dateReport-edit').serializeObject();
+            data.completes = $('#completes').bootstrapTable('getData');
+            data.personnels = $('#personnels').bootstrapTable('getData');
+            data.attachmentList=attachmentList;
+            interfaces(prefix + "/edit", data);
+        }
+    }
+
+    //保存修改接口   刷新iframe
+    function interfaces(url, data) {
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: url,
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.saveSuccess(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+
+    var attachmentList = new Array();
+    $(function () {
+        //图片反显出来
+        var config = {
+            url: ctx+"oa/oaAttachment/selectAttach",
+            type: "post",
+            dataType: "json",
+            data: {"objectId": [[${dailyData.id}]]},
+            success: function(result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if(attachList!=null && attachList.length>0){
+                    var downloadConfig = new Array();
+                    for(var i=0; i<attachList.length; i++){
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if(isAssetTypeAnImage(attach.attachmentName)){
+                            down.type = 'image';
+                        }else{
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({"objectId":[[${dailyData.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+                    }
+                    var option1={
+                        id:'uploadFileId',
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl:imgsUrl,
+                        downloadConfig:downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                }else{
+                    var option2={
+                        id:'uploadFileId',
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        deleteExtraData:null,
+                        imgsUrl:new Array(),
+                        initialPreviewConfig:null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    });
+
+    $(function () {
+        //当日完成工程量
+        var options = {
+            id: 'completes',
+            url:ctx + 'oa/sysProjectDailyComplete/list',
+            showSearch: false,
+            showRefresh: false,
+            showColumns: false,
+            showToggle: false,
+            showExport: false,
+            uniqueId: 'id',
+            sortOrder:'desc',
+            queryParams: {"dailyId": [[${dailyData.id}]]},
+            columns: [
+                [
+                    {
+                        title: '序号',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        formatter: function (value, row, index) {
+                            return parseInt(index)+1
+                        }
+                    },
+                    {
+                        field: 'project',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        title: '施工项目',
+
+                    },
+                    {
+                        field: 'unit',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        title: '单位'
+                    },
+                    {
+                        field: 'contractedQuantity',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        title: '合同量'
+                    },
+                    {
+                        title: '当日完成量',
+                        colspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        align: 'center',
+                    },
+                    {
+                        field: 'completion',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        title: '累计完成工程量'
+                    },
+                    {
+                        field: 'constructionSite',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        title: '施工部位'
+                    },
+                    {
+                        field: 'putInto',
+                        rowspan: 2,
+                        halign: "center",
+                        valign: 'middle',
+                        title: '投入机械设备、材料、人员'
+                    },
+                    {
+                        title: '操作',
+                        width: '10%',
+                        halign: "center",
+                        valign: 'middle',
+                        rowspan: 2,
+                        formatter: function (value, row, index) {
+                            var action = [];
+                            action.push('<a onclick="removeRow(\'completes\',\'' + row.id + '\')">删除</a>  ');
+                            action.push('<a onclick="editRow(\'completes\',\'' + row.id + '\',\'' + index + '\')">编辑</a>');
+                            return action.join('')
+                        }
+                    }
+                ],
+                [
+                    {
+                        field: 'projectPlan',
+                        title: '计划',
+                        halign: "center",
+                    },
+                    {
+                        field: 'projectReality',
+                        title: '实际',
+                        halign: "center",
+                    },
+                ]
+            ]
+        };
+        $.table.init(options);
+
+        //添加当日工作完成情况弹窗
+        $('#addCompletes').click(function () {
+            $.form.reset('form-completes-add');//清空原有数据
+            $('#popup-Completes').modal('show');
+            $('#completesValue').val('00');
+        });
+
+        $('#insertCompletes').click(function () {
+            var indexV = $('#completesValue').val();
+            var formData = $('#form-completes-add').serializeObject();
+            if (indexV == '00') {
+                insertRow(formData, 'completes', null);
+            } else {
+                insertRow(formData, 'completes', indexV);
+            }
+        });
+
+
+
+
+        //现场人员统计
+        var options2 = {
+            id: 'personnels',
+            url:ctx + 'oa/sysProjectDailyPersonnel/list',
+            showSearch: false,
+            showRefresh: false,
+            showColumns: false,
+            showToggle: false,
+            showExport: false,
+            showFooter: true,
+            uniqueId: 'id',
+            sortOrder:'desc',
+            queryParams: {"dailyId": [[${dailyData.id}]]},
+            columns: [
+
+                {
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return parseInt(index)+1
+                    }
+                },
+                {
+                    field: 'projectDepartment',
+                    title: '项目部/班组',
+
+                },
+                {
+                    field: 'enterNumber',
+                    title: '进场人数',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseInt(value[i].enterNumber);
+                        }
+                        return "合计：" + sumBalance;
+                    }
+                },
+                {
+                    field: 'remark',
+                    title: '备注'
+                },
+                {
+                    title: '操作',
+                    width: '10%',
+                    formatter: function (value, row, index) {
+                        var action = [];
+                        action.push('<a onclick="removeRow(\'personnels\',\'' + row.id + '\')">删除</a>  ');
+                        action.push('<a onclick="editRow(\'personnels\',\'' + row.id + '\',\'' + index + '\')">编辑</a>');
+                        return action.join('')
+                    }
+                }]
+        };
+        $.table.init(options2);
+
+        //添加当日工作完成情况弹窗
+        $('#addPersonnels').click(function () {
+            $.form.reset('form-personnels-add');//清空原有数据
+            $('#popup-Personnels').modal('show');
+            $('#personnelsValue').val('00');
+            console.log($('#personnelsValue').val());
+        });
+
+        $('#insertPersonnels').click(function () {
+            var indexV = $('#personnelsValue').val();
+            var formData = $('#form-personnels-add').serializeObject();
+            console.log(indexV);
+            if (indexV == '00') {
+                insertRow(formData, 'personnels', null);
+            } else {
+                insertRow(formData, 'personnels', indexV);
+            }
+        });
+    })
+
+    /*新增行*/
+    function insertRow(data, id, editId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var countDate = $("#" + id).bootstrapTable('getData');
+        var table_row = '';
+        table_row = data
+        table_row.id = randomId
+        if (editId != null) {
+            table_row.id = randomId;
+            $("#" + id).bootstrapTable('updateRow', {
+                index: editId, // 你想修改哪行，0表示第一行
+                row: table_row
+            })
+
+        } else {
+            table_row.id = randomId;
+            $("#" + id).bootstrapTable('insertRow', {
+                index: countDate.length, // 你想插入到哪，0表示第一行
+                row: table_row
+            })
+        }
+    }
+    //判断是否已经添加
+    function isHas(data, id) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id == id) {
+                isTF = true;
+            }
+        }
+        return isTF;
+    }
+
+    //修改行
+    function editRow(id, rowId, rowIndex) {
+        var da = $('#' + id).bootstrapTable('getRowByUniqueId', rowId);
+        if (id=='personnels') {
+            $('#personnelsValue').val(rowIndex);
+            $('#popup-Personnels').modal('show');
+            $('#form-personnels-add').loadData(da);
+        }else {
+            $('#completesValue').val(rowIndex);
+            $('#popup-Completes').modal('show');
+            $('#form-Completes-add').loadData(da);
+        }
+
+
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id, rowId) {
+        $.modal.confirm("确定删除该行数据吗?", function() {
+            $("#" + id).bootstrapTable('removeByUniqueId', rowId);
+        });
+    }
+
+</script>
+</body>
+</html>

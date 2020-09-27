@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增借印申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <style>
+        table td {
+            position: relative
+        }
+
+        .deleteProject {
+            width: 50px;
+            height: 32px;
+            line-height: 33px;
+            background-color: #ed5565;
+            text-align: center;
+            border-radius: 3px;
+            color: white;
+            font-size: 15px;
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            box-shadow: 1px 1px 3px #888888;
+            z-index: 5;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaSealBorrow-add">
+                        <table class="table table-bordered table-condensed"
+                               style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>新增借印申请</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>
+                                    <input name="proposer" id="proposer" class="form-control" type="hidden"
+                                           th:value="${user.userId}"/>
+                                    <input name="proposerName" id="proposerName" class="form-control" type="text"
+                                           readonly th:value="${user.userName}"/>
+                                </td>
+                                <td class="active">申请公司：</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" name="companyName" id="companyName" class="form-control" readonly
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:value="${company.deptName}"/>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td>
+                                    <input id="deptId" name="deptId" class="form-control" type="hidden"
+                                           th:value="${user.dept.deptId}">
+                                    <input id="deptName" name="deptName" class="form-control" readonly
+                                           type="text" onclick="selectDeptTree('deptId','deptName','1')"
+                                           th:value="${user.dept.deptName}">
+                                </td>
+                                <td class="active">申请日期：</td>
+                                <td>
+                                    <input id="applyDate" name="applyDate" class="form-control currentTime time-input"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">归还日期：</td>
+                                <td>
+                                    <input id="returnDate" name="returnDate" class="form-control currentTime time-input"
+                                           type="text">
+                                </td>
+                                <td class="active">借印事由：</td>
+                                <td>
+                                    <input id="reason" name="reason" class="form-control" type="text">
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">借印数量：</td>
+                                <td>
+                                    <input id="borrowCount" name="borrowCount" class="form-control" type="text">
+                                </td>
+                                <td class="active">还印数量：</td>
+                                <td>
+                                    <input id="returnCount" name="returnCount" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注：</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <!-- 添加印章 -->
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="btn-group-sm" id="toolbar1" role="group">
+                            <a class="btn btn-warning" data-toggle="modal" onclick="addDetail()"> <i
+                                    class="fa fa-plus"></i> 添加印章明细 </a>
+                            <a class="btn btn-danger" onclick="removeRowAll('detailTable')"><i class="fa fa-remove"></i>
+                                删除所有行</a>
+                        </div>
+                        <div class="fixed-table-container">
+                            <table id="detailTable" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaSealBorrow"
+    var datas = [[${@dict.getType('oa_seal_type')}]];
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+
+    //提交
+    function submitHandler() {
+        var data = {}
+        var dataForm = $('#form-oaSealBorrow-add').serializeObject();
+        data.oaSealBorrow = dataForm;
+        data.attachmentList = attachmentList;
+        data.detailList = $('#detailTable').bootstrapTable('getData');
+        console.log(data)
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = {}
+        var dataForm = $('#form-oaSealBorrow-add').serializeObject();
+        data.oaSealBorrow = dataForm;
+        data.attachmentList = attachmentList;
+        data.detailList = $('#detailTable').bootstrapTable('getData');
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+
+    }
+
+    //关联印章
+    function addDetail() {
+        var options = {
+            title: '选择印章',
+            width: "1200",
+            url: ctx + "oa/oaSeal",
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler2();
+        var data = result;
+        console.log(data)
+
+        for (var i = 0; i < data.length; i++) {
+            var formData = {};
+            if (data[i].status == 0 && data[i].inCompany == 'Y' && data[i].canAppoint == 'Y') {
+                var randomId = 100 + ~~(Math.random() * 100);
+                formData.id = randomId;
+                formData['sealId'] = data[i].id;
+                formData['sealName'] = data[i].sealName;
+                formData['type'] = data[i].type;
+                $("#detailTable").bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: formData
+                })
+            } else {
+                if (data[i].inCompany == 'N' && data[i].canAppoint == 'N') {
+                    $.modal.alertWarning("你选择的印章中不在公司！");
+                } else {
+                    $.modal.alertWarning(data[i].sealName + "未归还，无法借出！");
+                }
+            }
+
+        }
+    }
+
+    var options1 = {
+        id: 'detailTable',
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'id',
+        modalName: "明细",
+        showExport: false,
+        clickToSelect: true,
+        columns: [
+            {
+                field: 'sealId',
+                title: 'sealId',
+                visible: false
+            },
+            {
+                field: 'sealName',
+                title: '印章名称'
+            },
+            {
+                field: 'type',
+                title: '印章类型',
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(datas, value);
+                }
+            },
+            {
+                title: '操作',
+                formatter: function (value, row, index) {
+                    return '<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a> '
+                }
+            }]
+
+    };
+    $(function () {
+        $.table.init(options1);
+    });
+
+    /* 删除指定表格行 */
+    function removeRow(id, rowId) {
+        $.modal.confirm("确定删除该行数据吗?", function () {
+            $("#" + id).bootstrapTable('removeByUniqueId', rowId);
+        });
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $.modal.confirm("确定删除所有行吗?", function () {
+            $("#" + id).bootstrapTable('removeAll');
+        });
+    }
+</script>
+</body>
+</html>

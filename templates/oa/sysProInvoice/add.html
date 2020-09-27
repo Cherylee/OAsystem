@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增销项发票')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProInvoice-add">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>销项发票</h2>
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        <td class="active">申请人：</td>
+                                        <td>
+                                            <input id="proposerId" name="proposerId" th:value="${user.userId}" class="form-control" type="hidden">
+                                            <input class="form-control"  type="text" readonly th:value="${user.userName}"/>
+                                        </td>
+                                        <td class="active">所属公司：</td>
+                                        <td>
+                                            <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                            <input type="text" name="companyName" id="companyName" class="form-control" readonly
+                                                   onclick="selectDeptTree('companyId','companyName','0')" th:value="${company.deptName}"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请部门：</td>
+                                        <td>
+                                            <input id="treeId" name="deptId" class="form-control" type="hidden" th:value="${user.dept.deptId}">
+                                            <input id="treeName" name="deptName" class="form-control" readonly
+                                                   type="text" onclick="selectDeptTree('treeId','treeName','1')" th:value="${user.dept.deptName}">
+                                        </td>
+                                        <td class="active"><span style="color: red;" th:if="${flag=='sys'}">*</span>工程名称：</td>
+                                        <td>
+                                            <input id="projectId" name="projectId" type="hidden" />
+                                            <input id="projectName" name="projectName" class="form-control" type="text" onclick="selectPro()">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请日期：</td>
+                                        <td>
+                                            <div class="input-group data">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <input id="applyDate" name="applyDate" class="form-control time-input-data currentDate" type="text" >
+                                            </div>
+                                        </td>
+                                        <td class="active">工程地点：</td>
+                                        <td>
+                                            <input id="projectLoc" name="projectLoc" class="form-control" type="text" placeholder="XXX省 XXX市 XXX区">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">业主单位：</td>
+                                        <td>
+                                            <input id="constructUnit" name="constructUnit" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">开票类型：</td>
+                                        <td>
+                                            <select id="billType" name="billType" class="form-control" th:with="type=${@dict.getType('sys_pro_invoice_type')}">-->
+                                                <option value="">------所有------</option>
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">开票金额（含税）：</td>
+                                        <td>
+                                            <input id="billAmount" name="billAmount" class="form-control" type="text">                                        </td>
+                                        <td class="active">税率：</td>
+                                        <td>
+                                            <input id="taxRate" name="taxRate" class="form-control" type="text" placeholder="例如：9%">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">不含税开票金额：</td>
+                                        <td>
+                                            <input id="invoiceTaxAmount" name="invoiceTaxAmount" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">税额：</td>
+                                        <td>
+                                            <input id="taxAmount" name="taxAmount" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">开票信息：</td>
+                                        <td>
+                                            <table class="receiveWay-1" style="width: 100%">
+                                                <tr>
+                                                    <td class="active">开票公司名称:</td>
+                                                    <td>
+                                                        <input id="billCompanyName" name="billCompanyName" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">纳税人识别号:</td>
+                                                    <td>
+                                                        <input id="taxpayerId" name="taxpayerId" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">地址:</td>
+                                                    <td>
+                                                        <input id="billLoc" name="billLoc" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">电话:</td>
+                                                    <td>
+                                                        <input id="billPhone" name="billPhone" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">开户行:</td>
+                                                    <td>
+                                                        <input id="bankName" name="bankName" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">银行账号:</td>
+                                                    <td>
+                                                        <input id="bankAccount" name="bankAccount" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td class="active">发票领取方式：</td>
+                                        <td>
+                                            <select id="invoiceTakeWay" name="invoiceTakeWay" class="form-control" th:with="type=${@dict.getType('sys_pro_cross_receiveWay')}">-->
+                                                <option value="">------所有------</option>
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                            <table class="hidden invoiceTakeWay-1" style="width: 100%">
+                                                <tr>
+                                                    <td class="active">收件人：</td>
+                                                    <td>
+                                                        <input id="receiver" name="receiver" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">地址：</td>
+                                                    <td>
+                                                        <input id="sendLoc" name="sendLoc" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">电话：</td>
+                                                    <td>
+                                                        <input id="sendPhone" name="sendPhone" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">付款方式：</td>
+                                                    <td>
+                                                        <select id="freight" name="freight" class="form-control" th:with="type=${@dict.getType('sys_pro_cross_payType')}">
+                                                            <option value="">------所有------</option>
+                                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">备注：</td>
+                                        <td colspan="3">
+                                            <input id="remark" name="remark" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="btn-group-sm" id="toolbar-detail" role="group">
+                            <br>
+                            <a class="btn btn-success" id="addCon" > <i class="fa fa-plus"></i>
+                                缴税记录
+                            </a>
+                        </div>
+                        <div class=" select-table table-striped">
+                            <table class="table table-bordered table-bot" id="detail">
+
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+                                <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <!-- 弹出框 -->
+    <div class="modal inmodal fade" id="myModal5" role="dialog"
+         aria-hidden="true">
+        <input id="myModal5Value" type="hidden">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body ">
+                    <form class="form-horizontal m" id="form-Condition-add">
+                        <input id="prepaidTaxId" name="prepaidTaxId" type="hidden">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">预缴税金编号：</label>
+                                    <div class="col-sm-8">
+                                        <input id="code" name="code" class="form-control" type="text" onclick="selectPrepaidTax()">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">申请日期：</label>
+                                    <div class="col-sm-8">
+                                        <input id="applyTime" name="applyTime" class="form-control" type="text" readonly="readonly" >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">税额总计：</label>
+                                    <div class="col-sm-8">
+                                        <input id="totalTax" name="totalTax" class="form-control" type="text" readonly="readonly">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">销售金额：</label>
+                                    <div class="col-sm-8">
+                                        <input id="salesAmount" name="salesAmount" class="form-control" type="number" readonly="readonly">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">已开票金额：</label>
+                                    <div class="col-sm-8">
+                                        <input id="invoicedAmount" name="invoicedAmount"  class="form-control" type="text" readonly="readonly">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">本次开票金额：</label>
+                                    <div class="col-sm-8">
+                                        <input id="PayBillAmount" name="billAmount" class="form-control" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">剩余开票金额：</label>
+                                    <div class="col-sm-8">
+                                        <input id="restBillAmount" name="restBillAmount" class="form-control" type="text" readonly="readonly">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            id="insertCondition">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript" th:inline="javascript">
+		var prefix = ctx + "oa/sysProInvoice"
+		$("#form-sysProInvoice-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+        if([[${flag}]]=='sys'){
+            $('#projectId').attr("required", "true");
+            $('#projectName').attr("required", "true");
+        }
+
+        //下拉框选择方式
+        $('#invoiceTakeWay').change(function () {
+            if($(this).val()==='1'){
+                $('.invoiceTakeWay-1').removeClass('hidden')
+            }else{
+                $('.invoiceTakeWay-1 ').children().find('input').val('');
+                $('.invoiceTakeWay-1 ').children().find('select').val('');
+                $('.invoiceTakeWay-1').addClass('hidden');
+            }
+        });
+        //提交
+        function submitHandler() {
+            if ($.validate.form()) {
+                var data = {};
+                data.sysProInvoice = $('#form-sysProInvoice-add').serializeObject();
+                data.payTaxList=$('#detail').bootstrapTable('getData');;
+                data.status = 0;
+                data.flag=false;
+                $.operate.saveJsonTab(prefix + "/add", data);
+            }
+        }
+        //保存草稿
+        function saveDraft(){
+            if ($.validate.form()) {
+                var data = {};
+                data.sysProInvoice = $('#form-sysProInvoice-add').serializeObject();
+                data.payTaxList=$('#detail').bootstrapTable('getData');;
+                data.status = 0;
+                data.flag=true;
+                $.operate.saveJsonTab(prefix + "/saveDraft", data);
+            }
+        }
+        //关联工程
+        function selectPro(){
+            var options = {
+                title : '工程',
+                width : "1200",
+                url : ctx + 'oa/oaProject',
+                callBack : doSubmit
+            };
+            $.modal.openOptions(options);
+        }
+
+        function doSubmit(index, layero){
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#projectId').val(data.id);
+            $('#projectName').val(data.projectName);
+            $('#constructUnit').val(data.constructUnit);
+        }
+
+
+
+        //关联预缴税金
+        function selectPrepaidTax(){
+            var options = {
+                title : '预缴税金',
+                width : "1200",
+                url : ctx + 'oa/sysProPrepaidTax',
+                callBack : doSubmit2
+            };
+            $.modal.openOptions(options);
+        }
+
+        function doSubmit2(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#prepaidTaxId').val(data.id)
+            $('#code').val(data.code);
+            $('#applyTime').val(data.applyTime);
+            $('#totalTax').val(data.totalTax);
+            $('#salesAmount').val(data.salesAmount);
+            $('#invoicedAmount').val(data.salesAmount-data.restSalesAmount);
+            $('#restBillAmount').val(data.restSalesAmount)
+        }
+
+        //不含税开票金额/税额的计算
+        $("input[name='billAmount']").bind("input propertychange",
+            function () {
+                var num = $(this).val();
+                var taxRate =$('#taxRate').val();
+                if (taxRate!=''){
+                    num = parseFloat(num);
+                    taxRate = parseFloat((parseFloat(taxRate)/100).toFixed(2));
+                    var invoiceTaxAmount = (num/(1+taxRate)).toFixed(2);
+                    var taxAmount=(invoiceTaxAmount*taxRate).toFixed(2);
+                    $('#invoiceTaxAmount').val(invoiceTaxAmount);
+                    $('#taxAmount').val(taxAmount);
+                }
+
+        });
+        $("input[name='taxRate']").bind("input propertychange",
+            function () {
+                var taxRate = $(this).val();
+                var num =$('#billAmount').val();
+                if (num!=''){
+                    num = parseFloat(num);
+                    taxRate = parseFloat((parseFloat(taxRate)/100).toFixed(6));
+                    var invoiceTaxAmount = (num/(1+taxRate)).toFixed(2);
+                    var taxAmount=(invoiceTaxAmount*taxRate).toFixed(2);
+                    $('#invoiceTaxAmount').val(invoiceTaxAmount);
+                    $('#taxAmount').val(taxAmount);
+                }
+            });
+
+
+        //自动计算剩余金额
+        $("input[id='PayBillAmount']").bind("input propertychange",
+            function () {
+                var num = $(this).val();
+                var salesAmount =$('#salesAmount').val();
+                var alreadyAmount = $('#alreadyAmount').val();
+                $('#restSalesAmount').val(salesAmount-alreadyAmount-num);
+            })
+
+        //缴税记录
+        $(function() {
+            var options = {
+                id:'detail',
+                clickToSelect : true,
+                showSearch : false,
+                showRefresh : false,
+                showToggle : false,
+                showColumns : false,
+                showPageGo : false,
+                pagination : false,
+                uniqueId:'id',
+                showFooter: true,
+                modalName: "缴税记录",
+                showExport: false,
+                columns: [{
+                    checkbox: false,
+                    visible: false
+                },
+                    {
+                        field : 'id',
+                        title : 'id',
+                        visible:false
+                    },
+                    {
+                        field : 'code',
+                        title : '预缴税金编号',
+                        sortable: true
+                    },
+                    {
+                        field : 'applyTime',
+                        title : '申请日期',
+                        sortable: true
+                    },
+                    {
+                        field : 'totalTax',
+                        title : '税额总计',
+                        sortable: true
+                    },
+                    {
+                        field : 'salesAmount',
+                        title : '销售金额',
+                        sortable: true,
+                    },
+                    {
+                        field : 'invoicedAmount',
+                        title : '已开票金额',
+                        sortable: true
+                    },
+                    {
+                        field : 'billAmount',
+                        title : '本次开票金额',
+                        sortable: true
+                    },
+                    {
+                        field : 'restBillAmount',
+                        title : '剩余开票金额',
+                        sortable: true
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        formatter: function(value, row, index) {
+                            var action=[]
+                            action.push('<a onclick="removeRow(\'detail\',\''+row.id+'\')">删除</a>  ')
+                            action.push('<a onclick="editRow(\'detail\',\''+row.id+'\',\''+index+'\')">编辑</a>')
+                            return action.join('')
+                        }
+                    }]
+            };
+            $.table.init(options);
+            $('#addCon').click(function() {
+                $.form.reset('form-Condition-add');//清空原有数据
+                var html='<div class="file-loading">'+
+                    '<input id="uploadFileId2" type="file" multiple>'+
+                    '</div>';
+                $('#fileUpload').html(html);
+                downFile();
+                $('#myModal5Value').val('00');
+                $('#myModal5').modal(options);
+            });
+            $('#insertCondition').click(function() {
+
+                var indexV=$('#myModal5Value').val()
+                var formData=$('#form-Condition-add').serializeObject();
+                if(indexV=='00'){
+                    console.log(formData)
+                    insertRow(formData,'detail',null)
+
+                }else{
+                    insertRow(formData,'detail',indexV)
+
+                }
+            });
+        });
+
+        /*新增行*/
+        function insertRow(data,id,editId) {
+            var randomId = 100 + ~~(Math.random() * 100);
+            var countDate = $("#"+id).bootstrapTable('getData');
+            var table_row = '';
+            table_row = data
+            table_row.id=randomId
+            if(id=='borrowTable'){
+                table_row[0]=false;
+                table_row.borrowMoney=[[${user.borrowMoney}]]
+                table_row.borrowId=data.id
+                var countDate = $("#"+id).bootstrapTable('getData');
+                if(isHas(countDate,data.id)==false){
+                    $("#"+id).bootstrapTable('insertRow', {
+                        index : 0, // 你想插入到哪，0表示第一行
+                        row : table_row
+                    })
+                }
+            }else{
+                if(editId!=null){
+                    table_row.id=randomId
+                    $("#"+id).bootstrapTable('updateRow', {
+                        index: editId, // 你想修改哪行，0表示第一行
+                        row: table_row
+                    })
+
+                }else{
+                    table_row.id=randomId
+                    $("#"+id).bootstrapTable('insertRow', {
+                        index : countDate.length, // 你想插入到哪，0表示第一行
+                        row : table_row
+                    })
+                }
+            }
+
+
+
+        }
+        //修改行
+        function editRow(id,rowId,rowIndex){
+            var da=$('#'+id).bootstrapTable('getRowByUniqueId', rowId);
+            $('#myModal5Value').val(rowIndex);
+            $('#myModal5').modal('show');
+            $('#form-Condition-add').loadData(da)
+
+        }
+        //判断是否已经添加
+        function isHas(data,id){
+            var isTF=false;
+            for(var i=0;i<data.length;i++){
+                if(data[i].id==id){
+                    isTF=true;
+                }
+            }
+            return isTF;
+        }
+        /* 删除指定表格行 */
+        function removeRow(id,rowId) {
+            $("#" + id).bootstrapTable('removeByUniqueId', rowId)
+
+        }
+        /* 删除所有表格行 */
+        function removeRowAll(id) {
+            $("#" + id).bootstrapTable('removeAll')
+            idxx = 0;
+        }
+	</script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增预缴税金')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProPrepaidTax-add">
+                            <input type="hidden" name="restSalesAmount" id="restSalesAmount">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>预缴税金</h2>
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        <td class="active">申请人：</td>
+                                        <td>
+                                            <input id="proposerId" name="proposerId" th:value="${user.userId}" class="form-control" type="hidden">
+                                            <input th:value="${user.userName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">所属公司：</td>
+                                        <td>
+                                            <input id="companyId" name="companyId" th:value="${company.deptId}" class="form-control" type="hidden">
+                                            <input id="companyName" name="companyName" th:value="${company.deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请部门：</td>
+                                        <td>
+                                            <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}" type="hidden">
+                                            <input id="deptName" name="deptName" th:value="${user.dept.deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active"><span style="color: red; ">*</span>工程名称：</td>
+                                        <td>
+                                            <input id="projectId" name="projectId" type="hidden" />
+                                            <input id="projectName" name="projectName" class="form-control" type="text" onclick="selectPro()" required="required">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active"><span style="color: red; ">*</span>申请日期：</td>
+                                        <td>
+                                            <div class="input-group data">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <input id="applyTime" name="applyTime" class="form-control time-input-data currentDate" type="text" required="required">
+                                            </div>
+                                        </td>
+                                        <td class="active">工程地点：</td>
+                                        <td>
+                                            <input id="address" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">建设单位：</td>
+                                        <td>
+                                            <input id="constructUnit" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">报验证：</td>
+                                        <td>
+                                            <input id="crossCertificeId" name="crossCertificeId" class="form-control" type="text" onclick="selectProCross()">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active"><span style="color: red; ">*</span>税额总计：</td>
+                                        <td>
+                                            <input id="totalTax" name="totalTax" class="form-control" type="text" required="required">
+                                        </td>
+                                        <td class="active">税务机关：</td>
+                                        <td>
+                                            <input id="taxationBureau" name="taxationBureau" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">销售金额：</td>
+                                        <td>
+                                            <input id="salesAmount" name="salesAmount" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">税票数量：</td>
+                                        <td>
+                                            <input id="taxReceiptNum" name="taxReceiptNum" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">备注：</td>
+                                        <td>
+                                            <input id="remark" name="remark" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">缴税地点：</td>
+                                        <td>
+                                            <select id="taxeSite"  name="taxeSite" class="form-control" th:with="type=${@dict.getType('sys_pro_tax_site')}" required="required" >
+                                                <option value="">--请选择--</option>
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">附件：</td>
+                                        <td colspan="3">
+                                            <div class="file-loading">
+                                                <input id="uploadFileId" type="file" multiple>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <!-- 税额明细 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <div class="btn-group-sm" id="toolbar1" role="group">
+                                <a class="btn btn-warning" data-toggle="modal" onclick="addDetail()"> <i class="fa fa-plus"></i> 添加税额明细 </a>
+                                <a class="btn btn-danger" onclick="removeRowAll('taxDetailTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                            </div>
+                            <div class="fixed-table-container">
+                                <table id="taxDetailTable" data-mobile-responsive="true"></table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+                                <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <!-- 税额明细弹出框 -->
+    <div class="modal inmodal fade" id="detailModel" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body ">
+                    <form class="form-horizontal m" id="form-detailModel-add">
+                        <div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label"><span style="color: red; ">*</span>税种：</label>
+                                <div class="col-sm-8">
+                                    <select id="taxType"  name="taxType" class="form-control" th:with="type=${@dict.getType('sys_pro_tax_type')}" required="required" >
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">税率：</label>
+                                <div class="col-sm-8">
+                                    <input id="taxRate" name="taxRate" class="form-control" type="text" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label"><span style="color: red; ">*</span>税额：</label>
+                                <div class="col-sm-8">
+                                    <input id="taxAmount" name="taxAmount" class="form-control" type="text" required="required">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToTaxDetailTable()">保存</button>
+                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/sysProPrepaidTax"
+		$("#form-sysProPrepaidTax-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+
+        function doSubmit1(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#'+projectId).val(data.id)
+            $('#'+proName).val(data.projectName)
+        }
+
+		function submitHandler() {
+	        if ($.validate.form()) {
+                var data = {};
+                data.prepaidTax = $('#form-sysProPrepaidTax-add').serializeObject();
+                data.detailList = $('#taxDetailTable').bootstrapTable('getData');
+                data.attachmentList = attachmentList;
+                $.operate.saveJsonTab(prefix + "/add", data);
+	        }
+	    }
+
+
+        $("input[name='salesAmount']").bind("input propertychange",
+            function () {
+                var num = $(this).val();
+                console.log(num)
+                $('#restSalesAmount').val(num)
+            });
+
+        //上传附件
+        var attachmentList = new Array();
+        var option = {
+            id : 'uploadFileId',
+            uploadUrl : null,
+            deleteUrl : null,
+            deleteExtraData : null,
+            imgsUrl : new Array(),
+            initialPreviewConfig : null,
+            showPreview : true
+        }
+        $.common.uploadFile(option);
+        downFile();
+
+        var sysProTaxType = [[${@dict.getType('sys_pro_tax_type')}]];
+        var options = {
+            id : 'taxDetailTable',
+            showSearch : false,
+            showRefresh : false,
+            showToggle : false,
+            showColumns : false,
+            showPageGo : false,
+            pagination : false,
+            uniqueId : 'id',
+            modalName : "税额明细",
+            showExport : false,
+            clickToSelect : true,
+            columns : [
+                {
+                    field : 'id',
+                    title : 'id',
+                    visible : false
+                },
+                {
+                    field : 'taxType',
+                    title : '税种',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(sysProTaxType, value);
+                    }
+                },
+                {
+                    field : 'taxRate',
+                    title : '税率'
+                },
+                {
+                    field : 'taxAmount',
+                    title : '税额'
+                },
+                {
+                    title : '操作',
+                    formatter : function(value, row, index) {
+                        return	'<a class="btn btn-danger" onclick="removeRow(\'taxDetailTable\',\'' + row.id + '\')">删除</a> '
+                    }
+                } ]
+
+        };
+
+        //关联工程
+        function selectPro(){
+            var options = {
+                title : '工程',
+                width : "1200",
+                url : ctx + 'oa/oaProject',
+                callBack : doSubmit
+            };
+            $.modal.openOptions(options);
+        }
+
+        function doSubmit(index, layero){
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#projectId').val(data.id);
+            $('#projectName').val(data.projectName);
+            $('#constructUnit').val(data.constructUnit);
+        }
+
+        $(function() {
+            $.table.init(options);
+        });
+
+        //添加明细信息
+        function addDetail(){
+            $.form.reset('form-detailModel-add');//清空原有数据
+            $('#detailModel').modal("show");
+        }
+
+        /* 删除指定表格行 */
+        function removeRow(id, rowId) {
+            $.modal.confirm("确定删除该行数据吗?", function() {
+                $("#" + id).bootstrapTable('removeByUniqueId', rowId);
+            });
+        }
+        /* 删除所有表格行 */
+        function removeRowAll(id) {
+            $.modal.confirm("确定删除所有行吗?", function() {
+                $("#" + id).bootstrapTable('removeAll');
+            });
+        }
+
+        //将信息填入到税额明细中
+        function saveToTaxDetailTable(){
+            var formData = $('#form-detailModel-add').serializeObject();
+            var randomId = 100 + ~~(Math.random() * 100);
+            formData.id=randomId;
+            $("#taxDetailTable").bootstrapTable('insertRow', {
+                index : 0, // 你想插入到哪，0表示第一行
+                row : formData
+            })
+        }
+
+        //保存草稿
+        function saveDraft(){
+            var data = {};
+            data.prepaidTax = $('#form-sysProPrepaidTax-add').serializeObject();
+            data.detailList = $('#taxDetailTable').bootstrapTable('getData');
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+
+        function doSubmit2(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#projectId').val(data.projectId);
+            $('#projectName').val(data.proName);
+            $('#address').val(data.address);
+            $('#constructUnit').val(data.constructUnit);
+        }
+
+        //关联外管证
+        function selectProCross() {
+            var options = {
+                title : '选择项目',
+                width : "1200",
+                url : ctx + "oa/sysProCrossCertifice",
+                callBack : doSubmit3
+            };
+            $.modal.openOptions(options);
+        }
+        function doSubmit3(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#projectId').val(data.projectId);
+            $('#projectName').val(data.proName);
+            $('#constructUnit').val(data.constructUnit);
+            $('#crossCertificeId').val(data.code);
+            $('#taxationBureau').val(data.taxationBureau);
+            $('#address').val(data.address);
+        }
+	</script>
+</body>
+</html>

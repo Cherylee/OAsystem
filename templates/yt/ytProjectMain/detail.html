@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('项目详情')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style type="text/css">
+.badge {
+	background-color: none !important;
+	color: #337ab7 !important;
+	background-color: rgb(255, 255, 255) !important;
+}
+
+.tabs-container .tabs-left>.nav-tabs {
+	width: 10%;
+}
+
+.tabs-container .tabs-left .tab-pane .panel-body {
+	margin-left: 10%;
+	width: 90%;
+}
+
+.tabs-container .tabs-left .panel-body {
+	margin-left: 10%;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="tabs-container">
+			<div class="tabs-left">
+				<ul class="nav nav-tabs">
+					<li class="active"><a data-toggle="tab" href="#tab-8"
+						aria-expanded="true"> 投标阶段</a></li>
+					<!-- <li class=""><a data-toggle="tab" href="#tab-9"
+						aria-expanded="false"> 已中标</a></li> -->
+				</ul>
+				<div class="tab-content ">
+					<div id="tab-8" class="tab-pane active">
+						<div class="panel-body">
+
+							<!-- 项目主体信息 -->
+							<h5>
+								当前标书状态:<span class="ytprojectstate">[[${ytProjectMain.state}]]</span>
+							</h5>
+							<hr>
+							<table class="table table-bordered" th:object="${ytProjectMain}">
+								<caption>
+									<strong>项目主体信息</strong>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">项目名称</td>
+										<td>[[*{name}]]</td>
+										<td class="active">项目编号</td>
+										<td>[[*{code}]]</td>
+										<td class="active">招标信息</td>
+										<td><a th:href="*{biddingInfoLinkLoc}">[[*{biddingInfoLinkLoc}]]</a></td>
+									</tr>
+									<tr>
+										<td class="active">工程类型</td>
+										<td>[[*{projectType}]]</td>
+										<td class="active">建设单位</td>
+										<td>[[*{constructionUnit}]]</td>
+										<td class="active">代建单位</td>
+										<td>[[*{replaceUnit}]]</td>
+									</tr>
+									<tr>
+										<td class="active">建设地点</td>
+										<td>[[*{constructionLoc}]]</td>
+										<td class="active">项目规模</td>
+										<td>[[*{projectScale}]]</td>
+										<td class="active">招标工期</td>
+										<td>[[*{biddingLimitDate}]]</td>
+									</tr>
+									<tr>
+										<td class="active">投资总额(万元)</td>
+										<td>[[*{investAmount}]]</td>
+										<td class="active">招标设计费用(万元)</td>
+										<td>[[*{biddingDesignCost}]]</td>
+										<td class="active">招标内容</td>
+										<td>[[*{biddingContent}]]</td>
+									</tr>
+									<tr>
+										<td class="active">评标办法</td>
+										<td>[[*{evaluationMethod}]]</td>
+										<td class="active">资质要求</td>
+										<td>[[*{qualificationRequirements}]]</td>
+										<td class="active">业绩要求</td>
+										<td>[[*{performanceRequirements}]]</td>
+									</tr>
+									<tr>
+										<td class="active">投标保证金</td>
+										<td>[[*{deposit}]]</td>
+										<td class="active">投标文件递交时间</td>
+										<td><span
+											th:text="*{#dates.format(filesSubmitDate, 'yyyy-MM-dd')}"></span></td>
+										<td class="active">保证金提交截止日期</td>
+										<td><span
+											th:text="*{#dates.format(depositSubmitDate, 'yyyy-MM-dd')}"></span></td>
+									</tr>
+									<tr>
+										<td class="active">开标时间</td>
+										<td><span
+											th:text="*{#dates.format(biddingDate, 'yyyy-MM-dd')}"></span></td>
+										<td class="active">开标地点</td>
+										<td>[[*{biddingPlace}]]</td>
+										<td class="active">开标方式</td>
+										<td><span class="biddingway">[[*{biddingWay}]]</span></td>
+									</tr>
+									<tr>
+										<td class="active text-center" colspan="6">项目组人员要求</td>
+									</tr>
+									<tr>
+										<td class="active">项目负责人要求</td>
+										<td colspan="2">[[*{projectHeadmanRequirements}]]</td>
+										<td class="active">其它人员要求</td>
+										<td colspan="2">[[*{projectOthersRequirements}]]</td>
+
+									</tr>
+									<tr>
+										<td class="active">陪标与否</td>
+										<td colspan="2"><span class="accompany">[[*{accompany}]]</span></td>
+										<td class="active">编制类型</td>
+										<td colspan="2"><span class="bidType">[[*{bidType}]]</span></td>
+
+									</tr>
+
+								</tbody>
+							</table>
+							<div class="node1" th:if="${ytProjectMain.state == '01'}">
+								<h5>生产经营部经理：</h5>
+								<div class="row">
+									<div class="col-sm-offset-5 col-sm-10">
+										<button class="btn btn-sm btn-info"
+											onclick="changeState('03')">确认</button>
+										&nbsp;
+										<button class="btn btn-sm btn-danger"
+											onclick="changeState('04')">驳回</button>
+										&nbsp;
+										<button class="btn btn-sm btn-primary"
+											onclick="changeState('02')">转到总经理</button>
+									</div>
+								</div>
+							</div>
+							<div class="node2" th:if="${ytProjectMain.state == '02'}">
+								<h5>总经理：</h5>
+								<div class="row">
+									<div class="col-sm-offset-5 col-sm-10">
+										<button type="button" class="btn btn-sm btn-info"
+											onclick="changeState('03')">确认</button>
+										&nbsp;
+										<button type="button" class="btn btn-sm btn-danger"
+											onclick="changeState('04')">驳回并提交抄送人</button>
+									</div>
+								</div>
+							</div>
+							<!-- 生产经营部经理分配-->
+							<div
+								th:if="${ytProjectMain.state == '03' or ytProjectMain.state == '05' or ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+								<table class="table table-bordered node1"
+									th:object="${ytProjectBidCharge}">
+									<caption>
+										<strong>生产经营部经理分配</strong>
+									</caption>
+
+									<tbody>
+										<form id="form-dispose">
+											<tr>
+												<td class="active" width="20%">技术标负责人员</td>
+												<td colspan="2" width="30%">
+													<div th:if="*{technicianIds != null}">[[*{technicianNames}]]</div>
+													<div th:unless="*{technicianIds != null}">
+														<input type="hidden" id="projectId" name="projectId"
+															th:value="*{projectId}"> <input type="hidden"
+															id="technicianIds" name="technicianIds"> <input
+															id="technicianNames" class="form-control" type="text"
+															onclick="selectUser('technicianIds','technicianNames')">
+													</div>
+
+												</td>
+												<td class="active" width="20%">计划完成日期</td>
+												<td colspan="2" width="30%">
+													<div th:if="*{planDate != null}">
+														<span th:text="*{#dates.format(planDate, 'yyyy-MM-dd')}"></span>
+													</div>
+													<div th:unless="*{planDate != null}">
+														<input class="form-control time-input-data" type="text"
+															placeholder="yyyy-mm-dd">
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td class="active">商务标负责人员</td>
+												<td colspan="2">
+													<div th:if="*{businessIds != null}">[[*{businessNames}]]</div>
+													<div th:unless="*{businessIds != null}">
+														<input type="hidden" id="businessIds" name="businessIds">
+														<input id="businessNames" class="form-control" type="text"
+															onclick="selectUser('businessIds','businessNames')">
+													</div>
+												</td>
+												<td class="active">计划完成日期</td>
+												<td colspan="2">
+													<div th:if="*{planDate != null}">
+														<span th:text="*{#dates.format(planDate, 'yyyy-MM-dd')}"></span>
+													</div>
+													<div th:unless="*{planDate != null}">
+														<input name="planDate"
+															class="form-control time-input-data" type="text">
+													</div>
+												</td>
+											</tr>
+										</form>
+										<td class="text-center" colspan="6"
+											th:unless="${ytProjectMain.state == '05' or ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+											<button type="button" class="btn btn-sm btn-info"
+												onclick="disposePerson('form-dispose')">提交</button> &nbsp;
+											<button type="button" class="btn btn-sm btn-danger"
+												onclick="closeItem()">取消</button>
+										</td>
+
+									</tbody>
+								</table>
+							</div>
+							<!-- 保证金到账与否 -->
+							<table class="table table-bordered "
+								th:if="${ytProjectMain.state == '05' or ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+								<tr>
+									<td class="active" width="20%">保证金到账与否：</td>
+									<td colspan="2"><span
+										th:if="${ytProjectBidCharge.depositReady} eq '1'">保证金已到账</span>
+										<div
+											th:if="${ytProjectBidCharge.depositReady==null} or ${ytProjectBidCharge.depositReady} eq '0'">
+											<span
+												th:unless="${user.userId} eq ${ytProjectBidCharge.businessIds}">保证金未到账
+											</span>
+										</div>
+										<div
+											th:if="${user.userId} eq ${ytProjectBidCharge.businessIds}">
+											<form id="form-depositReady"
+												th:if="${ytProjectBidCharge.depositReady==null} or ${ytProjectBidCharge.depositReady} eq '0'">
+												<div class="radio check-box">
+													<input type="hidden" value="1" name="id"
+														th:value="${ytProjectBidCharge.id}"> <label>
+														<input type="radio" value="1" checked=""
+														name="depositReady"> <i></i> 是
+													</label>
+												</div>
+												<div class="radio check-box">
+													<label> <input type="radio" value="0"
+														name="depositReady"> <i></i> 否
+													</label>
+												</div>
+											</form>
+										</div></td>
+								</tr>
+								<tr th:if="${user.userId} eq ${ytProjectBidCharge.businessIds}">
+									<td class="text-center" colspan="6">
+										<div
+											th:if="${ytProjectBidCharge.depositReady==null} or ${ytProjectBidCharge.depositReady} eq '0'">
+											<button type="button" class="btn btn-sm btn-info"
+												onclick="depositReady('form-depositReady')">提交</button>
+										</div>
+									</td>
+								</tr>
+							</table>
+
+							<!-- 投标文件上传 -->
+							<div
+								th:if="${ytProjectMain.state == '05' or ytProjectMain.state == '06' or ytProjectMain.state == '07'} and ${ytProjectBidCharge.chosen == true}">
+								<table class="table table-bordered"
+									th:object="${ytProjectBidCharge}">
+									<caption>
+										<strong>投标文件上传</strong>
+									</caption>
+									<form id="form-file">
+										<tbody>
+											<tr>
+												<td class="active">技术标文件</td>
+												<td colspan="2"><input type="hidden" name="id"
+													th:value="*{id}"> <input type="hidden"
+													name="businessIds" th:value="*{businessIds}"> <input
+													type="hidden" name="technicianIds"
+													th:value="*{technicianIds}">
+													<div class="file-loading">
+														<input id="uploadFileId1" type="file" multiple
+															th:disabled="${ytProjectMain.state == '06'} or ${ytProjectMain.state == '07'}">
+													</div></td>
+											</tr>
+											<tr>
+												<td class="active">商务标文件</td>
+												<td colspan="2">
+													<div class="file-loading">
+														<input id="uploadFileId2" type="file" multiple
+															th:disabled="${ytProjectMain.state == '06'} or ${ytProjectMain.state == '07'}">
+
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td class="text-center" colspan="6" th:unless="${ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+													<button type="button" class="btn btn-sm btn-info" 
+														onclick="depositReady('form-file')">提交</button>
+												</td>
+											</tr>
+											<tr class="node1">
+												<td class="text-center" colspan="6"
+													th:unless="${ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+													<button type="button" class="btn btn-sm btn-info"
+														onclick="changeState('06')">确认</button>
+												</td>
+											</tr>
+									</form>
+									</tbody>
+								</table>
+							</div>
+							<!-- 投标文件展示 -->
+							<!-- <div
+								th:if="${ytProjectMain.state == '05' or ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+								<table class="table table-bordered node1"
+									th:object="${ytProjectBidCharge}"
+									th:if="${ytProjectBidCharge.chosen == false}">
+									<caption>
+										<strong>投标文件</strong>
+									</caption>
+									<tbody>
+										<tr>
+											<td class="active" width="20%">技术标文件</td>
+											<td colspan="2"><div class="file-loading">
+													<input id="uploadFileId1" type="file" multiple disabled>
+												</div></td>
+										</tr>
+										<tr>
+											<td class="active" width="20%">商务标文件</td>
+											<td colspan="2"><div class="file-loading">
+													<input id="uploadFileId2" type="file" multiple disabled>
+
+												</div></td>
+										</tr>
+										<tr>
+											<td class="text-center" colspan="6"
+												th:unless="${ytProjectMain.state == '06' or ytProjectMain.state == '07'}">
+												<button type="button" class="btn btn-sm btn-info"
+													onclick="changeState('06')">确认</button>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div> -->
+							<!-- 中标情况 -->
+<!--							<div-->
+<!--								th:if="${ytProjectMain.state == '06' or ytProjectMain.state == '07'}">-->
+<!--								<table class="table table-bordered node1">-->
+<!--									<tbody>-->
+<!--										<tr>-->
+<!--											<td class="active" width="20%">中标情况</td>-->
+<!--											<td colspan="2"><span class="ytbidcondition"-->
+<!--												th:if="${ytProjectMain.bidState != null} and ${ytProjectMain.state == '07'}">-->
+<!--													[[${ytProjectMain.bidState}]] </span> <select-->
+<!--												th:unless="${ytProjectMain.bidState != null} and ${ytProjectMain.state == '07'}"-->
+<!--												id="bidState" style="width: 250px" class="form-control"-->
+<!--												name="bidState"-->
+<!--												th:with="type=${@dict.getType('yt_bid_condition')}">-->
+<!--													<option value="">&#45;&#45;&#45;&#45;&#45;&#45;所有&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+<!--													<option th:each="dict : ${type}"-->
+<!--														th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+<!--											</select></td>-->
+<!--										</tr>-->
+<!--										<tr th:if="${ytProjectMain.state == '06'}">-->
+<!--											<td class="text-center" colspan="6">-->
+<!--												<button type="button" class="btn btn-sm btn-info"-->
+<!--													onclick="changeStatebid('07')">确认</button>-->
+<!--											</td>-->
+<!--										</tr>-->
+
+<!--									</tbody>-->
+<!--								</table>-->
+
+
+<!--							</div>-->
+
+
+						</div>
+					</div>
+					<!-- <div id="tab-9" class="tab-pane">
+						<div class="panel-body">123</div>
+					</div> -->
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+			var prefix = ctx + "yt/ytProjectMain";
+			console.log([[${ytProjectBidCharge}]])
+			console.log([[${ytProjectMain}]])
+			//生产经营部经理
+			var node1= [[${@permission.hasPermi('yt:ytProjectMain:node1')}]];
+			//总经理
+			var node2= [[${@permission.hasPermi('yt:ytProjectMain:node2')}]];
+			//权限标识
+			$('.node1').addClass(node1)
+			$('.node2').addClass(node2)
+			
+			var attachmentList = new Array();
+			var techAttachmentList = null;//技术标文件List
+			var bizAttachmentList =  null;//商务标文件List
+			function callback(id){
+				if(id=='uploadFileId1'){
+					techAttachmentList = attachmentList;
+				}else{
+					bizAttachmentList = attachmentList;
+				}
+			}
+			
+			
+			/* 多选用户 */
+			var UId = null;
+			var UName = null;
+			function selectUser(id, name) {
+				UId = id;
+				UName = name;
+				var options = {
+					title : '选择用户',
+					width : "1200",
+					url : ctx + "oa/oaApplyTemplate/selectUser",
+					callBack : doSubmit1
+				};
+				$.modal.openOptions(options);
+			}
+			function doSubmit1(index, layero) {
+				var iframeWin = layero.find('iframe')[0];
+				var result = iframeWin.contentWindow.submitHandlerMore();
+				var data = result;
+				$('#' + UId).val(data.idArry)
+				$('#' + UName).html(data.namesArry)
+
+			}
+			//修改状态
+			function changeState(state){
+				var config = {
+						contentType : "application/json;charset=UTF-8",
+	        	        url: ctx + "business/jyTenderNotice/changeYtState",
+	        	        type: "get",
+	        	        data: {'id':[[${ytProjectMain.id}]],'state':state,'bidState':''},
+	        	        beforeSend: function () {
+	        	        	$.modal.loading("正在处理中，请稍后...");
+	        	        },
+	        	        success: function(result) {	
+	        	        	$.modal.closeLoading();
+	        	        	$.operate.successTabCallback(result)    
+	        	        }
+	        	    };
+				
+	        	 $.ajax(config) 
+			}
+			//确认投标结果
+			function changeStatebid(state){
+				var itemValue1 = $("#bidState").val();
+				var config = {
+						contentType : "application/json;charset=UTF-8",
+	        	        url: ctx + "business/jyTenderNotice/changeYtState",
+	        	        type: "get",
+	        	        data: {'id':[[${ytProjectMain.id}]],'state':state,'bidState':itemValue1},
+	        	        beforeSend: function () {
+	        	        	$.modal.loading("正在处理中，请稍后...");
+	        	        },
+	        	        success: function(result) {	
+	        	        	$.modal.closeLoading();
+	        	        	$.operate.successTabCallback(result);
+	        	        }
+	        	    };
+				
+	        	 $.ajax(config) 
+			}
+			
+			
+			
+			/* 多选用户 */
+			var UId=null;
+			var UName=null;
+			function selectUser(id,name){
+				UId = id;
+				UName=name;
+				var options = {
+					title : '选择用户',
+					width : "1200",
+					url : ctx + "oa/oaApplyTemplate/selectUser",
+					callBack : doSubmit1
+				};
+				$.modal.openOptions(options);
+			}
+			function doSubmit1(index, layero) {
+				var iframeWin = layero.find('iframe')[0];
+				var result = iframeWin.contentWindow.submitHandlerMore();
+				var data = result;
+				$('#'+UId).val(data.idArry)
+				$('#'+UName).val(data.namesArry)
+
+			}
+			//分配人员
+			function disposePerson(id){
+				var config = {
+        	        url: prefix + "/saveProjectBidCharge",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: $('#'+id).serialize(),
+        	        beforeSend: function () {
+        	        	$.modal.loading("正在处理中，请稍后...");
+        	        },
+        	        success: function(result) {
+        	        	$.operate.ajaxSuccess(result);
+        	        	changeState('05')
+        	        }
+        	    };
+        	    $.ajax(config)
+				//$.operate.saveTab(prefix + "/saveProjectBidCharge", $('#'+id).serialize());				
+			} 
+			if([[${ytProjectBidCharge}]]){
+				attachment()
+			}
+			//保证金是否到账&&上传投标文件 
+			function depositReady(id){
+				var data=$('#'+id).serializeObject();
+				data.techAttachmentUrls=techAttachmentList
+				data.bizAttachmentUrls=bizAttachmentList
+				$.operate.saveJsonTab(prefix + "/saveProjectBidChargeFiles",data);
+				//$.operate.saveTab(prefix + "/saveProjectBidCharge", data);
+			}
+			
+			//回显字典 封装的公用方法
+			function dictV(id,d,v){//d:字典名 v:键值
+				$(id).html($.table.selectDictLabel(d, v));
+			}
+			
+			$(function(){
+				//回显项目状态
+			    dictV('.ytprojectstate',[[${@dict.getType('yt_project_state')}]],[[${ytProjectMain.state}]])
+			    //回显中标情况
+			    dictV('.ytbidcondition',[[${@dict.getType('yt_bid_condition')}]],[[${ytProjectMain.bidState}]])
+			    //开标方式
+			    dictV('.biddingway',[[${@dict.getType('bidding_way')}]],[[${ytProjectMain.biddingWay}]])
+			    //陪标与否
+			    dictV('.accompany',[[${@dict.getType('sys_yes_no')}]],[[${ytProjectMain.accompany}]])
+			    //编制类型
+			    dictV('.bidType',[[${@dict.getType('yt_bid_type')}]],[[${ytProjectMain.bidType}]]) 
+			    
+			})
+				
+			function attachment(){				
+				var config = {
+	        	        url: ctx+"yt/ytAttachment/selectAttachByObjectId",
+	        	        type: "post",
+	        	        dataType: "json",
+	        	        data: {"objId": [[${ytProjectBidCharge.id}]]},
+	        	        success: function(result) {
+					        var attachList = result.data;
+	        	        	
+	        	        	if(attachList!=null && attachList.length>0){
+	        	        		var imgsUrl = new Array();
+		    	        		var downloadConfig = new Array();
+						        var imgsUrl2 = new Array();
+		    	        		var downloadConfig2 = new Array();
+	        	        		var downloadConfig = new Array();
+	        	        		for(var i=0; i<attachList.length; i++){
+	        	        			var down = {};
+	        	        			var attach = attachList[i];
+	        	        			if(attach.type=='01'){
+	    	    	        			imgsUrl.push(attach.attachmentName);
+	    	    	        			down.key = attach.attachmentName;
+	    	    	        			down.caption = attach.fileName;
+	    	    	        			if(isAssetTypeAnImage(attach.attachmentName)){
+	    		    	        			down.type = 'image';
+	    	    	        			}else{
+	    	    	        				down.type = 'object';
+	    	    	        			}
+	    	    	        			//down.frameAttr={style :'height:100px;high:100px'};
+	    	    	        			downloadConfig.push(down);
+	    	    	        		//
+	        	        			}else if(attach.type=='02'){
+	        	        				imgsUrl2.push(attach.attachmentName);
+	    	    	        			down.key = attach.attachmentName;
+	    	    	        			down.caption = attach.fileName;
+	    	    	        			//down.frameAttr={style :'height:100px;high:100px'};
+	    	    	        			if(isAssetTypeAnImage(attach.attachmentName)){
+	    		    	        			down.type = 'image';
+	    	    	        			}else{
+	    	    	        				down.type = 'object';
+	    	    	        			}
+	    	    	        			downloadConfig2.push(down);
+	        	        			}	        	        	
+	        	        		}
+	        	        		var deleteExtraData = {
+	       	        					"fileName" : attach.attachmentName,
+	       	        					"tableName" : "yt_attachment"
+	       	        			};
+	        	        		var option1={
+	        	    					id:'uploadFileId1',
+	        	    					uploadUrl:null,
+	        	    					deleteUrl:null,
+	        	    					deleteExtraData:deleteExtraData,
+	        	    					imgsUrl:imgsUrl,
+	        	    					downloadConfig:downloadConfig,
+	        	    					attachmentList : new Array(),
+	        	    					callback : callback
+	        	    			}
+	        	        		$.common.uploadFile(option1); 
+	        	        		var option2={
+	        	    					id:'uploadFileId2',
+	        	    					uploadUrl:null,
+	        	    					deleteUrl:null,        	    		
+	        	    					deleteExtraData:deleteExtraData,
+	        	    					imgsUrl:imgsUrl2,
+	        	    					downloadConfig:downloadConfig2,
+	        	    					attachmentList : new Array(),
+	        	    					callback : callback
+	        	    			}
+	        	        		$.common.uploadFile(option2); 
+	        	        	}else{
+	      
+	        	        		 var option3={
+	        	    					id:'uploadFileId1',
+	        	    					uploadUrl:null,
+	        	    					deleteUrl:null,
+	        	    					deleteExtraData:null,
+	        	    					imgsUrl:new Array(),
+	        	    					initialPreviewConfig:null,
+	        	    					attachmentList : new Array(),
+	        	    					callback : callback
+	        	    			}
+	        	        		$.common.uploadFile(option3);
+	        	        		 var option4={
+		        	    					id:'uploadFileId2',
+		        	    					uploadUrl:null,
+		        	    					deleteUrl:null,
+		        	    					deleteExtraData:null,
+		        	    					imgsUrl:new Array(),
+		        	    					initialPreviewConfig:null,
+		        	    					attachmentList : new Array(),
+		        	    					callback : callback
+		        	    			}
+		        	        		$.common.uploadFile(option4); 
+	        	        	}
+			     			downFile();
+	        	        }
+	        	    };
+	        	$.ajax(config)
+			}
+			
+		
+			
+		</script>
+</body>
+</html>

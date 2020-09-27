@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('物资入库列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								<input type="hidden" id="companyId" name="companyId" />
+								<input type="text" id="companyName" onclick="selectDeptTree('companyId','companyName','0')" placeholder="存放公司"/>
+							</li>
+							<li>
+								<input type="text" name="location" placeholder="存放地点"/>
+							</li>
+							<li>
+								<select id="goodsType" name="goodsType"  th:with="type=${@dict.getType('oa_project_goods_type')}">
+									<option value="">物资类型</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								<input type="text" name="projectName" placeholder="所属项目"/>
+							</li>
+							<li class="select-time">
+								<label>入库日期： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaProjectGoods:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.edit()" shiro:hasPermission="oa:oaProjectGoods:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaProjectGoods:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaProjectGoods:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaProjectGoods:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaProjectGoods:remove')}]];
+        var prefix = ctx + "oa/oaProjectGoods";
+        var goodsType = [[${@dict.getType('oa_project_goods_type')}]];
+		var yes_no = [[${@dict.getType('sys_yes_no')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "物资入库",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '物资编号',
+					sortable: true
+				},
+				{
+					field : 'companyName',
+					title : '存放公司',
+					sortable: true
+				},
+				{
+					field : 'deptName',
+					title : '存放部门',
+					sortable: true
+				},
+				{
+					field : 'location',
+					title : '存放地点',
+					sortable: true
+				},
+				{
+					field : 'userName',
+					title : '保管人',
+					sortable: true
+				},
+				{
+					field : 'goodsName', 
+					title : '物资名称',
+					sortable: true
+				},
+				{
+					field : 'goodsType', 
+					title : '物资类型',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(goodsType, value);
+					}
+				},
+				{
+					field : 'unit', 
+					title : '单位',
+					sortable: true
+				},
+				{
+					field : 'price', 
+					title : '单价',
+					sortable: true
+				},
+				{
+					field : 'totalStock', 
+					title : '总库存',
+					sortable: true
+				},
+				{
+					field : 'inventoryQuantity',
+					title : '入库数量',
+					sortable: true,
+				},
+				{
+					field : 'effect', 
+					title : '是否有效',
+					sortable: true,
+				},
+				{
+					field : 'inDate', 
+					title : '入库日期',
+					sortable: true
+				},
+				{
+					field : 'projectName',
+					title : '所属项目：',
+					sortable: true
+				},
+				{
+					field : 'contractName',
+					title : '关联合同：',
+					sortable: true
+				},
+				{
+					field : 'remark',
+					title : '备注',
+					sortable: true
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

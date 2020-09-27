@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('OA统计')"/>
+</head>
+<style>
+    .ibox {
+        margin-top: 10px;
+        margin-bottom: 0px;
+    }
+
+    .ibox-content {
+        padding: 5px 20px 18px 20px;
+        border-style: none;
+        background-color: none;
+    }
+
+    .ibox-title {
+        background-color: #eff3f8;
+    }
+
+    .flexBox {
+        display: flex;
+        justify-content: space-between;
+    }
+
+</style>
+<body class="gray-bg">
+<div style="padding: 0px 28px;">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="text" class="hidden" id="CompanyId" name="companyId"/>
+                            <input type="text" id="CompanyName" onclick="selectDeptTree('CompanyId','CompanyName','0')"
+                                   placeholder="申请公司"/>
+                        </li>
+
+                        <li>
+                            <input type="text" class="hidden" name="deptId" id="treeId"/>
+                            <input type="text" id="treeName" name="deptName"
+                                   onclick="selectDeptTree('treeId','treeName','1')" placeholder="申请部门"/>
+                        </li>
+                        <li class="select-time">
+                            <input type="text" class="time-input" id="startTime" placeholder="起始时间"
+                                   name="beginTime"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="终止时间"
+                                   name="endTime"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="overviewSearch()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!--收款-->
+    <div class="row reciBox ibox">
+        <div class="ibox-title">
+            <h5>收款：<span id="receivableSum">0</span></h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row " id="receivableData">
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <div class="flexBox">
+                                <h5>工程款</h5>
+                                <p>占比：0%</p>
+                            </div>
+                            <h2>0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h5>往来款</h5>
+                            <h2>0</h2>
+                            <p>占比：0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h5>代收代付</h5>
+                            <h2>0</h2>
+                            <p>占比：0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h5>社保</h5>
+                            <h2>0</h2>
+                            <p>占比：0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h5>公积金</h5>
+                            <h2>0</h2>
+                            <p>占比：0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h5>其他收入</h5>
+                            <h2>0</h2>
+                            <p>占比：0%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <div class="">
+                                <h5>补贴</h5>
+                                <p>占比：0%</p>
+                            </div>
+                            <h2>0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--付款-->
+    <div class="row ibox">
+        <div class="ibox-title">
+            <h5>付款：<span id="paymentSum">0</span></h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row " id="paymentData">
+
+            </div>
+        </div>
+    </div>
+    <!--报销-->
+    <div class="row ibox">
+        <div class="ibox-title">
+            <h5>报销：<span id="remiSum">0</span></h5>
+        </div>
+        <div class="ibox-content">
+            <div class="row " id="remiData">
+
+            </div>
+        </div>
+    </div>
+    <!--柱状图-->
+    <div class="row ibox">
+        <div class="ibox-title">
+            柱状图表
+        </div>
+        <div class="ibox-content">
+            <div class="echarts" id="echarts-bar-chart"></div>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:src="@{/ajax/libs/report/echarts/echarts-all.js}"></script>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaOverView";
+    var receivableSum = 0//收款总计
+    var paymentSum = 0//付款总计
+    var remiSum = 0//报销总计
+    overviewSearch()
+
+    //查询
+    function overviewSearch() {
+        var search = {};
+        var htmlReceivable = ''
+        var htmlPayment = ''
+        var htmlRemi = ''
+        $.each($("#formId").serializeArray(), function (i, field) {
+            search[field.name] = field.value;
+        });
+        //收款
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + '/selectReceivableData',
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(search),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+                $.modal.disable();
+            },
+            success: function (res) {
+                $.modal.closeLoading()
+                for (var i = 0; i < res.length; i++) {
+                    htmlReceivable += '<div class="col-sm-2">\n' +
+                        '                <div class="ibox">\n' +
+                        '                    <div class="ibox-content">\n' +
+                        '                    <div class="flexBox">\n' +
+                        '                        <h5>' + res[i].receivableTypeName + '</h5>\n' +
+                        '                        <p>占比：' + res[i].proportion + '%</p>\n' +
+                        '                        </div>\n' +
+                        '                        <h2>' + res[i].sumAmount + '万元</h2>\n' +
+                        '                    </div>\n' +
+                        '                </div>\n' +
+                        '            </div>'
+                    // 总计
+                    receivableSum += res[i].sumAmount
+                }
+
+                $('#receivableData').html(htmlReceivable)
+                $('#receivableSum').html(receivableSum + '万元')
+            }
+        };
+        $.ajax(config)
+        //付款
+        var config1 = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + '/selectPaymentData',
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(search),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+                $.modal.disable();
+            },
+            success: function (res) {
+                $.modal.closeLoading()
+                for (var i = 0; i < res.length; i++) {
+                    htmlPayment += '<div class="col-sm-2">\n' +
+                        '                <div class="ibox">\n' +
+                        '                    <div class="ibox-content">\n' +
+                        '                    <div class="flexBox">\n' +
+                        '                        <h5>' + res[i].payTypeName + '</h5>\n' +
+                        '                        <p>占比：' + res[i].proportion + '%</p>\n' +
+                        '                    </div>\n' +
+                        '                        <h2>' + res[i].sumAmount + '万元</h2>\n' +
+                        '                    </div>\n' +
+                        '                </div>\n' +
+                        '            </div>'
+                    // 总计
+                    paymentSum += res[i].sumAmount
+                }
+                $('#paymentData').html(htmlPayment)
+                $('#paymentSum').html(paymentSum + '万元')
+            }
+        };
+        $.ajax(config1)
+        //报销
+        var config2 = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + '/selectReimbursementData',
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(search),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+                $.modal.disable();
+            },
+            success: function (res) {
+                $.modal.closeLoading()
+                for (var i = 0; i < res.length; i++) {
+                    htmlRemi += '<div class="col-sm-2">\n' +
+                        '                <div class="ibox">\n' +
+                        '                    <div class="ibox-content">\n' +
+                        '                    <div class="flexBox">\n' +
+                        '                        <h5>' + res[i].reimbursementTypeName + '</h5>\n' +
+                        '                        <p>占比：' + res[i].proportion + '%</p>\n' +
+                        '                    </div>\n' +
+                        '                        <h2>' + res[i].sumAmount + '万元</h2>\n' +
+                        '                    </div>\n' +
+                        '                </div>\n' +
+                        '            </div>'
+                    // 总计
+                    remiSum += res[i].sumAmount;
+                }
+                remiSum = parseFloat(remiSum).toFixed(5)
+                $('#remiData').html(htmlRemi)
+                $('#remiSum').html(remiSum + '万元')
+            }
+        };
+        $.ajax(config2)
+        // 柱状图
+        var config2 = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + '//selectPaymentReceivableReimbursementData',
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(search),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+                $.modal.disable();
+            },
+            success: function (res) {
+                $.modal.closeLoading()
+                var barChart = echarts.init(document.getElementById("echarts-bar-chart"));
+                var xAxisData = []
+                var receivableData = []
+                var paymentData = []
+                var remiData = []
+                for (var i = 0; i < res.length; i++) {
+                    xAxisData.push(res[i].date)
+                    receivableData.push(res[i].receivablesSum)
+                    paymentData.push(res[i].paymentSum)
+                    remiData.push(res[i].reimbursementSum)
+                }
+                var baroption = {
+                    color: ['#89e7b3', '#4cabce', '#ffba00'],
+                    title: {
+                        text: '收款，付款，报销柱状图'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['收款', '付款', '报销']
+                    },
+                    calculable: true,
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: xAxisData,
+                            axisTick: {
+                                show: false
+                            },
+                            axisLine: {
+                                show: false
+                            },
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            splitNumber: 5,
+                            axisLabel: {
+                                textStyle: {
+                                    color: '#999'
+                                }
+                            },
+                            axisLine: {
+                                show: false
+                            },
+                            axisTick: {
+                                show: false
+                            },
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '收款',
+                            type: 'bar',
+                            data: receivableData,
+                            showBackground: true
+                        },
+                        {
+                            name: '付款',
+                            type: 'bar',
+                            data: paymentData,
+
+                            showBackground: true
+
+                        },
+                        {
+                            name: '报销',
+                            type: 'bar',
+                            data: remiData,
+                            showBackground: true
+                        }
+                    ]
+                };
+                barChart.setOption(baroption);
+                window.onresize = barChart.resize;
+            }
+        };
+        $.ajax(config2)
+        //清零
+        receivableSum = 0//收款总计
+        paymentSum = 0//付款总计
+        remiSum = 0//报销总计
+    }
+</script>
+</body>
+</html>

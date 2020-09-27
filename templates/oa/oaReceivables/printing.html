@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div style="position: fixed; z-index: 10; top: 30px;right: 40px">
+    <button class="btn btn-warning btn-rounded btn-sm" onclick="printing()"><i class="fa fa-download"></i>打印</button>
+</div>
+<div id="printing">
+    <div th:each="obj,objStat :${oaReceivablesVoList}">
+        <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+            <!--抬头  -->
+            <div class="hr-line-dashed"></div>
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <table class="table table-bordered table-condensed table-bot">
+                                <caption class="text-center">
+                                    <h2>收款单</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">编号：</td>
+                                    <td>[[${obj.oaReceivables.code}]]</td>
+                                    <td class="active">所属公司：</td>
+                                    <td>[[${obj.oaReceivables.companyName}]]</td>
+
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人：</td>
+                                    <td>[[${obj.oaReceivables.userName}]] </td>
+                                    <td class="active">项目名称：</td>
+                                    <td>[[${obj.oaReceivables.projectName}]]
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门：</td>
+                                    <td>[[${obj.oaReceivables.deptName}]]</td>
+                                    <td class="active">申请日期：</td>
+                                    <td colspan="3">[[${#dates.format(obj.oaReceivables.applyDate, 'yyyy-MM-dd HH:mm:ss')}]]
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active"><span style="color: red;">*</span>收款事由：</td>
+                                    <td>[[${obj.oaReceivables.reason}]]</td>
+                                    <td class="active">收款日期：</td>
+                                    <td colspan="3">[[${#dates.format(obj.oaReceivables.receivablesDate, 'yyyy-MM-dd HH:mm:ss')}]]
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">收款金额：</td>
+                                    <td>[[${obj.oaReceivables.money}]]</td>
+                                    <td class="active">金额大写：</td>
+                                    <td colspan="3">[[${obj.oaReceivables.moneyUpcase}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">款项来源人：</td>
+                                    <td colspan="3">[[${obj.oaReceivables.payee}]]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <br>
+                            <h4>收款明细</h4>
+                            <table class="table table-bordered table-condensed" >
+                                <tr>
+                                    <th style="width: 16%">收款类型</th>
+                                    <th style="width: 12%">款项类别</th>
+                                    <th style="width: 12%">款项用途</th>
+                                    <th style="width: 12%">收款金额</th>
+                                    <th style="width: 12%">备注</th>
+                                </tr>
+                                <tr th:each="detail,detailStat :${oaReceivablesVoList[objStat.index].receiveDetailList}">
+                                    <td th:classappend="${'receivableType'+ (objStat.index) + (detailStat.index)}"></td>
+                                    <td th:classappend="${'paymentType'+ (objStat.index)+ (detailStat.index) }"></td>
+                                    <td th:classappend="${'moneyPurpost'+ (objStat.index)+ (detailStat.index)}"></td>
+                                    <td>[[${detail.receivableCost}]]</td>
+                                    <td>[[${detail.remark}]]</td>
+                                </tr>
+                                <tr th:if="${oaReceivablesVoList[objStat.index].receiveDetailList == null}">
+                                    <td colspan="8" style="text-align: center">暂无数据</td>
+                                </tr>
+                            </table>
+                            <br>
+                            <h4>冲抵借款</h4>
+                            <table class="table table-bordered table-condensed" >
+                                <tr>
+                                    <th style="width: 16%">借款编号</th>
+                                    <th style="width: 12%">借款用途</th>
+                                    <th style="width: 12%">借款金额</th>
+                                    <th style="width: 12%">冲抵金额</th>
+                                    <th style="width: 12%">剩余可冲抵金额</th>
+                                </tr>
+                                <tr th:each="detail,detailStat :${oaReceivablesVoList[objStat.index].borrowMoneyList}">
+                                    <td>[[${detail.code}]]</td>
+                                    <td>[[${detail.borrowReason}]]</td>
+                                    <td>[[${detail.borrowAmount}]]</td>
+                                    <td>[[${detail.offsetAmount}]]</td>
+                                    <td>[[${detail.borrowMoney}]]</td>
+                                </tr>
+                                <tr th:if="${oaReceivablesVoList[objStat.index].borrowMoneyList == null}">
+                                    <td colspan="8" style="text-align: center">暂无数据</td>
+                                </tr>
+                            </table>
+                            <br>
+                            <h4>审批流程</h4>
+                            <table class="table table-bordered table-condensed" >
+                                <tr>
+                                    <th></th>
+                                    <th style="width: 25%">流程名称</th>
+                                    <th style="width: 25%">开始时间</th>
+                                    <th style="width: 25%">审批信息</th>
+                                    <th style="width: 25%">审核时间</th>
+                                </tr>
+                                <tr th:each="approval,approvalStat :${oaReceivablesVoList[objStat.index].processList}">
+                                    <td>[[${approvalStat.index}]]</td>
+                                    <td>[[${approval.actName}]]</td>
+                                    <td>[[${#dates.format(approval.startTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td>[[${approval.message}]]</td>
+                                    <td>[[${#dates.format(approval.endTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="page-break-after:always;"></div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    console.log([[${oaReceivablesVoList}]]);
+    var receivableType=[[${@dict.getType("oa_receivable_type")}]]
+    var sys_pro_payment_type_relation = [[${@dict.getType('sys_pro_payment_type_relation')}]];
+    var sys_pro_payment_type = [[${@dict.getType('sys_pro_payment_type')}]];
+    var sys_pro_payment_type2_1 = [[${@dict.getType('sys_pro_payment_type2_1')}]];
+    var sys_pro_payment_type2_2 = [[${@dict.getType('sys_pro_payment_type2_2')}]];
+    var sys_pro_payment_type2_3 = [[${@dict.getType('sys_pro_payment_type2_3')}]];
+    var sys_pro_payment_type2_4 = [[${@dict.getType('sys_pro_payment_type2_4')}]];
+    var sys_pro_payment_type2_5 = [[${@dict.getType('sys_pro_payment_type2_5')}]];
+    var oaReceivablesVoList = [[${oaReceivablesVoList}]];
+
+    //字典查询
+    //收款类型
+    selectDetailDictionary(receivableType,[[${oaReceivablesVoList}]],'receiveDetailList','receivableType');
+
+    selectDetailDictionary1(sys_pro_payment_type,[[${oaReceivablesVoList}]],'receiveDetailList','paymentType');
+    //款项用途  款项类别 联动
+    var relation=[];
+    function selectDetailDictionary1(dictionary,list,detailName,value) {
+        for(var i=0;i<list.length;i++){
+            for (var j=0;j<list[i][detailName].length;j++){
+                for (var g = 0; g < sys_pro_payment_type_relation.length; g++) {
+                    if(sys_pro_payment_type_relation[g].dictLabel==list[i][detailName][j][value]){
+                        relation=eval(sys_pro_payment_type_relation[g].dictValue)
+                    }
+                }
+                var valueText = $.table.selectDictLabel(dictionary, list[i][detailName][j][value]);
+                $('.'+value+i+j).html(valueText)
+            }
+        }
+        selectDetailDictionary(relation,[[${oaReceivablesVoList}]],'receiveDetailList','moneyPurpost');
+    }
+
+
+
+    function printing() {
+        $('#printing').jqprint({
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: false
+        });
+    }
+
+</script>
+</body>
+</html>

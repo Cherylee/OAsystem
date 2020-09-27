@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('审批进项发票')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="" id="form-sysProCostBill-edit" th:object="${sysProCostBill}">
+                        <input class="form-control hide" name="id" th:value="*{id}" type="text"  />
+                        <table class="table table-bordered table-condensed table-bot">
+                            <caption class="text-center">
+                                <h2>进项发票</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td  colspan="2">[[*{proposerName}]]</td>
+                                <td class="active">所属公司：</td>
+                                <td  colspan="2">[[*{companyName}]]
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td  colspan="2">[[*{deptName}]]</td>
+                                <td class="active">关联工程：</td>
+                                <td  colspan="2">
+                                    [[*{projectName}]]
+                                </td>
+
+                            </tr>
+                            <tr> <td class="active">申请日期：</td>
+                                <td colspan="2">[[${#dates.format(sysProCostBill.applyDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+
+                                <td class="active">工程地点：</td>
+                                <td  colspan="2">[[*{projectLoc}]]</td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">开票类型：</td>
+                                <td  colspan="2"><select name="billType" class="form-control" th:field="*{billType}"
+                                                         th:with="type=${@dict.getType('sys_pro_invoice_type')}" disabled>
+                                    <option value="">--请选择--</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select></td>
+                                <td  class="active">发票金额（含税）：</td>
+                                <td  colspan="2">[[*{billAmount}]]</td>
+                            </tr>
+                            <!--<tr>
+                                <td class="active">税率：</td>
+                                <td colspan="5"><input id="taxRate" name="taxRate" class="form-control" type="text"></td>
+                            </tr>-->
+                            <tr>
+                                <td class="active">不含税开票金额 ：</td>
+                                <td colspan="2">[[*{invoiceTaxAmount}]]</td>
+                                <td class="active">税额 ：</td>
+                                <td colspan="2">[[*{taxAmount}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active" rowspan="6">销售方信息：</td>
+                                <td class="active">销售公司名称 ：</td>
+                                <td>[[*{saleCompanyName}]]
+                                </td>
+                                <td class="active" rowspan="2">付款方式 ：</td>
+                                <td rowspan="2">
+                                    <select name="payWay" class="form-control" disabled th:field="*{payWay}"
+                                            th:with="type=${@dict.getType('sysPro_pay_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">纳税人识别号：</td>
+                                <td >[[*{taxpayerId}]]</td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">销售方地址 ：</td>
+                                <td>
+                                    [[*{saleLocation}]]
+                                </td>
+                                <td class="active">是否签字：</td>
+                                <td>
+                                    <select name="signed" class="form-control" disabled th:field="*{signed}"
+                                            th:with="type=${@dict.getType('sys_yes_no')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">销售方电话：</td>
+                                <td colspan="3">[[*{salePhone}]]</td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">开户行 ：</td>
+                                <td colspan="3">[[*{bankName}]]
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">银行账号：</td>
+                                <td colspan="3">[[*{bankAccount}]] </td>
+                            </tr>
+                            <tr>
+
+                                <td class="active">备注 ：</td>
+                                <td colspan="5">[[*{remark}]]
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class=" select-table table-striped">
+                        <table class="table table-bordered table-bot" id="detail">
+
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${sysProCostBill.id}]],'oa/sysProCrossCertifice/copy','flag')">
+                                抄送</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- 弹出框 -->
+<div class="modal inmodal fade" id="myModal5" role="dialog"
+     aria-hidden="true">
+    <input id="myModal5Value" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+
+                <form class="form-horizontal m" id="form-Condition-add">
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">发票号码：</label>
+                                <div class="col-sm-8">
+                                    <input id="billCode" name="billCode" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">开票日期：</label>
+                                <div class="col-sm-8">
+                                    <input id="billDate" name="billDate" class="form-control time-input" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">发票内容：</label>
+                                <div class="col-sm-8">
+                                    <input id="billText" name="billText" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">发票金额：</label>
+                                <div class="col-sm-8">
+                                    <input   name="billAmount" class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">税额：</label>
+                                <div class="col-sm-8">
+                                    <input id="tax" name="tax" class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">关联合同id：</label>
+                                <div class="col-sm-8">
+                                    <input id="contractId" name="contractId" class="form-control" type="text" onclick="selectContract()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">附件：</label>
+                                <div class="col-sm-10" id="fileUpload"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                        id="insertCondition">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProCostBill"
+    //流程
+    var data = {};
+    data.procInstId=[[${sysProCostBill.procInstId}]];
+    data.id = [[${sysProCostBill.id}]];
+    selectActProcessList(data,"approveInfoId");
+    //附件
+    var attachmentList = new Array();
+
+
+
+    //同意
+    function agree(){
+        if([[${sysProCostBill.billStatus}]]=='0'){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-15/sys_pro_cost_bill/"+[[${sysProCostBill.id}]]);
+        }else if([[${sysProCostBill.billStatus}]]=='1'){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-16/sys_pro_cost_bill/"+[[${sysProCostBill.id}]]);
+        }else{
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-17/sys_pro_cost_bill/"+[[${sysProCostBill.id}]]);
+        }
+
+    }
+    //不同意
+    function disagree(){
+        if([[${sysProCostBill.billStatus}]]=='0'){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-15/sys_pro_cost_bill/"+[[${sysProCostBill.id}]]);
+        }else if([[${sysProCostBill.billStatus}]]=='1'){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-16/sys_pro_cost_bill/"+[[${sysProCostBill.id}]]);
+        }else{
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-17/sys_pro_cost_bill/"+[[${sysProCostBill.id}]]);
+        }
+    }
+
+    //返回
+    function backAway(){
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+    //修改行
+    var imgsUrl = new Array();
+    function editRow(id,rowId,rowIndex,attachmentList){
+        var da=$('#'+id).bootstrapTable('getRowByUniqueId', rowId);
+        $('#myModal5Value').val(rowIndex);
+        $('#myModal5').modal('show');
+        $('#form-Condition-add').loadData(da)
+        var html='<div class="file-loading">'+
+            '<input id="uploadFileId2" type="file" multiple>'+
+            '</div>'
+        $('#form-Condition-add').loadData(da[0])
+        $('#fileUpload').html(html)
+        //明细   上传附件
+        var file=[]
+        var list=attachmentList.split(',')
+        for(var i=0; i<list.length; i++){
+            file.push(list[i]);
+        }
+        var uploadOption1 = {
+            id:'uploadFileId2',
+            uploadUrl:null,
+            deleteUrl:null,
+            //deleteExtraData:deleteExtraData,
+            imgsUrl:file
+        }
+        //附件
+        $.common.uploadFile(uploadOption1);
+        downFile();
+    }
+    //明细表格
+    var options = {
+        id:'detail',
+        url:ctx+'oa/sysProCostBillDetail/list',
+        clickToSelect : true,
+        showSearch : false,
+        showRefresh : false,
+        showToggle : false,
+        showColumns : false,
+        showPageGo : false,
+        pagination : false,
+        uniqueId:'id',
+        queryParams:{'mainId':[[${sysProCostBill.id}]]},
+        showFooter: true,
+        modalName: "进项发票明细",
+        showExport: false,
+        columns: [{
+            checkbox: false,
+            visible: false
+        },
+            {
+                field : 'id',
+                title : 'id',
+                visible: false
+            },
+            {
+                field : 'mainId',
+                title : '主票据id',
+                sortable: true,
+                visible: false
+            },
+            {
+                field : 'billCode',
+                title : '发票号码',
+                sortable: true
+            },
+            {
+                field : 'billDate',
+                title : '开票日期',
+                sortable: true
+            },
+            {
+                field : 'billText',
+                title : '发票内容',
+                sortable: true
+            },
+            {
+                field : 'billAmount',
+                title : '发票金额',
+                sortable: true,
+                footerFormatter:function (value) {
+                    var sumBalance = 0;
+                    for (var i in value) {
+                        sumBalance += parseFloat(value[i].billAmount);
+                    }
+                    return  '合计：'+sumBalance;
+                }
+            },
+            {
+                field : 'tax',
+                title : '税额',
+                sortable: true
+            },
+            {
+                field : 'contractId',
+                title : '关联合同id',
+                sortable: true
+            },
+            {
+                field : 'attachmentList',
+                title : '关联其他模块',
+                formatter: function(value, row, index) {
+                    var imgName=''
+                    for (var i=0;i<value.length;i++){
+                        imgName+=value[i].attachmentName+'<br>'
+                    }
+                    return '<span style="color: blue;">'+imgName+'</span>'
+                }
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function(value, row, index) {
+                    var action=[]
+                    var imgName=''
+                    var list=row.attachmentList
+                    for (var i=0;i<list.length;i++){
+                        imgName+=list[i].attachmentUrl+','
+                    }
+                    action.push('<a onclick="editRow(\'detail\',\''+row.id+'\',\''+index+'\',\''+imgName+'\')">查看</a>')
+                    return action.join('')
+                }
+            }]
+    };
+
+
+    $(function() {
+
+        $.table.init(options);
+
+    });
+</script>
+</body>
+</html>

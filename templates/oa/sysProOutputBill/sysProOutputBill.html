@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('销项发票列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								<p>项目：</p>
+								<input class="form-control" id="proName" type="text"  onclick="selectPro('projectId','proName')" />
+								<input type="hidden" id="projectId" name="projectId" />
+							</li>
+
+							<li>
+								编号：<input type="text" name="code"/>
+							</li>
+
+							<li>
+								状态：
+								<select name="status" th:with="type=${@dict.getType('oa_leave_status')}">
+									<option value="">所有</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+
+							<li>
+								发票类型：
+								<select name="invoiceType" th:with="type=${@dict.getType('sys_pro_invoice_type')}">
+									<option value="">所有</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:sysProOutputBill:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:sysProOutputBill:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+<!--				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:sysProOutputBill:remove">-->
+<!--					<i class="fa fa-remove"></i> 删除-->
+<!--				</a>-->
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:sysProOutputBill:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:sysProOutputBill:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:sysProOutputBill:remove')}]];
+        var applyState=[[${@dict.getType('oa_leave_status')}]];
+        var prefix = ctx + "oa/sysProOutputBill";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "销项发票",
+                sortName : "createTime",
+                sortOrder : "desc",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'projectId', 
+					title : '项目id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'deptId', 
+					title : '部门id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '编号',
+					sortable: true
+				},
+				{
+					field : 'deptName', 
+					title : '申请部门',
+					sortable: true
+				},
+				{
+					field : 'proposer', 
+					title : '申请人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'userName', 
+					title : '申请人',
+					sortable: true
+				},
+				{
+					field : 'applyTime', 
+					title : '申请日期',
+					sortable: true
+				},
+				{
+					field : 'proName', 
+					title : '项目名称',
+					sortable: true
+				},
+				{
+					field : 'companyId', 
+					title : '公司id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'companyName', 
+					title : '公司名称',
+					sortable: true
+				},
+				{
+					field : 'totalTax', 
+					title : '发票税额',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '审批状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(applyState, value);
+		        	}
+				},
+				{
+					field : 'invoiceType', 
+					title : '发票类型（0：增值税专用发票，1：增值税普通发票，2：普通商业发票）',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'invoiceRate', 
+					title : '发票税率',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'invoiceMoneyUpper', 
+					title : '发票金额大写',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'purchaseCompanyName', 
+					title : '购买方公司名称',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'purchaseBankAccount', 
+					title : '购买方银行账号',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'purchasePhoneNum', 
+					title : '购买方电话',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'purchaseOpenBank', 
+					title : '购买方开户行',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'purchaseAddress', 
+					title : '购买方地址',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'purchaseTaxNum', 
+					title : '购买方税号',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'procInstId', 
+					title : '流程id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '修改时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改者',
+					sortable: true,
+					visible: false
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	if(row.allowedEdit==true)
+						{
+							actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+							// actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						}
+						if(row.status=='0'){
+							actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+						}
+		            	return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('支出报表')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body class="white-bg">
+<div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-top"></div>
+            支出汇总报表<hr style="left: 92px;">
+        </div>
+        <div class="col-md-7" style="min-height: 300px">
+            <div class=" select-table table-striped">
+                <table  id="expenditureSummary" class="table table-bordered table-bot" ></table>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="echarts" id="echarts-pie-chart" style="top: 50px;"></div>
+        </div>
+
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            收款用途报表<hr style="left: 92px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="collectionPurpose" class="table table-bordered table-bot" ></table>
+
+        </div>
+        <div class="hide" style="padding-top: 10px;text-indent: 10px">提示：该报表将显示每笔项目收款的实际用途(前提是在执行付款,扣款,退款,借款,报销,清账等需消耗项目当前余额的操作时关联上对应的收款记录)</div>
+
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/oaReceivables";
+    $(function () {
+
+        //箭头方向
+        var arrowList = $(".arrow");
+        arrowList.click(function () {
+            var obj=$(this);
+            obj.toggleClass("arrow-top");
+            obj.toggleClass("arrow-bottom");
+            obj.parent().siblings().toggleClass("hide");
+        })
+
+        //支出汇总报表
+        var expenditureSummary = {
+            id:'expenditureSummary',
+            url:prefix + '/selectExpenditureData',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    field:'type',
+                    title: '支出类型',
+                    align:'center',
+                    halign:'center',
+                    formatter:function (value,row, index) {
+                        return '<a onclick="openList(\'' + row.type+ '\')">'+value+'</a>';
+                    }
+                },
+                {
+                    field:'proportion',
+                    title: '占比',
+                    align:'center',
+                    halign:'center',
+                    formatter:function (value) {
+                        return parseFloat(value).toFixed(2)+'%';
+                    }
+
+                },
+                {
+                    field:'number',
+                    title: '支出次数',
+                    align:'center',
+                    halign:'center',
+                    formatter:function (value) {
+                        return value+'次';
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].number);
+                        }
+                        return sumBalance+'次';
+                    }
+
+
+                },
+                {
+                    field:'sumAmount',
+                    title: '支出总金额',
+                    align:'center',
+                    halign:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumAmount);
+                        }
+                        return sumBalance;
+                    }
+
+                },
+                {
+                    field:'max',
+                    title: '最多的一笔支出',
+                    align:'center',
+                    halign:'center',
+
+                }]
+        };
+        $.table.init(expenditureSummary);
+
+        //报表饼图
+        var pieChartData=[];
+        var dataName=[];
+        var config = {
+            url: prefix+'/selectExpenditureData',
+            type: 'post',
+            dataType: 'json',
+            data:  {"projectId": [[${projectId}]]},
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function(result) {
+                var data = result.rows;
+                for (var i=0 ;i< data.length ;i++){
+                    var dateJson ={};
+                    dateJson.value= data[i].sumAmount;
+                    dateJson.name = data[i].type;
+                    pieChartData.push(dateJson);
+                    dataName.push(data[i].type);
+                }
+                $.modal.closeLoading();
+                var pieChart = echarts.init(document.getElementById("echarts-pie-chart"));
+                var pieOptions = {
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        orient : 'vertical',
+                        x : 'left',
+                        data:dataName,
+                    },
+                    calculable : true,
+                    series : [
+                        {
+                            name:'费用名称',
+                            type:'pie',
+                            radius : '75%',
+                            center: ['60%', '55%'],
+                            data:pieChartData,
+                        }
+                    ]
+                };
+
+                pieChart.setOption(pieOptions);
+                $(window).resize(pieChart.resize);
+            }
+        };
+        $.ajax(config);
+
+        var paymentType=[[${@dict.getType("sys_pro_payment_type")}]]
+        //收款用途报表
+        var collectionPurpose = {
+            id:'collectionPurpose',
+            url: prefix + '/selectReceivablesWay',
+            updateUrl: prefix2 + "/edit/{id}",
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter: true,
+            columns:[
+                {
+                    title : '',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        console.log(row);
+                        return $.table.serialNumber(index);
+                    },
+                    footerFormatter:function (value) {
+                        return "小计：";
+                    }
+                },
+                {
+                    field : 'code',
+                    title: '编号',
+                    align:'center',
+                    halign:'center',
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'receivablesDate',
+                    title: '交款日期',
+                    align:'center',
+                    halign:'center',
+                },
+                {
+                    field : 'payee',
+                    title: '交款人',
+                    align:'center',
+                    halign:'center',
+                },
+                {
+                    field : 'paymentType',
+                    title: '款项类别',
+                    align:'center',
+                    halign:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(paymentType, value);
+                    }
+                },
+                {
+                    field : 'moneyPurpost',
+                    title: '款项用途',
+                    align:'center',
+                    halign:'center',
+                },
+                {
+                    field : 'receivableCost',
+                    title: '到账金额',
+                    align:'center',
+                    halign:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].receivableCost);
+                        }
+                        return sumBalance;
+                    }
+                }
+                // {
+                //     field : 'code',
+                //     title: '剩余可用金额',
+                //     align:'center',
+                //     halign:'center',
+                //     sortable: true,
+                //
+                // },
+                // {
+                //     field : 'code',
+                //     title: '付其他费用',
+                //     align:'center',
+                //     halign:'center',
+                //     sortable: true,
+                //
+                // }
+                ]
+        };
+        $.table.init(collectionPurpose);
+    });
+
+    function openList(type) {
+        window.parent.openExpensePopup(type,[[${projectId}]]);
+    }
+
+</script>
+</body>
+</html>

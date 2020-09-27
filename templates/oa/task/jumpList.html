@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head>
+	<th:block th:include="include :: header('任务列表')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="config-form">
+					<!-- <div class="select-list">
+						<ul>
+						    <li>
+								申请人：<input type="text" name="proposer"/>
+							</li>
+							<li>
+								类别：
+								<select name="leave_type" th:with="type=${@dict.getType('oa_leave_type')}">
+									<option value="">所有</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div> -->
+				</form>
+			</div>
+			
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+
+	var prefix = ctx + "oa/task";
+	
+	var approveType = [[${@dict.getType('oa_examine_type')}]];
+
+    $(function () {
+        var options = {
+        	uniqueId: "id",
+            url: prefix + "/getJumpList",
+            modalName: "任务处理",
+            search: false,
+            showExport: false,
+            columns: [{
+                checkbox: true
+            },
+            {
+                field: 'id',
+                title: 'id',
+                visible: false
+            },
+            {
+                field: 'userName',
+                title: '申请人'
+            },
+            {
+                field: 'procInstId',
+                title: '流程id'
+            },
+            {
+                field: 'taskId',
+                title: '任务id'
+            },
+            {
+                field: 'nodeName',
+                title: '当前审批节点'
+            },
+            {
+                field: 'type',
+                title: '类型',
+                formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(approveType, value);
+	        	}
+            },
+            {
+                field: 'applyTimeFrom',
+                title: '申请时间从'
+            },
+            {
+                field: 'applyTimeTo',
+                title: '申请时间到'
+            },
+            {
+                field: 'applyDays',
+                title: '申请天数',
+                formatter: function (value, row, index) {
+                	if(value==null){
+                		return "-"
+                	}else{
+	                	return value+" 天"
+                	}
+                }
+            },
+            {
+                field: 'applyReason',
+                title: '申请事由'
+            },
+            {
+                field: 'createTime',
+                title: '创建日期'
+            },
+            {
+                field: 'remark',
+                title: '备注'
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var actions = [];
+                    actions.push('<a class="btn btn-sm btn-primary " href="#" onclick="approveTab(\''+row.type+'\',\''+row.id+'\',\''+row.taskId+'\')"><i class="fa fa-edit"></i>跳转到指定节点</a>');
+                    return actions.join('');
+                }
+            }]
+        };
+        $.table.init(options);
+    });
+    
+    //打开审批页面
+    function approveTab(type,id,taskId){
+    	 $.modal.openFullS("跳转任意节点", prefix+"/jumpAnyNodeView/"+taskId);
+    }
+    
+</script>
+</body>
+</html>

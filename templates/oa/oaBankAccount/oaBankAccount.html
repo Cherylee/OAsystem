@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('银行账户列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li><input type="hidden" id="companyId" name="companyId"/>
+                            <input type="text" id="companyName"
+                                   onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+                        </li>
+                        <li>
+                            <input type="text" name="userName" placeholder="申请人"/>
+                        </li>
+                        <li><select name="type"
+                                    th:with="type=${@dict.getType('oa_bank_type')}">
+                            <option value="">类型</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li class="select-time">
+                            <label>申请时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+                        <li><a class="btn btn-primary btn-rounded btn-sm"
+                               onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm"
+                               onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()"
+               shiro:hasPermission="oa:oaBankAccount:add"> <i
+                    class="fa fa-plus"></i> 添加
+            </a> <a class="btn btn-primary btn-edit disabled"
+                    onclick="$.operate.editTab()"
+                    shiro:hasPermission="oa:oaBankAccount:edit"> <i
+                class="fa fa-edit"></i> 修改
+        </a>
+
+            <a class="btn btn-warning" onclick="$.table.exportExcel()"
+               shiro:hasPermission="oa:oaBankAccount:export"> <i
+                    class="fa fa-download"></i> 导出
+            </a>
+
+            <a class="btn btn-info" onclick="$.table.importExcel()" shiro:hasPermission="oa:oaBankAccount:import">
+                <i class="fa fa-upload"></i> 导入
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaBankAccount:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaBankAccount:remove')}]];
+    var prefix = ctx + "oa/oaBankAccount";
+    var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+    var bankType = [[${@dict.getType('oa_bank_type')}]];
+    var bankAccountType = [[${@dict.getType('oa_bankAccount_type')}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            importUrl: prefix + "/importData",
+            importTemplateUrl: prefix + "/importTemplate",
+            modalName: "银行账户",
+            sortName: "createTime",
+            clickToSelect: true,
+            sortOrder: "desc",
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'code',
+                    title: '编号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = null;
+                        if (row.code) {
+                            text = row.code
+                        } else {
+                            text = '暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editTab(\'' + row.id + '\')">' + text + '</a>'
+                    }
+                },
+                {
+                    field: 'accountName',
+                    title: '账户名称',
+                    sortable: true
+                },
+                {
+                    field: 'accountNo',
+                    title: '账号',
+                    sortable: true
+                },
+                {
+                    field: 'bankName',
+                    title: '开户行名称',
+                    sortable: true
+                },
+                {
+                    field: 'openAccountDate',
+                    title: '最迟办结时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'accountType',
+                    title: '账户类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bankAccountType, value);
+                    }
+                },
+                {
+                    field: 'status',
+                    title: '审批状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oaStatus, value);
+                    },
+                    visible: false
+                },
+                {
+                    field: 'type',
+                    title: '账户状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bankType, value);
+                    }
+                },
+                {
+                    field: 'proposer',
+                    title: '申请人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'userName',
+                    title: '申请人',
+                    sortable: true
+                },
+                {
+                    field: 'companyId',
+                    title: '公司id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'companyName',
+                    title: '公司',
+                    sortable: true
+                },
+                {
+                    field: 'deptId',
+                    title: '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deptName',
+                    title: '部门',
+                    sortable: true
+                },
+                {
+                    field: 'projectId',
+                    title: '工程id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'applyTime',
+                    title: '申请日期',
+                    sortable: true
+                },
+                {
+                    field: 'licenseTime',
+                    title: '营业执照取得时间',
+                    sortable: false,
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'procInstId',
+                    title: '流程id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'keeper',
+                    title: '印鉴保管人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'area',
+                    title: '开户所在地',
+                    sortable: true
+                },
+                {
+                    field: 'reason',
+                    title: '开户理由',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'openId',
+                    title: '销户时关联的开户id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createTime',
+                    title: '创建日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '修改时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '修改者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var text = '查看详情'
+                        var edit = ''
+                        var classN = 'btn-info'
+                        if (row.status == '3' || row.status == '99') {
+                            if (row.allowedEdit == true) {
+                                edit = editFlag
+                                text = '编辑'
+                                classN = 'btn-success'
+                                actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                            }
+                        } else {
+                            actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                        }
+                        if (row.status == '99' && row.allowedEdit == true) {
+                            // actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        }
+                        if (row.status == '2' && row.allowedEdit == true) {
+                            actions.push('<a class="btn btn-danger btn-xs ' + edit + '" href="#" onclick="openTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>销户</a> ');
+                        }
+                        if (row.status == '0' && row.allowedEdit == true) {
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //  跳转
+    function openTab(id) {
+        $.modal.openTab("销户", prefix + "/toBankAccountCancel/" + id);
+    }
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+        if ($.table.selectColumns('type') == '1') {
+            $.modal.alertWarning("不能选择销户账户哦！");
+            return;
+        }
+        $.modal.close();
+        return target[0];
+    }
+</script>
+</body>
+
+<!-- 导入区域 -->
+<script id="importTpl" type="text/template">
+    <form enctype="multipart/form-data" class="mt20 mb10">
+        <div class="col-xs-offset-1">
+            <input type="file" id="file" name="file"/>
+            <div class="mt10 pt5">
+                	<a onclick="$.table.importTemplate()" class="btn btn-default btn-xs"><i class="fa fa-file-excel-o"></i> 下载模板</a>
+            </div>
+            <font color="red" class="pull-left mt10">
+                提示：仅允许导入“xls”或“xlsx”格式文件！
+            </font>
+        </div>
+    </form>
+</script>
+
+</html>

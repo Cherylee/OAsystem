@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('收利息')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaInterest-add" th:object="${oaBorrowMoney}">
+<!--                        <input id="id" name="id" th:field="*{id}" type="hidden">-->
+                        <input id="borrowId" name="borrowId" th:value="*{id}" type="hidden">
+                        <table class="table table-bordered table-condensed"
+                               style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>收利息</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">编号：</td>
+                                <td><input class="form-control" type="text" name="code"
+                                           th:field="*{code}" readonly/></td>
+                                <td class="active">所属公司：</td>
+                                <td><input type="hidden" name="companyId" id="companyId" th:field="*{companyId}" />
+                                    <input type="text" name="companyName" id="companyName" class="form-control" readonly="readonly"
+                                           onclick="selectDeptTree('companyId','companyName','0')" th:value="*{companyName}" /></td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td><input class="form-control" type="text" name="userName" readonly
+                                           th:value="*{userName}" /></td>
+                                <td class="active">项目名称：</td>
+                                <td>
+                                    <!-- 工程id -->
+                                    <input id="projectId" name="projectId" class="form-control" type="hidden" >
+                                    <input id="projectName" class="form-control" name="projectName" type="text" th:field="*{projectName}" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td>
+                                    <input id="treeId" name="deptId" class="form-control" type="hidden" th:field="*{deptId}">
+                                    <input id="treeName" name="deptName" class="form-control" readonly="readonly"
+                                           type="text" onclick="selectDeptTree('treeId','treeName','1')" th:value="*{deptName}">
+                                </td>
+                                <td class="active">申请日期：</td>
+                                <td>
+                                    <input id="applyTime" name="applyTime" th:value="${#dates.format(oaBorrowMoney.applyTime, 'yyyy-MM-dd')}"
+                                           class="form-control time-input-data" type="text" readonly="readonly" disabled="disabled">
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>借款类型：</td>
+                                <td><select name="borrowType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_borrow_type')}"
+                                            required="required" id="borrowType" th:field="*{borrowType}">
+                                    <option value="">--请选择--</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select></td>
+                                <td class="active">借款人：</td>
+                                <td><input class="form-control" type="text" name="borrower"
+                                           th:field="*{borrower}" /></td>
+                            </tr>
+                            <tr>
+                                <td class="active">借款金额：</td>
+                                <td><input type="number" class="form-control"
+                                           name="borrowAmount" th:field="*{borrowAmount}" id="borrowAmount"/></td>
+                                <td class="active">金额大写：</td>
+                                <td>
+                                    <input id="amountUpcase" name="amountUpcase" class="form-control" type="text"
+                                           th:field="*{amountUpcase}" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active" colspan="4" style="text-align: center ;font-size: 15px">利息明细</td>
+                            </tr>
+                            <tr>
+                                <td class="active">收款日期：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="receiptDate" name="receiptDate" class="form-control time-input-data currentDate" type="text" >
+                                    </div>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>利率：</td>
+                                <td>
+                                    <input id="rate" name="rate" th:field="*{rate}" type="hidden">
+                                    <input id="rate2" name="rate2" class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">利息所属期开始：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="interestPeriodStart" name="interestPeriodStart" class="form-control time-input-data" type="text">
+                                    </div>
+                                </td>
+                                <td class="active">利息所属期结束：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="interestPeriodEnd" name="interestPeriodEnd" class="form-control time-input-data" type="text">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">本期利息：</td>
+                                <td>
+                                    <input id="interestReceipt" name="interestReceipt" class="form-control" type="text">
+                                </td>
+                                <td class="active">已收利息：</td>
+                                <td>
+                                    <input id="alreadyReceiptInterest" name="alreadyReceiptInterest" class="form-control" type="text" th:value="${receiveMoney}" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple >
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<th:block th:include="include :: lastNode" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaBorrowMoney";
+    var prefix2 = ctx + "oa/oaInterest";
+    var lastNodeId=[[${oaBorrowMoney.id}]];
+    var actDefineId=[[${oaBorrowMoney.actDefineId}]];
+    var lastStatus=[[${oaBorrowMoney.status}]];
+    //选择工程
+    var pId = null;
+    var pName = null;
+    function selectPro(id, name) {
+        pId = id;
+        pName = name;
+        var options = {
+            title : '选择工程',
+            width : "1200",
+            url : ctx + "business/jyTenderNotice",
+            callBack : doSubmit1
+        };
+        $.modal.openOptions(options);
+    }
+
+    //利率反显
+    var rate2 = ([[${oaBorrowMoney.rate}]]*100).toFixed(2)
+    $('#rate2').val(rate2+'%');
+
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        console.log(data)
+        $('#' + pId).val(data.id)
+        $('#' + pName).val(data.projectName)
+    }
+    var attachmentList = new Array();
+    var option2={
+        id:'uploadFileId',
+        uploadUrl:null,
+        deleteUrl:null,
+        deleteExtraData:null,
+        imgsUrl:new Array(),
+        initialPreviewConfig:null
+    }
+    $.common.uploadFile(option2);
+
+
+    //保存草稿
+    function saveDraft() {
+        var data = $('#form-oaInterest-add').serializeObject();
+        data.attachmentList = attachmentList;
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix2 + "/saveDraft", data);
+        }
+
+    }
+    //提交
+    function submitHandler() {
+        var data = $('#form-oaInterest-add').serializeObject();
+        data.attachmentList = attachmentList;
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix2 + "/add", data);
+        }
+    }
+
+    //自动大小写转换
+    coverUpper('borrowAmount','amountUpcase')
+
+</script>
+</body>
+</html>

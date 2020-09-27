@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('印章列表')"/>
+	<style>
+		#formId .select-list > ul > li p {
+			width: 120px;
+		}
+	</style>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="formId">
+				<div class="select-list">
+					<ul>
+						<li>
+							<select id="type" class="selectpicker" name="type"
+									th:with="type=${@dict.getType('oa_seal_type')}">
+								<option value=""> 印章类型</option>
+								<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+							</select>
+						</li>
+						<li>
+							<input type="hidden" id="companyId" name="companyId"/> <input
+								type="text" id="companyName"
+								onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+						</li>
+						<li>
+							<input type="text" id="safekeepingDeptIdName"
+								   onclick="selectDeptTree('safekeepingDeptId','safekeepingDeptIdName','1')"
+								   placeholder="保管部门"/>
+							<input name="safekeepingDeptId" id="safekeepingDeptId" type="hidden"/>
+						</li>
+
+						<li>
+							<input type="text" id="safekeepingByaName"
+								   onclick="selectUserById('safekeepingBy','safekeepingByaName')" placeholder="保管人"/>
+							<input name="safekeepingBy" id="safekeepingBy" type="hidden"/>
+						</li>
+						<li>
+							<input name="safekeepingBy" id="engravingUserName" type="text" placeholder="刻制人"/>
+						</li>
+						<li>
+							<select name="status" class="selectpicker"
+									th:with="type=${@dict.getType('oa_seal_status')}">
+								<option value="">状态</option>
+								<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+							</select>
+						</li>
+
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+									class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+									class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+			<a class="btn btn-success " onclick="$.operate.addTab()" shiro:hasPermission="oa:oaSeal:add">
+				<i class="fa fa-plus"></i> 添加
+			</a>
+			<a class="btn btn-primary btn-edit disabled " onclick="$.operate.editTab()"
+			   shiro:hasPermission="oa:oaSeal:edit">
+				<i class="fa fa-edit"></i> 修改
+			</a>
+			<a class="btn btn-danger btn-del btn-del disabled " onclick="$.operate.removeAll()"
+			   shiro:hasPermission="oa:oaSeal:remove">
+				<i class="fa fa-remove"></i> 删除
+			</a>
+			<a class="btn btn-warning " onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaSeal:export">
+				<i class="fa fa-download"></i> 导出
+			</a>
+		</div>
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+		</div>
+	</div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+	var editFlag = [[${@permission.hasPermi('oa:oaSeal:edit')}]];
+	var removeFlag = [[${@permission.hasPermi('oa:oaSeal:remove')}]];
+	var prefix = ctx + "oa/oaSeal";
+	var datas = [[${@dict.getType('oa_seal_type')}]];
+	var sysYesNo = [[${@dict.getType('sys_yes_no')}]];
+	var sealStatus = [[${@dict.getType('oa_seal_status')}]];
+
+	$(function () {
+		var options = {
+			url: prefix + "/borrowList",
+			createUrl: prefix + "/add",
+			updateUrl: prefix + "/edit/{id}",
+			removeUrl: prefix + "/remove",
+			exportUrl: prefix + "/export",
+			modalName: "印章",
+			showExport: true,
+			sortName: "createTime",
+			sortOrder: "desc",
+			clickToSelect: true,
+			columns: [{
+				checkbox: true
+			},
+				{
+					field: 'id',
+					title: 'id',
+					visible: false
+				},
+				{
+					field: 'sealName',
+					title: '印章名称',
+					sortable: true
+				},
+				{
+					field: 'type',
+					title: '印章类型',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(datas, value);
+					}
+				},
+				{
+					field: 'companyName',
+					title: '公司',
+					sortable: true
+				},
+				{
+					field: 'appDept.deptName',
+					title: '部门',
+					sortable: true
+				},
+				{
+					field: 'engravingUserName',
+					title: '刻制人',
+					sortable: true
+				},
+				{
+					field: 'engravingDept.deptName',
+					title: '刻制部门',
+					sortable: true
+				},
+				{
+					field: 'safekeepingDept.deptName',
+					title: '保管部门',
+					sortable: true
+				},
+				{
+					field: 'safekeepingUserName',
+					title: '保管人',
+					sortable: true
+				},
+				{
+					field: 'createBy',
+					title: '创建者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field: 'createTime',
+					title: '创建日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field: 'canAppoint',
+					title: '可预约',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(sysYesNo, value);
+					}
+				},
+				{
+					field: 'inCompany',
+					title: '在公司',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(sysYesNo, value);
+					}
+				},
+				{
+					field: 'status',
+					title: '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(sealStatus, value);
+					}
+				},
+				{
+					field: 'remark',
+					title: '备注',
+					sortable: true
+				},
+				{
+					field: 'filingTime',
+					title: '公安备案时间',
+					sortable: true
+				},
+				{
+					field: 'updateBy',
+					title: '修改者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field: 'updateTime',
+					title: '修改时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function (value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-success modelHide btn-xs ' + editFlag + ' " href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+						actions.push('<a class="btn btn-danger modelHide btn-xs ' + removeFlag + ' " href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	/* 回显函数  */
+	function submitHandler() {
+		var target = $('#bootstrap-table').bootstrapTable('getSelections');
+		if (target.length == 0) {
+			$.modal.alertWarning("请选择一条记录");
+			return;
+		}
+		if (target.length > 1) {
+			$.modal.alertWarning("只能选择一条记录");
+			return;
+		}
+		$.modal.close();
+		return target[0];
+	}
+
+	/* 回显函数2  */
+	function submitHandler2() {
+		var target = $('#bootstrap-table').bootstrapTable('getSelections');
+		if (target.length == 0) {
+			$.modal.alertWarning("请选择一条记录");
+			return;
+		}
+		$.modal.close();
+		return target;
+	}
+
+</script>
+</body>
+</html>

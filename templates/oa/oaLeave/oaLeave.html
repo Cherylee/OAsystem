@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head>
+	<th:block th:include="include :: header('请假流程')" />
+</head>
+<body class="gray-bg">
+
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="config-form">
+					<div class="select-list">
+						<ul>
+						    <li>
+								<input type="hidden" id="proposer" name="proposer" />
+								<input type="text" id="userName" placeholder="申请人" onclick="selectUser('proposer','userName')"/>
+							</li>
+							<li><input type="hidden" id="CompanyId" name="companyId"/> <input
+									type="text" id="CompanyName"
+									onclick="selectDeptTree('CompanyId','CompanyName','0')" placeholder="申请公司"/>
+							</li>
+							<li><input type="hidden" id="deptId" name="deptId"/> <input
+									type="text" id="deptName"
+									onclick="selectDeptTree('deptId','deptName','1')" placeholder="申请部门"/>
+							</li>
+							<li>
+								<select name="leaveType" th:with="type=${@dict.getType('oa_leave_type')}">
+									<option value="">类别</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li class="select-time">
+								<label>申请时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="applyTimeFrom"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="applyTimeTo"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+			<div class="btn-group-sm hidden-xs" id="toolbar" role="group">
+				<a class="btn btn-success " onclick="$.operate.addTab()" shiro:hasPermission="oa:oaLeave:add">
+					<i class="fa fa-plus"></i> 申请
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:oaLeave:edit">
+		            <i class="fa fa-edit"></i> 修改
+		        </a>
+<!--				<a class="btn btn-danger btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaLeave:remove">-->
+<!--					<i class="fa fa-remove"></i> 删除-->
+<!--				</a>-->
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var removeFlag = [[${@permission.hasPermi('oa:oaLeave:remove')}]];
+    var editFlag = [[${@permission.hasPermi('oa:oaLeave:edit')}]];
+    
+    var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+    var oaLeaveType = [[${@dict.getType('oa_leave_type')}]];
+    
+    var prefix = ctx + "oa/oaLeave";
+
+    $(function () {
+        var options = {
+        	uniqueId: "leaveId",
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            removeUrl: prefix + "/remove",
+            updateUrl: prefix + "/edit/{id}",
+            modalName: "请假申请",
+            sortName : "createTime",
+	        sortOrder : "desc",
+            search: false,
+            showExport: false,
+            columns: [{
+                checkbox: true
+            },
+            {
+                field: 'leaveId',
+                title: '请假id',
+                visible : false
+            },
+            {
+                field: 'proposer',
+                title: '申请人ID',
+				visible : false
+            },
+			{
+                field: 'userName',
+                title: '申请人'
+            },
+			{
+				field : 'deptName',
+				title : '申请部门',
+				sortable: true
+			},
+			{
+				field : 'companyName',
+				title : '公司名称',
+				sortable: true
+			},
+			{
+				field: 'deputyName',
+				title: '职务代理人'
+			},
+            {
+                field: 'applyTimeFrom',
+                title: '申请时间从'
+            },
+            {
+                field: 'applyTimeTo',
+                title: '申请时间到'
+            },
+            {
+                field: 'leaveReason',
+                title: '请假原因'
+            },
+            {
+                field: 'leaveType',
+                title: '请假类别',
+                formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(oaLeaveType, value);
+	        	}
+                
+            },
+            {
+                field: 'status',
+                title: '状态',
+                formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(oaStatus, value);
+	        	}
+            },
+            {
+                field: 'yearHoliday',
+                title: '剩余年假'
+            },
+            {
+                field: 'procInstId',
+                title: '流程id'
+            },
+            {
+                field: 'useYearHoliday',
+                title: '是否消耗年假',
+                formatter: function (value, row, index) {
+                	if(value=='N'){
+                		return '否'
+                	}else {
+                		return '是'
+                	}
+                }
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var actions = [];
+                    var text='查看详情'
+	            	var edit=''
+			        var classN='btn-info'
+					if(row.status=='3'||row.status=='99'){
+						if (row.allowedEdit==true)
+						{
+							edit=editFlag
+							text='编辑'
+							classN='btn-success'
+							actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.leaveId + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+							// actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="remove(\'' + row.leaveId+'\',\''+row.status+ '\')"><i class="fa fa-remove"></i>删除</a> ');
+						}
+					}else
+					{
+						actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.leaveId + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+					}
+					if(row.status=='0'){
+						actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+					}
+                    return actions.join('');
+                }
+            }]
+        };
+        $.table.init(options);
+    });
+    
+    //删除
+    function  remove(id,status) {
+    	if(status!=3 && status!=0){
+    		$.modal.alertWarning("只有申请和驳回状态能被删除！");
+    		return;
+    	}
+    	$.modal.confirm("确定删除该条" + $.table._option.modalName + "信息吗？", function() {
+            var url = $.common.isEmpty(id) ? $.table._option.removeUrl : $.table._option.removeUrl.replace("{id}", id);
+            if($.table._option.type == table_type.bootstrapTreeTable) {
+            	$.operate.get(url);
+            } else {
+        	    var data = { "ids": id };
+        	    $.operate.submit(url, "post", "json", data);
+            }
+    	});
+    	
+    }
+    
+    /*用户列表*/
+    var mid='';
+    var mname=''
+    function selectUserById(id,name){
+    	mid=id;
+    	mname=name;
+		var options = {
+				title: '选择用户',
+				width: "1200",
+				url: ctx + "oa/oaApplyTemplate/selectUser",
+				callBack: doSubmit1
+			};
+			$.modal.openOptions(options);
+	}
+    function doSubmit1(index, layero){
+      var iframeWin = layero.find('iframe')[0];
+      var result = iframeWin.contentWindow.submitHandler();
+	  var data = result.data;
+	  
+	  $('#'+mname).val(data.userName);
+	  $('#'+mid).val(data.userId);
+
+    } 
+
+</script>
+</body>
+</html>

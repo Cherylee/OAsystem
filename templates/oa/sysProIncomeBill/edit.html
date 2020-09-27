@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改进项发票')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-sysProIncomeBill-edit" th:object="${sysProIncomeBill}">
+        <input id="id" name="id" th:field="*{id}" type="hidden">
+        <input id="procInstId" name="procInstId" th:field="*{procInstId}" class="form-control" type="hidden">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">项目：</label>
+                <div class="col-sm-8">
+                    <input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="hidden">
+                    <input th:field="*{proName}" class="form-control" type="text" readonly="readonly">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">合同：</label>
+                <div class="col-sm-8">
+                    <input id="contractId" name="contractId" th:field="*{contractId}" class="form-control" type="hidden">
+                    <input id="contractName" name="contractName" th:field="*{contractName}" class="form-control" type="text" readonly="readonly">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">合同类型：</label>
+                <div class="col-sm-8">
+                    <input id="contractType" name="contractType" class="form-control" th:field="*{contractType}"  type="hidden">
+                    <div class="form-control contractType"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">申请人：</label>
+                <div class="col-sm-8">
+                    <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                    <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">公司：</label>
+                <div class="col-sm-8">
+                    <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                    <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">申请部门：</label>
+                <div class="col-sm-8">
+                    <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                    <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">审批状态：</label>
+                <div class="col-sm-8">
+                    <select class="form-control" name="status"
+                            th:with="type=${@dict.getType('oa_leave_status')}"
+                            th:field="*{status}" disabled="disabled">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">申请日期：</label>
+                <div class="col-sm-8">
+                    <input id="applyTime" name="applyTime"
+                           th:value="${#dates.format(sysProIncomeBill.applyTime, 'yyyy-MM-dd')}"
+                           class="form-control time-input-data" type="text" readonly="readonly">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">开票单位：</label>
+                <div class="col-sm-8">
+                    <input id="issuingOffice" name="issuingOffice" th:field="*{issuingOffice}" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">发票类型：</label>
+                <div class="col-sm-8">
+                    <select name="invoiceType" class="form-control"
+                            th:with="type=${@dict.getType('sys_pro_invoice_type')}"
+                            th:field="*{invoiceType}" disabled="disabled">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hidden">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">发票税率：</label>
+                <div class="col-sm-8">
+                    <select name="invoiceRate" class="form-control"
+                            th:with="type=${@dict.getType('sys_pro_invoice_rate')}"
+                            th:field="*{invoiceRate}" disabled="disabled">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6" th:if="${sysProIncomeBill.invoiceType!='2'}">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">税额总计：</label>
+                <div class="col-sm-8">
+                    <input id="totalTax" name="totalTax" th:field="*{totalTax}" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">价税总计：</label>
+                <div class="col-sm-8">
+                    <input id="totalMoney" name="totalMoney" th:field="*{totalMoney}" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">不含税金额总计：</label>
+                <div class="col-sm-8">
+                    <input id="notTotalMoney" name="" class="form-control" type="text" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">结算类型：</label>
+                <div class="col-sm-8">
+                    <select name="settlementType" class="form-control"
+                            th:with="type=${@dict.getType('sys_pro_settlement_type')}"
+                            th:field="*{settlementType}" disabled="disabled">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">备注：</label>
+                <div class="col-sm-8">
+                    <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">附件：</label>
+                <div class="col-sm-10">
+                    <div class="file-loading">
+                        <input id="uploadFileId" type="file" multiple>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- 付款记录 -->
+    <div class="col-sm-12 select-table table-striped">
+        <div class="btn-group-sm" id="toolbar1" role="group">
+            <a class="btn btn-warning" data-toggle="modal" onclick="addPayRecord()"> <i class="fa fa-plus"></i>
+                添加需关联当前发票的付款记录 </a>
+            <a class="btn btn-danger" onclick="removeRowAll('payTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+        </div>
+        <div class="fixed-table-container">
+            <table id="payTable" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+    <!-- 发票明细 -->
+    <div class="col-sm-12 select-table table-striped">
+        <div class="btn-group-sm" id="toolbar2" role="group">
+            <a class="btn btn-warning" data-toggle="modal" onclick="addDetail()"> <i class="fa fa-plus"></i> 添加发票明细 </a>
+            <a class="btn btn-danger" onclick="removeRowAll('detailTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+        </div>
+        <div class="fixed-table-container">
+            <table id="detailTable" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <br>
+            <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                <i class="fa fa-check"></i>保存草稿
+            </button>
+
+            <button type="button" th:if="${sysProIncomeBill.status} == '99'"
+                    class="btn btn-sm btn-primary" onclick="submitHandlerDraft()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()" th:if="${sysProIncomeBill.status=='3'}">
+                <i class="fa fa-check"></i>提交
+            </button>
+
+
+            <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+
+    <!-- 审批流程记录 -->
+    <div class="col-sm-12 select-table table-striped">
+        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+    </div>
+
+</div>
+
+<!-- 付款记录弹出框 -->
+<div class="modal inmodal fade" id="payModel" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-payModel-add">
+                    <div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">付款编号：</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" name="payCode" id="payCode">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">付款金额：</label>
+                            <div class="col-sm-8">
+                                <input id="payMoney" name="payMoney" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">收款人：</label>
+                            <div class="col-sm-8">
+                                <input id="payee" name="payee" class="form-control" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToPayTable()">保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 发票明细弹出框 -->
+<div class="modal inmodal fade" id="detailModel" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-detailModel-add">
+                    <div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">发票编号：</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" name="code" id="code">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">开票日期：</label>
+                            <div class="col-sm-8">
+                                <div class="input-group data">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="billingDate" name="billingDate"
+                                           class="form-control time-input-data currentDate" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">发票金额：</label>
+                            <div class="col-sm-8">
+                                <input id="invoiceAmount" name="invoiceAmount" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">发票税额：</label>
+                            <div class="col-sm-8">
+                                <input id="invoiceTax" name="invoiceTax" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">价税合计：</label>
+                            <div class="col-sm-8">
+                                <input  name="totalMoney" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">货物或服务名：</label>
+                            <div class="col-sm-8">
+                                <input id="serviceName" name="serviceName" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">备注：</label>
+                            <div class="col-sm-8">
+                                <input name="remark" class="form-control" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToDetailTable()">保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProIncomeBill";
+    $("#form-sysProIncomeBill-edit").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    $(function () {
+        $.common.dictV({
+            'className':'contractType',
+            'dict':[[${@dict.getType('oa_contract_type1')}]],
+            'value':[[${sysProIncomeBill.contractType}]]
+        })
+    });
+
+
+    //不含税金额总计计算
+    $("input[name='totalTax']").bind("input propertychange",
+        function () {
+            var num = $(this).val();
+            if ($('#totalMoney').val()==''){
+                $('#notTotalMoney').val(0);
+            }else {
+                $('#notTotalMoney').val(parseFloat($('#totalMoney').val())-num);
+            }
+        });
+    $("input[name='totalMoney']").bind("input propertychange",
+        function () {
+            var num = parseFloat($(this).val());
+            if ($('#totalTax').val()==''){
+                $('#notTotalMoney').val(num);
+            }else {
+                $('#notTotalMoney').val(num-parseFloat($('#totalTax').val()));
+            }
+
+        });
+
+
+
+    //选择合同
+    function selectContract() {
+        var options = {
+            title: '选择合同',
+            width: "1200",
+            url: ctx + "oa/oaContract",
+            callBack: doSubmitContract
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitContract(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        if(data){
+            $('#contractId').val(data.id)
+            $('#contractName').val(data.contractName)
+            $('#contractType').val(data.type1)
+            $.common.dictV({
+                'className':'contractType',
+                'dict':[[${@dict.getType('oa_contract_type1')}]],
+                'value':data.type1
+            })
+        }
+    }
+
+    //上传附件
+    var attachmentList = new Array();
+    $(function () {
+        //图片反显出来
+        var config = {
+            url: ctx+"oa/oaAttachment/selectAttach",
+            type: "post",
+            dataType: "json",
+            data: {"objectId": [[${sysProIncomeBill.id}]]},
+            success: function(result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if(attachList!=null && attachList.length>0){
+                    var downloadConfig = new Array();
+                    for(var i=0; i<attachList.length; i++){
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if(isAssetTypeAnImage(attach.attachmentName)){
+                            down.type = 'image';
+                        }else{
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({"objectId":[[${sysProIncomeBill.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+                    }
+                    var option1={
+                        id:'uploadFileId',
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl:imgsUrl,
+                        downloadConfig:downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                }else{
+                    var option2={
+                        id:'uploadFileId',
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        deleteExtraData:null,
+                        imgsUrl:new Array(),
+                        initialPreviewConfig:null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    });
+
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            var data = {};
+            data.bill = $('#form-sysProIncomeBill-edit').serializeObject();
+            data.relList = $('#payTable').bootstrapTable('getData');
+            data.detailList = $('#detailTable').bootstrapTable('getData');
+            data.attachmentList = attachmentList;
+            data.flag = false;
+            $.operate.saveJsonTab(prefix + "/submitDraft", data);
+        }
+    }
+
+    function submitHandlerDraft() {
+        if ($.validate.form()) {
+            var data = {};
+            data.flag = true;
+            data.bill = $('#form-sysProIncomeBill-edit').serializeObject();
+            data.relList = $('#payTable').bootstrapTable('getData');
+            data.detailList = $('#detailTable').bootstrapTable('getData');
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/submitDraft", data);
+        }
+    }
+
+    var options1 = {
+        id: 'detailTable',
+        url: ctx + 'oa/sysProIncomeBillDetail/list',
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'id',
+        modalName: "明细",
+        showExport: false,
+        clickToSelect: true,
+        queryParams: {"parentId": [[${sysProIncomeBill.id}]]},
+        columns: [
+            {
+                radio: true
+            },
+            {
+                field: 'id',
+                title: 'id',
+                visible: false
+            },
+            {
+                field: 'code',
+                title: '发票编号'
+            },
+            {
+                field: 'billingDate',
+                title: '开票日期'
+            },
+            {
+                field: 'invoiceAmount',
+                title: '发票金额'
+            },
+            {
+                field: 'invoiceTax',
+                title: '发票税额'
+            },
+            {
+                field: 'totalMoney',
+                title: '价税合计'
+            },
+            {
+                field: 'serviceName',
+                title: '货物或服务名'
+            },
+            {
+                field: 'file',
+                title: '附件'
+            },
+            {
+                title: '操作',
+                formatter: function (value, row, index) {
+                    return '<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a> '
+                }
+            }]
+
+    };
+
+    var options2 = {
+        id: 'payTable',
+        showSearch: false,
+        url:ctx + "oa/sysProIncomeBillRel/list",
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'id',
+        modalName: "付款记录",
+        showExport: false,
+        clickToSelect: true,
+        queryParams: {"incomeId": [[${sysProIncomeBill.id}]]},
+        columns: [
+            {
+                radio: true
+            },
+            {
+                field: 'id',
+                title: 'id',
+                    visible: false
+            },
+            {
+                field: 'payCode',
+                title: '付款编号'
+            },
+            {
+                field: 'payMoney',
+                title: '付款金额'
+            },
+            {
+                field: 'payee',
+                title: '收款人'
+            },
+            {
+                title: '操作',
+                formatter: function (value, row, index) {
+
+                    return '<a class="btn btn-danger" onclick="removeRow(\'payTable\',\'' + row.id + '\')">删除</a> '
+                }
+            }]
+
+    };
+
+    $(function () {
+        $.table.init(options1);
+        $.table.init(options2);
+        //流程
+        var data = {};
+        data.procInstId = [[${sysProIncomeBill.procInstId}]];
+        data.id = [[${sysProIncomeBill.id}]];
+        selectActProcessList(data);
+    });
+
+    //将信息填入到付款记录明细中
+    function saveToPayTable() {
+        var formData = $('#form-payModel-add').serializeObject();
+        var randomId = 100 + ~~(Math.random() * 100);
+        formData.id = randomId;
+        $("#payTable").bootstrapTable('insertRow', {
+            index: 0, // 你想插入到哪，0表示第一行
+            row: formData
+        })
+    }
+
+    //添加付款记录信息
+    function addPayRecord() {
+        $.form.reset('form-payModel-add');//清空原有数据
+        $('#payModel').modal("show");
+    }
+
+    //将信息填入到发票明细中
+    function saveToDetailTable() {
+        var formData = $('#form-detailModel-add').serializeObject();
+        var randomId = 100 + ~~(Math.random() * 100);
+        formData.id = randomId;
+        $("#detailTable").bootstrapTable('insertRow', {
+            index: 0, // 你想插入到哪，0表示第一行
+            row: formData
+        })
+    }
+
+    //添加明细信息
+    function addDetail() {
+        $.form.reset('form-detailModel-add');//清空原有数据
+        $('#detailModel').modal("show");
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id, rowId) {
+        $.modal.confirm("确定删除该行数据吗?", function () {
+            $("#" + id).bootstrapTable('removeByUniqueId', rowId);
+        });
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $.modal.confirm("确定删除所有行吗?", function () {
+            $("#" + id).bootstrapTable('removeAll');
+        });
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = {};
+        data.bill = $('#form-sysProIncomeBill-edit').serializeObject();
+        data.relList = $('#payTable').bootstrapTable('getData');
+        data.detailList = $('#detailTable').bootstrapTable('getData');
+        data.attachmentList = attachmentList;
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+    }
+</script>
+</body>
+</html>

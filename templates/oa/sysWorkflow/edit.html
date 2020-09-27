@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改工程工作流配置主')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysWorkflow-edit" th:object="${sysWorkflow}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+            
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"> 项目：</label>
+					<div class="col-sm-8">
+						<input id="proId" name="proId" type="hidden"/>
+						<input id="proName" name="proName" th:field="*{proName}" class="form-control" type="text" readonly="readonly" >
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+		        <div class="form-group">
+		            <label class="col-sm-4 control-label">类型：</label>
+		            <div class="col-sm-8">
+		            	<select name="type" class="form-control"
+										th:with="type=${@dict.getType('sys_workflow_type')}"
+										th:field="*{type}" disabled="disabled">
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}" 
+										th:value="${dict.dictValue}">
+										</option>
+						</select>
+		            </div>
+		        </div>
+		    </div>
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">工作流名称：</label>
+					<div class="col-sm-8">
+						<input id="workFlowName" name="workFlowName" th:field="*{workFlowName}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">工作流描述：</label>
+					<div class="col-sm-8">
+						<input id="content" name="content" th:field="*{content}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">创建者：</label>
+					<div class="col-sm-8">
+						<input id="createBy" name="createBy" th:field="*{createBy}" class="form-control" type="text" readonly="readonly">
+					</div>
+				</div>
+			</div>
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">创建时间：</label>
+					<div class="col-sm-8">
+						<input id="createTime" name="createTime" th:value="${#dates.format(sysWorkflow.createTime, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text" readonly="readonly">
+					</div>
+				</div>
+			</div>
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">更新者：</label>
+					<div class="col-sm-8">
+						<input id="updateBy" name="updateBy" th:field="*{updateBy}" class="form-control" type="text" readonly="readonly">
+					</div>
+				</div>
+			</div>
+            <div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">更新时间：</label>
+					<div class="col-sm-8">
+						<input id="updateTime" name="updateTime" th:value="${#dates.format(sysWorkflow.updateTime, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text" readonly="readonly">
+					</div>
+				</div>
+			</div>
+		</form>
+		<div class="col-sm-12 select-table table-striped">
+			<div class="fixed-table-container">
+				<table id="detailTable" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<br>
+				<button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+				&nbsp;
+				<button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+    </div>
+    
+    <!-- 弹出框 -->
+	<div class="modal inmodal fade" id="myModal5" role="dialog" aria-hidden="true">
+		<input id="myModal5Value" type="hidden" />
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body ">
+					<form class="form-horizontal m" id="form-Condition-add">
+						<div>
+							<input name="idx" class="form-control" type="hidden">
+							<div class="form-group">
+								<label class="col-sm-3 control-label">用户：</label>
+								<div class="col-sm-8">
+									<input type="hidden" name="userIds" id="userIds"> 
+									<input id="userName" name="userName" class="form-control" type="text" 
+									onclick="selectUser('userIds','userName')">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">节点名称：</label>
+								<div class="col-sm-8">
+									<input id="nodeName1" name="nodeName1" class="form-control" type="text">
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal" id="insertCondition">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysWorkflow";
+		$("#form-sysWorkflow-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	var data = {};
+	        	data.workFlow = $('#form-sysWorkflow-edit').serializeObject();
+	        	data.stepList = $('#detailTable').bootstrapTable('getData');
+	        	$.operate.saveJsonTab(prefix + "/editWorkFlowVo", data);
+	        }
+	    }
+		
+		
+		//添加审批节点的table
+		var options1 = {
+			id : 'detailTable',
+			url: ctx+'oa/sysWorkflowStep/list',
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			uniqueId : 'id',
+			modalName : "明细",
+			showExport : false,
+			queryParams : {"workflowId":[[${sysWorkflow.id}]]},
+			columns : [
+					{
+						radio : true
+					},
+					{
+						field : 'id',
+						title : 'id',
+						visible : true
+					},
+					{
+						field : 'roleIds',
+						title : '角色Ids',
+						visible : false
+					},
+					{
+						field : 'userIds',
+						title : '用户Ids',
+						visible : false
+					},
+					{
+						field : 'idx',
+						title : '序号'
+					},
+					{
+						field : 'nodeName',
+						title : '节点名称'
+					},
+					{
+						field : 'userName',
+						title : '审批人员'
+					},
+					{
+						field : 'type',
+						title : '审批类型',
+						visible : false
+					},
+					{
+						title : '操作',
+						formatter : function(value, row, index) {
+							return	'<a class="btn btn-success" onclick="editRow(\'myModal5\',\'myModal5Value\',\'form-Condition-add\',\'detailTable\',\''
+									+ row.id + '\',\'' + index + '\')">编辑</a>'
+						}
+					} ]
+
+		};
+		
+		$(function() {
+			$.table.init(options1);
+			$('#insertCondition').click(function() {
+				var indexV = $('#myModal5Value').val()
+				var formData = $('#form-Condition-add').serializeObject();
+				formData.nodeName = formData.nodeName1;
+				formData.type = "2";//默认普通流程，1为会签流程
+				$("#detailTable").bootstrapTable('updateRow', {
+					index : indexV, 
+					row : formData
+				});
+				
+			});
+		});
+		
+		//修改行
+		function editRow(modal,modalV,tableId,id, rowId, rowIndex) {
+			var da = $('#' + id).bootstrapTable('getRowByUniqueId', rowId);
+			if(id=='detailTable'){
+				da.nodeName1=da.nodeName
+			}
+			$('#'+modalV).val(rowIndex);
+			$('#'+modal).modal('show');
+			$('#'+tableId).loadData(da);
+
+		}
+		
+		/* 删除指定表格行 */
+		function removeRow(id, rowId) {
+			$.modal.confirm("确定删除该行数据吗?", function() {
+				$("#" + id).bootstrapTable('removeByUniqueId', rowId);
+    		});
+		}
+		
+	</script>
+</body>
+</html>

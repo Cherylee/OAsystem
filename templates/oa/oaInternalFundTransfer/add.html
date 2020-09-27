@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增内部资金调拨单')" />
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <form class="form-horizontal m" id="form-oaInternalFundTransfer-add">
+                            <table class="table table-bordered table-condensed table-bot">
+                                <caption class="text-center">
+                                    <h2>内部资金调拨单</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">编号</td>
+                                    <td>
+                                        <input id="code" name="code" class="form-control" type="text" readonly>
+                                    </td>
+                                    <td class="active">申请人所属公司</td>
+                                    <td>
+                                        <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                        <input type="text" name="companyName" id="companyName" class="form-control"
+                                               onclick="selectDeptTree('companyId','companyName','0')" th:value="${company.deptName}"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人</td>
+                                    <td>
+                                        <input class="form-control" type="text" readonly th:value="${user.userName}"/>
+                                    </td>
+                                    <td class="active">申请日期</td>
+                                    <td>
+                                        <input id="applyDate" name="applyDate" class="form-control currentTime" type="text" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td class="active">申请部门</td>
+                                    <td>
+                                        <input id="treeId" name="deptId" class="form-control" type="hidden" th:value="${user.dept.deptId}">
+                                        <input id="treeName" name="deptName" class="form-control"
+                                               type="text" onclick="selectDeptTree('treeId','treeName','1')" th:value="${user.dept.deptName}">
+                                    </td>
+                                    <td class="active">付款类型</td>
+                                    <td>
+                                        <input id="payType" name="payType" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款人</td>
+                                    <td>
+                                        <input id="payee" name="payee" class="form-control" type="text" list="payeeList1">
+                                        <datalist id="payeeList1" >
+                                            <option th:each="item : ${payeeDataList}" th:text="${item.dictLabel}"
+                                                    th:data-value="${item.dictValue}">
+                                            </option>
+                                        </datalist>
+                                    </td>
+                                    <td class="active">收款人</td>
+                                    <td>
+                                        <input id="receivabler" name="receivabler" class="form-control" type="text" list="payeeList2">
+                                        <datalist id="payeeList2" >
+                                            <option th:each="item : ${payeeDataList}" th:text="${item.dictLabel}"
+                                                    th:data-value="${item.dictValue}">
+                                            </option>
+                                        </datalist>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款账号</td>
+                                    <td>
+                                        <input id="payeeAccount" name="payeeAccount" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">收款人账号</td>
+                                    <td>
+                                        <input id="receivablerAccount" name="receivablerAccount" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款开户行</td>
+                                    <td>
+                                        <input id="payeeOpenBank" name="payeeOpenBank" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">收款人开户行</td>
+                                    <td>
+                                        <input id="receivablerOpenBank" name="receivablerOpenBank" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款事由</td>
+                                    <td colspan="3">
+                                        <input id="reason" name="reason" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款金额</td>
+                                    <td>
+                                        <input id="money" name="money" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">金额大写</td>
+                                    <td>
+                                        <input id="moneyUpper" name="moneyUpper" class="form-control" type="text" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10">
+                                <br>
+                                <button type="button" class="btn btn-sm btn-info"
+                                        onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js"/>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaInternalFundTransfer"
+		$("#form-oaInternalFundTransfer-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		//提交
+		function submitHandler() {
+	        if ($.validate.form()) {
+                var data =  $('#form-oaInternalFundTransfer-add').serializeObject();
+                data.attachmentList = attachmentList;
+                console.log(data);
+                $.operate.saveJsonTab(prefix + "/add", data);
+                insectUser('payee','payeeAccount','payeeOpenBank');
+                insectUser('receivabler','receivablerAccount','receivablerOpenBank');
+	        }
+	    }
+        //保存草稿
+	    function saveDraft() {
+            if ($.validate.form()) {
+                var data = $('#form-oaInternalFundTransfer-add').serializeObject();
+                data.attachmentList = attachmentList;
+                console.log(data);
+                $.operate.saveJsonTab(prefix + "/saveDraft", data);
+                insectUser('payee','payeeAccount','payeeOpenBank');
+                insectUser('receivabler','receivablerAccount','receivablerOpenBank');
+            }
+        }
+
+        //上传附件
+        var attachmentList = new Array();
+        var option = {
+            id: 'uploadFileId',
+            uploadUrl: null,
+            deleteUrl: null,
+            deleteExtraData: null,
+            imgsUrl: new Array(),
+            initialPreviewConfig: null,
+            showPreview: true
+        }
+        $.common.uploadFile(option);
+        downFile();
+
+        //自动大小写转换
+        coverUpper('money', 'moneyUpper')
+
+        //付款人模糊搜素带出账号
+        $('#payee').bind('input propertychange', function() {
+            payee=$(this).val()
+            var config = {
+                url: ctx+'oa/oaPayeeAccountInformation/list',
+                type: 'post',
+                dataType: 'json',
+                data: {'payee':payee},
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function(result) {
+                    $.modal.closeLoading();
+                    var html=""
+                    for (var i=0;i<result.length;i++){
+                        html+="<option data-value="+result[i].id+"> "+result[i].payee+"</option>"
+                        if($('#payee').val()==result[i].payee){
+                            payerList=result[i]
+                            $('#payeeAccount').val(result[i].account)
+                            $('#payeeOpenBank').val(result[i].openingBank)
+                        }
+                    }
+                    $('#payeeList1').html(html)
+
+                }
+            };
+            $.ajax(config)
+        })
+
+        //收款人模糊搜素带出账号
+        $('#receivabler').bind('input propertychange', function() {
+            payee=parseInt($(this).val())
+            var config = {
+                url: ctx+'oa/oaPayeeAccountInformation/list',
+                type: 'post',
+                dataType: 'json',
+                data: {'payee':payee},
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function(result) {
+                    $.modal.closeLoading();
+                    var html=""
+                    for (var i=0;i<result.length;i++){
+                        html+="<option data-value="+result[i].id+"> "+result[i].payee+"</option>"
+                        if($('#receivabler').val()==result[i].payee){
+                            payerList=result[i]
+                            $('#receivablerAccount').val(result[i].account)
+                            $('#receivablerOpenBank').val(result[i].openingBank)
+                        }
+                    }
+                    $('#payeeList2').html(html)
+
+                }
+            };
+            $.ajax(config)
+        })
+
+        //提交添加模糊搜索
+        function insectUser(payee,payeeAccount,payeeOpenBank) {
+            var data={};
+            data.payee=$('#'+payee).val();
+            data.account=$('#'+payeeAccount).val();
+            data.openingBank=$('#'+payeeOpenBank).val();
+            data.isNew=1;
+            $.operate.saveTab(ctx+'oa/oaPayeeAccountInformation/add',data)
+        }
+	</script>
+</body>
+</html>

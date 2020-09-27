@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('物资领用审批')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaProjectGoodsReceive-edit" th:object="${oaProjectGoodsReceive}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+                        <table class="table table-bordered table-condensed" >
+                            <caption class="text-center">
+                                <h2>工程物资领用申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人</td>
+                                <td>
+                                    [[*{userName}]]
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>公司</td>
+                                <td>
+                                    [[*{companyName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>归属部门</td>
+                                <td>
+                                    [[*{deptName}]]
+                                </td>
+                                <td class="active">物资类型</td>
+                                <td>
+                                    <select id="goodsType" required class="form-control " disabled
+                                            name="goodsType" th:field="*{goodsType}"
+                                            th:with="type=${@dict.getType('oa_project_goods_type')}">
+                                        <option value="">-- 请选择 --</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">所属项目</td>
+                                <td>
+                                    [[*{projectName}]]
+
+                                </td>
+                                <td class="active">关联合同</td>
+                                <td>
+                                    [[*{contractName}]]
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            <tr>
+                                <td class="active">备注</td>
+                                <td>
+                                    [[*{remark}]]
+                                </td>
+                                <td class="active">申请日期</td>
+                                <td>
+                                    [[${#dates.format(oaProjectGoodsReceive.createTime, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="fixed-table-container">
+
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="processTableId" data-mobile-responsive="true"></table>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${oaProjectGoodsReceive.id}]],'oa/oaProjectGoodsReceive/copy','flag')">
+                                抄送</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<th:block th:include="include :: lastNode" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaProjectGoodsReceive";
+    var lastNodeId=[[${oaProjectGoodsReceive.id}]];
+    var actDefineId=[[${oaProjectGoodsReceive.actDefineId}]];
+    var lastStatus=[[${oaProjectGoodsReceive.status}]];
+    //流程
+    var data = {};
+    data.procInstId=[[${oaProjectGoodsReceive.procInstId}]];
+    data.id = [[${oaProjectGoodsReceive.id}]];
+    selectActProcessList(data,"processTableId");
+
+
+    //同意
+    function agree(){
+        $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-24/oa_project_goods_receive/"+[[${oaProjectGoodsReceive.id}]]);
+    }
+    //不同意
+    function disagree(){
+        $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-24/oa_project_goods_receive/"+[[${oaProjectGoodsReceive.id}]]);
+    }
+    //返回
+    function backAway(){
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+
+    var datas = [[${@dict.getType('oa_project_goods_type')}]];
+    var options = {
+        modalName: "系统物资",
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        url: ctx + "oa/oaProjectGoodsReceiveDetail/selectDetailsByReceiveId?receiveId="+[[${oaProjectGoodsReceive.id}]],
+        columns: [{
+            checkbox: true
+        },
+            {
+                field : 'id',
+                title : 'id',
+                visible: false
+            },
+            {
+                field : 'goodsType',
+                title : '物资类型',
+                sortable: true,
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(datas, value);
+                }
+            },
+            {
+                field : 'goodsName',
+                title : '物资名称',
+                sortable: true
+            },
+            {
+                field : 'totalStock',
+                title : '物资数量',
+                sortable: true
+            },
+            {
+                field : 'useStock',
+                title : '领用数量',
+                sortable: true,
+                editable : {
+                    type : 'text',
+                    title : '数量',
+                    emptytext : "【数量】必填！",
+                    validate : function(value) {
+                        if (isNaN(value)) {
+                            return '只能输入数字！';
+                        }
+                    }
+                }
+            },
+            {
+                field : 'unit',
+                title : '单位',
+                sortable: true
+            },
+            {
+                field : 'price',
+                title : '单价',
+                sortable: true
+            },
+            {
+                field : 'brand',
+                title : '规格型号',
+                sortable: true
+            },
+            {
+                field : 'inDate',
+                title : '入库日期',
+                sortable: true
+            },
+            {
+                field : 'remark',
+                title : '备注',
+                sortable: true
+            }]
+    };
+    $.table.init(options);
+    //图片反显出来
+    var attachmentList = new Array();
+    $(function () {
+        var config = {
+            url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+            type: "post",
+            dataType: "json",
+            data: {"objId": [[${oaProjectGoodsReceive.id}]]},
+            success: function(result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if(attachList!=null && attachList.length>0){
+                    var downloadConfig = new Array();
+                    for(var i=0; i<attachList.length; i++){
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if(isAssetTypeAnImage(attach.attachmentName)){
+                            down.type = 'image';
+                        }else{
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({"objectId":[[${oaProjectGoodsReceive.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+                    }
+                    var option1={
+                        id:'uploadFileId',
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl:imgsUrl,
+                        downloadConfig:downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                }else{
+                    var option2={
+                        id:'uploadFileId',
+                        uploadUrl:null,
+                        deleteUrl:null,
+                        deleteExtraData:null,
+                        imgsUrl:new Array(),
+                        initialPreviewConfig:null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    });
+</script>
+</body>
+</html>

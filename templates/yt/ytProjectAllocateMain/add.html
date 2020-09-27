@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增主管分配主')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-ytProjectAllocateMain-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目id：</label>
+            <div class="col-sm-8">
+            	<input id="projectId" name="projectId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">设计费用：</label>
+            <div class="col-sm-8">
+            	<input id="designCost" name="designCost" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否预估：</label>
+            <div class="col-sm-8">
+            	<input id="isEstimate" name="isEstimate" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">主负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="principleLeaderId" name="principleLeaderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">副负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="deputyLeaderId" name="deputyLeaderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目分管id：</label>
+            <div class="col-sm-8">
+            	<input id="projectManagerId" name="projectManagerId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">测量负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="auditorId" name="measureLeaderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">勘测负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="checkerId" name="surveyLeaderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">其它负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="participantIds" name="otherLeaderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">总工期：</label>
+            <div class="col-sm-8">
+            	<input id="totalPeriod" name="totalPeriod" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "yt/ytProjectAllocateMain"
+		$("#form-ytProjectAllocateMain-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-ytProjectAllocateMain-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

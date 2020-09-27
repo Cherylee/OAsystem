@@ -1,0 +1,276 @@
+<!-- 补充协议列表 -->
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+<th:block th:include="include :: header('附属协议列表')" />
+</head>
+<body class="gray-bg">
+
+	<div class="container-div">
+		<div class="row">			
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaContract:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaContract:remove')}]];
+        
+        var signFlag = [[${@permission.hasPermi('oa:oaContract:signFlag')}]];
+        var FileFlag = [[${@permission.hasPermi('oa:oaContract:FileFlag')}]];
+        
+        var prefix = ctx + "oa/oaContract";
+        var ContractStatus = [[${@dict.getType('oa_ApplyStatusContract')}]];
+        var ContractType1 = [[${@dict.getType('oa_contract_type1')}]];
+        var ContractType2 = [[${@dict.getType('oa_contract_type2')}]];
+        
+        
+        var examineFlag=[[${@permission.hasPermi('oa:oaContract:examine')}]];//审核按钮 权限 
+        
+        $(function() {
+            var options = {
+                url: prefix + "/list",               
+                modalName: "附属协议列表",
+		        showExport: true,
+		        sortName : "createTime",
+		        sortOrder : "desc",
+		        queryParams : {"contractType": "1","parentId" : [[${id}]]},
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'parentId', 
+					title : '主合同id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'serialNum', 
+					title : '流水号',
+					sortable: true
+				},
+				{
+					field : 'applier', 
+					title : '申请人',
+					sortable: true
+				},
+				{
+					field : 'deptName', 
+					title : '申请部门名称',
+					sortable: true
+				},
+				{
+					field : 'signingParties', 
+					title : '签约相对方',
+					sortable: true
+				},
+				{
+					field : 'type1', 
+					title : '合同类型1',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(ContractType1, value);
+		        	}
+				},
+				{
+					field : 'contractType', 
+					title : '合同种类',
+					sortable: true,
+					visible: false
+					
+				},
+				{
+					field : 'type2', 
+					title : '合同类型2',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(ContractType2, value);
+		        	}
+				},
+				{
+					field : 'contractName', 
+					title : '合同名称',
+					sortable: true,
+					formatter:function(value, row, index){
+						return '<a onclick="openExamine(\'' + row.id + '\')">'+row.contractName+'</a>'
+					}
+				},
+				{
+					field : 'projectName', 
+					title : '工程名称',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '合同审核状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(ContractStatus, value);
+		        	}
+				},
+				{
+					field : 'currentPersonName', 
+					title : '当前处理人姓名',
+					sortable: true
+				},
+
+				{
+					field : 'contractCode', 
+					title : '合同编号',
+					sortable: true
+				},
+				{
+					field : 'contractAmount', 
+					title : '合同金额',
+					sortable: true
+				},
+				{
+					field : 'effectDate', 
+					title : '合同生效日',
+					sortable: true
+				},
+				{
+					field : 'expirationDate', 
+					title : '合同失效日',
+					sortable: true
+				},
+				
+				{
+					field : 'amountUpper', 
+					title : '合同金额大写',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'amountPaid', 
+					title : '已付款',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'amountUnpaid', 
+					title : '未付款',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'invoiced', 
+					title : '已开票',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'settled', 
+					title : '已结算',
+					sortable: true,
+					visible: false
+				},
+				
+				{
+					field : 'payType', 
+					title : '付款方式（0预付，1尾款，2进度款）',
+					sortable: true,
+					visible: false
+				},
+				
+				{
+					field : 'proposer', 
+					title : '申请人id',
+					sortable: true,
+					visible: false
+				},
+				
+				{
+					field : 'deptId', 
+					title : '申请部门id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'currentPersonId', 
+					title : '当前处理人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'thirdPartPerson', 
+					title : '第三方负责人',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'thirdPartyName', 
+					title : '第三方名称',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'tenderDoc', 
+					title : '合同文件',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'qualifications', 
+					title : '资质证明',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'remark', 
+					title : '签约背景/备注说明',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '合同申请日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createBy', 
+					title : '创建人',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '修改日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改人',
+					sortable: true,
+					visible: false
+				}]
+            };
+            $.table.init(options);
+        });
+        
+        //签署/归档操作
+        function exeStatusChange(id,status,msg){
+        	$.modal.confirm(msg, function() {
+            	 $.operate.get(prefix+"/exeStatusChange/"+id+"/"+status);
+        	});
+        }
+        
+        //打开合同审核界面
+        function openExamine(id){
+              $.modal.openTab("合同审核",prefix + "/toExamine/"+id);          	              
+        }
+        
+       
+    </script>
+</body>
+</html>

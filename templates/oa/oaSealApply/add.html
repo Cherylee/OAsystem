@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增印章流程')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaSealApply-add">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>印章申请</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>操作类型：</td>
+                                <td style="width: 35%">
+                                    <select required="required" name="optType" id="optType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_seal_eng_discard')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">申请人：</td>
+                                <td>
+                                    <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control"
+                                           type="hidden">
+                                    <input id="proposerId" th:value="${user.userName}" class="form-control" type="text"
+                                           readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>申请公司：</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" id="companyName" name="companyName" class="form-control"
+                                           onclick="selectDeptTree('companyId','companyName','0')" required="required"
+                                           th:value="${company.deptName}"/>
+                                </td>
+                                <td class="active"><span style="color: red; ">*</span>申请部门：</td>
+                                <td>
+                                    <input type="hidden" name="deptId" id="treeId" th:value="${user.deptId}"/>
+                                    <input type="text" id="treeName" name="deptName" class="form-control"
+                                           onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:value="${user.dept.deptName}" required="required"/>
+                                </td>
+                            </tr>
+                            <!--								<tr>-->
+                            <!--									<td class="active">印章名称：</td>-->
+                            <!--									<td>-->
+                            <!--										<input type="hidden" name="sealId" id="sealId">-->
+                            <!--										<input id="sealName" name="sealName" class="form-control" type="text" onclick="showSeal('sealId','sealName','sealType')">-->
+                            <!--									</td>-->
+                            <!--									<td class="active">印章类型：</td>-->
+                            <!--									<td>-->
+                            <!--										<select id="sealType" style="pointer-events: none;"  name="type" class="form-control"-->
+                            <!--												th:with="type=${@dict.getType('oa_seal_type')}" readonly="readonly">-->
+                            <!--											<option value="">&#45;&#45;请选择&#45;&#45;</option>-->
+                            <!--											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+                            <!--										</select>-->
+                            <!--									</td>-->
+                            <!--								</tr>-->
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>申请事由：</td>
+                                <td>
+                                    <input id="reason" name="reason" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                                <td class="active">关联模块：</td>
+                                <td>
+                                    <select id="relObjType" name="relObjType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_seal_rel_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">关联对象：</td>
+                                <td>
+                                    <input id="relObjId" name="relObjId" class="form-control" type="hidden">
+                                    <input id="relObjName" name="relObjName" class="form-control" type="text"
+                                           onclick="selectObjByModelType('relObjId','relObjName')" readonly="readonly">
+                                </td>
+                                <td class="active">用印文件类型：</td>
+                                <td>
+                                    <select id="fileType" name="fileType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_seal_file_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">刻制印章规格：</td>
+                                <td>
+                                    <input id="stampSpec" name="stampSpec" class="form-control useSealK" type="text"
+                                           disabled>
+                                </td>
+                                <td class="active">印章刻制材料：</td>
+                                <td>
+                                    <input id="stampMaterial" name="stampMaterial" class="form-control useSealK"
+                                           type="text" disabled>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">文件数量：</td>
+                                <td>
+                                    <input id="fileNum" name="fileNum" class="form-control useSeal" type="number"
+                                           disabled>
+                                </td>
+                                <td class="active">备注：</td>
+                                <td>
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr id="useSeal" class="hide">
+                                <td class="active ">附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading ">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <!-- 添加印章 -->
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="btn-group-sm" id="toolbar1" role="group">
+                            <a class="btn btn-warning" data-toggle="modal" onclick="addDetail()"> <i
+                                    class="fa fa-plus"></i> 添加印章明细 </a>
+                            <a class="btn btn-danger" onclick="removeRowAll('detailTable')"><i class="fa fa-remove"></i>
+                                删除所有行</a>
+                        </div>
+                        <div class="fixed-table-container">
+                            <table id="detailTable" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaSealApply"
+    $("#form-oaSealApply-add").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+    //弹框
+    var sId = null;
+    var sName = null;
+    var sType = null;
+
+    function showSeal(id, name, type) {
+        sId = id;
+        sName = name;
+        sType = type
+        var options = {
+            title: '选择印章',
+            width: "1200",
+            url: ctx + "oa/oaSeal",
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + sId).val(data.id)
+        $('#' + sName).val(data.sealName)
+        $('#' + sType).val(data.type)
+    }
+
+    //根据选择的关联模块展示对应台账
+    var oId = null;
+    var oName = null;
+
+    function selectObjByModelType(id, name) {
+        oId = id;
+        oName = name;
+        var relObjType = document.getElementById("relObjType");
+        var objOption = relObjType.options[relObjType.selectedIndex].value;
+        var options = "";
+        if (objOption == '0'
+            || objOption == '1'
+            || objOption == '2'
+            || objOption == '3'
+            || objOption == '99') {
+            options = {
+                title: '选择合同',
+                width: "1200",
+                url: ctx + "oa/oaContract/relList/" + objOption,
+                callBack: doSubmitRelContract
+            };
+        } else if (objOption == '100') {		//通知发文
+            options = {
+                title: '选择信息发文',
+                width: "1200",
+                url: ctx + "oa/oaInformation",
+                callBack: doSubmitRelInfo
+            };
+        } else {
+            return;
+        }
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitRelContract(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + oId).val(data.id)
+        $('#' + oName).val(data.contractName)
+    }
+
+    function doSubmitRelInfo(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + oId).val(data.id)
+        $('#' + oName).val(data.title)
+    }
+
+    function submitHandler() {
+        var data={}
+        var dataForm = $('#form-oaSealApply-add').serializeObject();
+        data.oaSealApply = dataForm;
+        data.attachmentList = attachmentList;
+        data.detailList = $('#detailTable').bootstrapTable('getData');
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data={}
+        var dataForm = $('#form-oaSealApply-add').serializeObject();
+        data.oaSealApply = dataForm;
+        data.attachmentList = attachmentList;
+        data.detailList = $('#detailTable').bootstrapTable('getData');
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+    }
+
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+    $(function () {
+        $('#optType').change(function () {
+            if ($(this).val() == '0') {
+                $('.useSealK').removeAttr("disabled");
+
+            } else {
+                $('.useSealK').attr("disabled", "disabled");
+                $('.useSealK').val('');
+            }
+            if ($(this).val() != '0' && $(this).val() != '1') {
+
+                $('#useSeal').removeClass('hide')
+                $('.useSeal').removeAttr("disabled");
+            } else {
+                $('#useSeal').addClass('hide')
+                $('#useSeal').find('input').val('');
+                $('.useSeal').attr("disabled", "disabled");
+                $('.useSeal').val('');
+                attachmentList = new Array();
+            }
+        });
+        $.table.init(options1);
+    })
+
+    //关联印章
+    function addDetail() {
+        var options = {
+            title: '选择印章',
+            width: "1200",
+            url: ctx + "oa/oaSeal",
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler2();
+        var data = result;
+        for (var i = 0; i < data.length; i++) {
+            var formData = {};
+            if (data[i].status == 0 && data[i].inCompany == 'Y' && data[i].canAppoint == 'Y') {
+                var randomId = 100 + ~~(Math.random() * 100);
+                formData.id = randomId;
+                formData['sealId'] = data[i].id;
+                formData['sealName'] = data[i].sealName;
+                formData['type'] = data[i].type;
+                $("#detailTable").bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: formData
+                })
+            } else {
+                if (data[i].inCompany == 'N' && data[i].canAppoint == 'N') {
+                    $.modal.alertWarning("你选择的印章中不在公司！");
+                } else {
+                    $.modal.alertWarning(data[i].sealName + "未归还，无法借出！");
+                }
+            }
+
+        }
+    }
+
+    var datas = [[${@dict.getType('oa_seal_type')}]];
+    var options1 = {
+        id: 'detailTable',
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'id',
+        modalName: "明细",
+        showExport: false,
+        clickToSelect: true,
+        columns: [
+            {
+                field: 'sealId',
+                title: 'sealId',
+                visible: false
+            },
+            {
+                field: 'sealName',
+                title: '印章名称'
+            },
+            {
+                field: 'type',
+                title: '印章类型',
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(datas, value);
+                }
+            },
+            {
+                title: '操作',
+                formatter: function (value, row, index) {
+                    return '<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a> '
+                }
+            }]
+
+    };
+
+    /* 删除指定表格行 */
+    function removeRow(id, rowId) {
+        $.modal.confirm("确定删除该行数据吗?", function () {
+            $("#" + id).bootstrapTable('removeByUniqueId', rowId);
+        });
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $.modal.confirm("确定删除所有行吗?", function () {
+            $("#" + id).bootstrapTable('removeAll');
+        });
+    }
+</script>
+</body>
+</html>

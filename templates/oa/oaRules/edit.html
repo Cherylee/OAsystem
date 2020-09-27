@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改制度申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaRules-edit" th:object="${oaRules}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>请假申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">申请人</td>
+                                <td>
+                                    <input class="form-control" type="text" th:field="*{userName}" readonly>
+                                </td>
+                                <td class="active">申请公司</td>
+                                <td>
+                                    <input type="hidden" name="applyCompanyId" id="companyId"
+                                           th:field="*{applyCompanyId}"/>
+                                    <input type="text" id="companyName" name="applyCompanyName" class="form-control"
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:field="*{applyCompanyName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门</td>
+                                <td>
+                                    <input type="hidden" name="applyDeptId" id="treeId" th:field="*{applyDeptId}"/>
+                                    <input type="text" id="treeName" name="applyDeptName" class="form-control"
+                                           onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:field="*{applyDeptName}"/>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>操作类型</td>
+                                <td>
+                                    <select id="optType" name="optType" class="form-control" required
+                                            th:with="type=${@dict.getType('oa_rules_opt_type')}" th:field="*{optType}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">制度名称</td>
+                                <td>
+                                    <input id="oriRulesId" name="oriRulesId" th:field="*{oriRulesId}" type="hidden">
+                                    <input id="rulesName" name="rulesName" class="form-control" type="text"
+                                           th:field="*{rulesName}">
+                                </td>
+                                <td class="active">制度编号</td>
+                                <td>
+                                    <input id="code" name="code" class="form-control" type="text" th:field="*{code}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">版次</td>
+                                <td>
+                                    <input id="version" name="version" class="form-control" type="text"
+                                           th:field="*{version}">
+                                </td>
+                                <td class="active">发布部门</td>
+                                <td>
+                                    <input type="hidden" name="publishDeptId" id="publishDeptId"
+                                           th:field="*{publishDeptId}"/>
+                                    <input type="text" id="publishDeptName" name="publishDeptName" class="form-control"
+                                           onclick="selectDeptTree('publishDeptId','publishDeptName','1')"
+                                           th:field="*{publishDeptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">发布日期</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="publishDate" name="publishDate" class="form-control  time-input"
+                                               type="text"
+                                               th:value="${#dates.format(oaRules.publishDate, 'yyyy-MM-dd HH:mm:ss')}">
+                                    </div>
+                                </td>
+                                <td class="active">秘密等级</td>
+                                <td>
+                                    <select name="secretLevel" class="form-control"
+                                            th:with="type=${@dict.getType('oa_secret_grade')}"
+                                            th:field="*{secretLevel}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">制度状态</td>
+                                <td>
+                                    <select name="ruleStatus" class="form-control"
+                                            th:with="type=${@dict.getType('oa_rule_status')}" th:field="*{ruleStatus}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">申请日期</td>
+                                <td>
+                                    <input id="applyTime" name="applyTime" class="form-control" type="text" readonly
+                                           th:value="${#dates.format(oaRules.applyTime, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" class="form-control" type="text"
+                                           th:field="*{remark}">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <form class="form-horizontal m">
+                        <table class="table table-bordered table-condensed">
+                            <tbody>
+                            <tr>
+                                <td class="active">附件</td>
+                                <td colspan="7">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple
+                                               th:disabled="${oaRules.status!='3'&&oaRules.status!='99'}? true : false">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">可查询部门</td>
+                                <td colspan="7">
+                                    <div class="btn-group-sm" id="toolbar1" role="group">
+                                        <a class="btn btn-success" onclick="selectRuleDept()"
+                                           th:if="${oaRules.status=='3' || oaRules.status=='99'}"> <i
+                                                class="fa fa-plus"></i>
+                                            添加
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-12 select-table table-striped">
+                                        <table id="bootstrap-table-dept" data-mobile-responsive="true"></table>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">可查阅人员</td>
+                                <td colspan="7">
+                                    <div class="btn-group-sm" id="toolbar2" role="group">
+                                        <a class="btn btn-success" onclick="selectRuleUser()"
+                                           th:if="${oaRules.status=='3' || oaRules.status=='99'}"> <i
+                                                class="fa fa-plus"></i>
+                                            添加
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-12 select-table table-striped">
+                                        <table id="bootstrap-table-user" data-mobile-responsive="true"></table>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()" th:if="${oaRules.status=='99'}">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandlerDraft()" th:if="${oaRules.status=='99'}">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()" th:if="${oaRules.status=='3'}">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:if="${oaRules.status!='2'&&oaRules.status!='16'&&oaRules.status!='99'}"
+                                    onclick="urge()">
+                                <i class="fa fa-check"></i>催办
+                            </button>
+                            <button type="button" class="btn btn-sm btn-warning"
+                                    th:if="${oaRules.status == '2' && oaRules.ruleStatus != '1'}"
+                                    onclick="cancel()">
+                                <i class="fa fa-check"></i>作废
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" th:if="${oaRules.status!='99'}"
+                                    th:onclick="selectUser('','','0',[[${oaRules.id}]],'oa/oaRules/copy')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaRules";
+    var lastNodeId = [[${oaRules.id}]];
+    var actDefineId = [[${oaRules.actDefineId}]];
+    var lastStatus = [[${oaRules.status}]];
+
+    //流程
+    var data = {};
+    data.procInstId = [[${oaRules.procInstId}]];
+    data.id = [[${oaRules.id}]];
+    selectActProcessList(data, "approveInfoId");
+
+    /*新增行*/
+    function insertRow(data, tableId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var table_row = '';
+        table_row = data
+        table_row[0] = false;
+        var countDate = $("#" + tableId).bootstrapTable('getData');
+        if (tableId == 'bootstrap-table-dept') {//部门
+            if (isHas(countDate, data.deptId, '0') == false) {
+                $("#" + tableId).bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: table_row
+                })
+            }
+        } else if (tableId == 'bootstrap-table-user') {//人员
+            if (isHas(countDate, data.userId, '1') == false) {
+                $("#" + tableId).bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: table_row
+                })
+            }
+        }
+
+
+    }
+
+    //判断是否已经添加
+    function isHas(data, id, flag) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (flag == '0') {//部门
+                if (data[i].deptId == id) {
+                    isTF = true;
+                }
+            } else if (flag == '1') {//人员
+                if (data[i].userId == id) {
+                    isTF = true;
+                }
+            }
+
+        }
+        return isTF;
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(tableId, rowId) {
+        $("#" + tableId).bootstrapTable('removeByUniqueId', rowId)
+
+    }
+
+    //弹框选择部门
+    function selectRuleDept() {
+        var options = {
+            title: '选择部门',
+            width: "380",
+            url: ctx + "system/dept/selectDeptTree/100",
+            callBack: doSubmitRoleDept
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitRoleDept(index, layero) {
+        var tree = layero.find("iframe")[0].contentWindow.$._tree;
+        if ($.tree.notAllowParents(tree)) {
+            var body = layer.getChildFrame('body', index);
+            var deptData = {}
+            deptData.deptId = body.find('#treeId').val();
+            deptData.deptName = body.find('#treeName').val()
+            layer.close(index);
+            insertRow(deptData, 'bootstrap-table-dept')
+        }
+
+    }
+
+    /* 多选用户 */
+    function selectRuleUser() {
+        var options = {
+            title: '选择用户',
+            width: "1200",
+            url: ctx + "oa/oaApplyTemplate/selectUser",
+            callBack: doSubmitRuleUser
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitRuleUser(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandlerMore1();
+        for (var i = 0; i < result.length; i++) {
+            insertRow(result[i], 'bootstrap-table-user')
+        }
+    }
+
+    function submitHandler() {
+        var data = {}
+        if ($.validate.form()) {
+            var optType = $('#optType').val();
+            if (optType == '2') {
+                $.modal.alertError("作废流程需要单据审核通过后，进入详情页，点击下方“作废”按钮申请，此处请选择其它类型操作！");
+                return;
+            }
+            data.rules = $('#form-oaRules-edit').serializeObject();
+            data.attachmentList = attachmentList;
+            data.deptList = $("#bootstrap-table-dept").bootstrapTable('getData');
+            data.userList = $("#bootstrap-table-user").bootstrapTable('getData');
+            $.operate.saveJsonTab(prefix + "/modifyRulesVo", data);
+        }
+    }
+
+    //作废制度
+    function cancel() {
+        $.modal.confirm("是否确认申请作废？", function () {
+            var data = {}
+            if ($.validate.form()) {
+                data.rules = $('#form-oaRules-edit').serializeObject();
+                data.attachmentList = attachmentList;
+                data.deptList = $("#bootstrap-table-dept").bootstrapTable('getData');
+                data.userList = $("#bootstrap-table-user").bootstrapTable('getData');
+                var config = {
+                    contentType: "application/json;charset=UTF-8",
+                    url: prefix + "/cancel",
+                    type: "post",
+                    dataType: "json",
+                    data: JSON.stringify(data),
+                    beforeSend: function () {
+                        $.modal.loading("正在处理中，请稍后...");
+                    },
+                    success: function (result) {
+                        $.operate.successTabCallback(result);
+                    }
+                };
+                $.ajax(config)
+            }
+        })
+    }
+
+    //提交草稿
+    function submitHandlerDraft() {
+        var data = {}
+        if ($.validate.form()) {
+            var optType = $('#optType').val();
+            if (optType == '2') {
+                $.modal.alertError("作废流程需要单据审核通过后，进入详情页，点击下方“作废”按钮申请，此处请选择其它类型操作！");
+                return;
+            }
+            data.rules = $('#form-oaRules-edit').serializeObject();
+            data.attachmentList = attachmentList;
+            data.deptList = $("#bootstrap-table-dept").bootstrapTable('getData');
+            data.userList = $("#bootstrap-table-user").bootstrapTable('getData');
+            $.operate.saveJsonTab(prefix + "/submitDraft", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = {}
+        var optType = $('#optType').val();
+        if (optType == '2') {
+            $.modal.alertError("作废流程需要单据审核通过后，进入详情页，点击下方“作废”按钮申请，此处请选择其它类型操作！");
+            return;
+        }
+        data.rules = $('#form-oaRules-edit').serializeObject();
+        data.attachmentList = attachmentList;
+        data.deptList = $("#bootstrap-table-dept").bootstrapTable('getData');
+        data.userList = $("#bootstrap-table-user").bootstrapTable('getData');
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+    }
+
+    function doSubmitRules(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#oriRulesId').val(data.oriRulesId);
+        $('#rulesName').val(data.rulesName);
+        $('#code').val(data.code);
+        $('#version').val(data.version);
+        $('#secretLevel').val(data.secretLevel);
+        $('#remark').val(data.remark);
+    }
+
+    var attachmentList = new Array();
+    //图片反显出来
+    $(function () {
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttachByObjectId",
+            type: "post",
+            dataType: "json",
+            data: {"objId": [[${oaRules.id}]]},
+            success: function (result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({
+                            "objectId": [[${oaRules.id}]],
+                            "attachmentName": attach.attachmentName,
+                            "fileName": attach.fileName
+                        })
+                    }
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                } else {
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+        $.table.init(options1);
+        $.table.init(options2);
+
+        $('#optType').change(function () {
+            var typeVal = $('#optType').val();
+            if (typeVal == '1') {
+                $('#rulesName').attr('readonly', true);
+                $('#rulesName').click(function () {
+                    var options = {
+                        title: '选择制度',
+                        width: "1200",
+                        url: ctx + "oa/oaRules",
+                        callBack: doSubmitRules
+                    };
+                    $.modal.openOptions(options);
+                })
+            } else {
+                $('#rulesName').removeAttr('readonly');
+                $('#rulesName').unbind('click');
+            }
+        })
+    });
+    var options1 = {
+        url: ctx + "oa/oaRulesDept/list",
+        modalName: "制度与部门关系",
+        id: "bootstrap-table-dept",
+        showExport: false,
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'deptId',
+        toolbar: "toolbar1",
+        queryParams: {"rulesId": [[${oaRules.id}]]},
+        columns: [{
+            checkbox: true
+        },
+            {
+                field: 'id',
+                title: '主键',
+                visible: false
+            },
+            {
+                field: 'rulesId',
+                title: '制度id',
+                sortable: true,
+                visible: false
+            },
+            {
+                field: 'deptId',
+                title: '部门id',
+                sortable: true,
+                visible: false
+            },
+            {
+                field: 'deptName',
+                title: '部门名称',
+                sortable: true
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var actions = [];
+                    if ([[${oaRules.status}]] == '3' || [[${oaRules.status}]] == '99') {
+                        actions.push('<a class="btn btn-danger btn-xs" onclick="removeRow(\'bootstrap-table-dept\',\'' + row.deptId + '\')">删除</a>');
+                    }
+                    return actions.join('');
+                }
+            }]
+    };
+    var options2 = {
+        url: ctx + "oa/oaRulesUser/list",
+        modalName: "制度与人员关系",
+        showExport: true,
+        id: "bootstrap-table-user",
+        showExport: false,
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        toolbar: "toolbar2",
+        uniqueId: 'userId',
+        queryParams: {"rulesId": [[${oaRules.id}]]},
+        columns: [{
+            checkbox: true
+        },
+            {
+                field: 'id',
+                title: '主键',
+                visible: false
+            },
+            {
+                field: 'rulesId',
+                title: '制度id',
+                sortable: true,
+                visible: false
+            },
+            {
+                field: 'userName',
+                title: '用户名',
+                sortable: true
+            },
+            {
+                field: 'userId',
+                title: '用户id',
+                sortable: true,
+                visible: false
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var actions = [];
+                    if ([[${oaRules.status}]] == '3' || [[${oaRules.status}]] == '99') {
+                        actions.push('<a class="btn btn-danger btn-xs" onclick="removeRow(\'bootstrap-table-user\',\'' + row.userId + '\')">删除</a>');
+                    }
+                    return actions.join('');
+                }
+            }]
+    };
+
+</script>
+</body>
+</html>

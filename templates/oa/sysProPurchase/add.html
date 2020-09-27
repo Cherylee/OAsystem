@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增工程采购申请')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-sysProPurchase-add">
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>采购申请</h2>
+                            </caption>
+                            <tbody>
+                                <tr>
+                                    <td class="active">采购标题：</td>
+                                    <td>
+                                        <input id="title" name="title" class="form-control" type="text" >
+                                    </td>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control" type="hidden">
+                                        <input th:value="${user.userName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">归属公司：</td>
+                                    <td>
+                                        <input id="companyId" name="companyId" class="form-control" th:value="${company.deptId}" type="hidden">
+                                        <input id="companyName" name="companyName" th:value="${company.deptName}"  class="form-control" type="text" >
+                                    </td>
+
+                                    <td class="active"><span style="color: red; ">*</span>工程名称：</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" type="hidden" />
+                                        <input id="projectName" name="projectName" class="form-control" type="text" onclick="selectPro('projectId','projectName')" required="required">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">归属部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}" type="hidden">
+                                        <input id="deptName" name="deptName" th:value="${user.dept.deptName}" class="form-control" type="text" >
+                                    </td>
+                                    <td class="active">采购类型：</td>
+                                    <td >
+                                        <select name="purchaseType" class="form-control"
+                                                th:with="type=${@dict.getType('sys_pro_purchase_type')}">
+                                            <option value="">--请选择--</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                    th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td class="active">备注：</td>
+                                    <td colspan="3">
+                                        <input id="remark" name="remark" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <!-- 采购明细 -->
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="btn-group-sm" id="toolbar1" role="group">
+                            <a class="btn btn-warning" data-toggle="modal" id="addCon"> <i class="fa fa-plus"></i> 添加采购明细 </a>
+                            <a class="btn btn-danger multiple" onclick="removeRow('purchaseDetailTable')"> <i class="fa fa-remove"></i>删除选择行</a>
+                            <a class="btn btn-danger" onclick="removeRowAll('purchaseDetailTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                        </div>
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="purchaseDetailTable" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft('purchaseDetailTable','/saveDraft',true)">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler('purchaseDetailTable','/add',false)">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 采购明细弹出框 -->
+<div class="modal inmodal fade" id="detailModel" role="dialog" aria-hidden="true">
+    <input id="detailModelValue" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-detailModel-add">
+                    <div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">物资名称：</label>
+                            <div class="col-sm-8">
+                                <input id="goodsName" name="goodsName" class="form-control" type="text" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">数量：</label>
+                            <div class="col-sm-8">
+                                <input id="num" name="num" class="form-control" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">单位：</label>
+                            <div class="col-sm-8">
+                                <input id="unit" name="unit" class="form-control" type="text" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">单价（元）：</label>
+                            <div class="col-sm-8">
+                                <input id="price" name="price" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">规格型号：</label>
+                            <div class="col-sm-8">
+                                <input id="brand" name="brand" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">使用时间：</label>
+                            <div class="col-sm-8">
+                                <input id="useTime" name="useTime"
+                                       class="form-control time-input-data" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">备注：</label>
+                            <div class="col-sm-8">
+                                <input name="remark" class="form-control" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="insertCondition">保存</button>
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProPurchase"
+    $("#form-sysProPurchase-add").validate({
+        rules:{
+            xxxx:{
+                required:true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    var options = {
+        id : "purchaseDetailTable",
+        modalName : "采购物资明细",
+        showSearch : false,
+        showRefresh : false,
+        showToggle : false,
+        showColumns : false,
+        showPageGo : true,
+        onEditableSave : onEditableSave,
+        columns : [ {
+            checkbox : true
+        }, {
+            field : 'id',
+            title : 'id',
+            visible : false
+        }, {
+            field : 'goodsName',
+            title : '物资名称',
+            //sortable: true,
+            editable : true
+
+        }, {
+            field : 'num',
+            title : '数量',
+            //sortable: true,
+            editable : {
+                type : 'text',
+                title : '数量',
+                emptytext : "【数量】为空"
+            }
+        }, {
+            field : 'unit',
+            title : '单位',
+            //sortable: true,
+            editable : {
+                type : 'text',
+                title : '单位',
+                emptytext : "【单位】为空"
+            }
+        }, {
+            field : 'price',
+            title : '单价',
+            //sortable: true,
+            editable : {
+                type : 'text',
+                title : '单价',
+                emptytext : "【单价】为空"
+            }
+        }, {
+            field : 'brand',
+            title : '规格型号',
+            //sortable: true,
+            editable : {
+                type : 'text',
+                title : '规格型号'
+            }
+        }, {
+            field : 'purchaseId',
+            title : '主表id',
+            //sortable: true,
+            visible : false
+        }, {
+            field : 'useTime',
+            title : '使用时间',
+            //sortable: true,
+            editable : {
+                type : 'date',
+                title : '使用时间',
+                emptytext : "【使用时间】为空"
+            }
+        }, {
+            field : 'remark',
+            title : '备注',
+            //sortable: true,
+            editable : {
+                type : 'text',
+                title : '备注'
+            }
+        } ]
+    };
+
+    //提交，保存草稿
+    function submitHandler(id,url,flag) {
+        var data = {};
+        var form_data = $('#form-sysProPurchase-add').serializeObject();
+        data.purchase = form_data;
+        data.detailList = $("#" + id).bootstrapTable('getData');
+        data.flag = flag;
+        for (var i = 0; i < data.detailList.length; i++) {
+            var d = data.detailList[i];
+            if (isNull(d.goodsName) || isNull(d.num) || isNull(d.price) || isNull(d.unit)) {
+                $.modal.alertWarning("物资名称，数量，单位，单价必填！！！");
+                return;
+            }
+        }
+        $.operate.saveJsonTab(prefix + url, data);
+    }
+
+    function saveDraft(id,url,flag) {
+        var data = {};
+        var form_data = $('#form-sysProPurchase-add').serializeObject();
+        data.purchase = form_data;
+        data.detailList = $("#" + id).bootstrapTable('getData');
+        data.flag = flag;
+        $.operate.saveJsonTab(prefix + url, data);
+    }
+
+    function isNull(req) {
+        if (req == null || req == '') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id) {
+        var ids = $.map($('#' + id).bootstrapTable('getSelections'),
+            function(row) {
+                return row["id"];
+            });
+        if (ids.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        $.modal.confirm("确定删除该行数据吗?", function() {
+            $("#" + id).bootstrapTable('remove', {
+                field : 'id',
+                values : ids
+            })
+        });
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $.modal.confirm("确定删除所有行吗?", function() {
+            $("#" + id).bootstrapTable('removeAll');
+        });
+    }
+
+    function onEditableSave(field, row, oldValue, $el) {
+        alert("字段名：" + field + "，当前值：" + row[field] + "，旧值：" + oldValue);
+    }
+
+    //弹框添加表格行
+    var idxx = 0;
+    function insertCondition() {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var form_data = $('#form-detailModel-add').serializeObject();
+        form_data.idx = idxx
+        form_data.id = randomId
+
+        $("#purchaseDetailTable").bootstrapTable('insertRow', {
+            index : 0, // 你想插入到哪，0表示第一行
+            row : form_data
+        })
+        idxx++
+        $.modal.close();
+    }
+
+
+    //添加明细信息
+    $(function() {
+        $.table.init(options);
+        //点击弹框
+        $('#addCon').click(function() {
+            clearForm($('#form-detailModel-add'))
+            $('#detailModelValue').val('0');
+            $('#detailModel').modal(options);
+        })
+        $('#insertCondition').click(function() {
+            insertCondition()
+        })
+    })
+</script>
+</body>
+</html>

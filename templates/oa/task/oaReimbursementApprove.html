@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改费用报销')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+	<th:block th:include="include :: sysProCss"/>
+	<style>
+		table td {
+			position: relative
+		}
+
+		.fixed-table-toolbar .bs-bars {
+			display: none !important;
+		}
+
+		.box-center-title {
+			display: flex;
+			justify-content: flex-start;
+			align-items: center
+		}
+
+		.box-center-title hr {
+			position: initial;
+			left: auto;
+			top: auto;
+			height: 1px;
+			background: rgb(216, 216, 216);
+			width: 100%;
+		}
+
+		.box-center-title span {
+			padding: 0 10px 0 5px;
+		}
+
+	</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form id="form-oaReimbursement-edit"
+							th:object="${oaReimbursement}">
+							<input id="taskId" name="taskId" th:value="${taskId}"
+								type="hidden"> <input name="procInstId" type="hidden"
+								th:field="*{procInstId}" /> <input id="id" name="id"
+								th:field="*{id}" type="hidden">
+							<table class="table table-bordered table-condensed table-bot">
+								<caption class="text-center">
+									<h2>报销单</h2>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">编号：</td>
+										<td>[[*{code}]]</td>
+										<td class="active">所属公司：</td>
+										<td>[[*{companyName}]]</td>
+
+									</tr>
+									<tr>
+										<td class="active">申请人：</td>
+										<td>[[*{userName}]]</td>
+										<td class="active"><span style="color: red;">*</span>项目名称：</td>
+										<td>[[*{title}]]</td>
+									</tr>
+									<tr>
+										<td class="active">申请部门：</td>
+										<td>[[*{deptName}]]</td>
+										<td class="active">申请日期：</td>
+										<td colspan="3">[[${#dates.format(oaReimbursement.applyDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+									</tr>
+
+									<tr>
+										<td class="active">报销金额：</td>
+										<td>[[*{money}]]</td>
+										<td class="active">金额大写：</td>
+										<td colspan="3">[[*{moneyUpcase}]]</td>
+									</tr>
+									<tr>
+										<td class="active">报销人：</td>
+										<td>[[*{receiver}]]</td>
+										<td class="active">收款账号：</td>
+										<td colspan="3">[[*{receiverAccount}]]</td>
+									</tr>
+									<tr>
+										<td class="active">收款开户行：</td>
+										<td colspan="3">
+											[[*{receiverOpenBank}]]
+										</td>
+									</tr>
+									<tr>
+										<td class="active">附件：</td>
+										<td colspan="3">
+											<div class="file-loading">
+												<input id="uploadFileId1" type="file" multiple disabled>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">实际报销金额：</td>
+										<td>[[*{actualMoney}]]
+										</td>
+										<td class="active">金额大写：</td>
+										<td>[[*{actualMoneyUpcase}]]</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<!-- 报销明细 -->
+						<div>
+							<div class="box-center-title ">
+								<div class="arrow arrow-bottom"></div>
+								<span>报销明细</span>
+								<hr>
+							</div>
+							<div class=" select-table table-striped arrow-box">
+								<table class="table table-bordered table-bot" id="detailTable">
+
+								</table>
+							</div>
+						</div>
+						<div>
+							<div class="box-center-title ">
+								<div class="arrow arrow-bottom"></div>
+								<span>扣款明细</span>
+								<hr>
+							</div>
+							<div class="arrow-box">
+								<table class="table table-bordered table-bot" id="detailTable1">
+
+								</table>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="disagree() " th:if=" ${hisFlag} ne '1'">不同意</button>
+				<button type="button" class="btn btn-sm btn-success"
+						th:onclick="selectUser('','','0',[[${oaReimbursement.id}]],'oa/oaReimbursement/copy','flag')">
+						抄送</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关闭
+				</button>
+			</div>
+		</div>
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<th:block th:include="include :: lastNode"/>
+	<script th:inline="javascript">
+	    var prefix = ctx + "oa/oaReimbursement";
+		var lastNodeId = [[${oaReimbursement.id}]];
+		var actDefineId = [[${oaReimbursement.actDefineId}]];
+		var lastStatus = [[${oaReimbursement.status}]];
+		//同意
+		function agree() {
+			$.modal.open("同意备注", ctx + "oa/task/reimbursementAgree/" + $("#taskId").val()+ "/3/"+[[${oaReimbursement.id}]]+"/oa_reimbursement");
+		}
+		//不同意
+		function disagree() {
+			$.modal.open("不同意原因", ctx + "oa/task/reimbursementDisagree/"+ $("#taskId").val() + "/3/"+[[${oaReimbursement.id}]]+"/oa_reimbursement");
+		}
+		var attachmentList = new Array();
+		//返回
+		function backAway() {
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+
+		//明细表格
+        var bxType = [[${@dict.getType('oa_reimbursement_type')}]];
+		var raType = [[${@dict.getType('oa_reimbursement_link')}]];
+        var detailOptions = {
+         		id : "detailTable",
+ 	            url: ctx + "oa/oaReimbursementDetail/list",
+ 	            modalName: "报销明细",
+ 	            search: false,
+ 	            showExport: false,
+ 		        showRefresh:false,
+ 		        showColumns:false,
+ 		        showToggle:false,
+ 		        showSearch:false,
+ 		        pagination:false,
+ 		        uniqueId:'id',
+ 		        striped:true,
+ 		        queryParams : {"parentId":[[${oaReimbursement.id}]]},
+ 	            columns: [{
+ 	                radio: true
+ 	            },
+ 	           {
+ 	                field: 'id',
+ 	                title: 'id',
+ 	                visible:false
+ 	            },
+ 	            {
+ 	                field: 'reimbursementReason',
+ 	                title: '报销事由'
+ 	            },
+ 	            {
+ 	                field: 'money',
+ 	                title: '报销金额'
+ 	            },
+					{
+						field: 'reimbursementType',
+						title: '报销类型',
+						formatter: function (value, row, index) {
+							return $.table.selectDictLabel(bxType, value);
+						}
+					},
+					{
+						field: 'relationType',
+						title: '关联其他模块类型',
+						formatter: function (value, row, index) {
+							return $.table.selectDictLabel(raType, value);
+						}
+					},
+					{
+						field: 'relationId',
+						title: '关联其他模块表单',
+						formatter: function (value, row, index) {
+							return '<a onclick="editTab(\'' + row.relationType + '\',\'' +  row.relationId+ '\')">'+row.relationId+'</a>'
+						}
+					}
+ 	            ]
+ 	        };
+		//跳转到详情页面
+		function editTab(url,id){
+			$.modal.openFull("详情",ctx + "oa/"+url+"/edit/"+id);
+		}
+        //扣款表格
+		var detailOptions1 = {
+			id: "detailTable1",
+			url: ctx + "oa/oaReimbursementCut/list",
+			modalName: "扣款明细",
+			search: false,
+			showExport: false,
+			showRefresh: false,
+			showColumns: false,
+			showToggle: false,
+			showSearch: false,
+			pagination: false,
+			uniqueId: 'id',
+			striped: true,
+			queryParams: {"parentId": [[${oaReimbursement.id}]]},
+			columns: [{
+				radio: true,
+				visible: false
+			}, {
+				field: 'id',
+				title: 'id',
+				visible: false
+			},
+				{
+					field: 'userId',
+					title: '审批人Id'
+				},
+				{
+					field: 'userName',
+					title: '审批人'
+				},
+				{
+					field: 'reason',
+					title: '扣款事由'
+				},
+				{
+					field: 'money',
+					title: '扣款金额'
+				}]
+		};
+
+		$(function() {
+			$.table.init(detailOptions);
+			$.table.init(detailOptions1);
+			//附件回显
+			var config = {
+				url: ctx+"oa/oaAttachment/selectAttach",
+				type: "post",
+				dataType: "json",
+				data: {"objectId": [[${oaReimbursement.id}]]},
+				success: function(result) {
+					var imgsUrl = new Array();
+					var attachList = result.data;
+					if(attachList!=null && attachList.length>0){
+						var downloadConfig = new Array();
+						for(var i=0; i<attachList.length; i++){
+							var down = {};
+							var attach = attachList[i];
+							imgsUrl.push(attach.attachmentUrl);
+							down.key = attach.attachmentName;
+							down.caption = attach.fileName;
+							down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+							if(isAssetTypeAnImage(attach.attachmentName)){
+								down.type = 'image';
+							}else{
+								down.type = 'object';
+							}
+							downloadConfig.push(down);
+						}
+						var option1={
+							id:'uploadFileId1',
+							uploadUrl:null,
+							deleteUrl:null,
+							imgsUrl:imgsUrl,
+							downloadConfig:downloadConfig,
+							attachmentList : new Array()
+						}
+						$.common.uploadFile(option1);
+					}else{
+						$('.file-loading').parent().html('<p>暂无附件</p>')
+					}
+					downFile();
+				}
+			};
+			$.ajax(config)
+			//箭头方向
+			var arrowList = $(".arrow");
+			arrowList.click(function () {
+				var obj = $(this);
+				obj.toggleClass("arrow-top");
+				obj.toggleClass("arrow-bottom");
+				obj.parent().siblings('.arrow-box').toggleClass("box-center-table-type");
+			})
+		});
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaReimbursement.procInstId}]];
+    	data.id = [[${oaReimbursement.id}]];
+		selectActProcessList(data);
+	</script>
+</body>
+</html>

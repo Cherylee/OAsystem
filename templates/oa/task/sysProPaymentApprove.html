@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改项目付款')" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+    <th:block th:include="include :: sysProCss"/>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProPayment-edit" th:object="${sysProPayment}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>项目付款</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active"><span style="color: red; ">*</span>申请类型：</td>
+                                    <td>
+                                        <select class="form-control" name="sysPayType"
+                                                th:with="type=${@dict.getType('sys_pro_pay_type')}"
+                                                th:field="*{sysPayType}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                    <td class="active">项目：</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="hidden">
+                                        <input th:field="*{proName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">编号：</td>
+                                    <td>
+                                        <input id="code" name="code" th:field="*{code}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                                        <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">公司名称：</td>
+                                    <td>
+                                        <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                        <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">申请部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                        <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly"
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">审批状态：</td>
+                                    <td>
+                                        <select class="form-control" name="status"
+                                                th:with="type=${@dict.getType('oa_leave_status')}"
+                                                th:field="*{status}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                    <td class="active">申请日期：</td>
+                                    <td>
+                                        <input id="applyTime" name="applyTime" th:value="${#dates.format(sysProPayment.applyTime, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">支付日期：</td>
+                                    <td>
+                                        <input id="paymentDate" name="paymentDate" th:value="${#dates.format(sysProPayment.paymentDate, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">支出总金额：</td>
+                                    <td>
+                                        <input id="amount" name="amount" th:field="*{amount}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">金额大写：</td>
+                                    <td>
+                                        <input id="moneyUpper" name="moneyUpper" th:field="*{moneyUpper}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">付款事由：</td>
+                                    <td>
+                                        <input  name="reason" th:field="*{reason}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">备注：</td>
+                                    <td colspan="3">
+                                        <input name="remark" th:field="*{remark}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="col-sm-12 ">
+                            <h4 class="form-header h4">付款明细</h4>
+                            <div class="col-sm-12 select-table table-striped">
+                                <div class="btn-group-sm" id="toolbar1" role="group">
+                                    <a class="btn btn-warning" data-toggle="modal" onclick="addDetail()"> <i class="fa fa-plus"></i> 添加明细记录 </a>
+                                    <a class="btn btn-danger" onclick="removeRowAll('detailTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                                </div>
+                                <div class="fixed-table-container">
+                                    <table id="detailTable" data-mobile-responsive="true"></table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12" style="overflow: hidden">
+                            <div class="box-center-title ">
+                                <div class="arrow arrow-bottom" id="arrowBtn"></div>
+                                <span>扣款明细</span>
+                                <hr>
+                            </div>
+                            <div class="select-table table-striped arrow-box box-center-table-type">
+                                <table class="table table-bordered table-bot" id="detailTable1">
+
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10 add_btn_mt" style="padding-top: 20px  ">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                                <button type="button" class="btn btn-sm btn-success"
+                                        th:onclick="selectUser('','','0',[[${sysProPayment.id}]],'oa/oaCertificatesLogout/copy','flag')">
+                                    抄送</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关闭
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 审批流程记录 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="JavaScript">
+		var prefix = ctx + "oa/sysProPayment";
+
+        var contractTypeList=[[${@dict.getType('oa_contract_type1')}]];
+        var bigTpye=[[${@dict.getType('sys_payment_big_type')}]];
+		//流程
+		var data = {};
+    	data.procInstId= [[${sysProPayment.procInstId}]];
+    	data.id = [[${sysProPayment.id}]];
+		selectActProcessList(data);
+
+		$(function () {
+            //箭头方向
+            var arrowList = $(".arrow");
+            arrowList.click(function () {
+                var obj = $(this);
+                if(obj.attr('id')=='arrowBtn'){//判断是否扣款明细
+                    $.table.init(detailOptions1);
+                }
+                obj.toggleClass("arrow-top");
+                obj.toggleClass("arrow-bottom");
+                obj.parent().siblings('.arrow-box').toggleClass("box-center-table-type");
+            })
+        })
+
+		//同意
+    	function agree(){
+            if([[${sysProPayment.sysPayType}]] =='0'){
+                $.modal.open("同意备注", ctx + "oa/task/reimbursementAgree/" + [[${taskId}]]+ "/GC-1/"+[[${sysProPayment.id}]]+"/sys_pro_payment");
+            }else if ([[${sysProPayment.sysPayType}]] =='1'){
+                $.modal.open("同意备注", ctx + "oa/task/reimbursementAgree/" + [[${taskId}]]+ "/GC-11/"+[[${sysProPayment.id}]]+"/sys_pro_payment");
+            } else {
+                $.modal.open("同意备注", ctx + "oa/task/reimbursementAgree/" + [[${taskId}]]+ "/GC-12/"+[[${sysProPayment.id}]]+"/sys_pro_payment");
+            }
+
+    	}
+		//不同意
+	    function disagree(){
+            if([[${sysProPayment.sysPayType}]] =='0'){
+                $.modal.open("同意备注", ctx + "oa/task/reimbursementDisagree/" + [[${taskId}]]+ "/GC-1/"+[[${sysProPayment.id}]]+"/sys_pro_payment");
+            }else if ([[${sysProPayment.sysPayType}]] =='1'){
+                $.modal.open("同意备注", ctx + "oa/task/reimbursementDisagree/" + [[${taskId}]]+ "/GC-11/"+[[${sysProPayment.id}]]+"/sys_pro_payment");
+            } else {
+                $.modal.open("同意备注", ctx + "oa/task/reimbursementDisagree/" + [[${taskId}]]+ "/GC-12/"+[[${sysProPayment.id}]]+"/sys_pro_payment");
+            }
+	    }
+	    //返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+
+
+        $(function () {
+            var attachmentList = new Array();
+            //回显附件
+            var config = {
+                url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+                type: "post",
+                dataType: "json",
+                data: {"objId": [[${sysProPayment.id}]]},
+                success: function(result) {
+                    var imgsUrl = new Array();
+                    var attachList = result.data;
+                    if(attachList!=null && attachList.length>0){
+                        var downloadConfig = new Array();
+                        for(var i=0; i<attachList.length; i++){
+                            var down = {};
+                            var attach = attachList[i];
+                            imgsUrl.push(attach.attachmentUrl);
+                            down.key = attach.attachmentName;
+                            down.caption = attach.fileName;
+                            down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                            if(isAssetTypeAnImage(attach.attachmentName)){
+                                down.type = 'image';
+                            }else{
+                                down.type = 'object';
+                            }
+                            downloadConfig.push(down);
+                        }
+                        var option1={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            imgsUrl:imgsUrl,
+                            downloadConfig:downloadConfig
+                        }
+                        $.common.uploadFile(option1);
+                    }else{
+                        var option2={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            deleteExtraData:null,
+                            imgsUrl:new Array(),
+                            initialPreviewConfig:null
+                        }
+                        $.common.uploadFile(option2);
+                    }
+                    downFile();
+                }
+            };
+            $.ajax(config)
+        });
+		
+		var options = {
+				id : 'detailTable',
+				url : ctx+'oa/sysProPaymentDetail/list',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "明细记录",
+				showExport : false,
+				clickToSelect : true,
+				queryParams : {'parentId' : [[${sysProPayment.id}]]},
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'contractId',
+							title : '合同id',
+							visible : false
+						},
+						{
+							field : 'billId',
+							title : '发票id',
+							visible : false
+						},
+						{
+							field : 'contractType',
+							title : '合同类型',
+                            formatter: function (value, row, index) {
+                                return $.table.selectDictLabel(contractTypeList, value);
+                            }
+						},
+						{
+							field : 'billType',
+							title : '发票类型'
+						},
+						{
+							field : 'amount',
+							title : '付款金额'
+						},
+						{
+							field : 'receivePerson',
+							title : '收款人'
+						},
+						{
+							field : 'receivePersonAccount',
+							title : '收款人账号'
+						},
+						{
+							field : 'receivePersonOpenBank',
+							title : '收款人开户行'
+						},
+						{
+							field : 'proCategory',
+							title : '工程大类',
+                            formatter: function (value, row, index) {
+                                return $.table.selectDictLabel(bigTpye, value);
+                            }
+						},
+						{
+							field : 'detailCategory',
+							title : '工程小类'
+						},
+						{
+							field : 'reason',
+							title : '付款事由'
+						},
+						{
+							field : 'remark',
+							title : '备注'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+			};
+		$.table.init(options);
+
+        //扣款表格
+        var detailOptions1 = {
+            id: "detailTable1",
+            url: ctx + "oa/sysProPaymentCut/list",
+            modalName: "扣款明细",
+            search: false,
+            showExport: false,
+            showRefresh: false,
+            showColumns: false,
+            showToggle: false,
+            showSearch: false,
+            pagination: false,
+            uniqueId: 'id',
+            striped: true,
+            queryParams: {"parentId": [[${sysProPayment.id}]]},
+            columns: [{
+                radio: true,
+                visible: false
+            }, {
+                field: 'id',
+                title: 'id',
+                visible: false
+            },
+                {
+                    field: 'userId',
+                    title: '审批人Id'
+                },
+                {
+                    field: 'userName',
+                    title: '审批人'
+                },
+                {
+                    field: 'reason',
+                    title: '扣款事由'
+                },
+                {
+                    field: 'money',
+                    title: '扣款金额'
+                }]
+        };
+
+        $.table.init(detailOptions1);
+
+	</script>
+</body>
+</html>

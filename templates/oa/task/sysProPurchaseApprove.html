@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('工程采购申请审批')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProPurchase-edit" th:object="${sysProPurchase}">
+                            <input id="id" name="id" th:field="*{id}" type="hidden">
+                            <input name="procInstId" type="hidden" id="procInstId" th:field="*{procInstId}" />
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>采购申请</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">采购标题：</td>
+                                    <td>
+                                        <input id="title" name="title" th:value="*{title}" class="form-control" type="text" >
+                                    </td>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:value="*{proposer}" class="form-control" type="hidden">
+                                        <input th:value="*{proposerName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">归属部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" class="form-control" th:value="*{deptId}" type="hidden">
+                                        <input id="deptName" name="deptName" th:value="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active"><span style="color: red; ">*</span>工程名称：</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" type="hidden" />
+                                        <input id="projectName" name="projectName" class="form-control" type="text" th:value="*{projectName}"
+                                               onclick="selectPro('projectId','projectName')" required="required">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">采购类型：</td>
+                                    <td >
+                                        <select name="purchaseType" id="purchaseType" class="form-control" th:field="*{purchaseType}"
+                                                th:with="type=${@dict.getType('sys_pro_purchase_type')}">
+                                            <option value="">--请选择--</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                    th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                    <td class="active">备注：</td>
+                                    <td>
+                                        <input id="remark" name="remark" th:value="*{remark}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <!-- 采购明细 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <div class="col-sm-12 select-table table-striped">
+                                <table id="purchaseDetailTable" data-mobile-responsive="true"></table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                <button type="button" class="btn btn-sm btn-primary"
+                        onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                <button type="button" class="btn btn-sm btn-danger"
+                        onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                <button type="button" class="btn btn-sm btn-success"
+                        th:onclick="selectUser('','','0',[[${sysProPurchase.id}]],'oa/sysProPurchase/copy',false)">
+                    抄送</button>
+                <button type="button" class="btn btn-sm btn-danger"
+                        onclick="closeItem()">
+                    <i class="fa fa-reply-all"></i>关闭
+                </button>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/sysProPurchase";
+        //同意
+        function agree(){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-25/sys_pro_purchase/"+[[${sysProPurchase.id}]]);
+        }
+        //不同意
+        function disagree(){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-25/sys_pro_purchase/"+[[${sysProPurchase.id}]]);
+        }
+        //返回
+        function backAway(){
+            $.modal.close();
+            var parent = window.parent;
+            parent.$.table.refresh();
+        }
+
+        var options = {
+            id : "purchaseDetailTable",
+            url: ctx + "oa/sysProPurchaseDetail/list",
+            modalName : "采购物资明细",
+            showSearch : false,
+            showRefresh : false,
+            showToggle : false,
+            showColumns : false,
+            showPageGo : true,
+            queryParams:{'purchaseId':[[${sysProPurchase.id}]]},
+            striped:true,
+            columns : [ {
+                checkbox : false
+            }, {
+                field : 'id',
+                title : 'id',
+                visible : false
+            }, {
+                field : 'goodsName',
+                title : '物资名称',
+                //sortable: true,
+
+            }, {
+                field : 'num',
+                title : '数量',
+                //sortable: true,
+            }, {
+                field : 'unit',
+                title : '单位',
+                //sortable: true,
+            }, {
+                field : 'price',
+                title : '单价',
+                //sortable: true,
+            }, {
+                field : 'brand',
+                title : '规格型号',
+                //sortable: true,
+            }, {
+                field : 'purchaseId',
+                title : '主表id',
+                //sortable: true,
+                visible : false
+            }, {
+                field : 'useTime',
+                title : '使用时间',
+                //sortable: true,
+            }, {
+                field : 'remark',
+                title : '备注',
+                //sortable: true,
+            } ]
+        };
+
+        $(function() {
+            $.table.init(options);
+        })
+
+	</script>
+</body>
+</html>

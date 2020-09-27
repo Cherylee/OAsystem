@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('车辆列表')" />
+	<style>
+	   #formId .select-list>ul>li p{
+	   width:120px;
+	    }
+	</style>
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								<select name="status" th:with="type=${@dict.getType('oa_car_manage_state')}">
+									<option value="">车辆状态</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								<input type="hidden" id="companyId" name="companyId" /> <input
+									type="text" id="companyName"
+									onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+							</li>
+							<li>
+								<p>车辆归属人：</p>
+								<input id="owner" onclick="selectUserById()" type="text"/>
+								<input name="owner" type="hidden"/>
+							</li>
+
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaCar:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:oaCar:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaCar:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaCar:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaCar:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaCar:remove')}]];
+        var carStatus = [[${@dict.getType('oa_car_manage_state')}]];
+        var prefix = ctx + "oa/oaCar";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "车辆",
+		        showExport: true,
+				rowStyle: rowStyle,//通过自定义函数设置行样式
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'carNo', 
+					title : '车牌号',
+					sortable: true
+				},
+				{
+					field : 'bodyColor', 
+					title : '车身颜色',
+					sortable: true
+				},
+				{
+					field : 'carBrad', 
+					title : '品牌型号',
+					sortable: true
+				},
+				{
+					field : 'drivingLicense', 
+					title : '行驶证号',
+					sortable: true
+				},
+				{
+					field : 'carEngine', 
+					title : '发动机号',
+					sortable: true
+				},
+				{
+					field : 'carFrame', 
+					title : '车架号',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(carStatus, value);
+		        	}
+				},
+				{
+					field : 'userName', 
+					title : '车辆归属人',
+					sortable: true
+				},
+				{
+					field : 'insuranceExpireDate',
+					title : '保险到期时间',
+					sortable: true
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        
+        /*车辆归属人*/
+        function selectUserById(){
+    		var options = {
+    				title: '选择用户',
+    				width: "1200",
+    				url: ctx + "oa/oaApplyTemplate/selectUser",
+    				callBack: doSubmit1
+    			};
+    			$.modal.openOptions(options);
+    	}
+        function doSubmit1(index, layero){
+          var iframeWin = layero.find('iframe')[0];
+          var result = iframeWin.contentWindow.submitHandler();
+		  var data = result.data;
+		  $('#owner').val(data.userName);
+		  $("input[name='owner']").val(data.userId);
+		   
+        }
+
+		//指定行的颜色
+		function rowStyle(row, index) {
+			var style = {};
+			var diff = diffDate(row.insuranceExpireDate);
+			if(diff<=60){
+				style={css:{'color':'#ed5565'}};
+			}
+			return style;
+		}
+
+
+		//比较两个日期时间差
+		function diffDate(expireDate){
+        	var insuranceExpireDate = Date.parse(expireDate);//到期时间
+			var timestamp=new Date().getTime();//当前时间
+			var tar = insuranceExpireDate-timestamp;
+			return tar / (1000 * 60 * 60 * 24); //将毫秒转为天数
+
+		}
+    </script>
+</body>
+</html>

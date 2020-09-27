@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('项目主列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li><input type="text" name="name" placeholder="项目名称"/>
+                        </li>
+                        <li> <select name="projectType"
+                                     th:with="type=${@dict.getType('yt_project_type')}">
+                            <option value="">工程类型</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"
+                            ></option>
+                        </select>
+                        </li>
+                        <!--<li class="select-time">
+                            <label>开标时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>-->
+
+                        <!--<li><select name="bidType"
+                                    th:with="type=${@dict.getType('yt_bid_type')}">
+                            <option value="">投标类型</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"
+                            ></option>
+                        </select>
+                        </li>-->
+                        <li><select name="state"
+                                    th:with="type=${@dict.getType('yt_project_state')}">
+                            <option value="">项目状态</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"
+                            ></option>
+                        </select>
+                        </li>
+
+
+                        <li><a class="btn btn-primary btn-rounded btn-sm"
+                               onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm"
+                               onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success " onclick="$.operate.addTab()">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <!--				<a class="btn btn-primary btn-edit " onclick="$.operate.editTab()">-->
+            <!--					<i class="fa fa-edit"></i> 修改-->
+            <!--				</a>-->
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var role1Flag = [[${@permission.hasPermi('yt:ytProjectMain:biddingProject:role1')}]];//生产经营部经理权限
+    var role2Flag = [[${@permission.hasPermi('yt:ytProjectMain:biddingProject:role2')}]];//总经理权限
+    var role3Flag = [[${@permission.hasPermi('yt:ytProjectMain:biddingProject:role3')}]];//总经理权限
+    var prefix = ctx + "yt/ytProjectMain";
+    var ytPMinfoType = [[${@dict.getType('yt_project_type')}]];
+    var ytBidType = [[${@dict.getType('yt_bid_type')}]];
+    var ytProjectState = [[${@dict.getType('yt_project_state')}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/bidlist",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            clickToSelect: true,
+            modalName: "项目信息",
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'ytProjectMain.id',
+                    title: '',
+                    visible: false
+                },
+                {
+                    field: 'ytProjectMain.name',
+                    title: '项目名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var linkLoc = '<a onclick="$.operate.editTab(\'' + row.ytProjectMain.id + '\')">点击查看</a>'
+                        return $.table.tooltip(row.ytProjectMain.name, 10, "open") + linkLoc
+                    }
+                },
+                {
+                    field: 'ytProjectMain.code',
+                    title: '项目编号',
+                    sortable: true
+                },
+                {
+                    field: 'ytProjectMain.biddingInfoLinkLoc',
+                    title: '招标信息',
+                    sortable: true,
+                    visible: false,
+                    formatter: function (value, row, index) {
+                        var linkLoc = '<a target="view_window" href="' + row.ytProjectMain.biddingInfoLinkLoc + '">点击查看</a>'
+                        return $.table.tooltip(row.ytProjectMain.biddingInfoLinkLoc, 10, "open") + linkLoc
+                    }
+                },
+                {
+                    field: 'biddingApplyId',
+                    title: '费用申请Id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'ytProjectMain.projectType',
+                    title: '工程类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ytPMinfoType, value);
+                    }
+                },
+                {
+                    field: 'ytProjectAllocateMain.principleLeaderName',
+                    title: '项目主负责人',
+                    visible: true
+                },
+                {
+                    field: 'constructionUnit',
+                    title: '建设单位',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'replaceUnit',
+                    title: '代建单位',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'constructionLoc',
+                    title: '建设地点',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectScale',
+                    title: '项目规模',
+                    sortable: true,
+                    visible: false
+                },
+                /*{
+                    field: 'ytProjectMain.biddingLimitDate',
+                    title: '招标工期',
+                    sortable: true
+                },*/
+                {
+                    field: 'investAmount',
+                    title: '投资总额',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'biddingDesignCost',
+                    title: '招标设计费用',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'biddingContent',
+                    title: '招标内容',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'qualificationRequirements',
+                    title: '资质要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'performanceRequirements',
+                    title: '业绩要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'evaluationMethod',
+                    title: '评标办法',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deposit',
+                    title: '投标保证金',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'depositSubmitDate',
+                    title: '保证金提交截止日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'filesSubmitDate',
+                    title: '投标文件递交时间',
+                    sortable: true,
+                    visible: false
+                },
+                /*{
+                    field: 'ytProjectMain.biddingDate',
+                    title: '开标时间',
+                    sortable: true
+                },*/
+                {
+                    field: 'biddingPlace',
+                    title: '开标地点',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectHeadmanRequirements',
+                    title: '项目负责人要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectOthersRequirements',
+                    title: '项目其他人要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'accompany',
+                    title: '陪标与否',
+                    sortable: true,
+                    visible: false
+                },
+                /*{
+                    field: 'ytProjectMain.bidType',
+                    title: '投标类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ytBidType, value);
+                    }
+                },*/
+
+                {
+                    field: 'ytProjectMain.proportion',
+                    title: '项目总进度',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var dat = row.ytProjectMain.proportion + "%";
+                        return '<p>' + dat + '</p><div class="progress progress-mini"> <div style="width: ' + dat + ';" class="progress-bar"></div> </div>'
+                    }
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '更新者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    sortable: true,
+                    visible: false
+                },
+                // {
+                //     title: '关联的付款单',
+                //     align: 'center',
+                //     formatter: function (value, row, index) {
+                //         return '<a class="btn btn-xs btn-success" onclick="openOaPayment(\'' + row.ytProjectMain.id + '\')">查看付款单</a>'
+                //     }
+                // },
+                // {
+                //     title: '关联的保证金',
+                //     align: 'center',
+                //     formatter: function (value, row, index) {
+                //         return '<a class="btn btn-xs btn-warning " onclick="openOaMargin(\'' + row.ytProjectMain.id + '\')">查看保证金</a>'
+                //     }
+                // },
+                {
+                    title: '关联的合同',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return '<a class="btn btn-xs btn-warning " onclick="openOaContract(\'' + row.ytProjectMain.id + '\')">查看合同</a>'
+                    }
+                },
+                {
+                    title: '分配负责人',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var textpeople = '分配'
+                        if (row.ytProjectAllocateMain != null) {
+                            textpeople = '修改'
+                        }
+                        if (role1Flag == 'hidden') {
+                            actions.push('...')
+                        } else {
+                            actions.push('<a class="btn btn-info btn-xs ' + role1Flag + '" href="#" onclick="managerAllocateTab(\'' + row.ytProjectMain.id + '\')">' + textpeople + '</a> ');
+                        }
+                        return actions.join('');
+                    }
+                },
+                {
+                    title: '分配比例',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var textscal = '分配'
+
+                        if (row.ytProjectAllocateMain != null) {
+                            if (row.leaderAuditState == '03') {
+                                textscal = '修改'
+                            } else if (row.leaderAuditState == '01' || row.leaderAuditState == '02'){
+                                textscal = '查看'
+                            }
+
+                            if ([[${user.userId}]] == row.ytProjectAllocateMain.principleLeaderId) {
+                                //分配比例
+                                actions.push('<a class="btn btn-success btn-xs " href="#" onclick="leaderAllocateTab(\'' + row.ytProjectMain.id +'\',\'' + 1 + '\')">' + textscal + '</a> ');
+                            } else {
+                                actions.push('<a class="btn btn-success btn-xs ' +role1Flag+ '"href="#" onclick="leaderAllocateTab(\'' + row.ytProjectMain.id +'\',\'' + 2 + '\')">' + textscal + '</a> ');
+                            }
+                        }
+
+                        if (row.leaderAuditState == '01') {
+                            //生产经营部经理确认分配
+                            actions.push('<a class="btn btn-success btn-xs ' + role1Flag + '" href="#" onclick="leaderAllocateTab(\'' + row.ytProjectMain.id+'\',\'' + 3 + '\')">确认分配</a> ');//确认分配比例
+                        }
+                        return actions.join('');
+                    }
+                },
+                {
+                    title: '分配人员',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (row.leaderAuditState == '02') {
+                            if ([[${user.userId}]] == row.ytProjectAllocateMain.principleLeaderId
+                                || [[${user.userId}]] == row.ytProjectAllocateMain.deputyLeaderId
+                                || [[${user.userId}]] == row.ytProjectAllocateMain.measureLeaderId
+                                || [[${user.userId}]] == row.ytProjectAllocateMain.surveyLeaderId
+                                || [[${user.userId}]] == row.ytProjectAllocateMain.otherLeaderId) {
+                                //负责人分配人员
+                                actions.push('<a class="btn btn-primary btn-xs " href="#" onclick="peopleConfiguration(\'' + row.ytProjectMain.id + '\')">分配</a> ');
+
+                                //负责人修改分配人员
+                                actions.push('<a class="btn btn-primary btn-xs " href="#" onclick="peopleConfigTabEdit(\'' + row.ytProjectMain.id + '\')">修改</a> ');
+
+                            }
+                            //生产经营部经理确认分配
+                            actions.push('<a class="btn btn-primary btn-xs '+role1Flag+'" href="#" onclick="peopleConfigTabEnter(\'' + row.ytProjectMain.id + '\')">确认</a>')
+
+
+                        } else {
+                            actions.push('...')
+                        }
+
+                        return actions.join('');
+
+                    }
+                },
+                {
+                    title: '进度录入',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs '+ role3Flag +'" href="#" onclick="peopleSchedule(\'' + row.ytProjectMain.id + '\')">跳转</a> ');
+                        return actions.join('');
+                    }
+                },
+                {
+                    title: '项目概览',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs '+role2Flag+'" href="#" onclick="projectOverView(\'' + row.ytProjectMain.id + '\')">概览</a> ');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //打开生产经营部经理分配
+    function managerAllocateTab(id) {
+        createMenuItem(ctx + "yt/ytProjectMain/managerAllocate/" + id, '生产经营部经理分配')
+    }
+
+    //打开分配比例页面
+    function leaderAllocateTab(id,flag) {
+        createMenuItem(ctx + "yt/ytProjectMain/leaderAllocate/" + id + "/" + flag, '负责人分配比例')
+    }
+
+    //打开分配比例页面
+    function peopleConfiguration(id) {
+        createMenuItem(ctx + "yt/ytProjectMain/peopleConfiguration/" + id , '负责人分配人员')
+    }
+
+    //打开修改分配人员页面
+    function peopleConfigTabEdit(id) {
+        createMenuItem(ctx + "yt/ytProjectMain/peopleConfiguration/update/" + id, '修改分配人员')
+    }
+
+    //打开确认分配人员页面
+    function peopleConfigTabEnter(id) {
+        createMenuItem(ctx + "yt/ytProjectMain/peopleConfiguration/audit/" + id, '确认分配人员')
+    }
+
+    //打开进度录入页面
+    function peopleSchedule(id) {
+        createMenuItem(ctx + "yt/ytPeopleSchedule/add/" + id, '人员进度录入')
+    }
+
+    //打开项目概览
+    function projectOverView(id) {
+        createMenuItem(ctx + "yt/ytProjectMain/overView/" + id, '项目概览')
+    }
+
+    //打开关联付款台账
+    function openOaPayment(id) {
+        var options = {
+            title: '关联的付款单',
+            width: "1200",
+            url: ctx + 'yt/ytProjectMain/toRelOaPaymentList/'+id
+        };
+        $.modal.openOptions(options);
+    }
+
+    //打开关联保证金台账
+    function openOaMargin(id) {
+        var options = {
+            title: '关联的付款单',
+            width: "1200",
+            url: ctx + 'yt/ytProjectMain/toRelOaMarginList/'+id
+        };
+        $.modal.openOptions(options);
+    }
+
+    //打开关联合同
+    function openOaContract(id) {
+        var options = {
+            title: '关联的合同',
+            width: "1400",
+            url: ctx + 'yt/ytProjectMain/toRelOaContractList/'+id
+        };
+        $.modal.openOptions(options);
+    }
+
+    //换算
+    /*function toPercent(point){
+      var str=Number(point*100)
+      str+="%";
+       return str;
+    }*/
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+        if (target.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if (target.length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+
+</script>
+</body>
+</html>

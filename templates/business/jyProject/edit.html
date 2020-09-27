@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改项目库')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-jyProject-edit" th:object="${jyProject}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目名称：</label>
+            <div class="col-sm-8">
+            	<input id="name" name="name" th:field="*{name}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目编号：</label>
+            <div class="col-sm-8">
+            	<input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目负责人id：</label>
+            <div class="col-sm-8">
+            	<input id="userId" name="userId" th:field="*{userId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目负责人姓名：</label>
+            <div class="col-sm-8">
+            	<input id="userName" name="userName" th:field="*{userName}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目类型：</label>
+            <div class="col-sm-8">
+            	<select id="proType" name="proType" class="form-control" th:field="*{proType}"
+					th:with="type=${@dict.getType('business_project_type')}">
+					<option value="">------所有------</option>
+					<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">开工日期：</label>
+            <div class="col-sm-8">
+            	<input id="startDate" name="startDate" class="form-control time-input-data" type="text" th:value="${#dates.format(jyProject.startDate, 'yyyy-MM-dd')}">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">竣工日期：</label>
+            <div class="col-sm-8">
+            	<input id="endDate" name="endDate" class="form-control time-input-data" type="text" th:value="${#dates.format(jyProject.endDate, 'yyyy-MM-dd')}">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目金额：</label>
+            <div class="col-sm-8">
+            	<input id="amount" name="amount" th:field="*{amount}" class="form-control" type="number">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">业主单位：</label>
+            <div class="col-sm-8">
+            	<input id="owner" name="owner" th:field="*{owner}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否有效：</label>
+            <div class="col-sm-8">
+            	<select id="effective" name="effective" class="form-control" th:field="*{effective}"
+					th:with="type=${@dict.getType('sys_yes_no')}">
+					<option value="">------所有------</option>
+					<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否完工：</label>
+            <div class="col-sm-8">
+            	<select id="finish" name="finish" class="form-control" th:field="*{finish}"
+					th:with="type=${@dict.getType('sys_yes_no')}">
+					<option value="">------所有------</option>
+					<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建日期：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" readonly="readonly" name="createTime" class="form-control" type="text" th:value="${#dates.format(jyProject.createTime, 'yyyy-MM-dd HH:mm:ss')}" >
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建人：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" readonly="readonly" th:field="*{createBy}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">修改日期：</label>
+            <div class="col-sm-8">
+            	<input id="updateTime" name="updateTime" readonly="readonly" class="form-control" type="text" th:value="${#dates.format(jyProject.updateTime, 'yyyy-MM-dd HH:mm:ss')}" >
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">修改人：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" readonly="readonly" th:field="*{updateBy}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+		
+		<div class="row">
+				<div class="col-sm-offset-5 col-sm-10">
+<!--					<button type="button" class="btn btn-sm btn-primary"-->
+<!--						onclick="submitHandler()">-->
+<!--						<i class="fa fa-check"></i>保 存-->
+<!--					</button>-->
+					&nbsp;
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+						<i class="fa fa-reply-all"></i>关 闭
+					</button>
+				</div>
+			</div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "business/jyProject";
+		$("#form-jyProject-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/edit", $('#form-jyProject-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

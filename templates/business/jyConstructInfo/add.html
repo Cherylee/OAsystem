@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:include="include :: header('新增招标')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<form class="form-horizontal m" id="form-jyConstructInfo-add">
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">标题：</label>
+				<div class="col-sm-8">
+					<input id="title" name="title" class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">项目名称：</label>
+				<div class="col-sm-8">
+					<input id="projName" name="projName" class="form-control"
+						   type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">相关标段包名称：</label>
+				<div class="col-sm-8">
+					<input id="bidName" name="bidName" class="form-control"
+						   type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">招标类型：</label>
+				<div class="col-sm-8">
+					<select name="tenderProjType"
+							th:with="type=${@dict.getType('yt_bid_trade')}"
+							class="form-control">
+						<option value="">------所有------</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+					</select>
+
+
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">发布时间：</label>
+				<div class="col-sm-8">
+					<input id="sendTime" name="sendTime" class="form-control time-input-data" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">招标项目编号：</label>
+				<div class="col-sm-8">
+					<input id="tenderProjCode" name="tenderProjCode"
+						   class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">中标人：</label>
+				<div class="col-sm-8">
+					<input id="winBidderName" name="winBidderName"
+						   class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">中标价：</label>
+				<div class="col-sm-8">
+					<input id="bidAmount" name="bidAmount" class="form-control"
+						   type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">公示类型：</label>
+				<div class="col-sm-8">
+					<input id="publicTypeName" name="publicTypeName"
+						   class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<!-- <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">bid：</label>
+                <div class="col-sm-8">
+                    <input id="bid" name="bid" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">dataFrom：</label>
+                <div class="col-sm-8">
+                    <input id="dataFrom" name="dataFrom" class="form-control"
+                        type="text">
+                </div>
+            </div>
+        </div> -->
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">详情链接地址：</label>
+				<div class="col-sm-8">
+					<input id="detailUrl" name="detailUrl" class="form-control"
+						   type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">投标类型：</label>
+				<div class="col-sm-8">
+					<select name="tenderType" class="form-control"
+							th:with="type=${@dict.getType('jy_tender_type')}">
+						<option value="">------所有------</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">保证金归属人：</label>
+				<div class="col-sm-8">
+					<input id="ownerName" name="ownerName" class="form-control"
+						   type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">业主：</label>
+				<div class="col-sm-8">
+					<input id="tendeRagencyName" name="tendeRagencyName"
+						   class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">来源平台：</label>
+				<div class="col-sm-8">
+					<input id="sourcePlatform" name="sourcePlatform"
+						   class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+
+	</form>
+	<div class="row">
+		<div class="col-sm-offset-5 col-sm-10">
+			<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+				<i class="fa fa-check"></i>保 存
+			</button>
+			&nbsp;
+			<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+				<i class="fa fa-reply-all"></i>关 闭
+			</button>
+		</div>
+	</div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript">
+	var prefix = ctx + "business/jyConstructInfo"
+	$("#form-jyConstructInfo-add").validate({
+		rules : {
+			xxxx : {
+				required : true,
+			},
+		},
+		focusCleanup : true
+	});
+
+	function submitHandler() {
+		if ($.validate.form()) {
+			$.operate.saveTab(prefix + "/add", $(
+					'#form-jyConstructInfo-add').serialize());
+		}
+	}
+</script>
+</body>
+</html>

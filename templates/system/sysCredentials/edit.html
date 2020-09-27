@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改证件')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-sysCredentials-edit" th:object="${sysCredentials}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>证件库</h2>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">证件类别：</td>
+										<td>
+											<input type="hidden" class="form-control" id="typeId" name="credentTypeId">
+											<input type="text" class="form-control" id="type" th:field="*{type}" onclick="selectTypeTree('typeId','type')">
+										</td>
+										<td class="active">证件姓名：</td>
+										<td>
+											<input id="name" name="name" th:field="*{name}" class="form-control" type="text">
+										</td>
+									</tr>
+									<tr>
+										<td class="active">身份证号码：</td>
+										<td>
+											<input id="idCard" name="idCard" th:field="*{idCard}" class="form-control" type="text">
+										</td>
+										<td class="active">证件编号：</td>
+										<td>
+											<input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+										</td>
+									</tr>
+									<tr>
+										<td class="active">专业：</td>
+										<td>
+											<input id="firstSubject" name="firstSubject"  th:field="*{firstSubject}" class="form-control" type="text">
+										</td>
+										<td class="active">有效期：</td>
+										<td>
+											<div class="input-group data">
+												<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+												<input id="firstValidDate" name="firstValidDate" class="form-control time-input-data" type="text"
+													   th:value="${#dates.format(sysCredentials.firstValidDate, 'yyyy-MM-dd')}">
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">专业：</td>
+										<td>
+											<input id="secondSubject" name="secondSubject"  th:field="*{secondSubject}" class="form-control" type="text">
+										</td>
+										<td class="active">有效期：</td>
+										<td>
+											<div class="input-group data">
+												<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+												<input id="secondValidDate" name="secondValidDate" class="form-control time-input-data" type="text"
+													   th:value="${#dates.format(sysCredentials.secondValidDate, 'yyyy-MM-dd')}">
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">专业：</td>
+										<td>
+											<input id="thirdSubject" name="thirdSubject"  th:field="*{thirdSubject}" class="form-control" type="text">
+										</td>
+										<td class="active">有效期：</td>
+										<td>
+											<div class="input-group data">
+												<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+												<input id="thirdValidDate" name="thirdValidDate" class="form-control time-input-data" type="text"
+													   th:value="${#dates.format(sysCredentials.thirdValidDate, 'yyyy-MM-dd')}">
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">发证日期：</td>
+										<td>
+											<div class="input-group data">
+												<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+												<input id="holdDate" name="holdDate" class="form-control time-input-data" type="text"
+													   th:value="${#dates.format(sysCredentials.holdDate, 'yyyy-MM-dd')}">
+											</div>
+										</td>
+										<td class="active">当前所在公司：</td>
+										<td>
+											<input type="hidden" name="deptId" id="treeId" th:field="*{deptId}" />
+											<input type="text" id="treeName" name="deptName" class="form-control" th:field="*{dept.deptName}" onclick="selectDeptTree('treeId','treeName')" />
+										</td>
+									</tr>
+									<tr>
+										<td class="active">可预约：</td>
+										<td>
+											<select name="canAppoint" class="form-control" th:field="*{canAppoint}" th:with="type=${@dict.getType('sys_yes_no')}">
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+										<td class="active">在公司：</td>
+										<td>
+											<select name="inCompany" class="form-control" th:field="*{inCompany}" th:with="type=${@dict.getType('sys_yes_no')}">
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">缴纳社保：</td>
+										<td>
+											<select name="paySocial" class="form-control" th:field="*{paySocial}" th:with="type=${@dict.getType('sys_yes_no')}">
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+										<td class="active">有扫描件：</td>
+										<td>
+											<select name="scanCopy" class="form-control" th:field="*{scanCopy}" th:with="type=${@dict.getType('sys_yes_no')}">
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">有效：</td>
+										<td>
+											<select name="effect" class="form-control" th:field="*{effect}" th:with="type=${@dict.getType('sys_yes_no')}">
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+										<td class="active">状态：</td>
+										<td>
+											<select name="status" class="form-control" th:field="*{status}" th:with="type=${@dict.getType('oa_sysCredentials_status')}">
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">持证人：</td>
+										<td>
+											<input id="ownerId" class="form-control" name="owner" type="text" th:field="*{owner}">
+										</td>
+										<td class="active">保管人：</td>
+										<td>
+											<input id="safeKeep" name="safeKeep" th:field="*{safeKeep}" class="form-control" type="hidden">
+											<input id="safeKeepName" class="form-control" type="text"
+												   onclick="selectUserById('safeKeep','safeKeepName')" th:field="*{safeKeepName}">
+										</td>
+									</tr>
+									<tr>
+										<td class="active">备注：</td>
+										<td colspan="3">
+											<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+										</td>
+									</tr>
+									<tr>
+										<td class="active">附件：</td>
+										<td colspan="3">
+											<div class="file-loading">
+												<input id="uploadFileId" type="file" multiple>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+
+								<button type="button" class="btn btn-sm btn-primary"
+										onclick="submitHandler()">
+									<i class="fa fa-check"></i>保 存
+								</button>
+								&nbsp;
+								<button type="button" class="btn btn-sm btn-danger"
+										onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "system/sysCredentials";
+		var attachmentList = new Array();
+        //图片反显出来
+        $(function () {
+        	var config = {
+        	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": [[${sysCredentials.id}]]},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        		}
+        	        		var option1={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+		     			downFile();
+        	        }
+        	    };
+        	    $.ajax(config)
+	    });
+		
+		function replaceAll(str, oldStr, newStr){
+			var temp = '';
+			temp = str.replace(oldStr, newStr);
+			if(isContains(temp, oldStr)){
+				temp = replaceAll(temp, oldStr, newStr);
+			}
+			return temp;
+		}
+
+		var attachmentUrls = null;
+		
+		
+
+		$("#form-sysCredentials-edit").validate({
+			rules : {
+				xxxx : {
+					required : true,
+				},
+			},
+			focusCleanup : true
+		});
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				var data = $('#form-sysCredentials-edit').serializeObject();
+				data.attachmentList = attachmentList;
+				$.operate.saveJsonTab(prefix + "/edit", data);
+			}
+		}
+		/*用户列表*/
+		var mid = '';
+		var mname = ''
+		function selectUserById(id, name) {
+			mid = id;
+			mname = name;
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+
+			$('#' + mname).val(data.userName);
+			$('#' + mid).val(data.userId);
+
+		}
+		/*用户管理-新增-选择部门树*/
+		function selectDeptTree(id, deptName) {
+			divDeptId = id;
+			divDeptName = deptName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#" + divDeptId).val(body.find('#treeId').val());
+				$("#" + divDeptName).val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+		/*选择归属类型 */
+		var divTypeId = null;
+		var divTypeName = null;
+		function selectTypeTree(id, typeName) {
+			divTypeId = id;
+			divTypeName = typeName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "1" : $("#" + id).val();
+			var options = {
+				title : '选择归属类型',
+				width : "380",
+				url : ctx + "system/sysCredentialsType/selectTypeTree/" + deptId,
+				callBack : typeSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		function typeSubmit(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if(divTypeName=='type'){
+				if ($.tree.notAllowParents(tree)) {
+					var body = layer.getChildFrame('body', index);
+					$("#" + divTypeId).val(body.find('#treeId').val());
+					$("#" + divTypeName).val(body.find('#ParentNodeName').val());
+					layer.close(index);
+				}
+			}
+
+		}
+
+	</script>
+</body>
+</html>

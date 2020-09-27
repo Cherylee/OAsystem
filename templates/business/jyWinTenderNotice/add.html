@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增经营部中标公告')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-jyWinTenderNotice-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">编号：</label>
+            <div class="col-sm-8">
+            	<input id="code" name="code" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程名称：</label>
+            <div class="col-sm-8">
+            	<input id="projectName" name="projectName" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工期：</label>
+            <div class="col-sm-8">
+            	<input id="timeLimit" name="timeLimit" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">建设单位：</label>
+            <div class="col-sm-8">
+            	<input id="constructUnit" name="constructUnit" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">中标日期：</label>
+            <div class="col-sm-8">
+            	<input id="winBidDate" name="winBidDate" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">中标造价：</label>
+            <div class="col-sm-8">
+            	<input id="winBidAmount" name="winBidAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">建造师：</label>
+            <div class="col-sm-8">
+            	<input id="builderName" name="builderName" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程概况：</label>
+            <div class="col-sm-8">
+            	<input id="projectDesc" name="projectDesc" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">投标申请id：</label>
+            <div class="col-sm-8">
+            	<input id="tenderId" name="tenderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建日期：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建人：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">修改日期：</label>
+            <div class="col-sm-8">
+            	<input id="updateTime" name="updateTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">修改人：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "business/jyWinTenderNotice"
+		$("#form-jyWinTenderNotice-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-jyWinTenderNotice-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

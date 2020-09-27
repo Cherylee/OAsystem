@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('报销明细')" />
+</head>
+<body class="white-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" name="projectId" th:value="${projectId}">
+                            <p>申请日期：</p>
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                            -
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                        </li>
+                        <li>
+                            报销金额
+                            <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                            -
+                            <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                            元
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/oaReimbursement";
+    var reimbursementType=[[${@dict.getType('oa_reimbursement_type')}]];
+    $(function() {
+        var options = {
+            url: prefix + "/selectReimbursementData",
+            modalName: "报销明细",
+            updateUrl: prefix2 + "/edit/{id}",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: queryParams,
+            columns: [
+                {
+                    title : '',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    },
+                    footerFormatter:function (value) {
+
+                        return '小计';
+                    }
+
+                },
+                {
+                    field : 'code',
+                    title : '编号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'companyId',
+                    title : '所属公司id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '报销类别',
+                    field:'reimbursementType',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(reimbursementType, value);
+                    }
+
+                },
+                {
+                    field : 'companyName',
+                    title : '申请公司',
+                    sortable: true
+                },
+                {
+                    field : 'userName',
+                    title : '申请人',
+                    sortable: true
+                },
+                {
+                    field : 'proposer',
+                    title : '申请人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field : 'deptId',
+                    title : '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field : 'deptName',
+                    title : '申请部门',
+                    sortable: true,
+                },
+                {
+                    field : 'applyDate',
+                    title : '申请日期',
+                    sortable: true
+                },
+                {
+                    field : 'actualMoney',
+                    title : '实际报销金额',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].money);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'remark',
+                    title : '备注',
+                    sortable: true
+                },
+
+            ]
+        };
+        $.table.init(options);
+    });
+    console.log([[${type}]]);
+
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        var projectId = [[${projectId}]];
+        var type = [[${type}]];
+        if (type!='null') {
+            search.projectId = projectId;
+            search.type = type;
+        }else{
+            search.projectId = projectId;
+        }
+        return search;
+    }
+
+</script>
+</body>
+</html>

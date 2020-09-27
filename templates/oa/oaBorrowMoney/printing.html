@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div style="position: fixed; z-index: 10; top: 30px;right: 40px">
+    <button class="btn btn-warning btn-rounded btn-sm" onclick="printing()"><i class="fa fa-download"></i>打印</button>
+</div>
+<div id="printing">
+    <div th:each="borrowMoney,borrowMoneyStat :${borrowMoneyVoList}">
+        <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+            <!--抬头  -->
+            <div class="hr-line-dashed"></div>
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <table class="table table-bordered table-condensed" >
+                                <caption class="text-center">
+                                    <h2>付款单</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active" style="width: 15%">编号</td>
+                                    <td style="width: 35%">[[${borrowMoney.oaBorrowMoney.code}]]</td>
+                                    <td class="active" style="width: 15%">所属公司</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.companyName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.userName}]]</td>
+                                    <td class="active">申请部门</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.deptName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">项目名称</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.projectName}]]</td>
+                                    <td class="active">借款人</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.borrower}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">借款类型</td>
+                                    <td th:classappend="${'borrowType'+ (borrowMoneyStat.index)}"></td>
+                                    <td class="active">收款账号</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.receiveAccount}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期</td>
+                                    <td>[[${#dates.format(borrowMoney.oaBorrowMoney.applyTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">预计归还时间</td>
+                                    <td>[[${#dates.format(borrowMoney.oaBorrowMoney.preBackDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">借款事由</td>
+                                    <td colspan="3">[[${borrowMoney.oaBorrowMoney.borrowReason}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">借款金额</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.borrowAmount}]]</td>
+                                    <td class="active">金额大写</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.amountUpcase}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active" colspan="4" style="text-align: center ;font-size: 15px">利息明细</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">起息日</td>
+                                    <td>[[${#dates.format(borrowMoney.oaBorrowMoney.interestDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">利率</td>
+                                    <td th:classappend="${'rate'+ (borrowMoneyStat.index)}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">收款方式</td>
+                                    <td th:classappend="${'receiptWay'+ (borrowMoneyStat.index)}">[[${borrowMoney.oaBorrowMoney.code}]]</td>
+                                    <td class="active">已收利息</td>
+                                    <td>[[${borrowMoney.oaBorrowMoney.alreadyReceiptInterest}]]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>利息明细</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 20%">利率</th>
+                                            <th style="width: 20%">利息所属期</th>
+                                            <th style="width: 20%">应收利息</th>
+                                            <th style="width: 20%">已收利息</th>
+                                            <th style="width: 20%">收款日期</th>
+                                        </tr>
+                                        <tr th:each="oaInterest,oaInterestStat :${borrowMoneyVoList[borrowMoneyStat.index].oaInterestList}">
+                                            <td>[[${oaInterest.rate}]]</td>
+                                            <td>[[${#dates.format(oaInterest.interestPeriod, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${oaInterest.interestReceipt}]]</td>
+                                            <td>[[${oaInterest.interestIn}]]</td>
+                                            <td>[[${#dates.format(oaInterest.receiptDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        </tr>
+                                        <tr th:if="${#lists.size(borrowMoney.oaInterestList)}==0">
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>还款明细</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 25%">还款日期</th>
+                                            <th style="width: 25%">未归还金额</th>
+                                            <th style="width: 25%">还款金额</th>
+                                            <th style="width: 25%">还款金额大写</th>
+                                        </tr>
+                                        <tr th:each="oaRefund,oaRefundStat :${borrowMoneyVoList[borrowMoneyStat.index].oaRefundList}">
+                                            <td>[[${#dates.format(oaRefund.refundDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${oaRefund.outstandAmount}]]</td>
+                                            <td>[[${oaRefund.refundAmount}]]</td>
+                                            <td>[[${oaRefund.refundAmountUpcase}]]</td>
+                                        </tr>
+                                        <tr th:if="${#lists.size(borrowMoney.oaRefundList)}==0">
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>审批流程</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th></th>
+                                            <th style="width: 25%">流程名称</th>
+                                            <th style="width: 25%">开始时间</th>
+                                            <th style="width: 25%">审批信息</th>
+                                            <th style="width: 25%">审核时间</th>
+                                        </tr>
+                                        <tr th:each="approval,approvalStat :${borrowMoneyVoList[borrowMoneyStat.index].processList}">
+                                            <td>[[${approvalStat.index}]]</td>
+                                            <td>[[${approval.actName}]]</td>
+                                            <td>[[${#dates.format(approval.startTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${approval.message}]]</td>
+                                            <td>[[${#dates.format(approval.endTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>最后一个节点</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 50%">用户名称</th>
+                                            <th style="width: 50%">留言</th>
+                                        </tr>
+                                        <tr th:unless="${borrowMoney.oaProcExeComment==null}">
+                                            <td>[[${borrowMoney.oaProcExeComment.userName}]]</td>
+                                            <td>[[${borrowMoney.oaProcExeComment.content}]]</td>
+                                        </tr>
+                                        <tr th:if="${borrowMoney.oaProcExeComment==null}">
+                                            <td colspan="2" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="page-break-after:always;"></div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var borrowMoneyVoList = [[${borrowMoneyVoList}]]
+    console.log(borrowMoneyVoList)
+    //字典查询
+    //借款类型
+    var borrowTypeList = [[${@dict.getType('oa_borrow_type')}]];
+    selectDictionary(borrowTypeList,borrowMoneyVoList,'oaBorrowMoney','borrowType');
+    //收款方式
+    var receiptWayList = [[${@dict.getType('oa_borrow_time_type ')}]];
+    selectDictionary(receiptWayList,borrowMoneyVoList,'oaBorrowMoney','receiptWay');
+    //利率显示
+
+    for (var i=0;i<borrowMoneyVoList.length;i++){
+        var text = (parseFloat(borrowMoneyVoList[i].oaBorrowMoney.rate)* 100).toFixed(2) + '%'
+        $('.rate'+i).text(text)
+    }
+
+    function printing() {
+        $('#printing').jqprint({
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: false
+        });
+    }
+</script>
+</body>
+</html>

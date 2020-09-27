@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('加班申请审批')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <style>
+        .add_btn_mt {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaPurchase-edit"
+                          th:object="${oaOvertime}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="taskId" name="taskId" th:value="${taskId}"
+                               type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>加班申请审批</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>[[*{userName}]]</td>
+                                <td class="active">所属公司：</td>
+                                <td>[[*{applyCompanyName}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td>[[*{applyDeptName}]]</td>
+                                <td class="active">申请日期：</td>
+                                <td colspan="3">[[${#dates.format(oaOvertime.applyTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">补登起始日期：</td>
+                                <td>[[${#dates.format(oaOvertime.workStart, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                <td class="active">补登结束日期：</td>
+                                <td colspan="3">[[${#dates.format(oaOvertime.workEnd, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">加班时长：</td>
+                                <td>[[*{workHour}]]</td>
+                                <td class="active">加班事由：</td>
+                                <td colspan="3">[[*{reason}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注：</td>
+                                <td colspan="3"> [[*{remark}]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12 select-table table-striped">
+        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+    </div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意
+            </button>
+            <button type="button" class="btn btn-sm btn-success"
+                    th:onclick="selectUser('','','0',[[${oaOvertime.id}]],'oa/oaOvertime/copy','flag')">
+                抄送
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关闭
+            </button>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaOvertime";
+    var lastNodeId = [[${oaOvertime.id}]];
+    var actDefineId = [[${oaOvertime.actDefineId}]];
+    var lastStatus = [[${oaOvertime.status}]];
+
+    //同意
+    function agree() {
+        $.modal.open("同意备注", ctx + "oa/task/agree/" + $("#taskId").val() + "/220/oa_overtime/" + [[${oaOvertime.id}]]);
+    }
+
+    //不同意
+    function disagree() {
+        $.modal.open("不同意原因", ctx + "oa/task/disagree/" + $("#taskId").val() + "/220/oa_overtime/" + [[${oaOvertime.id}]]);
+    }
+
+    //返回
+    function backAway() {
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+
+    //流程
+    var data = {};
+    data.procInstId = [[${oaOvertime.procInstId}]];
+    data.id = [[${oaOvertime.id}]];
+    selectActProcessList(data);
+</script>
+</body>
+</html>

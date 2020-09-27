@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改审批模板主')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			<div class="row">
+				<div class="col-sm-offset-5 col-sm-10">
+					<button type="button" class="btn btn-sm btn-primary"
+						onclick="SaveCandidateData()">
+						<i class="fa fa-check"></i>保 存
+					</button>
+					<!-- <span id="span" onclick="dar()">[[${user.userId}]]</span> -->
+					&nbsp;
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+						<i class="fa fa-reply-all"></i>关 闭
+					</button>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaApplyTemplate";
+		$(function() {
+            var options = {
+                url: prefix + "/selectNodeListByTempId",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "审批模板",
+		        showExport: true,
+		        queryParams : {"tempId": [[${oaApplyTemplate.id}]]},
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'nodeName', 
+					title : '节点名称',
+					sortable: true
+				},
+				{
+					field : 'assignee', 
+					title : '审批人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'assigneeName', 
+					title : '审批人',
+					sortable: true
+				},
+				{
+					field : 'backupUserName', 
+					title : '备选人',
+					sortable: true
+				},
+				{
+					field : 'backupUserId', 
+					title : '备选人id',
+					sortable: true,
+					visible: false
+				},
+		        {
+		            title: '操作',		           
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var text=''
+		            	var actions = [];
+		            	var str = row.assignee ;
+		            	var iserid=[[${user.userId}]]
+		            	if (row.backupUserId != ''&&row.backupUserId != null) {
+		            		text = '<a class="btn btn-danger btn-xs" href="#" onclick="deletebackupUser('+index+')">删除备选人员</a> ';
+						}
+		            	if(str.indexOf(iserid) != -1){
+		            		actions.push('<a class="" href="#" onclick="selectUserById('+index+')"><i class="fa fa-edit"></i> 选择备选人员</a> ');
+							actions.push(text);
+		            	}
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        
+        });
+		
+		
+		//弹框选择人员
+		var indexM=null;
+		function selectUserById(index) {
+			indexM=index
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		var updataName=null;
+		var updataId=null;
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			console.log(indexM)
+			updataName=data.namesArry
+			updataId=data.idArry
+			$("#bootstrap-table").bootstrapTable('updateRow', {
+			        		index: indexM, // 你想修改哪行，0表示第一行
+			                row: {
+			                	backupUserName: updataName,
+			                	backupUserId: updataId
+			                }
+			})
+		}
+		function SaveCandidateData(){
+			var dataF=$("#bootstrap-table").bootstrapTable('getData');
+			console.log(dataF);
+			var data = {
+					"oaApplyTemplate" :'',
+					"nodeList" : [],
+					"modelUserList" : [],
+					"conditionList": []
+				}
+			 data.oaApplyTemplate={
+					"id":[[${oaApplyTemplate.id}]]
+			}
+			data.nodeList=dataF;
+			var config = {
+					contentType : "application/json;charset=UTF-8",
+					url :ctx + "oa/oaApplyTemplate/updateProcess",
+					type : "post",
+					data : JSON.stringify(data),
+					beforeSend : function() {
+						$.modal.loading("正在处理中，请稍后...");
+					},
+					success : function(result) {
+						/* console.log(result) */
+						$.operate.successTabCallback(result);
+					}
+				};
+				console.log(data)
+				console.log(JSON.stringify(data))
+				$.ajax(config)
+		}
+		function deletebackupUser(index){
+			$.modal.confirm("确认要删除备选人员吗?", function() {
+				$("#bootstrap-table").bootstrapTable('updateRow', {
+	        		index: index, // 你想修改哪行，0表示第一行
+	                row: {
+	                	backupUser: '',
+	                	backupUserId: ''
+	                }
+	            })
+	            SaveCandidateData()
+ 		        layer.msg('执行成功…', { icon: 1 });
+ 		    });
+			
+		}
+	
+		
+		
+		
+	</script>
+</body>
+</html>

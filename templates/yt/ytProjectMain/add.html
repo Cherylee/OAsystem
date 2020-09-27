@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增项目信息')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-ytProjectMain-add">
+			
+			<span th:if="${oaMargin}"> <input id="oaMarginId"
+                                              name="oaMarginId" class="form-control" type="hidden"
+                                              th:value="${oaMargin.id}">
+			</span>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目名称：</label>
+                <div class="col-sm-8">
+                    <input id="name" name="name" class="form-control" type="text" th:value="${oaMargin?.projectName}">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目编号：</label>
+                <div class="col-sm-8">
+                    <input name="code" class="form-control" type="text" th:unless="${code}"
+                           th:value="${oaMargin?.code}">
+                    <input name="code" class="form-control" type="text" th:if="${code}" th:value="${code}">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">招标信息链接：</label>
+                <div class="col-sm-8">
+                    <!--<input id="biddingInfoId" name="biddingInfoId" type="hidden" th:value="${ytBiddingInfo?.id}">
+                    <input id="biddingInfoLinkLoc" name="biddingInfoLinkLoc"
+                        type="hidden" th:value="${ytBiddingInfo?.linkLoc}"> -->
+                    <input id="biddingInfoLinkLoc" name="biddingInfoLinkLoc" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">工程类型：</label>
+                <div class="col-sm-8">
+                    <select name="projectType" class="form-control"
+                            th:with="type=${@dict.getType('yt_project_type')}">
+                        <option value="">-----所有-----</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                    <!-- <input id="projectType" name="projectType"
+                                        class="form-control" type="text"> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">建设单位：</label>
+                <div class="col-sm-8">
+                    <input id="constructionUnit" name="constructionUnit"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">代建单位：</label>
+                <div class="col-sm-8">
+                    <input id="replaceUnit" name="replaceUnit" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">建设地点：</label>
+                <div class="col-sm-8">
+                    <input id="constructionLoc" name="constructionLoc"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目规模：</label>
+                <div class="col-sm-8">
+                    <input id="projectScale" name="projectScale" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">招标工期：</label>
+                <div class="col-sm-8">
+
+
+                    <input id="biddingLimitDate" name="biddingLimitDate"
+                           class="form-control " type="text">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投资总额：</label>
+                <div class="col-sm-8">
+                    <input id="investAmount" name="investAmount" class="form-control"
+                           type="number">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">招标设计费用(万元)：</label>
+                <div class="col-sm-8">
+                    <input id="biddingDesignCost" name="biddingDesignCost"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">招标内容：</label>
+                <div class="col-sm-8">
+                    <input id="biddingContent" name="biddingContent"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">资质要求：</label>
+                <div class="col-sm-8">
+                    <input id="qualificationRequirements"
+                           name="qualificationRequirements" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">业绩要求：</label>
+                <div class="col-sm-8">
+                    <input id="performanceRequirements" name="performanceRequirements"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">评标办法：</label>
+                <div class="col-sm-8">
+                    <input id="evaluationMethod" name="evaluationMethod"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标保证金：</label>
+                <div class="col-sm-8">
+                    <input id="deposit" name="deposit" class="form-control"
+                           type="number">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">保证金提交截止日期：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="depositSubmitDate" name="depositSubmitDate"
+                               class="form-control time-input-data" type="text">
+                    </div>
+                    <!-- <input id="depositSubmitDate" name="depositSubmitDate"
+                                        class="form-control" type="text"> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标文件递交时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="filesSubmitDate" name="filesSubmitDate"
+                               class="form-control time-input-data" type="text">
+                    </div>
+                    <!-- <input id="filesSubmitDate" name="filesSubmitDate"
+                                        class="form-control" type="text"> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">开标时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="biddingDate" name="biddingDate"
+                               class="form-control time-input-data" type="text">
+                    </div>
+                    <!-- <input id="biddingDate" name="biddingDate"
+                                        class="form-control" type="text"> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">开标地点：</label>
+                <div class="col-sm-8">
+                    <input id="biddingPlace" name="biddingPlace" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">开标方式：</label>
+                <div class="col-sm-8">
+                    <select name="biddingWay" class="form-control"
+                            th:with="type=${@dict.getType('bidding_way')}">
+                        <option value="">-----所有-----</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目负责人要求：</label>
+                <div class="col-sm-8">
+                    <input id="projectHeadmanRequirements"
+                           name="projectHeadmanRequirements" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目其他人要求：</label>
+                <div class="col-sm-8">
+                    <input id="projectOthersRequirements"
+                           name="projectOthersRequirements" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">陪标与否：</label>
+                <div class="col-sm-8">
+                    <select name="accompany" class="form-control"
+                            th:with="type=${@dict.getType('sys_yes_no')}">
+                        <option value="">-----所有-----</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                    <!-- <input id="accompany" name="accompany" class="form-control"
+                                        type="text"> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标类型：</label>
+                <div class="col-sm-8">
+                    <select name="bidType" class="form-control"
+                            th:with="type=${@dict.getType('yt_bid_type')}">
+                        <option value="">-----所有-----</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                    <!-- <input id="bidType" name="bidType" class="form-control"
+                                        type="text">  -->
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目级别：</label>
+                <div class="col-sm-8">
+                    <select name="projectLevel" class="form-control"
+                            th:with="type=${@dict.getType('yt_bid_Level')}">
+                        <option value="">-----所有-----</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">关联客户：</label>
+                <div class="col-sm-8">
+                    <input id="relCustomerId" name="relCustomerId"
+                           class="form-control" type="hidden">
+                    <input id="relCustomerName" name="relCustomerName"
+                           class="form-control" type="text" onclick="selectUser('relCustomerId','relCustomerName')">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">中标通知书：</label>
+                <div class="col-sm-8">
+                    <div class="file-loading">
+                        <input id="uploadFileId" type="file" multiple>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <!--<button class="btn btn-sm btn-info" onclick="saveHandler_test()">保存</button>-->
+            <button class="btn btn-sm btn-info" onclick="saveHandler_test()">保存</button>
+        </div>
+    </div>
+
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "business/jyWinTenderNotice";
+    //附件
+    var attachmentList = new Array();
+    var option2 = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null
+    }
+    $.common.uploadFile(option2);
+    downFile();
+
+    //保存
+    function saveHandler_test() {
+        var data = $('#form-ytProjectMain-add').serializeObject()
+        data.attachmentList = attachmentList
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/addYtProjectMain", data);
+        }
+    }
+
+</script>
+</body>
+</html>

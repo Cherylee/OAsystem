@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增数据权限接口')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-oaDataAuthInterface-add">
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span
+                    style="color: red;">*</span>名称：</label>
+            <div class="col-sm-5">
+                <select name="name" class="form-control" required="required"
+                        th:with="type=${@dict.getType('oa_dataAuthInterfase_name')}" >
+                    <option value="">所有</option>
+                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                            th:value="${dict.dictValue}"></option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">模块：</label>
+            <div class="col-sm-5">
+                <div class="table-striped">
+                    <table class="table table-bordered table-bot" id="modulesTable">
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <br>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/oaDataAuthInterface"
+    $("#form-oaDataAuthInterface-add").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        var data = {};
+        data.dataAuthInterface = $('#form-oaDataAuthInterface-add').serializeObject()
+        data.modulesList=$('#modulesTable').bootstrapTable('getSelections')
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/insertDataAuthAndRels", data);
+        }
+    }
+
+    //模块列表
+    var options1={}
+    var config = {
+        url: ctx + "oa/oaModules/list",
+        type: 'post',
+        data: '',
+        beforeSend: function () {
+            $.modal.loading("正在处理中，请稍后...");
+        },
+        success: function (result) {
+            var data=result.rows
+            for (var i=0;i<data.length;i++){
+                data[i].actionScope='0';
+                data[i].moduleId=data[i].id;
+            }
+
+            options1 = {
+                id: 'modulesTable',
+                data:data,
+                sidePagination: "client",
+                // url: ctx + "oa/oaModules/list",
+                clickToSelect: false,
+                showSearch: false,
+                showRefresh: false,
+                showToggle: false,
+                showColumns: false,
+                showPageGo: false,
+                uniqueId: 'id',
+                onEditableSave: onEditableSave,
+                showExport: false,
+                columns: [{
+                    checkbox: true
+                },
+                    {
+                        field: 'id',
+                        title: 'id',
+                        visible: false
+                    }, {
+                        field: 'moduleId',
+                        title: 'id',
+                        visible: false
+                    },
+                    {
+                        field: 'name',
+                        title: '名称',
+                        sortable: true
+                    },
+                    {
+                        field: 'relationTable',
+                        title: '关联表名',
+                        sortable: true
+                    },
+                    {
+                        field: 'actionScope',
+                        title: '范围',
+                        sortable: true,
+                        editable: {
+                            type: 'select',
+                            title: '状态',
+                            source: [{
+                                value: 0,
+                                text: "各子公司"
+                            }, {
+                                value: 1,
+                                text: "本部门"
+                            }]
+                        }
+                    }]
+
+            };
+
+            $.modal.closeLoading();
+            $.table.init(options1);
+        }
+    };
+
+    $(function () {
+        $.ajax(config)
+
+    })
+
+    function onEditableSave(field, row, oldValue, $el) {
+        alert("字段名：" + field + "，当前值：" + row[field] + "，旧值：" + oldValue);
+    }
+</script>
+</body>
+</html>

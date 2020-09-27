@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head>
+	<th:block th:include="include :: header('任务列表')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="config-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								类型：
+								<select name="type" th:with="type=${@dict.getType('oa_examine_type')}">
+									<option value="">--请选择--</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+
+    var approveType = [[${@dict.getType('sys_workflow_type')}]];
+    var statusData = [[${@dict.getType('oa_leave_status')}]];
+    var prefix = ctx + "oa/proTask";
+
+    $(function () {
+    	list();
+    });
+    
+    function list(){
+    	var options = {
+            	uniqueId: "id",
+                url: prefix + "/list",
+                modalName: "任务处理",
+                search: false,
+                showExport: false,
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'taskId',
+                    title: '任务id',
+                    visible: false
+                },
+                {
+                    field: 'procInstId',
+                    title: '流程id',
+                    visible: false
+                },
+                {
+                    field: 'code',
+                    title: '编号'
+                },
+                {
+                    field: 'nodeName',
+                    title: '任务名称'
+                },
+                {
+                    field: 'createTime',
+                    title: '创建日期'
+                },
+                {
+                    field: 'remark',
+                    title: '备注'
+                },
+                {
+                    field: 'type',
+                    title: '类型',
+                    formatter: function (value, row, index) {
+    	        		return $.table.selectDictLabel(approveType, value);
+    	        	}
+                },
+                {
+                    field: 'status',
+                    title: '审批状态',
+                    formatter: function (value, row, index) {
+    	        		return $.table.selectDictLabel(statusData, value);
+    	        	}
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-sm btn-primary " href="#" onclick="approveTab(\''+row.type+'\',\''+row.procInstId+'\',\''+row.taskId+'\')"><i class="fa fa-edit"></i>审批</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+    }
+    
+    
+    
+    //打开审批页面
+    function approveTab(type,id,taskId){
+		$.modal.openFullS("审批任务", ctx+"oa/proTask/approve/"+type+"/"+id+"/"+taskId);
+    }
+    
+</script>
+</body>
+</html>

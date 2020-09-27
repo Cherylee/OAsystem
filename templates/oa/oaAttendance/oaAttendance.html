@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('考勤记录列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            公司id：<input type="text" name="companyId"/>
+                        </li>
+
+                        <li>
+                            部门id：<input type="text" name="deptId"/>
+                        </li>
+
+                        <li>
+                            打卡人id：<input type="text" name="userId"/>
+                        </li>
+
+                        <li class="select-time">
+                            <label>打卡时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="exprotGatherData()">
+                <i class="fa fa-download"></i> 导出汇总记录
+            </a>
+            <a class="btn btn-warning" onclick="$.table.exportExcel()">
+                <i class="fa fa-download"></i> 导出每日记录
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaAttendance:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaAttendance:remove')}]];
+    var prefix = ctx + "oa/oaAttendance";
+
+    $(function () {
+        var options = {
+            url: prefix + "/gatherData",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            sidePagination: "client",
+            modalName: "考勤记录",
+            detailView: true,
+            showExport: true,
+            onExpandRow: function (index, row, $detail) {
+                initChildTable(index, row, $detail);
+            },
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'companyId',
+                    title: '公司id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'companyName',
+                    title: '公司',
+                    sortable: true
+                },
+                {
+                    field: 'deptId',
+                    title: '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deptName',
+                    title: '部门',
+                    sortable: true
+                },
+                {
+                    field: 'userId',
+                    title: '打卡人id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'userName',
+                    title: '姓名',
+                    sortable: true
+                },
+                {
+                    field: 'attendanceDay',
+                    title: '出勤天数',
+                    sortable: true
+                },
+                {
+                    field: 'lateTime',
+                    title: '迟到次数',
+                    sortable: true
+                },
+                {
+                    field: 'lateHours',
+                    title: '迟到时长',
+                    sortable: true
+                },
+                {
+                    field: 'earlyTime',
+                    title: '早退次数',
+                    sortable: true,
+                },
+                {
+                    field: 'earlyHours',
+                    title: '早退时长',
+                    sortable: true
+                },
+                {
+                    field: 'absentWorkCard',
+                    title: '上班缺卡次数',
+                    sortable: true
+                },
+                {
+                    field: 'absentOutCard',
+                    title: '下班缺卡次数',
+                    sortable: true
+                },
+                {
+                    field: 'leaveHours',
+                    title: '请假/调休时长',
+                    sortable: true
+                }]
+        };
+        $.table.init(options);
+    });
+    initChildTable = function (index, row, $detail) {
+        var childTable = $detail.html('<table id="detail-table" style="table-layout:fixed"></table>').find('table');
+        $(childTable).bootstrapTable({
+            url: prefix + "/list",
+            method: 'post',
+            sidePagination: "server",
+            contentType: "application/x-www-form-urlencoded",
+            pagination: true,
+            pageNumber: 1,
+            pageSize: 10,
+            queryParams:function(params){
+                return {
+                    pageSize:       params.limit,
+                    pageNum:        params.offset / params.limit + 1,
+                    searchValue:    params.search,
+                    orderByColumn:  params.sort,
+                    isAsc:          params.order,
+                    userId:         row.userId,
+                    params:         {"beginTime":$("#startTime").val(),"endTime":$("#endTime").val()}
+                }
+            },
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'companyId',
+                    title: '公司id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'companyName',
+                    title: '公司',
+                    sortable: true
+                },
+                {
+                    field: 'deptId',
+                    title: '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deptName',
+                    title: '部门',
+                    sortable: true
+                },
+                {
+                    field: 'userId',
+                    title: '打卡人id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'userName',
+                    title: '姓名',
+                    sortable: true
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'workTime',
+                    title: '上班时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateBy',
+                    title: '更新者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'closingTime',
+                    title: '下班时间',
+                    sortable: true
+                },
+                {
+                    field: 'longitude',
+                    title: '经度',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'latitude',
+                    title: '纬度',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'flag',
+                    title: '标记（0上班打卡，1下班打卡，2更新下班打卡）',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'distance',
+                    title: '打卡点到公司的距离',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true
+                }]
+        });
+    };
+
+    //导出汇总记录
+    function exprotGatherData() {
+        $.modal.confirm("确定导出汇总记录吗？", function() {
+            $.modal.loading("正在导出数据，请稍后...");
+            $.post(ctx+"oa/oaAttendance/exportGatherData", $("#formId").serializeArray(), function(result) {
+                if (result.code == web_status.SUCCESS) {
+                    window.location.href = ctx + "common/download?fileName=" + encodeURI(result.msg) + "&delete=" + true;
+                } else if (result.code == web_status.WARNING) {
+                    $.modal.alertWarning(result.msg)
+                } else {
+                    $.modal.alertError(result.msg);
+                }
+                $.modal.closeLoading();
+            });
+        });
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改保证金申请')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-jyMargin-edit"
+							th:object="${oaMargin}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<table class="table table-bordered table-condensed"
+								style="width: 90%; margin: 0 auto">
+								<caption class="text-center">
+									<h2>投标保证金</h2>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">编号：</td>
+										<td><input class="form-control" type="text" name="code"
+											th:field="*{code}" readonly/></td>
+										<td class="active">投标公司：</td>
+										<td><input type="text" class="form-control"
+											name="tenderCompany" th:field="*{tenderCompany}" /></td>
+
+									</tr>
+									<tr>
+										<td class="active">申请人：</td>
+										<td><input class="form-control" type="text" readonly
+											th:value="*{userName}" /></td>
+										<td class="active">保证金类型：</td>
+										<td><select id="marginType" name="marginType"
+											th:field="*{marginType}" class="form-control"
+											th:with="type=${@dict.getType('oa_jy_margin_type')}">
+												<option value="">------所有------</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">申请公司：</td>
+										<td><input type="hidden" name="companyId" id="companyId"
+											th:field="*{companyId}" /> <input type="text"
+											id="companyName" name="companyName" th:value="*{companyName}"
+											class="form-control"
+											onclick="selectDeptTree('companyId','companyName','0')" /></td>
+										<td class="active">转账方式：</td>
+										<td><select  name="transferMethod"
+													th:field="*{transferMethod}" class="form-control"
+													th:with="type=${@dict.getType('oa_jy_margin_transferMethod')}">
+											<option value="">------所有------</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">申请部门：</td>
+										<td><input id="treeId" name="deptId" class="form-control"
+											type="hidden" th:field="*{deptId}"> <input
+											id="treeName" name="deptName" class="form-control"
+											type="text" onclick="selectDeptTree('treeId','treeName','1')"
+											th:value="*{deptName}"></td>
+										<td class="active">关联收款单：</td>
+										<td><input id="companyAccount" name="companyAccount"
+											class="form-control" type="text" th:field="*{receiptCode}"
+											th:readonly="${jyTender?.tenderType='0'}"></td>
+									</tr>
+									<tr>
+										<td class="active">申请日期：</td>
+										<td >
+											<input id="applyTime" name="applyTime" class="form-control currentTime"
+												   type="text" readonly th:field="*{applyTime}">
+										</td>
+										<td class="active">工程名称：</td>
+										<td>
+											<input id="projectId" name="projectId" class="form-control" type="hidden" th:field="*{projectId}">
+											<input id="projectName" name="projectName" class="form-control" type="text"
+												   onclick="selectPro('projectId','projectName')" th:value="*{projectName}">
+										</td>
+									</tr>
+									<tr>
+										<td class="active">到账截止时间：</td>
+										<td>
+											<input id="endArrivalTime" name="endArrivalTime" class="form-control time-input"
+												   type="text" th:value="${#dates.format(oaMargin.endArrivalTime, 'yyyy-MM-dd HH:mm:ss')}">
+										</td>
+										<td class="active">投标方式：</td>
+										<td>
+											<select id="tenderType" name="tenderType" th:field="*{tenderType}" class="form-control dis"
+													th:with="type=${@dict.getType('business_project_type')}" disabled>
+												<option value="">------所有------</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">保证金总金额：</td>
+										<td><input id="marginTotalMoney" name="marginTotalMoney"
+											class="form-control" type="number"
+											th:field="*{marginTotalMoney}"></td>
+										<td class="active">保证金总金额（大写）：</td>
+										<td><input id="totalMoneyUpcase" name="totalMoneyUpcase"
+											class="form-control" type="text"
+											th:field="*{totalMoneyUpcase}"></td>
+									</tr>
+									<tr>
+										<td class="active">转账说明：</td>
+										<td colspan="3"><input id="transferDesc"
+											name="transferDesc" class="form-control" type="text"
+											th:field="*{transferDesc}"></td>
+									</tr>
+									<tr>
+										<td class="active">附件：</td>
+										<td colspan="3">
+											<div class="file-loading">
+												<input id="uploadFileId" type="file" multiple
+													th:disabled="${oaMargin.applyStatus!='3'&&oaMargin.applyStatus!='99'}? true : false">
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="active" colspan="2">款项来源人明细：</td>
+										<td class="active" colspan="2">保证金收款明细：</td>
+									</tr>
+									<tr>
+										<td class="active">款项来源人：</td>
+										<td><input id="sourceOfPayment" name="sourceOfPayment"
+											class="form-control" type="text"
+											th:field="*{sourceOfPayment}"></td>
+										<td class="active">收款人：</td>
+										<td><input id="collectOfPayment" name="collectOfPayment"
+											class="form-control" type="text"
+											th:field="*{collectOfPayment}"></td>
+									</tr>
+									<tr>
+										<td class="active">来源人账号：</td>
+										<td><input id="sourceOfAccount" name="sourceOfAccount"
+											class="form-control" type="text"
+											th:field="*{sourceOfAccount}"></td>
+										<td class="active">收款人账号：</td>
+										<td><input id="collectOfAccount" name="collectOfAccount"
+											class="form-control" type="text"
+											th:field="*{collectOfAccount}"></td>
+									</tr>
+									<tr>
+										<td class="active">来源人开户行：</td>
+										<td><input id="sourceOpenBank" name="sourceOpenBank"
+											class="form-control" type="text" th:field="*{sourceOpenBank}"></td>
+										<td class="active">收款开户行：</td>
+										<td><input id="collectOpenBank" name="collectOpenBank"
+											class="form-control" type="text"
+											th:field="*{collectOpenBank}"></td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-info"
+									onclick="saveDraft()" th:if="${oaMargin.applyStatus=='99'}">
+									<i class="fa fa-check"></i>保存草稿
+								</button>
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandlerDraft()"
+									th:if="${oaMargin.applyStatus=='99'}">
+									<i class="fa fa-check"></i>提交
+								</button>
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()" th:if="${oaMargin.applyStatus=='3'}">
+									<i class="fa fa-check"></i>提交
+								</button>
+								<button type="button" class="btn btn-sm btn-info"
+									th:if="${oaMargin.applyStatus!='2'&&oaMargin.applyStatus!='16'&&oaMargin.applyStatus!='99'}"
+									onclick="urge()">
+									<i class="fa fa-check"></i>催办
+								</button>
+								<button type="button" class="btn btn-sm btn-success" th:if="${oaMargin.applyStatus!='99'}"
+									th:onclick="selectUser('','','0',[[${oaMargin.id}]],'oa/oaMargin/copy')">
+									抄送</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="approveTaskId" data-mobile-responsive="true"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<th:block th:include="include :: lastNode" />
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaMargin";
+		var lastNodeId=[[${oaMargin.id}]];
+		var actDefineId=[[${oaMargin.actDefineId}]];
+		var lastStatus=[[${oaMargin.applyStatus}]];
+		//选择工程
+		var pId = null;
+		var pName = null;
+		function selectPro(id, name) {
+			pId = id;
+			pName = name;
+			var options = {
+				title : '选择工程',
+				width : "1200",
+				url : ctx + "business/jyTenderNotice",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			console.log(data)
+			$('#' + pId).val(data.id)
+			$('#' + pName).val(data.projectName)
+		}
+		 //图片反显出来
+		 var attachmentList = new Array();
+        $(function () {
+        	var config = {
+        	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": [[${oaMargin.id}]]},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        			attachmentList.push({"objectId":[[${oaMargin.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+        	        		}
+        	        		var option1={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+        	        }
+        	    };
+        	    $.ajax(config)
+	    });
+        //提交
+		function submitHandler() {
+			$(".dis").attr("disabled",false);
+			var data={}
+			var fData=$('#form-jyMargin-edit').serializeObject();
+			fData.applyType='0';
+			data.oaMargin=fData			
+			data.attachmentList=attachmentList
+			if ($.validate.form()) {
+				$.operate.saveJsonTab(prefix + "/modifyOaMargin",data);
+			}
+		}
+		//提交草稿
+		function submitHandlerDraft() {
+			$(".dis").attr("disabled",false);
+			var data={}
+			var fData=$('#form-jyMargin-edit').serializeObject();
+			fData.applyType='0';
+			data.oaMargin=fData			
+			data.attachmentList=attachmentList
+			if ($.validate.form()) {
+				$.operate.saveJsonTab(prefix + "/submitDraft",data);
+			}
+		}
+		//保存草稿
+		function saveDraft(){
+			$(".dis").attr("disabled",false);
+			var data={}
+			var fData=$('#form-jyMargin-edit').serializeObject();
+			fData.applyType='0';
+			data.oaMargin=fData			
+			data.attachmentList=attachmentList
+			if ($.validate.form()) {
+				$.operate.saveJsonTab(prefix + "/saveDraft",data);
+			}
+		}
+		
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaMargin.procInstId}]];
+    	data.id = [[${oaMargin.id}]];
+		selectActProcessList(data,"approveTaskId");
+		//自动大小写转换
+		coverUpper('marginTotalMoney','totalMoneyUpcase')
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('投标公告列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								工程名称：<input type="text" name="projectName"/>
+							</li>
+
+							<li>
+								投标状态：
+								<select id="status" name="status"
+								th:with="type=${@dict.getType('business_bidstatus')}">
+									<option value="">------所有------</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+					            </select>
+							</li>
+							<li>
+								<p>开标时间：</p><input type="text" name="openTenderDate" class="time-input"/>
+							</li>	
+																			
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('business:jyTenderNotice:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:jyTenderNotice:remove')}]];
+        var businessStatus = [[${@dict.getType('business_bidstatus')}]];
+        var prefix = ctx + "business/jyTenderNotice";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "投标公告",
+		        showExport: true,
+		        showFooter: true,
+		        clickToSelect : true,
+		        sortName : "createTime",
+			    sortOrder: "desc",
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'projectName', 
+					title : '工程名称',
+					sortable: true,
+					formatter: function (value, row, index) {
+						var text=null;
+						if(value){
+							text=$.table.tooltip(value,5, "open");
+						}else{
+							text='暂无编号'
+						}
+						return text;
+					}
+				},
+				{
+					field : 'status', 
+					title : '投标状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(businessStatus, value);
+		        	}
+				},
+				{
+					field : 'projectAmount', 
+					title : '工程造价',
+					sortable: true
+				},
+				{
+					field : 'openTenderDate', 
+					title : '开标时间',
+					sortable: true
+				},
+				{
+					field : 'promiseMoney', 
+					title : '保证金金额',
+					sortable: true,
+				    footerFormatter:function (value) {
+				    	var sumBalance = 0;
+				        for (var i in value) {
+				        	if(value[i].promiseMoney==null){
+				        		value[i].promiseMoney=0
+				        	}
+				        	sumBalance += parseFloat(value[i].promiseMoney);
+				        }
+				        return   '合计:'+sumBalance;
+				    }
+				},
+				{
+					field : 'closedAccountDate', 
+					title : '到账截止日期',
+					sortable: true
+				},
+				{
+					field : 'builderName', 
+					title : '建造师',
+					sortable: true
+				},
+				{
+					field : 'consignor', 
+					title : '委托人',
+					sortable: true
+				},
+				{
+					field : 'tenderId', 
+					title : '投标申请id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					sortable: true,
+					visible:false
+				},
+				{
+					field : 'createBy', 
+					title : '创建人',
+					sortable: true,
+					visible:false
+				},
+				{
+					field : 'updateTime', 
+					title : '修改日期',
+					sortable: true,
+					visible:false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改人',
+					sortable: true,
+					visible:false
+				},
+				{
+					field : 'winFlag', 
+					title : '是否已中标',
+					sortable: true,
+					visible:false
+				}]
+            };
+            $.table.init(options);
+        });
+        
+        //回显
+        function submitHandler(){
+       	 var target =$('#bootstrap-table').bootstrapTable('getSelections');
+   			
+   			
+        	if ($.table.selectColumns("id").length == 0) {
+    			$.modal.alertWarning("请至少选择一条记录");
+    			return;
+    		}
+        	if($.table.selectColumns("id").length >1 ){
+        		$.modal.alertWarning("只能选择一条记录哦！");
+    			return;
+        	}
+        	
+   			$.modal.close();
+   			return target[0];
+        }
+    </script>
+</body>
+</html>

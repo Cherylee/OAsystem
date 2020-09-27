@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('补充协议')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style type="text/css">
+caption {
+	font-size: 16px !important;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content"
+		th:object="${vo}">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<!-- 合同申请 -->
+						<form id="form-supAgre">
+						
+						<table class="table table-bordered">
+							<caption>
+								<strong>合同申请 </strong>
+							</caption>
+
+
+							<tbody>
+								<tr>
+									<td class="active">申请人</td>
+									<td class="active"><span th:text="*{oaContract.applier}"></span></td>
+									<td class="active">申请部门</td>
+									<td class="active"><span th:text="*{oaContract.deptName}"></span></td>
+									<td class="active">申请日期</td>
+									<td class="active"><span
+										th:text="*{#dates.format(oaContract.createTime, 'yyyy-MM-dd HH:mm:ss')}"></span></td>
+								</tr>
+								<tr>
+									<td class="active">合同类型</td>
+									<td class="active"><span class="oaContractType"></span></td>
+									<td class="active">合同金额</td>
+									<td class="active"><span
+										th:text="*{oaContract.contractAmount}"></span></td>
+									<td class="active">合同金额大写</td>
+									<td class="active"><span
+										th:text="*{oaContract.amountUpper}"></span></td>
+								</tr>
+								<tr class="ifshowProject hide">
+									<td class="active">工程类型</td>
+									<td class="active"><span class="oaProject"></span></td>
+									<td class="active">建造师</td>
+									<td class="active"><span></span></td>
+									<td class="active">工期</td>
+									<td class="active"><span
+										th:text="*{oaProject.projectCycle}"></span></td>
+								</tr>
+								<tr class="ifshowProject hide">
+									<td class="active">工程名称</td>
+									<td class="active" colspan="5"><span
+										th:text="*{oaProject.projectName}"></span></td>
+								</tr>
+								<tr>
+									<td class="active">合同名称</td>
+									<td class="active" colspan="5"><span
+										th:text="*{oaContract.contractName}"></span></td>
+								</tr>
+								<tr>
+									<td class="active">签约方名称</td>
+									<td class="active" colspan="2"><span
+										th:text="*{oaContract.signingParties}"></span></td>
+									<td class="active">付款方式</td>
+									<td class="active" colspan="2"><span class="payWay"></span></td>
+								</tr>
+								<tr>
+									<td class="active">第三方名称</td>
+									<td class="active" colspan="2"><span
+										th:text="*{oaContract.thirdPartyName}"></span></td>
+									<td class="active">第三方负责人</td>
+									<td class="active" colspan="2"><span
+										th:text="*{oaContract.thirdPartPerson}"></span></td>
+								</tr>
+								<tr>
+									<td class="active">签约方资质证明</td>
+									<td class="active" colspan="2"><span></span></td>
+									<td class="active">合同附件</td>
+									<td class="active" colspan="2"><span></span></td>
+								</tr>
+								<tr>
+									<td class="active">签约背景/备注说明</td>
+									<td class="active" colspan="5"><span
+										th:text="*{oaContract.remark}"></span></td>
+								</tr>
+								<tr>
+									<td>补充协议附件</td>
+									<td colspan="5"><div class="file-loading">
+											<input id="uploadFileId1" type="file" multiple>
+										</div>
+								</tr>
+								<tr>
+									<td>签约背景/备注说明</td>
+									<td colspan="5">
+									<input type="hidden" name="parentId" th:value="*{oaContract.id}">
+									<input type="hidden" name="contractType" value="2">
+									<input type="text" name="remark" class="form-control ">									
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+                        </form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>申请
+								</button>
+								&nbsp;
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+	
+		/* console.log([[${vo}]]); */
+		
+		var prefix = ctx + "oa/oaContract"
+		var oaContractType=[[${@dict.getType('oa_contract_type1')}]]
+		
+		// uploadFile('uploadFileId1', 'fileUrl1')
+
+		//文件上传
+        var attachmentList = new Array();
+        var option1 = {
+            id: 'uploadFileId1',
+            uploadUrl: null,
+            deleteUrl: null,
+            deleteExtraData: null,
+            imgsUrl: new Array(),
+            initialPreviewConfig: null,
+            attachmentList: new Array(),
+            callback: callback
+        }
+        $.common.uploadFile(option1);
+        downFile();
+        var fileList3 = []
+        function callback(id) {
+            if (id == 'uploadFileId1') {
+                fileList3 = attachmentList;
+                for (var i = 0; i < fileList3.length; i++) {
+                    fileList3[i].type = '6'
+                }
+            }
+        }
+
+
+		function submitHandler() {
+            var data=$('#form-supAgre').serializeObject()
+            data.attachmentList =fileList3
+            console.log(data)
+			$.operate.saveJsonTab(prefix + "/add", data);
+		}
+		
+		
+	
+		
+		//回显字典 封装的公用方法
+		function dictV(id,d,v){//d:字典名 v:键值
+			$(id).html($.table.selectDictLabel(d, v));
+		}
+		
+		$(function(){	
+			//判断是否显示工程字段&&副总审核
+			if([[${vo.oaContract.type1}]]==7){/*工程合同*/
+				$('.ifshowProject').removeClass('hide')
+			}
+			
+			//回显合同类型字段 
+			dictV('.oaContractType',[[${@dict.getType('oa_contract_type1')}]],[[${vo.oaContract.type1}]])
+			
+			dictV('.oaProject',[[${@dict.getType('oa_contract_type2')}]],[[${vo.oaProject.type}]])
+			
+			
+			
+			//回显付款方式
+			dictV('.payWay',[[${@dict.getType('oa_contact_payway')}]],[[${vo.oaContract.payType}]])
+			
+			if([[${vo.nodeFlag}]]=='key1'){
+				$('#nodeFlag').val('key1')
+			}
+
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div style="position: fixed; z-index: 10; top: 30px;right: 40px">
+    <button class="btn btn-warning btn-rounded btn-sm" onclick="printing()"><i class="fa fa-download"></i>打印</button>
+</div>
+<div id="printing">
+    <div th:each="outgoing,outgoingStat :${outgoingVoList}">
+        <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+            <!--抬头  -->
+            <div class="hr-line-dashed"></div>
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <table class="table table-bordered table-condensed" >
+                                <caption class="text-center">
+                                    <h2>外出申请</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active" style="width: 15%">申请人</td>
+                                    <td style="width: 35%">[[${outgoing.oaOutgoing.userName}]]</td>
+                                    <td class="active" style="width: 15%">申请公司</td>
+                                    <td>[[${outgoing.oaOutgoing.applyCompanyName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门</td>
+                                    <td>[[${outgoing.oaOutgoing.applyDeptName}]]</td>
+                                    <td class="active">外出起始日期</td>
+                                    <td>[[${#dates.format(outgoing.oaOutgoing.goOutStart, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">外出结束日期</td>
+                                    <td>[[${#dates.format(outgoing.oaOutgoing.goOutEnd, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">外出时长</td>
+                                    <td>[[${outgoing.oaOutgoing.goOutHour}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">外出事由</td>
+                                    <td>[[${outgoing.oaOutgoing.reason}]]</td>
+                                    <td class="active">申请日期</td>
+                                    <td>[[${#dates.format(outgoing.oaOutgoing.applyTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">备注</td>
+                                    <td colspan="3">[[${outgoing.oaOutgoing.remark}]]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>审批流程</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th></th>
+                                            <th style="width: 25%">流程名称</th>
+                                            <th style="width: 25%">开始时间</th>
+                                            <th style="width: 25%">审批信息</th>
+                                            <th style="width: 25%">审核时间</th>
+                                        </tr>
+                                        <tr th:each="approval,approvalStat :${outgoingVoList[outgoingStat.index].processList}">
+                                            <td>[[${approvalStat.index}]]</td>
+                                            <td>[[${approval.actName}]]</td>
+                                            <td>[[${#dates.format(approval.startTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${approval.message}]]</td>
+                                            <td>[[${#dates.format(approval.endTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="page-break-after:always;"></div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    console.log([[${outgoingVoList}]]);
+    function printing() {
+        $('#printing').jqprint({
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: false
+        });
+    }
+</script>
+</body>
+</html>

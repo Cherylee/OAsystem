@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增进项发票关联模块')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysProIncomeBillRel-add">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">进项发票id：</label>
+				<div class="col-sm-8">
+					<input id="incomeId" name="incomeId" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">关联类型（0：项目付款）：</label>
+				<div class="col-sm-8">
+					<input id="relType" name="relType" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">关联项目id：</label>
+				<div class="col-sm-8">
+					<input id="relId" name="relId" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProIncomeBillRel"
+		$("#form-sysProIncomeBillRel-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-sysProIncomeBillRel-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改项目-物资')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-oaProjectGoods-edit" th:object="${oaProjectGoods}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>物质入库</h2>
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        <td class="active">物资编号：</td>
+                                        <td>
+                                            <input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">物资名称：</td>
+                                        <td>
+                                            <input id="goodsName" name="goodsName" th:field="*{goodsName}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">物资类型：</td>
+                                        <td>
+                                            <select id="goodsType" name="goodsType" class="form-control"
+                                                    th:with="type=${@dict.getType('oa_project_goods_type')}" th:field="*{goodsType}" >
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                        </td>
+                                        <td class="active">单位：</td>
+                                        <td>
+                                            <input id="unit" name="unit" th:field="*{unit}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">单价：</td>
+                                        <td>
+                                            <input id="price" name="price" th:field="*{price}" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">规格型号：</td>
+                                        <td>
+                                            <input id="brand" name="brand" th:field="*{brand}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">总库存：</td>
+                                        <td>
+                                            <input id="totalStock" name="totalStock" th:field="*{totalStock}" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">所属项目：</td>
+                                        <td>
+                                            <input id="projectId" name="projectId" type="hidden" />
+                                            <input id="projectName" class="form-control" name="projectName" th:field="*{projectName}" type="text" onclick="selectPro('projectId','projectName')" >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">可用库存：</td>
+                                        <td>
+                                            <input id="availableStock" name="availableStock" th:field="*{availableStock}" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">关联合同：</td>
+                                        <td>
+                                            <input id="contractId" name="contractId" type="hidden" />
+                                            <input id="contractName" name="contractName" th:field="*{contractName}" class="form-control" type="text" onclick="selectCon('contractId','contractName')">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">入库数量：</td>
+                                        <td>
+                                            <input id="inventoryQuantity" name="inventoryQuantity" th:field="*{inventoryQuantity}" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">是否有效：</td>
+                                        <td>
+                                            <select id="effect" name="effect" class="form-control"
+                                                    th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{effect}" >
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">保管人：</td>
+                                        <td>
+                                            <input id="keeper" name="keeper" th:field="*{keeper}" class="form-control" type="hidden">
+                                            <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">入库日期：</td>
+                                        <td>
+                                            <input id="inDate" name="inDate" th:value="${#dates.format(oaProjectGoods.inDate, 'yyyy-MM-dd')}"
+                                                   class="form-control time-input-data" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">存放公司：</td>
+                                        <td>
+                                            <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                            <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">存放部门：</td>
+                                        <td>
+                                            <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                            <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">存放地点：</td>
+                                        <td>
+                                            <input type="text" id="location" th:field="*{location}" class="form-control" />
+                                        </td>
+                                        <td class="active">备注：</td>
+                                        <td>
+                                            <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10">
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaProjectGoods";
+		$("#form-oaProjectGoods-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+        //选择工程
+        var pId = null;
+        var pName = null;
+        function selectPro(id, name) {
+            pId = id;
+            pName = name;
+            var options = {
+                title : '工程',
+                width : "600",
+                url : ctx + "oa/oaProject",
+                callBack : doSubmit1
+            };
+            $.modal.openOptions(options);
+        }
+        function doSubmit1(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#' + pId).val(data.id)
+            $('#' + pName).val(data.projectName)
+        }
+        //选择合同
+        var cId = null;
+        var cName = null;
+        function selectCon(id, name) {
+            cId = id;
+            cName = name;
+            var options = {
+                title : '合同',
+                width : "600",
+                url : ctx + "oa/oaContract",
+                callBack : doSubmit2
+            };
+            $.modal.openOptions(options);
+        }
+        function doSubmit2(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#' + cId).val(data.id)
+            $('#' + cName).val(data.contractName)
+        }
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/edit", $('#form-oaProjectGoods-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

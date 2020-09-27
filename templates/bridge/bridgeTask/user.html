@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('用户列表')" />
+	<th:block th:include="include :: layout-latest-css" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="gray-bg">
+	<div class="ui-layout-west">
+		<div class="main-content">
+			<div class="box box-main">
+				<div class="box-header">
+					<div class="box-title">
+						<i class="fa icon-grid"></i> 组织机构
+					</div>
+					<div class="box-tools pull-right">
+						<button type="button" class="btn btn-box-tool" id="btnExpand" title="展开" style="display:none;"><i class="fa fa-chevron-up"></i></button>
+						<button type="button" class="btn btn-box-tool" id="btnCollapse" title="折叠"><i class="fa fa-chevron-down"></i></button>
+						<button type="button" class="btn btn-box-tool" id="btnRefresh" title="刷新部门"><i class="fa fa-refresh"></i></button>
+					</div>
+				</div>
+				<div class="ui-layout-content">
+					<div id="tree" class="ztree"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container-div ui-layout-center">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="user-form">
+					<input type="hidden" id="deptId" name="deptId">
+	                <input type="hidden" id="parentId" name="parentId">
+					<div class="select-list">
+						<ul>
+							<li>
+								登录名称：<input type="text" name="loginName"/>
+							</li>
+							<li>
+								手机号码：<input type="text" name="phonenumber"/>
+							</li>
+							<li>
+								用户状态：<select name="status" th:with="type=${@dict.getType('sys_normal_disable')}">
+									<option value="">所有</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li class="select-time">
+								<label>创建时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+								<input type="hidden" id="dataScope" name="params[dataScope]"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: layout-latest-js" />
+	<th:block th:include="include :: ztree-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "system/user";
+		var datas = [[${@dict.getType('sys_normal_disable')}]];
+
+		$(function() {
+		    var panehHidden = false;
+		    if ($(this).width() < 769) {
+		        panehHidden = true;
+		    }
+		    $('body').layout({ initClosed: panehHidden, west__size: 185 });
+		    setDataScope();
+		    queryUserList();
+		    $.table.search();
+		    queryDeptTree();
+		});
+
+		function queryUserList() {
+		    var options = {
+		        url: prefix + "/list",
+		        sortName: "createTime",
+		        sortOrder: "desc",
+		        modalName: "用户",
+		        showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                showSearch: false,
+                clickToSelect : true,
+		        columns: [{
+		            radio: true
+		        },
+		        {
+		            field: 'userId',
+		            title: '用户ID'
+		        },
+		        {
+		            field: 'loginName',
+		            title: '登录名称',
+		            sortable: true
+		        },
+		        {
+		            field: 'userName',
+		            title: '用户名称'
+		        },
+		        {
+		            field: 'dept.deptName',
+		            title: '部门'
+		        },
+		        {
+		            field: 'email',
+		            title: '邮箱',
+		            visible: false
+		        },
+		        {
+		            field: 'phonenumber',
+		            title: '手机'
+		        },
+		        {
+		            field: 'hireDate',
+		            title: '入职时间',
+		            sortable: true
+		        },
+		        {
+		            field: 'yearHoliday',
+		            title: '剩余年假',
+		            sortable: true,
+		            formatter: function (value, row, index) {
+		        		return value+"天";
+		        	}
+		        },
+		        {
+		        	title: '用户状态',
+		        	align: 'center',
+		        	formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(datas, value);
+		        	}
+		        },
+		        {
+		            field: 'createTime',
+		            title: '创建时间',
+		            sortable: true
+		        }]
+		    };
+		    $.table.init(options);
+		}
+		
+		//数据过滤
+		function setDataScope() {
+			var userIds = [[${userIds}]];
+			var sql = "and u.user_id not in (";
+			if($.isArray(ids)){
+				var ids = "";
+				for(var i=0; i<userIds.length; i++){
+					ids += userIds[i]+",";
+				}
+			}else{
+				sql += userIds;
+			}
+			sql += ")";
+			$("#dataScope").val(sql);
+			if(userIds==null){
+				$("#dataScope").val("");
+			}
+		}
+		
+		function queryDeptTree()
+		{
+			var url = ctx + "system/dept/treeData";
+			var options = {
+		        url: url,
+		        expandLevel: 2,
+		        onClick : zOnClick
+		    };
+			$.tree.init(options);
+			
+			function zOnClick(event, treeId, treeNode) {
+				$("#deptId").val(treeNode.id);
+				$("#parentId").val(treeNode.pId);
+				$.table.search();
+			}
+		}
+		
+		$('#btnExpand').click(function() {
+			$._tree.expandAll(true);
+		    $(this).hide();
+		    $('#btnCollapse').show();
+		});
+		
+		$('#btnCollapse').click(function() {
+			$._tree.expandAll(false);
+		    $(this).hide();
+		    $('#btnExpand').show();
+		});
+		
+		$('#btnRefresh').click(function() {
+			queryDeptTree();
+		});
+
+		
+		/* 添加用户-选择用户-提交 */
+		function submitHandler() {
+			var target =null;
+			var rows = $.table.selectFirstColumns();
+			if (rows.length == 0) {
+       			$.modal.alertWarning("请选择一条记录");
+       			return;
+       		}
+			var data = {"userId": rows[0] };
+			$.ajax({
+	            url: ctx + "oa/oaApplyTemplate/selectUser",
+	            data: data,
+	            type: "post",
+	            async:false, //同步
+	            dataType: "json",
+	            success: function(result) {
+	            	if (result.code == 0) {
+	            		target = result;
+	            	} else {
+	            		$.modal.alertError(result.msg);
+	            	}
+	            }
+	        });
+			$.modal.close();
+			return target;
+		}
+		
+	</script>
+</body>
+</html>

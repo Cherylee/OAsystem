@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('中标项目移交单列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								审批状态：
+								<select name="status" th:with="type=${@dict.getType('oa_leave_status')}">
+
+									<option value="">------所有------</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+
+							<li>
+								方式：
+								<select name="status" th:with="type=${@dict.getType('oa_win_bid_type')}">
+									<option value="">------所有------</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+
+							<li>
+								工程类型：
+								<select name="status" th:with="type=${@dict.getType('business_engineer_type')}">
+									<option value="">------所有------</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								履约担保金额：<input type="text" name="performanceAmount"/>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaWinBidTurnOver:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.edit()" shiro:hasPermission="oa:oaWinBidTurnOver:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaWinBidTurnOver:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaWinBidTurnOver:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaWinBidTurnOver:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaWinBidTurnOver:remove')}]];
+        var prefix = ctx + "oa/oaWinBidTurnOver";
+		var applyState=[[${@dict.getType('oa_leave_status')}]];
+		var typeList = [[${@dict.getType('oa_win_bid_type')}]];
+		var proTypeList = [[${@dict.getType('business_engineer_type')}]];
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                modalName: "中标项目移交单",
+				clickToSelect:true,
+				queryParams:{"status":"2"},
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'projectId', 
+					title : '项目id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '编号',
+					sortable: true
+				},
+				{
+					field : 'proposer', 
+					title : '申请人',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'companyName',
+					title : '公司',
+					sortable: true
+				},
+				{
+					field : 'deptName',
+					title : '部门',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(applyState, value);
+					}
+				},
+				{
+					field : 'applyTime', 
+					title : '申请日期',
+					sortable: true
+				},
+				{
+					field : 'projectName', 
+					title : '项目名称',
+					sortable: true
+				},
+				{
+					field : 'type', 
+					title : '方式',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(typeList, value);
+					}
+				},
+				{
+					field : 'winUnit',
+					title : '中标单位',
+					sortable: true
+				},
+				{
+					field : 'winBidTime', 
+					title : '中标日期',
+					sortable: true
+				},
+				{
+					field : 'proType', 
+					title : '工程类型',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(proTypeList, value);
+					}
+				},
+
+
+				{
+					field : 'performanceAmount', 
+					title : '履约担保金额',
+					sortable: true
+				},
+
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+						var actions = [];
+						var text='查看详情'
+						var edit=''
+						var classN='btn-info'
+						if(row.status=='3'||row.status=='99'){
+							console.log(row.allowedEdit)
+							// if (row.allowedEdit==true)
+							// {
+								edit=editFlag
+								text='编辑'
+								classN='btn-success'
+								actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+							// }
+						}else
+						{
+							actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+						}
+						if(row.status=='0'){
+							actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+						}
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+		//回显
+		function submitHandler() {
+			var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+			if ($.table.selectColumns("id").length == 0) {
+				$.modal.alertWarning("请至少选择一条记录");
+				return;
+			}
+			if ($.table.selectColumns("id").length > 1) {
+				$.modal.alertWarning("只能选择一条记录哦！");
+				return;
+			}
+
+			$.modal.close();
+			return target[0];
+		}
+    </script>
+</body>
+</html>

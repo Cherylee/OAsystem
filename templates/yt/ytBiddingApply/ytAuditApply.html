@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('项目详情')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style type="text/css">
+.badge {
+	background-color: none !important;
+	color: #337ab7 !important;
+	background-color: rgb(255, 255, 255) !important;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body">
+
+						<table class="table table-bordered" th:object="${ytBiddingApply}">
+							<caption>
+								<strong>基本信息</strong>
+							</caption>
+							<tbody>
+								<tr>
+									<td class="active">招标信息链接地址：</td>
+									<td colspan="5"><span class="">[[*{biddingInfoLinkLoc}]]</span></td>
+
+								</tr>
+								<tr>
+									<td class="active">项目编码：</td>
+									<td colspan="2"><span class="">[[*{projectCode}]]</span></td>
+									<td class="active">费用(元)：</td>
+									<td colspan="2"><span class="">[[*{cost}]]</span></td>
+								</tr>
+								<tr>
+									<td class="active">工程类型：</td>
+									<td colspan="2"><span class="projectType"></span></td>
+									<td class="active">转账类型：</td>
+									<td colspan="2"><span class="">[[*{transferType}]]</span></td>
+								</tr>
+								<tr>
+									<td class="active">招标代理机构/人员：</td>
+									<td colspan="2"><span class="">[[*{agentName}]]</span></td>
+									<td class="active">银行类型：</td>
+									<td colspan="2"><span class="bankType"></span></td>
+								</tr>
+								<tr>
+									<td class="active">银行账号：</td>
+									<td colspan="5"><span class="">[[*{bankAccount}]]</span></td>
+
+								</tr>
+								<tr>
+									<td class="active">备注：</td>
+									<td colspan="5"><span class="">[[*{remark}]]</span></td>
+								</tr>
+
+							</tbody>
+						</table>
+						<form id="form-ytBiddingApply-edit">
+						    <input id="id" name="id" th:field="*{ytBiddingApply.id}" type="hidden">
+						    <input id="state" name="state" class="form-control" type="hidden">
+						</form>
+
+						<div th:if="${ytBiddingApply.state == '01'}">
+							<h5>会计审核：</h5>
+							<div class="row">
+								<div class="col-sm-offset-5 col-sm-10">
+									<button class="btn btn-sm btn-info" onclick="changeState('02')">确认</button>
+									&nbsp;
+									<button class="btn btn-sm btn-danger"
+										onclick="changeState('04')">驳回</button>
+								</div>
+							</div>
+						</div>
+
+						<div th:if="${ytBiddingApply.state == '02'}">
+							<h5>出纳审核：</h5>
+							<div class="row">
+								<div class="col-sm-offset-5 col-sm-10">
+									<button type="button" class="btn btn-sm btn-info"
+										onclick="changeState('03')">确认转账</button>
+									&nbsp;
+									<button type="button" class="btn btn-sm btn-danger"
+										onclick="changeState('04')">驳回</button>
+								</div>
+							</div>
+						</div>
+
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+	console.log([[${ytBiddingApply}]])
+	var prefix = ctx + "yt/ytBiddingApply";
+	
+	//回显字典 封装的公用方法
+	function dictV(id,d,v){//d:字典名 v:键值
+		$(id).html($.table.selectDictLabel(d, v));
+	}
+	//改状态
+    function changeState(state){
+		$('#state').val(state)
+		$.operate.saveTab(prefix + "/edit", $('#form-ytBiddingApply-edit').serialize());
+    }
+	$(function(){
+		//回显银行类型
+	    dictV('.bankType',[[${@dict.getType('yt_bankType')}]],[[${ytBiddingApply.bankType}]])
+	  //回显工程类型
+	    dictV('.projectType',[[${@dict.getType('yt_project_type')}]],[[${ytBiddingApply.projectType}]])
+	})
+</script>
+</body>
+
+</html>
+
+
+

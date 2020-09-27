@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:include="include :: header('项目总计划')"/>
+<th:block th:include="include :: sysProCss"/>
+<th:block th:include="include :: bootstrap-fileinput-css"/>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <div class="col-md-12">
+        <div class="col-md-12">
+            <div class="box-center-title">
+                项目计划
+                <hr>
+            </div>
+            <div>
+                <div class="btn-group-sm" id="toolbar-projectPlan" role="group">
+                    <br>
+                    <a class="btn btn-success" id="addPlan"> <i class="fa fa-plus"></i>
+                        添加项目计划
+                    </a>
+                </div>
+                <div class="box-center-table table-type-active">
+                    <table id="projectPlan" class=" select-table table-striped" data-mobile-responsive="true"></table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="box-center-title">
+                资金占比
+                <hr>
+            </div>
+            <div th:if="${sysProjectMasterPlan.accountFlag} == null" class="col-md-12">
+                <div class="col-md-12" style="text-align: center">暂无数据</div>
+                <div class="btn-group-sm" role="group">
+                    <br>
+                    <a class="btn btn-success" id="addCapital"> <i class="fa fa-plus"></i>
+                        添加资金占比
+                    </a>
+                </div>
+            </div>
+            <div th:if="${sysProjectMasterPlan.accountFlag} != null">
+                <div class="btn-group-sm" id="toolbar-capital" role="group">
+                    <br>
+                    <a class="btn btn-primary" id="editCapital"> <i class="fa fa-edit"></i>
+                        修改资金占比
+                    </a>
+                </div>
+                <div class="col-md-7">
+                    <table style="height: 150px;">
+                        <tr>
+                            <td rowspan="5" class="basic-table-title">项目总价：</td>
+                            <td rowspan="5">[[${sysProjectMasterPlan.projectTotalPrice}]]</td>
+                            <td class="basic-table-title">成本预估：</td>
+                            <td>[[${sysProjectMasterPlan.costEstimate}]]</td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">劳务费：</td>
+                            <td>[[${sysProjectMasterPlan.laborFee}]]</td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">机械费：</td>
+                            <td>[[${sysProjectMasterPlan.materialsFee}]]</td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">材料费：</td>
+                            <td>[[${sysProjectMasterPlan.mechanicalFee}]]</td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">其他：</td>
+                            <td>[[${sysProjectMasterPlan.otherFee}]]</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-5" id="capital" style="height: 250px"></div>
+            </div>
+
+        </div>
+        <div class="col-md-12">
+            <div class="box-center-title">
+                项目组织机构分工
+                <hr style="width: 92%;">
+            </div>
+            <div th:if="${sysProjectMasterPlan.projectDivide} == null" class="col-md-12">
+                <div class="col-md-12" style="text-align: center">暂无数据</div>
+                <div class="btn-group-sm" role="group">
+                    <br>
+                    <a class="btn btn-success" id="addOrganization"> <i class="fa fa-plus"></i>
+                        添加项目组织机构分工
+                    </a>
+                </div>
+            </div>
+            <div th:if="${sysProjectMasterPlan.projectDivide} != null">
+                <div class="btn-group-sm" id="toolbar-organization" role="group">
+                    <br>
+                    <a class="btn btn-primary" id="editOrganization"> <i class="fa fa-edit"></i>
+                        修改项目组织机构分工
+                    </a>
+                </div>
+                <div style="padding-top: 10px;">
+                    <textarea rows="10" id="Organization" class="col-md-12 text-box2" disabled="disabled">[[${sysProjectMasterPlan.projectDivide}]]</textarea>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<!-- 项目计划弹出框 -->
+<div class="modal inmodal fade" id="myModal5" role="dialog" aria-hidden="true">
+    <input id="myModal5Value" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-Plan-add">
+                    <input type="hidden" id="planId" name="id">
+                    <input type="hidden" name="projectId" th:value="${sysProjectMasterPlan.projectId}">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">计划内容：</label>
+                                <div class="col-sm-10">
+                                    <input id="plan" name="plan" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">日期范围选择</label>
+                                <div class=" col-sm-10">
+                                    <div class="input-group">
+                                        <input type="text" class=" form-control" name="beginTime" id="laydate-startTime"
+                                               placeholder="yyyy-MM-dd"/>
+                                        <span class="input-group-addon">到</span>
+                                        <input type="text" class=" form-control" name="endTime" id="laydate-endTime"
+                                               placeholder="yyyy-MM-dd"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">附件：</label>
+                                <div class="col-sm-10" id="file">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="insertCondition">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 资金占比弹出框 -->
+<div class="modal inmodal fade" id="popup-Capital" role="dialog" aria-hidden="true">
+    <input id="popup-Capital-id" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-Capital-add">
+                    <input type="hidden" name="id" th:value="${sysProjectMasterPlan.id}">
+                    <input type="hidden" name="projectId" th:value="${sysProjectMasterPlan.projectId}">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">项目总价：</label>
+                                <div class="col-sm-8">
+                                    <input name="projectTotalPrice" th:value="${sysProjectMasterPlan.projectTotalPrice}"
+                                           class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">成本预估：</label>
+                                <div class="col-sm-8">
+                                    <input name="costEstimate" th:value="${sysProjectMasterPlan.costEstimate}"
+                                           class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">劳务费：</label>
+                                <div class="col-sm-8">
+                                    <input name="laborFee" th:value="${sysProjectMasterPlan.laborFee}"
+                                           class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">机械费：</label>
+                                <div class="col-sm-8">
+                                    <input name="mechanicalFee" th:value="${sysProjectMasterPlan.mechanicalFee}"
+                                           class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">材料费：</label>
+                                <div class="col-sm-8">
+                                    <input name="materialsFee" th:value="${sysProjectMasterPlan.materialsFee}"
+                                           class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">其他：</label>
+                                <div class="col-sm-8">
+                                    <input name="otherFee" th:value="${sysProjectMasterPlan.otherFee}"
+                                           class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="insertAddCapital">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--添加项目组织机构分工弹出框-->
+<div class="modal inmodal fade" id="popup-Organization" role="dialog" aria-hidden="true">
+    <input id="popup-Organization-id" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-Organization-add">
+                    <input type="hidden" name="id" th:value="${sysProjectMasterPlan.id}">
+                    <input type="hidden" name="projectId" th:value="${sysProjectMasterPlan.projectId}">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">项目组织机构分工：</label>
+                                <div class="col-sm-9">
+                                    <textarea name="projectDivide" class="col-md-12" style="min-height: 100px">[[${sysProjectMasterPlan.projectDivide}]]</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="insertOrganization">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: jquery-cxselect-js"/>
+<th:block th:include="include :: bootstrap-fileinput-css"/>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/sysProjectMasterPlan";
+    var prefix2 = ctx + 'oa/sysProjectPlan';
+
+    //上传附件
+    var attachmentList = new Array();
+    //表格记录数
+    var tableLenght = 0;
+
+    $(function () {
+        //项目计划
+        var options = {
+            id: 'projectPlan',
+            url: prefix2 + '/list',
+            removeUrl: prefix2 + "/remove",
+            showSearch: false,
+            showRefresh: false,
+            showColumns: false,
+            showToggle: false,
+            showExport: false,
+            uniqueId: 'id',
+            queryParams: {"projectId": [[${sysProjectMasterPlan.projectId}]]},
+            sortOrder:'desc',
+            columns: [
+                {
+                    title: '项目计划',
+                    formatter: function (value, row, index) {
+                        var number = parseInt(index) + 1
+                        return '阶段' + number
+                    }
+                },
+                {
+                    field: 'plan',
+                    title: '计划内容',
+
+                },
+                {
+                    field: 'beginTime',
+                    title: '起始时间'
+                },
+                {
+                    field: 'endTime',
+                    title: '结束时间'
+                },
+                {
+                    title: '操作',
+                    width: '10%',
+                    formatter: function (value, row, index) {
+                        tableLenght+=1;
+                        console.log(tableLenght);
+                        var action = []
+                        action.push('<a onclick="$.operate.remove(\'' + row.id + '\')">删除</a>  ');
+                        action.push('<a onclick="editRow(\'projectPlan\',\'' + row.id + '\',\'' + index + '\')">编辑</a>');
+                        return action.join('')
+                    }
+                }]
+        };
+        $.table.init(options);
+        $('#addPlan').click(function () {
+            $.form.reset('form-Plan-add');//清空原有数据
+            $('#myModal5Value').val('00');
+            $('#myModal5').modal(options);
+            attachmentList.length = 0;
+            $("#file").empty();
+            $('#file').html(' <div class="file-loading"><input id="uploadFileId2" type="file" multiple></div>');
+
+            var option = {
+                id: 'uploadFileId2',
+                uploadUrl: null,
+                deleteUrl: null,
+                deleteExtraData: null,
+                imgsUrl: new Array(),
+                initialPreviewConfig: null,
+                showPreview: true
+            }
+            $.common.uploadFile(option);
+            downFile();
+        });
+
+        //项目计划保存按钮
+        $('#insertCondition').click(function () {
+
+            var indexV = $('#myModal5Value').val()
+            var formData = $('#form-Plan-add').serializeObject();
+            if (indexV == '00') {
+                insertRow(formData, 'projectPlan', null);
+                var url = prefix2 + "/add";
+                formData.attachmentList = attachmentList;
+                console.log(formData)
+                interfaces(url, formData);
+            } else {
+                var url = prefix2 + "/edit";
+                formData.attachmentList = attachmentList;
+                console.log(formData);
+                interfaces(url, formData);
+            }
+        });
+
+        //时间段的选择
+        layui.use('laydate', function () {
+            var laydate = layui.laydate;
+            var startDate = laydate.render({
+                elem: '#laydate-startTime',
+                theme: 'molv',
+                trigger: 'click',
+                done: function (value, date) {
+                    // 结束时间大于开始时间
+                    if (value !== '') {
+                        endDate.config.min.year = date.year;
+                        endDate.config.min.month = date.month - 1;
+                        endDate.config.min.date = date.date;
+                    } else {
+                        endDate.config.min.year = '';
+                        endDate.config.min.month = '';
+                        endDate.config.min.date = '';
+                    }
+                }
+            });
+
+            var endDate = laydate.render({
+                elem: '#laydate-endTime',
+                min: $('#laydate-startTime').val(),
+                theme: 'molv',
+                trigger: 'click',
+                done: function (value, date) {
+                    // 开始时间小于结束时间
+                    if (value !== '') {
+                        startDate.config.max.year = date.year;
+                        startDate.config.max.month = date.month - 1;
+                        startDate.config.max.date = date.date;
+                    } else {
+                        startDate.config.max.year = '';
+                        startDate.config.max.month = '';
+                        startDate.config.max.date = '';
+                    }
+                }
+            });
+        })
+
+
+        if ([[${sysProjectMasterPlan.accountFlag}]] != null) {
+            //饼图
+            var pieChart = echarts.init(document.getElementById("capital"));
+            var pieoption2 = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    x: 'left',
+                    data: ['成本预估', '劳务费', '机械费', '材料费', '其他']
+                },
+                calculable: true,
+                series: [
+                    {
+                        name: '资金类型',
+                        type: 'pie',
+                        radius: '60%',
+                        center: ['50%', '40%'],
+                        data: [
+                            {value: [[${sysProjectMasterPlan.costEstimate}]], name: '成本预估'},
+                            {value: [[${sysProjectMasterPlan.laborFee}]], name: '劳务费'},
+                            {value: [[${sysProjectMasterPlan.materialsFee}]], name: '机械费'},
+                            {value: [[${sysProjectMasterPlan.mechanicalFee}]], name: '材料费'},
+                            {value: [[${sysProjectMasterPlan.otherFee}]], name: '其他'}
+                        ]
+                    }
+                ]
+            };
+            pieChart.setOption(pieoption2);
+            $(window).resize(pieChart.resize);
+        }
+
+
+        //资金占比事件
+        $('#addCapital').click(function () {
+            $.form.reset('form-Capital-add');//清空原有数据
+            $('#popup-Capital').modal('show');
+        });
+        $('#editCapital').click(function () {
+            $.form.reset('form-Capital-add');//清空原有数据
+            $('#popup-Capital').modal('show');
+        });
+        //资金占比无数据时添加
+        $('#insertAddCapital').click(function () {
+            var data = $('#form-Capital-add').serializeObject();
+            data.accountFlag = true;
+            interfaces(prefix + "/edit", data);
+
+        });
+
+
+        //项目组织机构分工事件
+        $('#addOrganization').click(function () {
+            $.form.reset('form-Organization-add');//清空原有数据
+            $('#popup-Organization').modal('show');
+        });
+        $('#editOrganization').click(function () {
+            $.form.reset('form-Organization-add');//清空原有数据
+            $('#popup-Organization').modal('show');
+        });
+        $('#insertOrganization').click(function () {
+            var data = $('#form-Organization-add').serializeObject();
+            interfaces(prefix + "/edit", data);
+
+        })
+    });
+
+    //保存修改接口   刷新iframe
+    function interfaces(url, data) {
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: url,
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.saveSuccess(result);
+                window.parent.func();
+            }
+        };
+        $.ajax(config)
+    }
+
+    /*新增行*/
+    function insertRow(data, id, editId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var countDate = $("#" + id).bootstrapTable('getData');
+        var table_row = '';
+        table_row = data
+        table_row.id = randomId
+        if (id == 'borrowTable') {
+            table_row[0] = false;
+            table_row.borrowId = data.id
+            var countDate = $("#" + id).bootstrapTable('getData');
+            if (isHas(countDate, data.id) == false) {
+                $("#" + id).bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: table_row
+                })
+            }
+        } else {
+            if (editId != null) {
+                table_row.id = randomId
+                $("#" + id).bootstrapTable('updateRow', {
+                    index: editId, // 你想修改哪行，0表示第一行
+                    row: table_row
+                })
+
+            } else {
+                table_row.id = randomId
+                $("#" + id).bootstrapTable('insertRow', {
+                    index: countDate.length, // 你想插入到哪，0表示第一行
+                    row: table_row
+                })
+            }
+        }
+    }
+
+    //修改行
+    function editRow(id, rowId, rowIndex) {
+        var da = $('#' + id).bootstrapTable('getRowByUniqueId', rowId);
+        $('#myModal5Value').val(rowIndex);
+        $('#myModal5').modal('show');
+        $('#form-Plan-add').loadData(da);
+
+        //图片反显出来
+        $('#file').html(' <div class="file-loading"><input id="uploadFileId" type="file" multiple> </div>');
+        attachmentList=[];
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttach",
+            type: "post",
+            dataType: "json",
+            data: {"objectId": da.id},
+            success: function (result) {
+                console.log(result)
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({
+                            "objectId": da.id,
+                            "attachmentName": attach.attachmentName,
+                            "fileName": attach.fileName
+                        })
+                    }
+                    console.log(imgsUrl)
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                } else {
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    }
+
+    //判断是否已经添加
+    function isHas(data, id) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id == id) {
+                isTF = true;
+            }
+        }
+        return isTF;
+    }
+
+    // /* 删除指定表格行 */
+    // function removeRow(id, rowId) {
+    //     var url = prefix2 +"/remove";
+    //     var data ={};
+    //     data.ids=rowId;
+    //     interfaces(url,data);
+    //     $("#" + id).bootstrapTable('removeByUniqueId', rowId)
+    // }
+</script>
+</body>
+</html>

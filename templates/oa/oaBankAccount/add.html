@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增银行账户')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaBankAccount-add">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>银行账户</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人</td>
+                                <td>
+                                    <input id="type" name="type" class="form-control" type="hidden" value="0">
+                                    <input name="proposer" type="hidden" id="proposer" th:value="${user.userId}"/>
+                                    <input th:value="${user.userName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" name="companyName" id="companyName" class="form-control" readonly
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:value="${company.deptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>归属部门</td>
+                                <td>
+                                    <input id="treeId" name="deptId" class="form-control" type="hidden"
+                                           th:value="${user.dept.deptId}">
+                                    <input id="treeName" name="deptName" class="form-control" readonly
+                                           type="text" onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:value="${user.dept.deptName}">
+                                </td>
+                                <td class="active">工程名称</td>
+                                <td>
+                                    <input id="projectId" class="form-control"
+                                           name="projectId" type="hidden">
+                                    <input id="projectName" class="form-control"
+                                           name="projectName" type="text"
+                                           onclick="selectPro('projectId','projectName')">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>账户类型</td>
+                                <td>
+                                    <select name="accountType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_bankAccount_type')}"
+                                            required="required" id="accountType">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">印鉴保管人</td>
+                                <td>
+                                    <input id="keeper" name="keeper" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">开户所在地</td>
+                                <td>
+                                    <input id="area" name="area" class="form-control" type="text">
+                                </td>
+                                <td class="active">开户所在银行</td>
+                                <td>
+                                    <input id="bankName" name="bankName" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">开户理由</td>
+                                <td>
+                                    <input id="reason" name="reason" class="form-control" type="text">
+                                </td>
+                                <td class="active">备注</td>
+                                <td>
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">账户预留印鉴</td>
+                                <td>
+                                    <input id="reserveSeal" name="reserveSeal" class="form-control" type="text">
+                                </td>
+                                <td class="active">项目部联系人</td>
+                                <td>
+                                    <input id="projectDeptLinkman" name="projectDeptLinkman" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">项目部联系电话</td>
+                                <td>
+                                    <input id="projectDeptPhone" name="projectDeptPhone" class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">业主是否指定银行</td>
+                                <td>
+                                    <select name="projectDeptAppoint" class="form-control"
+                                            th:with="type=${@dict.getType('sys_yes_no')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">指定银行联系电话</td>
+                                <td>
+                                    <input id="projectDeptAppointPhone" name="projectDeptAppointPhone"
+                                           class="form-control" type="text">
+                                </td>
+                                <td class="active">银行账户名称</td>
+                                <td>
+                                    <input id="accountName" name="accountName" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">银行账号</td>
+                                <td>
+                                    <input id="accountNo" name="accountNo" class="form-control" type="text">
+                                </td>
+                                <td class="active">最迟办结时间</td>
+                                <td>
+                                    <input id="openAccountDate" name="openAccountDate"
+                                           class="form-control currentTime" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">短信通知</td>
+                                <td>
+                                    <input id="smsMessage" name="smsMessage" class="form-control" type="text">
+                                </td>
+                                <td class="active">对账方式</td>
+                                <td>
+                                    <select name="accountCheckingType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_checking_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">客户经理电话</td>
+                                <td>
+                                    <input id="accountManagerPhone" name="accountManagerPhone" class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">申请日期</td>
+                                <td>
+                                    <input id="applyTime" name="applyTime"
+                                           class="form-control currentTime" type="text" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">营业执照取得时间</td>
+                                <td colspan="3">
+                                    <input id="licenseTime" name="licenseTime"
+                                           class="form-control time-input-data currentDate" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">开户材料</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script type="text/javascript">
+    var prefix = ctx + "oa/oaBankAccount"
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+
+    //显示隐藏
+    function selectModel(obj) {
+        var num = $(obj).val();
+        var obj = $('#form-oaBankAccount-add')
+        var contract = obj.find('input[name="contractId"]').parent()
+            .parent().parent();
+        var tender = obj.find('input[name="tenderId"]').parent().parent()
+            .parent();
+        //清空
+        contract.find('input').val('')
+        tender.find('input').val('')
+        if (num == '0') {
+            contract.addClass('hide')
+            tender.addClass('hide')
+        } else if (num == '1') {//工程合同
+            contract.removeClass('hide')
+            tender.addClass('hide')
+        } else if (num == '3') {//投标申请
+            tender.removeClass('hide')
+            contract.addClass('hide')
+        }
+    }
+
+    //关联 弹框
+    var lId = null;
+    var lName = null;
+
+    function showLinkM(id, name, url, text, doSubmit) {
+        lId = id;
+        lName = name
+        var options = {
+            title: text,
+            width: "1200",
+            url: ctx + url,
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    ////工程合同
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + lId).val(data.id)
+        $('#' + lName).val(data.contractName)
+    }
+
+    ////投标申请单
+    function doSubmit2(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + lId).val(data.id)
+        $('#' + lName).val(data.projectName)
+    }
+
+    //
+    function submitHandler() {
+        var data = {}
+        var dataForm = $('#form-oaBankAccount-add').serializeObject();
+        data.oaBankAccount = dataForm;
+        data.attachmentList = attachmentList;
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+
+    }
+
+    //提交
+    function submitHandler() {
+        var data = {}
+        var dataForm = $('#form-oaBankAccount-add').serializeObject();
+        data.oaBankAccount = dataForm;
+        data.attachmentList = attachmentList;
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = {}
+        var dataForm = $('#form-oaBankAccount-add').serializeObject();
+        data.oaBankAccount = dataForm;
+        data.attachmentList = attachmentList;
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+
+    }
+
+    //确认按钮
+    getType('0')
+
+    function getType(type) {
+        if (type == '0') {//开户
+            $('.open').show().siblings('.cancel').hide()
+        } else {//销户
+            $('.cancel').show().siblings('.open').find('input').attr('readonly', 'true')
+            $('.cancel').show().siblings('.open').find('select').attr('readonly', 'true')
+
+        }
+    }
+
+    //选择开户
+
+</script>
+</body>
+</html>

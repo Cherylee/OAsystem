@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('费用结算详情')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeSettlement-edit" th:object="${bridgeSettlement}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+	<!--<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程id：</label>
+            <div class="col-sm-8">
+            	<input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>-->
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程名称：</label>
+            <div class="col-sm-8">
+                <input id="projectName" name="projectName" th:field="*{projectName}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">结算日期：</label>
+            <div class="input-group data">
+                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                <input id="settlementDate" name="settlementDate" class="form-control required time-input-data" type="text"
+                       th:value="${#dates.format(bridgeSettlement.settlementDate, 'yyyy-MM-dd')}">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">结算编号：</label>
+            <div class="col-sm-8">
+            	<input id="settlementCode" name="settlementCode" th:field="*{settlementCode}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<!--<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同编号：</label>
+            <div class="col-sm-8">
+            	<input id="contractCode" name="contractCode" th:field="*{contractCode}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同金额：</label>
+            <div class="col-sm-8">
+            	<input id="contractAmount" name="contractAmount" th:field="*{contractAmount}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">累计收款：</label>
+            <div class="col-sm-8">
+            	<input id="cumulateAmount" name="cumulateAmount" th:field="*{cumulateAmount}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">本次收款：</label>
+            <div class="col-sm-8">
+            	<input id="currentAmount" name="currentAmount" th:field="*{currentAmount}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">待收款：</label>
+            <div class="col-sm-8">
+            	<input id="waitAmount" name="waitAmount" th:field="*{waitAmount}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">发票号：</label>
+            <div class="col-sm-8">
+            	<input id="billNum" name="billNum" th:field="*{billNum}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否完成收款（Y是，N否）：</label>
+            <div class="col-sm-8">
+            	<input id="isComplete" name="isComplete" th:field="*{isComplete}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建者：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" th:field="*{createBy}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建时间：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" th:field="*{createTime}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新者：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" th:field="*{updateBy}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新时间：</label>
+            <div class="col-sm-8">
+            	<input id="updateTime" name="updateTime" th:field="*{updateTime}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>-->
+		</form>
+    </div>
+    <!-- 关联检测大类 -->
+    <div class="col-sm-6 select-table table-striped">
+        <div class="fixed-table-container">
+            <table id="orderTable" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "bridge/bridgeSettlement";
+		/*$("#form-bridgeSettlement-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});*/
+		
+		/*function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-bridgeSettlement-edit').serialize());
+	        }
+	    }*/
+
+        var bridgeOrderState=[[${@dict.getType('bridge_order_status')}]];
+        var bridgeOrderSource=[[${@dict.getType('bridge_order_source')}]];
+
+        var options = {
+            id : 'orderTable',
+            url: ctx + "bridge/bridgeOrder/settlementOrderRelList",
+            detailUrl:ctx + "bridge/bridgeOrder/detail/{id}",
+            modalName: "委托单",
+            sortName : "createTime",
+            sortOrder : "desc",
+            pagination : false,
+            showExport : false,
+            queryParams : {"settlementId" : [[${bridgeSettlement.id}]]},
+            columns : [
+                {
+                    field : 'order.id',
+                    title : '委托单id',
+                    visible: false
+                },
+                {
+                    field : 'order.code',
+                    title : '委托单编码',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return '<a onclick="$.operate.detailTab(\'' + row.order.id + '\',)">'+row.order.code+'</a>'
+                    }
+                },
+                {
+                    field : 'order.source',
+                    title : '委托来源',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bridgeOrderSource, value);
+                    }
+
+                },
+                {
+                    field : 'book.name',
+                    title : '委托书名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value,5, "open");
+                    }
+                },
+                {
+                    field : 'order.clientUnit',
+                    title : '委托单位',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value,5, "open");
+                    }
+                },
+                {
+                    field : 'order.constructionUnit',
+                    title : '施工单位',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value,5, "open");
+                    }
+                },
+                {
+                    field : 'order.clientName',
+                    title : '委托人',
+                    sortable: true
+                },
+                {
+                    field : 'order.orderDate',
+                    title : '委托日期',
+                    sortable: true
+                },
+                {
+                    field : 'order.status',
+                    title : '状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bridgeOrderState, value);
+                    }
+                }]
+
+        };
+        $(function() {
+            $.table.init(options);
+        });
+	</script>
+</body>
+</html>

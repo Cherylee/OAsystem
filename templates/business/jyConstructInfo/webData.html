@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('获取数据源')" />
+	<th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-web-data-id">
+        
+		        <div class="form-group">
+		            <label class="col-sm-3 control-label">数据来源：</label>
+		            <div class="col-sm-8">
+                        <select class="form-control" name="targetUrl" th:with="type=${@dict.getType('yt_web_data_url')}" required="required" >
+						  <option value="">所有</option>
+						  <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					    </select>
+                    </div>
+		        </div>
+		        <div class="form-group">
+		            <label class="col-sm-3 control-label">开始日期：</label>
+		            <div class="col-sm-8">
+		            	<input id="beginTime" name="beginTime" class="form-control time-input-data" type="text">
+		            </div>
+		        </div>
+		        <div class="form-group">
+		            <label class="col-sm-3 control-label">结束日期：</label>
+		            <div class="col-sm-8">
+		            	<input id="endTime" name="endTime" class="form-control time-input-data" type="text">
+		            </div>
+		        </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "business/jyConstructInfo"
+		$("#form-web-data-id").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveJson(prefix + "/carwlData", $('#form-web-data-id').serializeObject());
+	        }
+	    }
+	</script>
+</body>
+</html>

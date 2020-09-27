@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增还证申请')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaCertificatesBack-add">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>还证申请</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">申请人</td>
+									<td>
+										<input class="form-control" type="text" th:value="${user.userName}" readonly>
+									</td>
+									<td class="active">申请公司</td>
+									<td>
+										<input type="hidden" name="applyCompanyId" id="companyId" th:value="${company.deptId}"/>
+										<input type="text" id="companyName" name="applyCompanyName" class="form-control"
+											   onclick="selectDeptTree('companyId','companyName','0')" th:value="${company.deptName}"/>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">申请部门</td>
+									<td>
+										<input type="hidden" name="applyDeptId" id="treeId" th:value="${user.dept.deptId}"/>
+										<input type="text" id="treeName" name="applyDeptName" class="form-control"
+											   onclick="selectDeptTree('treeId','treeName','1')" th:value="${user.dept.deptName}"/>
+									</td>
+									<td class="active">快递单号</td>
+									<td>
+										<input id="courierNumber" name="courierNumber" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">申请日期</td>
+									<td>
+										<input id="applyTime" name="applyTime" class="form-control currentTime" type="text" readonly>
+									</td>
+									<td class="active">备注</td>
+									<td>
+										<input id="remark" name="remark" class="form-control" type="text">
+									</td>
+								</tr>
+
+								</tbody>
+							</table>
+						</form>
+						<h4>还证明细 &nbsp;&nbsp;</h4>
+						<div class="btn-group-sm" id="toolbar1" role="group">
+							<a class="btn btn-success" onclick="selectCredentials()"> <i
+									class="fa fa-plus"></i> 添加需还证件
+							</a> <a class="btn btn-danger multiple"
+									onclick="removeRow('bootstrap-table1')"> <i
+								class="fa fa-remove"></i> 删除选择行
+						</a> <a class="btn btn-danger"
+								onclick="removeRowAll('bootstrap-table1')"> <i
+								class="fa fa-remove"></i> 删除所有行
+						</a>
+						</div>
+						<div class="select-table table-striped">
+							<div class="fixed-table-container">
+								<table id="bootstrap-table1" data-mobile-responsive="true"></table>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<br>
+								<button type="button" class="btn btn-sm btn-info"
+									onclick="saveDraft()">
+									<i class="fa fa-check"></i>保存草稿
+								</button>
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>提交
+								</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaCertificatesBack"
+		var types=[[${@dict.getType('oa_sysCredentials_type')}]];
+		var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+	    var sysCredentialsStatus = [[${@dict.getType('oa_sysCredentials_status')}]];
+	    var sysCredentialsType = [[${@dict.getType('oa_sysCredentials_type')}]];
+	    var sysYesNo = [[${@dict.getType('sys_yes_no')}]];
+		//相关部门申请表格
+		var options1 = {
+			id : "bootstrap-table1",
+			toolbar : "toolbar1",
+			modalName : "证件明细",
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : true,
+			pagination : false,
+			uniqueId : "id",
+			height : 300,
+			clickToSelect : true,
+			columns: [{
+	            checkbox: true
+	        },
+			{
+				field : 'id', 
+				title : '主键',
+				visible: false
+			},
+			{
+				field : 'name', 
+				title : '证件名称',
+				sortable: true
+			},
+			{
+				field : 'code', 
+				title : '证件编号',
+				sortable: true
+			},
+			{
+				field : 'owner', 
+				title : '持证人id',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'user.userName', 
+				title : '持证人',
+				sortable: true
+			},
+			{
+				field : 'safeKeepName', 
+				title : '保管人',
+				sortable: true
+			},
+			{
+				field : 'dept.deptName', 
+				title : '当前所在公司',
+				sortable: true
+			},
+			{
+				field : 'status', 
+				title : '状态',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysCredentialsStatus, value);
+	        	}
+			},
+			{
+				field : 'type', 
+				title : '证件类型',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysCredentialsType, value);
+	        	}
+				
+			},
+			{
+				field : 'canAppoint', 
+				title : '可预约',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysYesNo, value);
+	        	}
+			},
+			{
+				field : 'inCompany', 
+				title : '在公司',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysYesNo, value);
+	        	}
+			},
+			{
+				field : 'paySocial', 
+				title : '缴纳社保',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysYesNo, value);
+	        	}
+			},
+			{
+				field : 'scanCopy', 
+				title : '有扫描件',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysYesNo, value);
+	        	}
+			},
+			{
+				field : 'effect', 
+				title : '有效',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(sysYesNo, value);
+	        	}
+			},
+			{
+				field : 'remark', 
+				title : '备注',
+				sortable: true
+			}]
+		};
+		//初始化相关部门申请表格
+		$.table.init(options1);
+		
+		/* 多选证件 */
+		function selectCredentials() {
+			var options = {
+				title : '选择证件',
+				width : "1200",
+				url : ctx + "oa/oaCertificatesBack/tocertificatesBorrow",
+				callBack : doSubmit1
+			};
+			if ($.validate.form()) {
+			$.modal.openOptions(options);
+			}
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerMore();
+			var data = result;
+			for (var i = 0; i < data.length; i++) {
+				insertRow(data[i])
+			}
+
+		}
+		
+		/*新增行*/
+		var idxId = 1;
+		function insertRow(data) {
+			var randomId = 100 + ~~(Math.random() * 100);
+			var table_row = '';
+			table_row = data
+			table_row[0]=false;
+			table_row.certificatesId=data.id
+		    var countDate = $("#bootstrap-table1").bootstrapTable('getData');
+			if(isHas(countDate,data.id)==false){
+				$("#bootstrap-table1").bootstrapTable('insertRow', {
+					index : 0, // 你想插入到哪，0表示第一行
+					row : table_row
+				})
+			}
+			
+		}
+		//判断是否已经添加
+		function isHas(data,id){
+			var isTF=false;
+			for(var i=0;i<data.length;i++){
+				if(data[i].id==id){
+					isTF=true;
+				}
+			}
+			return isTF;
+		}
+		/* 删除指定表格行 */
+		function removeRow(id) {
+			var ids = $.map($('#' + id).bootstrapTable('getSelections'),
+					function(row) {
+						return row["id"];
+					});
+			if (ids.length == 0) {
+				$.modal.alertWarning("请至少选择一条记录");
+				return;
+			}
+			$("#" + id).bootstrapTable('remove', {
+				field : 'id',
+				values : ids
+			})
+
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$("#" + id).bootstrapTable('removeAll')
+			idxx = 0;
+		}
+		 //保存数据
+        function savaDta(){
+        	var data={};
+        	var formDa=$('#form-oaCertificatesBack-add').serializeObject()
+        	data.back=formDa
+        	var tabDa=$("#bootstrap-table1" ).bootstrapTable('getData')
+        	data.detailList=tabDa
+        	return data;
+        }
+		 //提交
+        function submitHandler() {
+			var data=savaDta()
+			$.operate.saveJsonTab(prefix + "/add",data);
+		}
+		 //保存草稿
+		 function saveDraft() {
+			var data=savaDta()
+			$.operate.saveJsonTab(prefix + "/saveDraft",data);
+		}
+		
+	</script>
+</body>
+</html>

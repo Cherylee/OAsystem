@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改合同审批节点配置')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+	<form class="form-horizontal m" id="form-oaContractNode-edit" th:object="${oaContractNode}">
+		<input id="id" name="id" th:field="*{id}" type="hidden">
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><span style="color: red">*</span>合同类型</label>
+			<div class="col-sm-4">
+				<select id="type" required="required"
+						class="form-control select2-hidden-accessible valid" name="type1"
+						th:with="type=${@dict.getType('oa_contract_type1')}" th:field="*{contractType}">
+
+					<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+							th:value="${dict.dictValue}"></option>
+				</select>
+			</div>
+		</div>
+
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><span style="color: red">*</span>当前所在公司：</label>
+			<div class="col-sm-4">
+				<!-- <input id="deptId" name="deptId" class="form-control" type="text"> -->
+				<input type="hidden" name="deptId" id="treeId" />
+				<input type="text" id="treeName" name="deptName" class="form-control" onclick="selectDeptTree('treeId','treeName')" th:field="*{deptName}" />
+			</div>
+		</div>
+
+
+		<div class="form-group hide" id="projectContactType">
+			<label class="col-sm-2 control-label">工程合同类型</label>
+			<div class="col-sm-4">
+				<select  required="required"
+						 class="form-control select2-hidden-accessible valid" name="type2"
+						 th:with="type=${@dict.getType('oa_contract_type2')}">
+					<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+							th:value="${dict.dictValue}"></option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">相关部门审核</label>
+			<div class="col-sm-8">
+				<div class="col-sm-12 select-table table-striped">
+
+					<div class="btn-group-sm" id="toolbar1" role="group">
+						<a class="btn btn-success"
+						   onclick="selectUserById('bootstrap-table1')"> <i
+								class="fa fa-plus"></i> 添加部门审核人员
+						</a> <a class="btn btn-danger multiple"
+								onclick="removeRow('bootstrap-table1')"> <i
+							class="fa fa-remove"></i> 删除选择行
+					</a> <a class="btn btn-danger"
+							onclick="removeRowAll('bootstrap-table1')"> <i
+							class="fa fa-remove"></i> 删除所有行
+					</a>
+					</div>
+					<div class="fixed-table-container">
+						<table id="bootstrap-table1" data-mobile-responsive="true"></table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">总经理裁决</label>
+				<div class="col-sm-4">
+					<input id="generalManager" type="hidden" name="generalManager" th:field="*{generalManager}">
+					<input id="managerName" class="form-control" type="text" onclick="selectUser('generalManager','managerName')"th:field="*{managerName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">法务签发</label>
+				<div class="col-sm-4">
+					<input id="legalIssueId" name="legalIssue" type="hidden">
+					<input id="legalIssueName"  class="form-control" type="text" onclick="selectUser('legalIssueId','legalIssueName')"th:field="*{legalIssueName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">法务用印</label>
+				<div class="col-sm-4">
+					<input id="legalSealId" name="legalSeal" type="hidden">
+					<input id="legalSealName"  class="form-control" type="text" onclick="selectUser('legalSealId','legalSealName')"th:field="*{legalSealName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">综合部用印</label>
+				<div class="col-sm-4">
+					<input id="comdeptSealId" name="comdeptSeal" type="hidden">
+					<input id="comdeptSealName"  class="form-control" type="text" onclick="selectUser('comdeptSealId','comdeptSealName')"th:field="*{comdeptSealName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">归档人员</label>
+				<div class="col-sm-4">
+					<input id="archiving" type="hidden" name="archiving" th:field="*{archiving}">
+					<input id="archivingName"  class="form-control" type="text"
+						onclick="selectUser('archiving','archivingName')"th:field="*{archivingName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">备注：</label>
+				<div class="col-sm-4">
+					<input id="remark" name="remark" class="form-control" type="text"th:field="*{remark}">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<button type="button" class="btn btn-sm btn-primary"
+						onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+				<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+<div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/oaContractNode";
+		$("#form-oaContractNode-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		function submitHandler() {
+				var data=$('#form-oaContractNode-edit').serializeObject();
+				$.each(data, function (n, value) {
+					if ($.isArray(value)) {
+						var att={
+							'rey':value+''
+						}
+						data[n]=att.rey
+					}
+				});
+			if ($.validate.form()) {
+				var config = {
+					contentType : "application/json;charset=UTF-8",
+					url : prefix + "/edit",
+					type : "post",
+					data : JSON.stringify(data),
+					beforeSend : function() {
+						$.modal.loading("正在处理...");
+					},
+					success : function(result) {
+						$.operate.successTabCallback(result);
+					}
+				};
+				$.ajax(config);
+			}
+	    }
+		//弹框选择人员
+		var domId=null;
+		function selectUserById(id) {
+			domId = id;
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+			insertRow(domId,data)
+
+		}
+		/*用户管理-新增-选择部门树*/
+		function selectDeptTree(id, deptName) {
+			divDeptId = id;
+			divDeptName = deptName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowLastLevel(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#" + divDeptId).val(body.find('#treeId').val());
+				$("#" + divDeptName).val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+		//相关部门申请表格
+		var options = {
+			id : "bootstrap-table1",
+			url: ctx+"system/user/selectUserListByUserIds",
+			toolbar : "toolbar1",
+			modalName : "审批节点",
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : true,
+			pagination:false,
+			uniqueId : "id",
+			height : 300,
+			clickToSelect : true,
+			queryParams:{"userIds":[[${oaContractNode.deptStaff}]]},
+			columns : [
+				{
+					radio : true
+				},
+				{
+					field:'userId',
+					title:'用户id',
+					formatter: function(value, row, index) {
+						return '<input type="hidden" name="deptStaff" value="'+row.userId+'"/>'+row.userId
+					}
+				},
+				{
+					field : 'deptName',
+					title : '部门'
+				},
+				{
+					field : 'userName',
+					title : '部门审核人员'
+				}]
+		};
+		$.table.init(options);
+
+		function insertRow(id,data) {
+			var table_row = '';
+			var table1_row = {
+				userId:data.userId,
+				deptName : data.dept.deptName,
+				userName : data.userName
+			}
+			if(id="bootstrap-table1"){
+				table_row=table1_row
+			}
+			var count = $("#" + id).bootstrapTable('getData').length;
+			$("#" + id).bootstrapTable('insertRow', {
+				index : count, // 你想插入到哪，0表示第一行
+				row : table_row
+			})
+		}
+		/* 删除指定表格行 */
+		function removeRow(id) {
+			var ids = $.map($('#' + id).bootstrapTable('getSelections'),
+					function(row) {
+						return row["userId"];
+					});
+			if (ids.length == 0) {
+				$.modal.alertWarning("请至少选择一条记录");
+				return;
+			}
+			$("#" + id).bootstrapTable('remove', {
+				field : 'userId',
+				values : ids
+			})
+
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$("#" + id).bootstrapTable('removeAll')
+		}
+	</script>
+</body>
+</html>

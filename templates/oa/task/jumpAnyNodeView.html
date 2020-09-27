@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('跳转任意节点')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    	<input type="text" th:value="${taskId}">
+    </div>
+    
+    <div class="col-sm-12 select-table table-striped">
+		<table id="bootstrap-table" data-mobile-responsive="true"></table>
+	</div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-danger" onclick="backAway()"><i class="fa fa-reply-all"></i>返回 </button>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+    
+		
+		//返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		
+	    $(function () {
+	        var options = {
+	        	uniqueId: "taskId",
+	            url: ctx + "oa/task/selectTaskListByTaskId/"+[[${taskId}]],
+	            modalName: "审批节点信息",
+	            search: false,
+	            showExport: false,
+	            columns: [{
+	                checkbox: false
+	            },
+	            {
+	                field: 'taskId',
+	                title: '任务id'
+	            },
+	            {
+	                field: 'nodeName',
+	                title: '审批节点名称'
+	            },
+	            {
+	                title: '操作',
+	                align: 'center',
+	                formatter: function (value, row, index) {
+	                    var actions = [];
+	                    actions.push('<a class="btn btn-sm btn-primary " href="#" onclick="jump(\''+row.taskId+'\')"><i class="fa fa-edit"></i>跳转</a>');
+	                    return actions.join('');
+	                }
+	            }]
+	        };
+	        $.table.init(options);
+	    });
+	    
+	    //跳转
+	    function jump(tarTaskId){
+	    	$.ajax({
+        		type : "get",
+        		url : ctx+"oa/task/jump/"+[[${taskId}]]+"/"+tarTaskId,
+        		dataType : "json",
+        		success : function(res){
+        			$.operate.successCallback(res);
+        			var parent = window.parent;
+        			parent.backAway();
+        		}
+        	}); 
+	    }
+	    
+	    
+	</script>
+</body>
+</html>

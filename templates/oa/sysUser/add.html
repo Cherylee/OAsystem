@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: header('新增用户')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-sysUser-add">
+                        <table class="table table-bordered table-condensed">
+                            <tbody>
+                            <th colspan="4">
+                                基本信息
+                            </th>
+                            <tr>
+                                <td class="active" width="15%">状态</td>
+                                <td width="35%">
+                                    <select class="form-control" name="status"
+                                            th:with="type=${@dict.getType('sys_normal_disable')}">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}" th:selected="${dict.dictValue} eq '0'"></option>
+                                    </select>
+                                </td>
+                                <td class="active" width="15%">身份证信息</td>
+                                <td width="35%">
+                                    <input id="idCard" name="idCard" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">入职日期</td>
+                                <td>
+                                    <input id="hireDate" name="hireDate" class="form-control time-input-data" type="text">
+                                </td>
+                                <td class="active">出生日期</td>
+                                <td>
+                                    <input id="birthday" name="birthday" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>姓名</td>
+                                <td>
+                                    <input id="userName" name="userName" class="form-control" type="text" required>
+                                </td>
+                                <td class="active">家庭住址</td>
+                                <td>
+                                    <input id="homeAddress" name="homeAddress" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">性别</td>
+                                <td>
+                                    <select class="form-control" name="sex"
+                                            th:with="type=${@dict.getType('sys_user_sex')}">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">现居住地址</td>
+                                <td>
+                                    <input id="currentAddress" name="currentAddress" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">民族</td>
+                                <td>
+                                    <input id="nation" name="nation" class="form-control" type="text">
+                                </td>
+                                <td class="active">婚否</td>
+                                <td>
+                                    <select class="form-control" name="married"
+                                            th:with="type=${@dict.getType('sys_yes_no')}" >
+                                        <option value="">--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>所属公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" required/>
+                                    <input type="text" name="companyName" id="companyName" class="form-control"
+                                           onclick="selectDeptTree('companyId','companyName','0')" required />
+                                </td>
+                                <td class="active">工作开始时间</td>
+                                <td>
+                                    <input id="attackTime" name="attackTime" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>所属部门</td>
+                                <td>
+                                    <input id="treeId" name="deptId" class="form-control" type="hidden" required>
+                                    <input id="treeName" name="deptName" class="form-control"
+                                           type="text" onclick="selectDeptTree('treeId','treeName','1')" required>
+                                </td>
+                                <td class="active">转正日期</td>
+                                <td>
+                                    <input id="correctionDate" name="correctionDate" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">所属项目</td>
+                                <td>
+                                    <input id="belongProject" name="belongProject" class="form-control" type="text">
+                                </td>
+                                <td class="active">劳动合同期限</td>
+                                <td>
+                                    <input id="contractPeriod" name="contractPeriod" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">直属上级</td>
+                                <td>
+                                    <input id="parentUserId"  class="form-control" type="text" onclick="selectUserById()" />
+                                    <input  name="parentUserId" type="hidden"/>
+                                </td>
+                                <td class="active">劳动合同续签</td>
+                                <td>
+                                    <input id="contractRenewal" name="contractRenewal" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>职务</td>
+                                <td>
+                                    <select id="post" name="postIds"
+                                            class="form-control select2-hidden-accessible selectpicker" multiple="" required>
+                                        <option th:each="post:${posts}" th:value="${post.postId}"
+                                                th:selected="${post.flag}" th:text="${post.postName}"
+                                                th:disabled="${post.status == '1'}">
+
+                                        </option>
+                                    </select>
+                                </td>
+                                <td class="active">合同签订次数</td>
+                                <td>
+                                    <input id="contractSignNum" name="contractSignNum" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">职称</td>
+                                <td>
+                                    <input id="professional" name="professional" class="form-control" type="text">
+                                </td>
+                                <td class="active">五险缴纳基数</td>
+                                <td>
+                                    <input id="insuranceBase" name="insuranceBase" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">政治面貌</td>
+                                <td>
+                                    <input id="politics" name="politics" class="form-control" type="text">
+                                </td>
+                                <td class="active">公积金缴纳基数</td>
+                                <td>
+                                    <input id="provideBase" name="provideBase" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">联系电话</td>
+                                <td>
+                                    <input id="phonenumber" name="phonenumber" class="form-control" type="text">
+                                </td>
+                                <td class="active">缴纳五险日期</td>
+                                <td>
+                                    <input id="fiveRisksDate" name="fiveRisksDate" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">邮箱</td>
+                                <td>
+                                    <input id="email" name="email" class="form-control" type="text">
+                                </td>
+                                <td class="active">缴纳公积金日期</td>
+                                <td>
+                                    <input id="commonFundsDate" name="commonFundsDate" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">剩余年假时数</td>
+                                <td>
+                                    <input id="yearHoliday" name="yearHoliday" class="form-control" type="number">
+                                </td>
+                                <td class="active">薪酬等级</td>
+                                <td>
+                                    <input id="payGrade" name="payGrade" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">可调休时数</td>
+                                <td>
+                                    <input id="breakOffHours" name="breakOffHours" class="form-control" type="number">
+                                </td>
+                                <td class="active">目前月薪</td>
+                                <td>
+                                    <input id="currentSalary" name="currentSalary" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">是否享有探亲假</td>
+                                <td>
+                                    <select  class="form-control" name="haveFamilyLeave"
+                                            th:with="type=${@dict.getType('sys_yes_no')}" >
+                                        <option value="">--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">调薪日期</td>
+                                <td>
+                                    <input id="salaryIncreateDate" name="salaryIncreateDate" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">离职日期</td>
+                                <td>
+                                    <input id="departureDate" name="departureDate" class="form-control time-input-data" type="text">
+                                </td>
+                                <td class="active">上年度考评成绩</td>
+                                <td>
+                                    <input id="lastYearScore" name="lastYearScore" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">紧急联系人</td>
+                                <td>
+                                    <input id="emergency" name="emergency" class="form-control" type="text">
+                                </td>
+                                <td class="active">紧急联系人电话</td>
+                                <td>
+                                    <input id="emergencyPhone" name="emergencyPhone" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered table-condensed" >
+                            <tbody>
+                            <th colspan="4">
+                                学历信息
+                            </th>
+                            <tr>
+                                <td class="active" width="15%">第一学历</td>
+                                <td width="25%">
+                                    <input id="firstEducation" name="firstEducation" class="form-control" type="text">
+                                </td>
+                                <td class="active" width="15%">专业</td>
+                                <td width="45%">
+                                    <input id="firstMajor" name="firstMajor" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">毕业院校</td>
+                                <td>
+                                    <input id="firstSchool" name="firstSchool" class="form-control" type="text">
+                                </td>
+                                <td class="active">毕业时间</td>
+                                <td>
+                                    <input id="firstGraduationTime" name="firstGraduationTime" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">第二学历</td>
+                                <td>
+                                    <input id="secondEducation" name="secondEducation" class="form-control" type="text">
+                                </td>
+                                <td class="active">专业</td>
+                                <td>
+                                    <input id="secondMajor" name="secondMajor" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">毕业院校</td>
+                                <td>
+                                    <input id="secondSchool" name="secondSchool" class="form-control" type="text">
+                                </td>
+                                <td class="active">毕业时间</td>
+                                <td>
+                                    <input id="secondGraduationTime" name="secondGraduationTime" class="form-control time-input-data" type="text">
+                                </td>
+                            </tr>
+
+
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered table-condensed">
+                            <tbody>
+                            <th colspan="4">
+                                其他信息
+                            </th>
+                            <tr>
+                                <td class="active" width="15%">备注</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered table-condensed">
+                            <tbody>
+                            <th colspan="4">
+                                附件（身份证，证件信息）
+                            </th>
+
+                            <tr>
+                                <td colspan="4">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <br>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: select2-js"/>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "system/user";
+
+    //附件
+    var attachmentList = new Array();
+    var option2={
+        id:'uploadFileId',
+        uploadUrl:null,
+        deleteUrl:null,
+        deleteExtraData:null,
+        imgsUrl:new Array(),
+        initialPreviewConfig:null
+    }
+    $.common.uploadFile(option2);
+    downFile();
+
+    $("#form-sysUser-add").validate({
+        onkeyup: false,
+        rules:{
+            email:{
+                email:true,
+                remote: {
+                    url: prefix + "/checkEmailUnique",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        name: function () {
+                            return $.common.trim($("#email").val());
+                        }
+                    },
+                    dataFilter: function (data, type) {
+                        return $.validate.unique(data);
+                    }
+                }
+            },
+            phonenumber:{
+                isPhone:true,
+                remote: {
+                    url: prefix + "/checkPhoneUnique",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        name: function () {
+                            return $.common.trim($("#phonenumber").val());
+                        }
+                    },
+                    dataFilter: function (data, type) {
+                        return $.validate.unique(data);
+                    }
+                }
+            }
+        },
+        messages: {
+            "email": {
+                remote: "Email已经存在"
+            },
+            "phonenumber":{
+                remote: "手机号码已经存在"
+            }
+        },
+        focusCleanup: true
+    });
+
+    /*用户管理-选择直属上级-用户列表*/
+    function selectUserById(){
+        var options = {
+            title: '选择用户',
+            width: "1200",
+            url: ctx + "oa/oaApplyTemplate/selectUser",
+            callBack: doSubmit1
+        };
+        $.modal.openOptions(options);
+    }
+    function doSubmit1(index, layero){
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result.data;
+        $('#parentUserId').val(data.userName);
+        $("input[name='parentUserId']").val(data.userId);
+        /* var row = $("#bootstrap-table").bootstrapTable('getSelections');
+        if(row.length<=0){
+            $.modal.alertWarning('请先选择要操作的记录！');
+            return;
+         } */
+    }
+
+    function submitHandler() {
+        var data=$("#form-sysUser-add").serializeObject();
+        if(data.postIds){
+            if(data.postIds.length<2){
+                var postArray = [];
+                postArray.push(data.postIds);
+                data.postIds=postArray;
+            }
+        }else{
+            $.modal.alertWarning('职务必填！')
+        }
+
+        data.attachmentList = attachmentList;
+        if ($.validate.form()) {
+            data.roleIds=[];
+            $.operate.saveJsonTab(prefix + "/add",data);
+        }
+    }
+</script>
+</body>
+</html>

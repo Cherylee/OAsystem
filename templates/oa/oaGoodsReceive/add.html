@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增物资领用申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaGoodsReceive-add">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>物资领用</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人</td>
+                                <td>
+                                    <input name="proposer" type="hidden" id="proposer" th:value="${user.userId}"/>
+                                    <input th:value="${user.userName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>归属公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                    <input type="text" id="companyName" name="companyName" class="form-control"
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:value="${company.deptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>归属部门</td>
+                                <td>
+                                    <input class="form-control" name="deptId" type="hidden" id="deptId"
+                                           th:value="${user.deptId}"/>
+                                    <input th:value="${user.dept.deptName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>物资类型</td>
+                                <td>
+                                    <select id="goodsType" required class="form-control " name="goodsType"
+                                            th:with="type=${@dict.getType('oa_goods_type')}">
+                                        <option value="">-- 请选择 --</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="btn-group-sm" id="toolbar1" role="group">
+                            <a class="btn btn-success"
+                               onclick="selectGoodsByType()"> <i
+                                    class="fa fa-plus"></i> 新增领用物资
+                            </a> <a class="btn btn-danger multiple"
+                                    onclick="removeRow('bootstrap-table')"> <i class="fa fa-remove"></i>
+                            删除选择行
+                        </a> <a class="btn btn-danger" onclick="removeRowAll('bootstrap-table')">
+                            <i class="fa fa-remove"></i> 删除所有行
+                        </a>
+                        </div>
+                        <div class="fixed-table-container">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaGoodsReceive"
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+
+            var rowData = $('#' + $.table._option.id).bootstrapTable('getData');
+            var tar = new Array();
+            if (rowData != null && rowData.length > 0) {
+                for (var i = 0; i < rowData.length; i++) {
+                    var obj = {};
+                    obj.num = rowData[i].num;
+                    obj.goodsId = rowData[i].id;
+                    tar.push(obj);
+                }
+            }
+            var data = {};
+            data.goodsType = $.form.selectSelects('goodsType');
+            data.companyId = $('#companyId').val();/*公司Id*/
+            data.deptId = $('#deptId').val();/*部门id*/
+            data.remark = $('#remark').val();/*备注*/
+            data.proposer = $('#proposer').val();
+            data.receiveDetailList = tar;
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var rowData = $('#' + $.table._option.id).bootstrapTable('getData');
+        var tar = new Array();
+        if (rowData != null && rowData.length > 0) {
+            for (var i = 0; i < rowData.length; i++) {
+                var obj = {};
+                obj.num = rowData[i].num;
+                obj.goodsId = rowData[i].id;
+                tar.push(obj);
+            }
+        }
+        var data = {};
+        data.goodsType = $.form.selectSelects('goodsType');
+        data.companyId = $('#companyId').val();/*公司Id*/
+        data.deptId = $('#deptId').val();/*部门id*/
+        data.remark = $('#remark').val();/*备注*/
+        data.proposer = $('#proposer').val();
+        data.receiveDetailList = tar;
+        data.attachmentList = attachmentList;
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+
+    }
+
+    //文件上传
+    /* var attachmentUrls = new Array();
+    $("#uploadFileId").fileinput({
+        'theme': 'explorer-fas',
+        uploadUrl: ctx+'common/bootstrapFileInputUpload',
+        overwriteInitial: false,
+        initialPreviewAsData: true
+    }).on("fileuploaded", function(event, data, previewId, index) {
+        attachmentUrls.push(data.response.url);
+    }); */
+
+    var datas = [[${@dict.getType('oa_goods_type')}]];
+    $(function () {
+        var options = {
+            modalName: "系统物资",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            columns: [{
+                radio: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'goodsType',
+                    title: '物资类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(datas, value);
+                    }
+                },
+                {
+                    field: 'goodsName',
+                    title: '物资名称',
+                    sortable: true
+                },
+                {
+                    field: 'num',
+                    title: '数量',
+                    sortable: true,
+                    editable: {
+                        type: 'text',
+                        title: '数量',
+                        emptytext: "【数量】必填！",
+                        validate: function (value) {
+                            if (isNaN(value)) {
+                                return '只能输入数字！';
+                            }
+                        }
+                    }
+                },
+                {
+                    field: 'unit',
+                    title: '单位',
+                    sortable: true
+                },
+                {
+                    field: 'price',
+                    title: '单价',
+                    sortable: true
+                },
+                {
+                    field: 'brand',
+                    title: '规格型号',
+                    sortable: true
+                },
+                {
+                    field: 'purchaseDate',
+                    title: '购买日期',
+                    sortable: true
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true
+                }]
+        };
+        $.table.init(options);
+    });
+
+    function selectGoodsByType() {
+        var selectVal = $("#goodsType").val();
+        if (selectVal == null || selectVal == '') {
+            $.modal.alertWarning("请先选择领用的物资类型！！！");
+            return;
+        }
+        var options = {
+            title: '选择物资',
+            width: "1200",
+            url: prefix + "/toSelectGoods/" + $("#goodsType").val(),
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        /* var row = $('#bootstrap-table').bootstrapTable('getSelections');
+        if(row.length<=0){
+            $.modal.alertWarning('请先选择要操作的记录！');
+            return;
+        }
+        var ids = $.map($('#bootstrap-table').bootstrapTable('getSelections'), function (row) {
+                return row["id"];
+            });
+        $("#bootstrap-table").bootstrapTable('remove', {
+            field: 'id',
+            values: ids
+        }); */
+        console.log(result)
+        var randomId = 100 + ~~(Math.random() * 100);
+        for (var i = 0; i < result.length; i++) {
+            var data = result[i];
+            insertRow('bootstrap-table', data)
+        }
+    };
+
+    function insertRow(id, data) {
+        var tableRow = null;
+        var randomId = 100 + ~~(Math.random() * 100);
+
+        tableRow = data;
+        tableRow.num = '';
+        var countDate = $("#bootstrap-table").bootstrapTable('getData');
+        if (isHas(countDate, data.id) == false) {
+            $("#" + id).bootstrapTable('insertRow', {
+                index: 0, // 你想插入到哪，0表示第一行
+                row: tableRow
+            })
+        }
+
+
+    }
+
+    //判断是否已经添加
+    function isHas(data, id) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id == id) {
+                isTF = true;
+            }
+        }
+        return isTF;
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id) {
+        var ids = $.map($('#' + id).bootstrapTable('getSelections'), function (row) {
+            return row["id"];
+        });
+        if (ids.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        $("#" + id).bootstrapTable('remove', {
+            field: 'id',
+            values: ids
+        })
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $("#" + id).bootstrapTable('removeAll')
+    }
+
+</script>
+</body>
+</html>

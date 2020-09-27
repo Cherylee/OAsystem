@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('水泥混凝土抗压强度试验检测记录列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								检测单id：<input type="text" name="orderId"/>
+							</li>
+
+							<li>
+								检测单编号：<input type="text" name="code"/>
+							</li>
+							<li>
+								实验日期：<input type="text" name="trialDate"/>
+							</li>
+							<li>
+								创建者：<input type="text" name="createBy"/>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="oa:bridgeReportCementCompression:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.edit()" shiro:hasPermission="oa:bridgeReportCementCompression:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:bridgeReportCementCompression:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:bridgeReportCementCompression:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:bridgeReportCementCompression:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:bridgeReportCementCompression:remove')}]];
+        var prefix = ctx + "bridge/bridgeReportCementCompression";
+        console.log([[${id}]])
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "水泥混凝土抗压强度试验检测记录",
+                queryParams: {"taskId": [[${id}]]},
+                sidePagination: "client",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'entrustCode',
+					title : '检测任务编号',
+					sortable: true
+				},
+				{
+					field : 'code',
+					title : '记录编号',
+					sortable: true
+				},
+				{
+					field : 'createBy',
+					title : '创建者',
+					sortable: true
+				},
+				{
+					field : 'testingUnitName',
+					title : '检测单位',
+					sortable: true
+				},
+				{
+					field : 'trialDate', 
+					title : '实验日期',
+					sortable: true,
+				}]
+            };
+            $.table.init(options);
+        });
+
+		//工程信息回显
+		function submitHandler() {
+			var target = $('#bootstrap-table').bootstrapTable('getSelections');
+			if (target.length == 0) {
+				$.modal.alertWarning("请选择一条记录");
+				return;
+			}
+			if (target.length > 1) {
+				$.modal.alertWarning("只能选择一条记录");
+				return;
+			}
+			if (target.length == 1) {
+				$.modal.close();
+				return target[0];
+			}
+		}
+    </script>
+</body>
+</html>

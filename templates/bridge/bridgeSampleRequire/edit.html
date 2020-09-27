@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改样品领用记录')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-bridgeSampleRequire-edit"
+			th:object="${bridgeSampleRequireVo}">
+			<input id="id" name="id" th:value="*{requireInfo.id}" type="hidden">
+			<div class="col-sm-6 hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">样品Id：</label>
+					<div class="col-sm-8">
+						<input id="sampleId" name="sampleId" class="form-control"
+							type="text" readonly="readonly" 
+							th:value="*{sample.id}">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"><span
+						style="color: red;">*</span>样品名称：</label>
+					<div class="col-sm-8">
+						<input id="sampleName" class="form-control"
+							type="text" readonly="readonly" th:value="*{sample.name}" onclick="selectSample('sampleId','sampleName')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">领取事由：</label>
+					<div class="col-sm-8">
+						<input id="requireCause" name="requireCause"
+							th:value="*{requireInfo.requireCause}" class="form-control"
+							type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">领取数量：</label>
+					<div class="col-sm-8">
+						<input id="requireNumber" name="requireNumber"
+							th:value="*{requireInfo.requireNumber}" class="form-control"
+							 type="number" min="1">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">单位：</label>
+					<div class="col-sm-8">
+						<input id="unit" name="unit" th:value="*{requireInfo.unit}"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">外观质量：</label>
+					<div class="col-sm-8">
+						<input id="appearance" name="appearance"
+							th:value="*{requireInfo.appearance}" class="form-control"
+							type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">领取时间：</label>
+					<div class="col-sm-8">
+						<div class="input-group data">
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							<input id="requireDate" name="requireDate"
+								class="form-control time-input-data" type="text"
+								th:value="*{#dates.format(requireInfo.requireDate, 'yyyy-MM-dd')}" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">样品状态：</label>
+					<div class="col-sm-8">
+						<select id="sampleStatus" th:value="*{requireInfo.sampleStatus}" class="form-control" name="sampleStatus" th:with="type=${@dict.getType('bridge_sample_require_status')}">
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" ></option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">发样人：</label>
+					<div class="col-sm-8">
+						<input id="sampleProviderId" name="sampleProviderId" type="hidden">
+						<input id="sampleProviderName" name="sampleProviderName"
+							class="form-control required" type="text"
+							onclick="selectUserById('sampleProviderId','sampleProviderName')"
+							aria-required="true" th:value="*{sampleProvider.userName}">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"><span
+						style="color: red;">*</span>领样人：</label>
+					<div class="col-sm-8">
+						<input id="sampleReceiverId" name="sampleReceiverId" type="hidden">
+						<input id="sampleReceiverName" name="sampleReceiverName"
+							class="form-control required" type="text"
+							onclick="selectUserById('sampleReceiverId','sampleReceiverName')"
+							aria-required="true" th:value="*{sampleReceiver.userName}">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">试验场地：</label>
+					<div class="col-sm-8">
+						<input id="expPlace" name="expPlace"
+							th:value="*{requireInfo.expPlace}" class="form-control"
+							type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">备注：</label>
+					<div class="col-sm-8">
+						<input id="remark" name="remark" th:value="*{requireInfo.remark}"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">创建者：</label>
+					<div class="col-sm-8">
+						<input id="createBy" name="createBy" th:value="*{requireInfo.createBy}"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">创建时间：</label>
+					<div class="col-sm-8">
+						<input id="createTime" name="createTime" th:value="*{requireInfo.createTime}"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">更新者：</label>
+					<div class="col-sm-8">
+						<input id="updateBy" name="updateBy" th:value="*{requireInfo.updateBy}"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 hide">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">更新时间：</label>
+					<div class="col-sm-8">
+						<input id="updateTime" name="updateTime" th:value="*{requireInfo.updateTime}"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div> 
+			<div class="row">
+				<div class="col-sm-offset-5 col-sm-10">
+					<button type="button" class="btn btn-sm btn-primary"
+						onclick="submitHandler()">
+						<i class="fa fa-check"></i>保 存
+					</button>
+					&nbsp;
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+						<i class="fa fa-reply-all"></i>关 闭
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript">
+		var prefix = ctx + "bridge/bridgeSampleRequire";
+		/* $("#form-bridgeSampleRequire-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		}); */
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.saveTab(prefix + "/edit", $(
+						'#form-bridgeSampleRequire-edit').serialize());
+			}
+		}
+		/*选择样品*/
+		var oid = '';
+		var oname = '';
+		function selectSample(id, name) {
+			oid = id;
+			oname = name;
+			var options = {
+				title : '选择检测项目',
+				width : "1200",
+				url : ctx + "bridge/bridgeSample",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerSelect();
+			var data = result;
+			if (data) {
+				$('#' + oid).val(data.id);
+				$('#' + oname).val(data.name);
+				$('#sampleCode').val(data.code)
+			} else {
+				return;
+			}
+		}
+		/*用户列表*/
+		var mid = '';
+		var mname = ''
+		function selectUserById(id, name) {
+			mid = id;
+			mname = name;
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+
+			$('#' + mname).val(data.userName);
+			$('#' + mid).val(data.userId);
+
+		}
+	</script>
+</body>
+</html>

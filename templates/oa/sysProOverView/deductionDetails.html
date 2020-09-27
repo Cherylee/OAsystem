@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('扣款明细')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body class="white-bg">
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" name="projectId" th:value="${projectId}">
+                            <select id="type" name="type" style="width: 100px;" th:with="type=${@dict.getType('sys_debit_type')}" class="overview-select-input">
+                                <option value=""  style="display: none;"  disabled  selected>扣款类型：</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+
+                        <li >
+                            <div id="element2">
+                                <select id="billType" name="billType" style="width: 100px;" th:with="type=${@dict.getType('sys_debit_bill_type')}" class="overview-select-input first">
+                                    <option value=""  style="display: none;"  disabled  selected>款项类别：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                                <select id="detailType" name="detailType" style="width: 100px;" class="overview-select-input second" th:with="type=${@dict.getType('sys_pro_debit_type2_1')}" required="required">
+                                    <option value="" disabled  selected>款项小类</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </div>
+
+                        </li>
+                        <li>
+                            <p>支付日期：</p>
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                            -
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                        </li>
+                        <li>
+                            扣款金额
+                            <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                            -
+                            <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                            元
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: jquery-cxselect-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+
+    var type = [[${@dict.getType('sys_debit_type')}]];
+    var debitType = [[${@dict.getType('sys_debit_bill_type')}]];
+    $(function() {
+        var options = {
+            url: prefix + "/selectProDebitData",
+            modalName: "扣款明细",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: queryParams,
+            columns: [
+                {
+                    title : '',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    },
+                    footerFormatter:function (value) {
+                        return '小计';
+                    }
+                },
+                {
+                    field : '',
+                    title : '结算途径',
+                    sortable: true
+                },
+                {
+                    field : '',
+                    title : '结算日期',
+                    sortable: true
+                },
+                {
+                    field : 'type',
+                    title : '扣款类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(type, value);
+                    }
+                },
+                {
+                    field : 'billType',
+                    title : '款项类别',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(debitType, value);
+                    }
+                },
+                {
+                    field : 'detailType',
+                    title : '款项小类',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var relation=[]
+                        for (var i = 0; i < sys_pro_debit_type_link.length; i++) {
+                            if(sys_pro_debit_type_link[i].dictLabel==row.billType){
+                                relation=eval(sys_pro_debit_type_link[i].dictValue)
+                            }
+                        }
+                        return $.table.selectDictLabel(relation, value);
+                    }
+                },
+                {
+                    field : 'amount',
+                    title : '扣款金额',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : '',
+                    title : '已退回过',
+                    sortable: true
+                },
+                {
+                    field : 'detailReason',
+                    title : '扣款事由',
+                    sortable: true
+                }
+
+            ]
+        };
+        $.table.init(options);
+    });
+
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        var projectId = [[${projectId}]];
+        var type = [[${type}]];
+        if (type!='null') {
+            search.projectId = projectId;
+            search.type = type;
+        }else{
+            search.projectId = projectId;
+        }
+        return search;
+    }
+
+
+    //大类小类
+    // 直接返回获取
+    var sys_pro_debit_type_link = [[${@dict.getType('sys_pro_debit_type_link')}]]
+    var sys_pro_debit_type1 = [[${@dict.getType('sys_pro_debit_type1')}]]
+    var sys_pro_debit_type2_1 = [[${@dict.getType('sys_pro_debit_type2_1')}]]
+    var sys_pro_debit_type2_2 = [[${@dict.getType('sys_pro_debit_type2_2')}]]
+    var sys_pro_debit_type2_3 = [[${@dict.getType('sys_pro_debit_type2_3')}]]
+    var sys_pro_debit_type2_4 = [[${@dict.getType('sys_pro_debit_type2_4')}]]
+    var sys_pro_debit_type2_5 = [[${@dict.getType('sys_pro_debit_type2_5')}]]
+    $(function () {
+        var dictD = []
+        for (var i = 0; i < sys_pro_debit_type_link.length; i++) {
+            dictD.push({
+                'v': sys_pro_debit_type1[i].dictValue,
+                'n': sys_pro_debit_type1[i].dictLabel,
+                's': []
+            })
+            var vlp = eval(sys_pro_debit_type_link[i].dictValue)
+            for (var a = 0; a < vlp.length; a++) {
+                var dictD_2 = {}
+                dictD_2.v = vlp[a].dictValue
+                dictD_2.n = vlp[a].dictLabel
+                dictD[i].s.push(dictD_2)
+            }
+
+        }
+
+        $('#element2').cxSelect({
+            selects: ['first', 'second'],
+            jsonValue: 'v',
+            data: dictD
+        });
+    })
+</script>
+</body>
+</html>

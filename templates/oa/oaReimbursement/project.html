@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('项目列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								项目名称：<input type="text" name="projectName"/>
+							</li>
+
+							<li>
+								区域：<input type="text" name="area"/>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/oaProject";
+        var oaProjectType = [[${@dict.getType('oa_project_type')}]];
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                modalName: "项目",
+		        showExport: true,
+		        clickToSelect : true,
+                columns: [{
+		            radio: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'projectName', 
+					title : '项目名称',
+					sortable: true
+				},
+				{
+					field : 'area', 
+					title : '区域',
+					sortable: true
+				},
+				{
+					field : 'budget', 
+					title : '预算',
+					sortable: true
+				},
+				{
+					field : 'type', 
+					title : '类别',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return $.table.selectDictLabel(oaProjectType, value);
+			        }
+				},
+				{
+					field : 'managerId', 
+					title : '项目经理id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'managerName', 
+					title : '项目经理',
+					sortable: true
+				},
+				{
+					field : 'projectCycle', 
+					title : '项目周期',
+					sortable: true
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					sortable: true
+				},
+				{
+					field : 'updateBy', 
+					title : '修改者',
+					sortable: true
+				},
+				{
+					field : 'updateTime', 
+					title : '修改时间',
+					sortable: true
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				}]
+            };
+            $.table.init(options);
+        });
+        
+        //选择类目
+        function submitHandler() {
+			var target =null;
+			var ids = $.table.selectColumns("id");
+			var names = $.table.selectColumns("projectName");
+			target={"id":ids[0],"projectName":names[0]}
+			$.modal.close();
+			return target;
+		}
+    </script>
+</body>
+</html>

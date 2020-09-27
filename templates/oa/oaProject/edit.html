@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改项目')" />
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<form class="form-horizontal m" id="form-oaProject-edit"
+			th:object="${oaProject}">
+			<input id="id" name="id" th:field="*{id}" type="hidden">
+			<div class="ibox">
+				<div class="ibox-title">
+					<h5>项目基本信息</h5>
+				</div>
+				<div class="ibox-content">
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">项目编号：</label>
+								<div class="col-sm-8">
+									<input id="code" name="code" class="form-control" type="text"
+										th:field="*{code}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label"><span style="color: red; ">*</span>关联项目移交单：</label>
+								<div class="col-sm-8">
+									<input id="oaWinBidTurnOverId" name="oaWinBidTurnOverId" type="hidden" required="required" th:field="*{oaWinBidTurnOverId}">
+									<input id="oaWinBidTurnOverCode" name="oaWinBidTurnOverCode" class="form-control" type="text" th:field="*{oaWinBidTurnOverCode}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">工程合同：</label>
+								<div class="col-sm-8">
+									<input name="contractId" type="hidden" th:field="*{contractId}">
+									<input id="contractCode" name="contractCode"
+										class="form-control" type="text" th:field="*{contractCode}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label"><span
+										style="color: red;">*</span>项目名称：</label>
+								<div class="col-sm-8">
+									<input id="projectName" name="projectName" class="form-control"
+										   type="text" th:field="*{projectName}" required="required">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label"><span
+										style="color: red;">*</span>工程地点：</label>
+								<div class="col-sm-8">
+									<input id="projectLoc" name="projectLoc" class="form-control"
+										   type="text" th:field="*{projectLoc}" required="required">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label"><span
+									style="color: red;">*</span>工程类型：</label>
+								<div class="col-sm-8">
+									<select id="projectType" name="projectType"
+										class="form-control"
+										th:with="type=${@dict.getType('business_engineer_type')}"
+										th:field="*{projectType}" required="required">
+										<option value="">-- 请选择 --</option>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+											th:value="${dict.dictValue}"></option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">项目类型：</label>
+								<div class="col-sm-8">
+									<select id="type" name="type" class="form-control"
+										th:with="type=${@dict.getType('business_project_type')}"
+										onchange="selectModel(this)" th:field="*{type}">
+										<option value="">-- 请选择 --</option>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+											th:value="${dict.dictValue}"></option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6 type" th:if="*{type}=='1'">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">合作单位：</label>
+								<div class="col-sm-8">
+									<input id="partnerUnit" name="partnerUnit" class="form-control"
+										type="text" placeholder="联营合作单位" th:field="*{partnerUnit}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">业主单位：</label>
+								<div class="col-sm-8">
+									<input id="developer" name="developer" class="form-control"
+										type="text" placeholder="甲方单位">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">开工日期：</label>
+								<div class="col-sm-8">
+									<div class="input-group data">
+										<span class="input-group-addon"><i
+											class="fa fa-calendar"></i></span> <input id="startDate"
+											name="startDate" class="form-control time-input" type="text"
+											th:value="${#dates.format(oaProject.startDate, 'yyyy-MM-dd HH:mm:ss')}">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">完工日期：</label>
+								<div class="col-sm-8">
+									<div class="input-group data">
+										<span class="input-group-addon"><i
+											class="fa fa-calendar"></i></span> <input id="endDate"
+											name="endDate" class="form-control time-input" type="text"
+											th:value="${#dates.format(oaProject.endDate, 'yyyy-MM-dd HH:mm:ss')}">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">项目工期：</label>
+								<div class="col-sm-8">
+									<input id="timeLimit" name="timeLimit" class="form-control" type="text" th:field="*{timeLimit}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">项目概况：</label>
+								<div class="col-sm-8">
+									<input id="situation" name="situation" class="form-control" type="text" th:field="*{situation}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">工程总价：</label>
+								<div class="col-sm-8">
+									<input id="totalPrices" name="totalPrices" class="form-control" type="number" th:field="*{totalPrices}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label"><span
+									style="color: red;">*</span>合同金额：</label>
+								<div class="col-sm-8">
+									<input id="contractAmount" name="contractAmount"
+										class="form-control" type="number"
+										th:field="*{contractAmount}" required="required">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">是否有效：</label>
+								<div class="col-sm-8">
+									<select id="effect" name="effect" class="form-control"
+										th:with="type=${@dict.getType('sys_yes_no')}"
+										th:field="*{effect}" required="required">
+										<option value="">-- 请选择 --</option>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+											th:value="${dict.dictValue}"></option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">是否完工：</label>
+								<div class="col-sm-8">
+									<select id="finishStatus" name="finishStatus"
+										class="form-control"
+										th:with="type=${@dict.getType('sys_yes_no')}"
+										th:field="*{finishStatus}" required="required">
+										<option value="">-- 请选择 --</option>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+											th:value="${dict.dictValue}"></option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">备注：</label>
+								<div class="col-sm-8">
+									<input id="remark" name="remark" class="form-control"
+										type="text" th:field="*{remark}">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ibox">
+				<div class="ibox-title">
+					<h5>项目人员信息</h5>
+				</div>
+				<div class="ibox-content">
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">项目负责人：</label>
+								<div class="col-sm-8">
+									<input id="managerId" name="managerId" class="form-control"
+										type="hidden" th:field="*{managerId}"> <input
+										id="managerName" name="managerName" class="form-control"
+										type="text"
+										onclick="selectUserById('managerId','managerName')"
+										th:field="*{managerName}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">分公司负责人：</label>
+								<div class="col-sm-8">
+									<input id="filialeManagerId" name="filialeManagerId" class="form-control"
+										   type="hidden" th:field="*{filialeManagerId}">
+									<input id="filialeManagerName" name="filialeManagerName" class="form-control" type="text"
+										   onclick="selectUserById('filialeManagerId','filialeManagerName')" th:field="*{filialeManagerName}" >
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">所属公司：</label>
+								<div class="col-sm-8">
+									<input id="companyId" name="companyId" class="form-control" type="hidden" th:field="*{companyId}">
+									<input id="companyName" name="companyName" class="form-control"
+										   type="text" onclick="selectDeptTree('companyId','companyName','0')" th:field="*{companyName}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">所属部门：</label>
+								<div class="col-sm-8">
+									<input id="deptId" name="deptId" class="form-control" type="hidden" th:field="*{deptId}">
+									<input id="deptName" name="deptName" class="form-control"
+										type="text" onclick="selectDeptTree('deptId','deptName','1')" th:field="*{deptName}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">关注部门：</label>
+								<div class="col-sm-8">
+									<input id="treeId" name="careDeptId" class="form-control"
+										type="hidden" th:field="*{careDeptId}"> <input
+										id="treeName" name="careDeptName" class="form-control"
+										type="text" onclick="selectDeptTree('treeId','treeName','1')"
+										th:field="*{careDeptName}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">内部关注人：</label>
+								<div class="col-sm-8">
+									<input id="innerViewerId" name="innerViewerId"
+										class="form-control" type="hidden"> <input
+										id="innerViewerName" name="innerViewerName"
+										class="form-control" type="text"
+										onclick="selectUserById('innerViewerId','innerViewerName')">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6 ">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">外部关注人：</label>
+								<div class="col-sm-8">
+									<input id="outerViewerId" name="outerViewerId"
+										class="form-control" type="hidden"> <input
+										id="outerViewerName" name="outerViewerName"
+										class="form-control" type="text"
+										onclick="selectUserById('outerViewerId','outerViewerName')">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">成控专员：</label>
+								<div class="col-sm-8">
+									<input id="commissioner" name="commissioner" class="form-control" type="hidden" th:field="*{commissioner}">
+									<input id="commissionerName" name="commissionerName" class="form-control" type="text"
+										onclick="selectUserById('commissioner','commissionerName')" th:field="*{commissionerName}" required>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">财务主管：</label>
+								<div class="col-sm-8">
+									<input id="treasurer" name="treasurer" class="form-control" type="hidden" th:field="*{treasurer}">
+									<input id="treasurerName" name="treasurerName" class="form-control" type="text"
+										   onclick="selectUserById('treasurer','treasurerName')" th:field="*{treasurerName}" required>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">现场负责人：</label>
+								<div class="col-sm-8">
+									<input id="scenePerson" name="scenePerson" class="form-control" type="text"  th:field="*{scenePerson}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">建造师：</label>
+								<div class="col-sm-8">
+									<input id="constructor" name="constructor" class="form-control" type="text" th:field="*{constructor}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">技术负责人：</label>
+								<div class="col-sm-8">
+									<input id="fieldSupervisor" name="fieldSupervisor" class="form-control" type="text" th:field="*{fieldSupervisor}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label"><span style="color: red; ">*</span>工程部副经理：</label>
+								<div class="col-sm-8">
+									<input id="deputyManager" th:field="*{deputyManager}" type="hidden"  class="form-control">
+									<input id="deputyManagerName" th:field="*{deputyManagerName}" class="form-control" type="text" onclick="selectUserById('deputyManager','deputyManagerName')" required>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ibox">
+				<div class="ibox-title">
+					<h5>项目款项信息</h5>
+				</div>
+				<div class="ibox-content">
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">冻结余额：</label>
+								<div class="col-sm-8">
+									<input id="freezeAmount" name="freezeAmount"
+										class="form-control" type="number" th:field="*{freezeAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">已收工程款：</label>
+								<div class="col-sm-8">
+									<input id="acceptProAmount" name="acceptProAmount"
+										class="form-control" type="number" th:field="*{acceptProAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">已付工程款：</label>
+								<div class="col-sm-8">
+									<input id="payProAmount" name="payProAmount"
+										class="form-control" type="number" th:field="*{payProAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">未清账扣款：</label>
+								<div class="col-sm-8">
+									<input id="clearAccountAmount" name="clearAccountAmount"
+										class="form-control" type="number" th:field="*{clearAccountAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">未还清借款：</label>
+								<div class="col-sm-8">
+									<input id="notPayoffAmount" name="notPayoffAmount"
+										class="form-control" type="number" th:field="*{notPayoffAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">未还预借款：</label>
+								<div class="col-sm-8">
+									<input id="notBackpreAmount" name="notBackpreAmount"
+										class="form-control" type="number" th:field="*{notBackpreAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">未退垫付款：</label>
+								<div class="col-sm-8">
+									<input id="notBackPaid" name="notBackPaid"
+										class="form-control" type="number" th:field="*{notBackPaid}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">未退保证金：</label>
+								<div class="col-sm-8">
+									<input id="notBackBond" name="notBackBond"
+										class="form-control" type="number" th:field="*{notBackBond}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">未退押金：</label>
+								<div class="col-sm-8">
+									<input id="notBackDeposit" name="notBackDeposit"
+										class="form-control" type="number" th:field="*{notBackDeposit}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">已收进项发票：</label>
+								<div class="col-sm-8">
+									<input id="recIncomeBill" name="recIncomeBill"
+										class="form-control" type="number" th:field="*{recIncomeBill}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">已开销项发票：</label>
+								<div class="col-sm-8">
+									<input id="openSellBill" name="openSellBill"
+										class="form-control" type="number" th:field="*{openSellBill}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">累计纳税金额：</label>
+								<div class="col-sm-8">
+									<input id="totalTaxAmount" name="totalTaxAmount"
+										class="form-control" type="number" th:field="*{totalTaxAmount}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">累计抵税金额：</label>
+								<div class="col-sm-8">
+									<input id="totalCreditTax" name="totalCreditTax"
+										class="form-control" type="number" th:field="*{totalCreditTax}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">累计报销金额：</label>
+								<div class="col-sm-8">
+									<input id="totalExpense" name="totalExpense"
+										class="form-control" type="number" th:field="*{totalExpense}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">成本总计：</label>
+								<div class="col-sm-8">
+									<input id="totalCost" name="totalCost"
+										class="form-control" type="number" th:field="*{totalCost}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">缴纳总计：</label>
+								<div class="col-sm-8">
+									<input id="totalPay" name="totalPay"
+										class="form-control" type="number" th:field="*{totalPay}">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">收入总计：</label>
+								<div class="col-sm-8">
+									<input id="totalIncome" name="totalIncome"
+										class="form-control" type="number" th:field="*{totalIncome}">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+				&nbsp;
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript" th:inline="javascript">
+		var prefix = ctx + "oa/oaProject";
+		//显示隐藏
+		function selectModel(obj) {
+			var type = $(obj).val();
+			if (type == '1') {
+				$('.type').removeClass('hide')
+			} else {
+				$('.type').addClass('hide').find('input').val('')
+			}
+		}
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.saveTab(prefix + "/edit", $('#form-oaProject-edit')
+						.serialize());
+			}
+		}
+		/*用户列表*/
+		var mid = '';
+		var mname = ''
+		function selectUserById(id, name) {
+			mid = id;
+			mname = name;
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+
+			$('#' + mname).val(data.userName);
+			$('#' + mid).val(data.userId);
+
+		}
+	</script>
+</body>
+</html>

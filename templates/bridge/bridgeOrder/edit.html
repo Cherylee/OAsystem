@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('委托单修改')" />
+<style type="text/css">
+/* .wizard-big.wizard > .content{
+	    height: 501px;
+	} */
+.wizard>.content {
+	background: #f8f8f8;
+}
+
+.wizard>.content>.body ul>li {
+	list-style: none;
+}
+
+.gongbox {
+	background: #fff;
+	padding: 20px 0;
+}
+
+.gongboxcontent {
+	margin: 0 auto;
+	float: none;
+}
+
+.info {
+	width: 55%;
+}
+
+.moreinput {
+	width: 95%;
+	float: left;
+	overflow: hidden;
+	background: #FFFFFF none;
+	border: 1px solid #e5e6e7;
+	border-radius: 1px;
+	color: inherit;
+	display: block;
+	/* padding: 6px 12px; */
+	-webkit-transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+	transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+	font-size: 14px;
+	border-bottom: 0px;
+}
+
+.moreinput input {
+	float: left;
+	border: 0px;
+	border-right: 1px solid #ddd;
+}
+
+.morebtn {
+	width: 5%;
+	float: left;
+	text-align: center;
+	font-size: 16px;
+	padding: 6px 0;
+	font-weight: 400;
+	background: #eee;
+	border: 1px solid #ddd;
+	border-left: 0;
+	cursor: pointer;
+	-webkit-transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+	transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s
+		ease-in-out 0s;
+}
+
+.tabs-container .tabs-left>.nav-tabs {
+	width: 10%;
+}
+
+.tabs-container .tabs-left .tab-pane .panel-body {
+	margin-left: 10%;
+	width: 90%;
+}
+
+.addtable {
+	min-height: 400px;
+}
+
+.bridgeExpMethodClass>.checkbox {
+	max-height: 200px;
+	overflow: auto;
+	border: 1px solid #eee;
+	padding: 10px 0px 10px 25px;
+}
+
+.moneybox {
+	border-top: 1px solid #e2e2e2;
+	/* overflow: auto; */
+	/* height: 50px; */
+	clear: both;
+	padding-top: 15px;
+	/* padding-bottom: 15px; */
+	height: 60px;
+	/* line-height: 53px; */
+}
+
+#money span,#moneyHis span {
+	color: blue;
+	font-weight: 600;
+	display: inline;
+	font-size: 18px;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="row" th:object="${bridgeOrderVo}">
+		<div class="col-sm-12">
+			<div class="ibox tabs-container">
+				<div class="ibox-content tabs-left">
+					<ul class="nav nav-tabs" id="step">
+						<li class="active"><a href="#tab1" data-toggle="tab">委托基本信息</a></li>
+						<li><a href="#tab2" data-toggle="tab">样品信息</a></li>
+						<li><a href="#tab3" data-toggle="tab">流程记录</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="tab1">
+							<div class="panel-body">
+								<form id="form" action=""
+									class="wizard-big wizard clearfix form-horizontal m">
+									<input name="id" th:value="${bridgeOrderVo.order.id}"
+										type="hidden"> <input name="code"
+										th:value="${bridgeOrderVo.order.code}" type="hidden">
+									<div class="info">
+										<div class="row ">
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>分配部门：</label>
+													<div class="col-sm-8">
+														<input type="hidden" name="deptId"
+															th:value="*{order.deptId}"> <input type="text"
+															id="treeName" th:value="*{dept.deptName}" name="deptName"
+															class="form-control" aria-required="true"
+															readonly="readonly" />
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托来源：</label>
+													<div class="col-sm-8">
+														<select id="source" class="form-control" name="source"
+															th:with="type=${@dict.getType('bridge_order_source')}" disabled="disabled">
+															<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+																	th:value="${dict.dictValue}" th:selected="*{order.source} == ${dict.dictValue}"></option>
+														</select>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>工程项目：</label>
+													<div class="col-sm-8">
+														<input name="projectId"
+															th:value="${bridgeOrderVo.order.projectId}" type="hidden">
+														<input id="projectName" name="projectName"
+															class="form-control" type="text"
+															th:value="*{project.name}" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">项目英文简写：</label>
+													<div class="col-sm-8">
+														<input id="probriefCode" name="probriefCode"
+															class="form-control" type="text"
+															th:value="*{project.briefCode}" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">合同：</label>
+													<div class="col-sm-8">
+														<input id="contractId" name="contractId" type="hidden"
+															th:field="*{order.contractId}"> <input
+															class="form-control" type="text"
+															th:field="*{contractInfo.name}" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托书：</label>
+													<div class="col-sm-8">
+														<!-- <input id="checkItemId" name="checkItemId"
+															class="form-control required" type="text" onclick="selectCheckItem()" aria-required="true"> -->
+														<input type="hidden" name="bookId" id="bookId"
+															th:value="*{book.id}"> <input id="orderName"
+															th:value="*{book.name}" class="form-control" type="text"
+															onclick="selectCheckItem('bookId','orderName')" disabled>
+													</div>
+												</div>
+											</div>
+
+
+
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-xs-4 control-label">检验类别：</label>
+													<div class="col-xs-8">
+														<select name="checkType" class="form-control"
+															th:with="type=${@dict.getType('bridge_order_checkType')}">
+															<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+																	th:value="${dict.dictValue}" th:selected="*{order.checkType} == ${dict.dictValue}"></option>
+														</select>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托单位：</label>
+													<div class="col-sm-8">
+														<input id="clientUnit" name="clientUnit"
+															class="form-control required" type="text"
+															aria-required="true" th:value="*{order.clientUnit}"
+															readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">施工单位：</label>
+													<div class="col-sm-8">
+														<input id="constructionUnit" name="constructionUnit"
+															class="form-control" type="text"
+															th:value="*{order.constructionUnit}" readonly="readonly">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">建设单位：</label>
+													<div class="col-sm-8">
+														<input class="form-control" type="text"
+															th:value="*{project.constructUnit}" readonly="readonly">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">所属区县：</label>
+													<div class="col-sm-8">
+														<input id="region" name="region" class="form-control"
+															type="text" th:value="*{order.region}">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">邮政编码：</label>
+													<div class="col-sm-8">
+														<input id="zipCode" name="zipCode" class="form-control"
+															type="text" th:value="*{order.zipCode}">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-12">
+												<div class="form-group">
+													<label class="col-sm-2 control-label">街道门牌号：</label>
+													<div class="col-sm-10">
+														<input id="street" name="street" class="form-control"
+															type="text" th:value="*{order.street}">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-12">
+												<div class="form-group">
+													<label class="col-sm-2 control-label">详细地址：</label>
+													<div class="col-sm-10">
+														<input id="detailAddr" name="detailAddr"
+															class="form-control" type="text"
+															th:value="*{order.detailAddr}">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托单位电话：</label>
+													<div class="col-sm-8">
+														<input id="clientUnitPhone" name="clientUnitPhone"
+															class="form-control" type="text"
+															th:value="*{order.clientUnitPhone}">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托单位传真：</label>
+													<div class="col-sm-8">
+														<input id="clientUnitFax" name="clientUnitFax"
+															class="form-control" type="text"
+															th:value="*{order.clientUnitFax}">
+													</div>
+												</div>
+											</div>
+
+											<div class="col-sm-12">
+												<div class="form-group">
+													<label class="col-sm-2 control-label">委托单位邮箱：</label>
+													<div class="col-sm-10">
+														<input id="clientUnitMail" name="clientUnitMail"
+															class="form-control" type="text"
+															th:value="*{order.clientUnitMail}">
+													</div>
+												</div>
+											</div>
+
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">联系人姓名：</label>
+													<div class="col-sm-8">
+														<input id="contactPersonName" name="contactPersonName"
+															class="form-control" type="text"
+															th:value="*{order.contactPersonName}">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">联系人电话：</label>
+													<div class="col-sm-8">
+														<input id="contactPersonPhone" name="contactPersonPhone"
+															class="form-control" type="text"
+															th:value="*{order.contactPersonPhone}">
+													</div>
+												</div>
+											</div>
+
+
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label"><span
+														style="color: red;">*</span>委托人：</label>
+													<div class="col-sm-8">
+														<input id="clientName" name="clientName"
+															class="form-control required" type="text"
+															aria-required="true"
+															th:value="*{project.contactPersonName}">
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">委托日期：</label>
+													<div class="col-sm-8">
+														<div class="input-group data">
+															<span class="input-group-addon"><i
+																class="fa fa-calendar"></i></span><input id="orderDate"
+																name="orderDate"
+																class="form-control required time-input-data"
+																type="text" aria-required="true"
+																th:value="${#dates.format(bridgeOrderVo.order.orderDate, 'yyyy-MM-dd')}">
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+
+						<div class="tab-pane" id="tab2">
+							<div class="panel-body">
+								<form class="form-horizontal" id="book-form">
+									<input name="Id" id="bookId_1" type="hidden"
+										th:value="*{book.id}" /> <input name="orderType"
+										class="orderType" type="hidden" th:value="*{book.orderType}" />
+								</form>
+								<form class="form-horizontal" id="sampleMain-form"
+									th:if="*{sampleMain}">
+
+									<input name="orderType" class="orderType" type="hidden"
+										th:value="*{book.orderType}" /> <input name="id"
+										class="form-control" type="hidden" th:value="*{sampleMain.id}">
+
+									<div th:each="list,columnStat : *{cloumnVo.columnList}">
+
+										<div
+											th:if="${(#strings.startsWith('__${list.name}__','param'))}">
+											<div class="col-sm-4">
+												<div class="form-group">
+													<label class="col-sm-4 control-label">[[${list.lableName}]]</label>
+													<!-- 字符串类型 -->
+													<div class="col-sm-8" th:if="${list.type}=='String'">
+														<input th:id="${list.name}" th:name="${list.name}"
+															class="form-control" type="text"
+															th:value="${bridgeOrderVo.sampleMain.__${list.name}__}">
+													</div>
+													<!-- 日期类型 -->
+													<div class="col-sm-8" th:if="${list.type}=='Date'">
+														<div class="input-group data">
+																			<span class="input-group-addon"><i
+																					class="fa fa-calendar"></i></span> <input
+																th:id="${list.name}" th:name="${list.name}"
+																class="form-control time-input-data" type="text"
+																th:value="${#dates.format(bridgeOrderVo.sampleMain.__${list.name}__, 'yyyy-MM-dd')}">
+														</div>
+													</div>
+													<!-- 下拉框 -->
+													<div class="col-sm-8" th:if="${list.type}=='select'">
+														<select th:id="${list.name}"
+																class="form-control selectpicker"
+																th:name="${list.name}"
+																th:with="type=${list.dictData}">
+															<option value="">-- 所有 --</option>
+															<option th:each="dict : ${type}"
+																	th:text="${dict.dictLabel}"
+																	th:value="${dict.dictValue}"
+																	th:selected="${bridgeOrderVo.sampleMain.__${list.name}__} eq ${dict.dictValue}"></option>
+														</select>
+													</div>
+													<!-- 数字型 -->
+													<div class="col-sm-8" th:if="${list.type}=='number'">
+														<input th:id="${list.name}" th:name="${list.name}"
+															   class="form-control" type="number"
+															   th:value="${bridgeOrderVo.sampleMain.__${list.name}__}">
+													</div>
+												</div>
+											</div>
+
+										</div>
+
+
+
+									</div>
+								</form>
+								<div class="col-sm-12">
+									<ul class="nav nav-tabs" id="deviceulid">
+										<li class="" th:each="sample,sampleStat : *{sampleVoList}"><a
+											class="active" th:href="@{'#order'+${sampleStat.index+1}}"
+											data-toggle="tab" th:text="样品+${sampleStat.index+1}"></a></li>
+									</ul>
+
+									<div class="tab-content" id="tab-content">
+										<div class="tab-pane"
+											th:each="sample,sampleStat : *{sampleVoList}"
+											th:id="order+${sampleStat.index+1}">
+											<form class="form-horizontal m"
+												th:id="sampleId+${sampleStat.index+1}">
+												<div class="row">
+													<input name="id" class="form-control" type="hidden"
+														th:value="${sample.sample.id}">
+
+													<div class="col-sm-4">
+														<div class="form-group">
+															<label class="col-sm-4 control-label">检测项目编码：</label>
+															<div class="col-sm-8">
+																<input id="itemCode" name="itemCode" th:value="${sample.sample.itemCode}" class="form-control" type="text" readonly>
+															</div>
+														</div>
+													</div>
+
+													<div class="col-sm-4">
+														<div class="form-group">
+															<label class="col-sm-4 control-label">是否是样品：</label>
+															<div class="col-sm-8">
+																<input  name="sampleOrNot" th:value="${sample.sample.sampleOrNot}" class="form-control" type="text" readonly onchange="changeSampleState(this)">
+															</div>
+														</div>
+													</div>
+
+
+													<div th:each="list,columnStat : *{cloumnVo.columnList}">
+														<input
+															th:if="${#strings.endsWith('__${list.lableName}__','id')}"
+															th:name="${list.name}"
+															th:value="${sample.sample.__${list.name}__}"
+															type="hidden" />
+														<div
+															th:if="!${(#strings.startsWith('__${list.name}__','param'))}">
+
+															<div class="col-sm-4"
+																th:unless="${#strings.endsWith('__${list.lableName}__','id')}">
+																<div class="form-group">
+																	<label class="col-sm-4 control-label"
+																		th:unless="${list.type}=='array'">[[${list.lableName}]]</label>
+
+																	<!-- 字符串类型 -->
+																	<div class="col-sm-8" th:if="${list.type}=='String'">
+																		<input th:id="${list.name}" th:name="${list.name}"
+																			class="form-control" type="text"
+																			th:value="${sample.sample.__${list.name}__}">
+																	</div>
+																	<!-- 日期类型 -->
+																	<div class="col-sm-8" th:if="${list.type}=='Date'">
+																		<div class="input-group data">
+																			<span class="input-group-addon"><i
+																				class="fa fa-calendar"></i></span> <input
+																				th:id="${list.name}" th:name="${list.name}"
+																				class="form-control time-input" type="text"
+																				th:value="${#dates.format(sample.sample.__${list.name}__, 'yyyy-MM-dd')}">
+
+																		</div>
+																	</div>
+																	<!-- 下拉框 -->
+																	<div class="col-sm-8" th:if="${list.type}=='select'">
+																		<select th:id="${list.name}"
+																			class="form-control selectpicker"
+																			th:name="${list.name}"
+																			th:with="type=${list.dictData}">
+																			<option value="">-- 所有 --</option>
+																			<option th:each="dict : ${type}"
+																				th:text="${dict.dictLabel}"
+																				th:value="${dict.dictValue}"
+																				th:selected="${sample.sample.__${list.name}__} eq ${dict.dictValue}"></option>
+																		</select>
+																	</div>
+																	<!-- 数字型 -->
+																	<div class="col-sm-8" th:if="${list.type}=='number'">
+																		<input th:id="${list.name}" th:name="${list.name}"
+																			class="form-control" type="number"
+																			th:value="${sample.sample.__${list.name}__}">
+																	</div>
+
+																</div>
+															</div>
+															<div class="col-sm-8" th:if="${list.type}=='array'">
+																<!-- arry型 -->
+																<label class="col-sm-2 control-label">[[${list.lableName}]]</label>
+																<div class="col-sm-8" th:if="${list.type}=='array'">
+																	<!-- <input th:id="${list.name}" th:name="${list.name}"
+																			class="form-control" type="number"
+																			th:value="${sample.arrMap.__${list.name}__}"> -->
+																	<div class="moreinput"
+																		style="border-bottom: 1px solid rgb(229, 230, 231);">
+																		<input style="width: 20%" class="form-control "
+																			th:name="${list.name}" type="text"
+																			th:each="arry,index : ${sample.arrMap.__${list.name}__}"
+																			th:value="${arry}">
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</form>
+											<!--											<form class="form-horizontal m"-->
+											<!--												th:id="reportId+${sampleStat.index+1}">-->
+											<!--												<h3>报告信息</h3>-->
+											<!--												<input type="hidden" name="id"-->
+											<!--													th:value="${sample.report.id}">-->
+											<!--												<div class="col-sm-4">-->
+											<!--													<div class="form-group">-->
+											<!--														<label class="col-sm-4 control-label">报告编号：</label>-->
+											<!--														<div class="col-sm-8">-->
+											<!--															<input name="code" class="form-control" type="text"-->
+											<!--																th:value="${sample.report.code}">-->
+											<!--														</div>-->
+											<!--													</div>-->
+											<!--												</div>-->
+											<!--												<div class="col-sm-4">-->
+											<!--													<div class="form-group">-->
+											<!--														<label class="col-sm-4 control-label">结论判定：</label>-->
+											<!--														<div class="col-sm-8">-->
+											<!--															<select id="resultType" class="form-control"-->
+											<!--																name="resultType"-->
+											<!--																th:with="type=${@dict.getType('bridge_report_result')}">-->
+											<!--																<option th:each="dict : ${type}"-->
+											<!--																	th:text="${dict.dictLabel}"-->
+											<!--																	th:value="${dict.dictValue}"-->
+											<!--																	th:selected="${sample.report.resultType} eq ${dict.dictValue}"></option>-->
+											<!--															</select>-->
+											<!--														</div>-->
+											<!--													</div>-->
+											<!--												</div>-->
+											<!--												<div class="col-sm-4">-->
+											<!--													<div class="form-group">-->
+											<!--														<label class="col-sm-4 control-label"> 预交日期：</label>-->
+											<!--														<div class="col-sm-8 ">-->
+											<!--															<div class="input-group data">-->
+											<!--																<span class="input-group-addon"><i-->
+											<!--																	class="fa fa-calendar"></i></span> <input id="forecastDate"-->
+											<!--																	name="forecastDate"-->
+											<!--																	class="form-control time-input-data" type="text"-->
+											<!--																	th:value="${#dates.format(sample.report.forecastDate, 'yyyy-MM-dd')}">-->
+											<!--															</div>-->
+											<!--														</div>-->
+											<!--													</div>-->
+											<!--												</div>-->
+											<!--												<div class="col-sm-4">-->
+											<!--													<div class="form-group">-->
+											<!--														<label class="col-sm-4 control-label">打印份数：</label>-->
+											<!--														<div class="col-sm-8">-->
+											<!--															<input id="printNum" name="printNum" class="form-control"-->
+											<!--																type="number" th:value="${sample.report.printNum}">-->
+											<!--														</div>-->
+											<!--													</div>-->
+											<!--												</div>-->
+											<!--												<div class="col-sm-4">-->
+											<!--													<div class="form-group">-->
+											<!--														<label class="col-sm-4 control-label">发放方式：</label>-->
+											<!--														<div class="col-sm-8">-->
+											<!--															<select id="handWay" class="form-control" name="handWay"-->
+											<!--																th:with="type=${@dict.getType('bridge_report_handWay')}">-->
+											<!--																<option th:each="dict : ${type}"-->
+											<!--																	th:text="${dict.dictLabel}"-->
+											<!--																	th:value="${dict.dictValue}"-->
+											<!--																	th:selected="${sample.report.handWay} eq ${dict.dictValue}"></option>-->
+											<!--															</select>-->
+											<!--														</div>-->
+											<!--													</div>-->
+											<!--												</div>-->
+											<!--												<div class="col-sm-4">-->
+											<!--													<div class="form-group">-->
+											<!--														<label class="col-sm-4 control-label">备注：</label>-->
+											<!--														<div class="col-sm-8">-->
+											<!--															<input id="remark" name="remark" class="form-control"-->
+											<!--																type="text" th:value="${sample.report.remark}">-->
+											<!--														</div>-->
+											<!--													</div>-->
+
+											<!--												</div>-->
+
+											<!--											</form>-->
+											<form class="form-horizontal m form_exp"
+												th:id="paramsId+${sampleStat.index+1}">
+												<h3 class="col-sm-12">试验参数</h3>
+												<div class="col-sm-8">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">评定标准：</label>
+														<div class="col-sm-10 bridgeExpMethodClass">
+															<li class="checkbox"
+																th:each="exp : ${sample.expMethodList}"><input
+																name="methodId" th:value="${exp.id}" type="hidden">
+																<div th:text="${exp.name}"></div></li>
+
+														</div>
+													</div>
+												</div>
+												<div class="col-sm-8">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">试验参数：</label>
+
+
+														<div class="col-sm-10 bridgeExpParamsClass">
+															<!-- <li class="checkbox"
+																th:each="expp : ${sample.expParamsList}"
+																style="width: 25%;">
+																<input name="paramsId" th:value="${expp.id}" type="hidden">
+																<div th:text="${expp.name}" th:code="${expp.code}"
+																	class="codeval"></div>
+															</li>
+ -->
+														</div>
+
+													</div>
+												</div>
+												<div class="col-sm-8">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">所需仪器设备：</label>
+														<div class="col-sm-10">
+															<div>
+																<div>
+																	<table
+																		class="tableorder table addtable1 table-bordered">
+																		<tr>
+																			<th>参数</th>
+																			<th>所需仪器</th>
+																		</tr>
+
+																	</table>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+								<div class="moneybox">
+									<div class="col-sm-8">
+
+										<label class="control-label"><strong>总计：</strong></label>
+
+										<div id="money">19版本收费标准:<span>[[*{costVo.totalAmount}]]</span>元</div>
+										<div id="moneyHis">07版本收费标准：<span>[[*{costVo.historyTotalAmount}]]</span>元</div>
+
+									</div>
+									<div class="col-sm-8">
+										<label class="control-label"><strong>折扣：</strong></label> <input
+											name="discount" id="discount" type="number"
+											th:value="*{costVo.discount}">
+									</div>
+									<div class="col-sm-8">
+										<label class="control-label"><strong>结算数量：</strong></label> <input
+											name="countNum" id="countNum" type="number"
+											th:value="*{costVo.countNum}">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane" id="tab3">
+							<div class="panel-body">
+								<div class="addtable">
+									<table id="bootstrap-table" data-mobile-responsive="true"
+										class="table  table-bordered">
+										<tr>
+											<th>作者</th>
+											<th>部门</th>
+											<th>创建时间</th>
+											<th>备注</th>
+										</tr>
+										<tr th:each="snp : *{snapshotList}">
+											<td th:text="${snp.userName}"></td>
+											<td th:text="${snp.deptName}"></td>
+											<td
+												th:text="${#dates.format(snp.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+											<td th:text="${snp.remark}"></td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-offset-6 col-sm-6">
+						<button type="button" class="btn btn-sm btn-primary"
+							onclick="submitHandler()">
+							<i class="fa fa-check"></i>保 存
+						</button>
+						&nbsp;
+						<button type="button" class="btn btn-sm btn-danger"
+							onclick="closeItem()">
+							<i class="fa fa-reply-all"></i>关 闭
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	</div>
+
+	<div th:include="include :: footer"></div>
+	<script th:inline="javascript">
+		var sampleOrNot = changeSampleState($('#sampleId1').children().find('input[name="sampleOrNot"]'));
+		function changeSampleState(obj){
+			var data=1
+			if(obj.val()=='N'){
+				data=0;
+			}else {
+				data=1;
+			}
+			return data;
+		}
+	
+		$.fn.serializeObject = function() {
+			var o = {};
+			var a = this.serializeArray();
+			$.each(a, function() {
+				if (o[this.name]) {
+					if (!o[this.name].push) {
+						o[this.name] = [ o[this.name] ];
+					}
+					o[this.name].push(this.value || '');
+				} else {
+					o[this.name] = this.value || '';
+				}
+			});
+			return o;
+		};
+	
+		/* 保存数据 */
+		var data = {
+			"order" : "",
+			"sampleVoList" : [],
+			"project" : "",
+			"sampleMain":'',
+			"book":'',
+			"costVo":''
+		}
+		var project = {//项目英文简写
+			'briefCode' : ''
+		}
+		//保存数据
+		//提交数据
+		var num = [[${bridgeOrderVo.sampleVoList.size()}]];
+		function submitHandler() {
+			/* console.log(num) */
+			data.sampleVoList=[];
+			var form_data = $('#form').serializeObject();//基础信息表单数据序列化
+			var mainsampleForm_data=$('#sampleMain-form').serializeObject();//sampleMain表单数据序列化
+			var bookForm_data=$('#book-form').serializeObject();//sampleMain表单数据序列化
+			data.order = form_data;
+
+			data.sampleMain = mainsampleForm_data;
+			data.book = bookForm_data;
+			/* data.sampleVoList = $("#" + id).bootstrapTable('getData'); */
+			//checkItem.code = form_data.checkItemcode//检测项目代码幅值
+			//checkItem.itemId = form_data.checkItemId//检测项目ID幅值
+			project.briefCode = form_data.probriefCode//项目英文简写幅值
+			//像样品数组里面添加数据
+			/* console.log(num); */
+			for (var i = 0; i < num; i++) {//通过for循环，找出添加的几个样品信息
+				var id = i + 1;
+				var formdata = {
+					"sample" : "",
+					"report" : "",
+					"expMethodList" : [],
+					"expParamsList":[]
+				};
+				//获取三个表单对象
+				var orderF=$('#sampleId' + id);
+				var repF = $('#reportId'+id);
+				var expF = $('#paramsId'+id);
+				//对当前的样品表单进行验证操作以及数据提取					
+				var efdata = orderF.serializeObject();//样品表单数据序列
+				$.each(efdata, function (n, value) {		
+		               if ($.isArray(value)) {
+		            	   var att={
+		            			   'rey':value+''
+		            	   }
+		            	   efdata[n]=att.rey
+						}
+		           });
+				formdata.sample = efdata;
+				//当前报告表单数据提取
+				var repform = repF.serializeObject();//报告表单序列
+				formdata.report = repform;
+				//当前实验参数表单数据提取以及必填控制
+				var expform = expF.serializeObject();//实验参数表单
+				if(JSON.stringify(expform)==="{}"){
+					$.modal.alertWarning("试验参数必选");
+	      			return;
+				}
+				if(typeof(expform.pid)=="undefined"){
+					$.modal.alertWarning("试验参数必选");
+	      			return;
+				}
+				if(typeof(expform.fid)=="undefined"){
+					$.modal.alertWarning("检测依据必选");
+	      			return;
+				} 
+				/* formdata.expMethodList = expform.fid;
+				formdata.expParamsList = expform.pid; */
+				setParams(expform.fid,formdata.expMethodList)
+				setParams(expform.pid,formdata.expParamsList)
+				data.sampleVoList.push(formdata);
+
+			} 
+			
+			//data.checkItem = checkItem;//检测项目代码添加进data
+			data.project = project;//项目英文简写添加进data
+			//保存结算数据
+			/* console.log(accountsData) */
+
+			if($('#discount').val()==''){
+				accountsData.discount=0;
+			}else{
+				accountsData.discount=parseFloat($('#discount').val())
+			}
+
+			if($('#countNum').val()=='' || $('#countNum').val()=='NaN'){
+				accountsData.countNum=1;
+			}else{
+				accountsData.countNum=parseInt($('#countNum').val())
+			}
+
+			data.costVo=accountsData
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/bridgeOrder/modifyBridgeOrderVo",
+				type : "post",
+				data : JSON.stringify(data),
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.operate.successTabCallback(result);
+				}
+			};
+			$.ajax(config)
+		}
+		//点击结算
+		var jsonData={
+			"paramsIds" : [],
+			"discount":0,
+			"countNum":1,
+		}
+	    var accountsData={
+			"discount":0,
+			"countNum":1,
+			"totalAmount":null,
+			"historyTotalAmount":null
+		}
+		function accounts(){
+			
+			jsonData={
+				"paramIds" : [],
+				"discount":0,
+				"countNum":1,
+			};
+
+			if($('#discount').val()==''){
+				jsonData.discount=0;
+			}else{
+				jsonData.discount=parseFloat($('#discount').val())
+			}
+
+			if($('#countNum').val()=='' || $('#countNum').val()=='NaN'){
+				jsonData.countNum=1;
+			}else{
+				jsonData.countNum=parseInt($('#countNum').val())
+			}
+
+			accountsData.discount=jsonData.discount;
+			accountsData.countNum=jsonData.countNum;
+
+			var pidArry=[]
+			for(var i=0;i<num;i++){
+				var id=i+1;
+				var objTable=$('#paramsId'+id).serializeObject();//实验参数表单
+				var pid=objTable.pid;
+				if(pid){
+					if($.isArray(pid)){
+						var ary=[];
+						ary=pid
+						var pidArry1=pidArry.concat(ary)
+						pidArry=pidArry1
+					}else{
+						var ary='';
+						ary=pid
+						pidArry.push(ary)
+					}
+				}
+			}
+			Settlement(pidArry)
+		}
+		function Settlement(pidArry){
+			
+			if($.isArray(pidArry)){
+				jsonData.paramIds=pidArry
+			}else{
+				jsonData.paramIds.push(pidArry);
+			}
+			/* console.log(jsonData); */
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/bridgeOrder/calAmt",
+				type : "post",
+				data : JSON.stringify(jsonData),
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					/* console.log(result)  */
+					var resultMoney=result.data;
+					//accountsData.totalAmount=resultMoney.toFixed(4)
+					accountsData.totalAmount=resultMoney.totalAmount.toFixed(4);
+					accountsData.historyTotalAmount=resultMoney.historyTotalAmount.toFixed(4);
+					//$('#money').text("￥"+resultMoney.toFixed(4)+'元')
+					$('#money').html("19版本收费标准：<span>￥"+resultMoney.totalAmount.toFixed(4)+'</span>元')
+					$('#moneyHis').html("07版本收费标准：<span>￥"+resultMoney.historyTotalAmount.toFixed(4)+'</span>元')
+				}
+			};
+			
+			$.ajax(config)
+		}
+		//设置试验参数
+		function setParams(id,formdata){
+			if($.isArray(id)){
+				for (var h = 0; h < id.length; h++) {
+					var re = {
+						'id' :id[h]
+					}
+					formdata.push(re);
+				}
+			}else{
+				formdata.push({"id":id});
+			}
+			
+		}
+		$(function() {
+			//获取委托单
+			var orderType=[[${bridgeOrderVo.book.orderType}]]
+			$('#deviceulid li').eq(0).tab('show');
+			$('#tab-content .tab-pane').eq(0).addClass('active')
+
+			var num = $('#deviceulid li').length;//确定循环的次数
+			var list = [];
+			//有几个样品就循环几次
+			for (var a = 0; a < num; a++) {
+				list = [];
+				var ornum = a + 1;
+				var obj = $('#order' + ornum);
+				var codeobj = obj.find('.codeval');
+				var table = obj.find('.tableorder');
+				for (var i = 0; i < codeobj.length; i++) {
+					var code = codeobj.eq(i).attr('code');
+					list.push(code);
+				}
+				showdatamach(list, table)
+			}
+			
+			setParamsList(orderType);
+			setMethodList(orderType);
+			
+			for(var ty=0;ty<num;ty++){
+				//多个数据
+				var id=ty+1
+				var objT=$('#sampleId'+id)
+				var thisO=objT.find('.moreinput');
+				var moreinputNum=thisO.children('input').length;
+				thisO.children('input').css('width',100/moreinputNum+'%')
+			}
+			
+			$('#discount').bind('input propertychange', function() {
+				accounts();	
+			});
+			$('#countNum').bind('input propertychange', function() {
+				accounts();
+			});
+			//控制折扣输入
+			//敲击按键时触发  
+		    $("#discount").bind("keypress", function(event) {
+			    var event= event || window.event;  
+			    var getValue = $(this).val();  
+			    //控制第一个不能输入小数点"."  
+			    if (getValue.length == 0 && event.which == 46) {
+			        event.preventDefault();  
+			        return;  
+			    }  
+			    //控制只能输入一个小数点"."  
+			    if (getValue.indexOf('.') != -1 && event.which == 46) {
+			        event.preventDefault();   
+			        return;  
+			    }
+			    //控制小数点后只能输入两位数
+			    if(getValue.indexOf('.')!=-1 && getValue.length-getValue.indexOf('.')>4){
+			        event.preventDefault();   
+			        return;  
+			    }
+			    //控制只能输入的值  
+			    if (event.which && (event.which < 48 || event.which > 57) && event.which != 8 && event.which != 46) {  
+			        event.preventDefault();  
+			        return;  
+		        }  
+		    });
+		    //失去焦点是触发  
+		    $("#discount").bind("blur", function(event) {  
+			    var value = $(this).val(), reg = /\.$/;  
+			    if (reg.test(value)) {
+			    	value = value.replace(reg, "");  
+			   		$(this).val(value);  
+			    }  
+		    });
+		});
+		
+		function showdatamach(list, table) {
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx
+						+ "bridge/bridgeMachine/selectMachineParamsByParamsCodeList",
+				type : "post",
+				data : JSON.stringify(list),
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+
+					var tdhtml = '';
+					var trhtml = '';
+					for (var i = 0; i < result.length; i++) {
+						tdhtml = '';
+						trhtml = '';
+						var dataresult = result[i];
+						for (var a = 0; a < dataresult.machineList.length; a++) {
+							if (a == 0) {
+								tdhtml = '<td rowspan="'+dataresult.machineList.length+'">'
+										+ dataresult.params.name
+										+ '</td><td>'
+										+ dataresult.machineList[a].machineName
+										+ '</td>';
+							} else {
+								tdhtml = '<td>'
+										+ dataresult.machineList[a].machineName
+										+ '</td>';
+							}
+							trhtml += '<tr>' + tdhtml + '</tr>';
+
+						}
+						table.append(trhtml);
+					}
+					$.modal.closeLoading();
+				}
+			};
+			$.ajax(config)
+		}
+		
+		
+		//设置检测依据
+		function setMethodList(orderType){
+			var config = {
+				contentType : "application/x-www-form-urlencoded",
+				url : ctx + "bridge/bridgeExpMethod/getMethodList",
+				type : "post",
+				data : {"orderType":orderType},
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					var html = '<div class="checkbox">';
+					for(var i=0; i<result.length; i++){
+						html += ' <label style="width: 100%;"><input type="checkbox" value="'+result[i].id+'" name="fid">'+result[i].name+result[i].code+'</label>';
+					}
+					html += '</div>';
+					/* $("#bridgeExpMethodIdortab"+id).html(html); */
+					$(".bridgeExpMethodClass").html(html);
+					setEXPM()
+				}
+			};
+			$.ajax(config)
+		}
+		
+		//设置参数集合
+		function setParamsList(orderType){
+			var config = {
+				//contentType : "application/json",
+				url : ctx + "bridge/bridgeExpParams/getCheckItemList",
+				type : "post",
+				data : {"orderType":orderType},
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					/* console.log(result) */
+
+					var whtml='<table class="table table-bordered"><div class="ox_checkbox">'
+					for(var a=0;a<result.length;a++){
+						whtml+='<tr><th>'+result[a].itemName+'</th>'
+						var html = '<td><div class="checkbox">';
+						for(var i=0; i<result[a].paramsList.length; i++){
+
+							html += ' <label style="width: 25%;"><input type="checkbox" value="'+result[a].paramsList[i].id+'" name="pid" code="'+result[a].paramsList[i].code+'">'+result[a].paramsList[i].name+'</label>';
+						}
+						whtml += html+ '</div></td></tr>';
+					}
+					whtml += '</div></table>';
+
+					/* $("#bridgeExpParamsIdortab"+id).html(html); */
+					$(".bridgeExpParamsClass").html(whtml);
+					/* paraClick(); */
+
+					setEXP()
+					paraClick();
+				}
+			};
+
+			$.ajax(config)
+		}
+		//注册参数点击事件
+    	var paraClick=function(){
+    		//点击实验参数显示对应的一起列表
+			$('input[name="pid"]').click(function(){
+				var ecode=$(this).attr('code');
+	        	var checkbox=$(this);
+	        	var tableId=$(this).parents('.form_exp').find('.addtable1');
+				if($(this).prop('checked')){
+		        	getInstrument(ecode,checkbox,tableId);
+				}else{
+					tableId.find('.'+ecode).remove();
+				}
+				if(sampleOrNot==0){
+					if($(this).parents('.form_exp').attr('id')=='paramsId1'){
+						accounts()
+					}
+				}else{
+					accounts()
+				}
+
+			});
+		}
+   		//请求数据，获取实验参数列表
+		function getInstrument(code,checkbox,tableId){
+			var resultdata=null;
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : ctx + "bridge/bridgeMachine/selectMachineParamsByParamsCode/"+code,
+				type : "get",
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					$.modal.closeLoading();
+					resultdata=result;
+					/* console.log(resultdata) */
+					var html='';
+					var trhtml='';
+					 for(var i=0;i<resultdata.machineList.length;i++){
+						 var rowspannum=result.machineList.length;
+						 if(i==0){
+							 trhtml='<td rowspan="'+resultdata.machineList.length+'">'+resultdata.params.name+'</td><td>'+resultdata.machineList[i].machineName+'</td>';
+						 }else{
+							 trhtml='<td>'+resultdata.machineList[i].machineName+'</td>';
+						 }
+						 html+='<tr class="'+code+'">'+trhtml+'</tr>'
+					 }
+					 tableId.append(html);
+
+				}
+			};
+			$.ajax(config)
+		}
+     
+		
+		function setEXP(){//试验参数
+			var obj=[[${bridgeOrderVo.sampleVoList}]]
+			//循环出方法列表
+			for(var i=0;i<obj.length;i++){
+				var id=i+1
+				var tableId=$('#order'+id)				
+				var expListP=obj[i].paramsMapList;
+				/* console.log(expListP) */
+				checkedExp(tableId,expListP)
+				
+			}
+		}
+		function setEXPM(){//检测依据
+			var obj=[[${bridgeOrderVo.sampleVoList}]]
+			//循环出方法列表
+			for(var i=0;i<obj.length;i++){
+				var id=i+1
+				var tableId=$('#order'+id)
+				var expListM=obj[i].expMethodList;				
+				checkedExpM(tableId,expListM)
+			}
+		}
+		//展示已经选中的CheckBox
+		function checkedExp(tableId,expListP){
+			var ExpP=tableId.find('.bridgeExpParamsClass');
+			var id=null;
+			var checkObj=null;
+			var type=null;
+
+			ExpP.find('input[name="pid"]').each(function() { //遍历所有复选框
+				id=$(this).attr('value');
+				checkObj=$(this);	
+				type=2;
+				setChecked(id,expListP,checkObj,type);
+			});
+		}
+		//展示已经选中的CheckBox
+		function checkedExpM(tableId,expListM){
+			var ExpM=tableId.find('.bridgeExpMethodClass');
+			var id=null;
+			var checkObj=null;
+			var type=null;
+			ExpM.find('input[name="fid"]').each(function() { //遍历所有复选框
+				id=$(this).attr('value');
+				checkObj=$(this);
+				type=1;
+				setChecked(id,expListM,checkObj,type);
+			});
+
+		}
+		//查询是否有相同的value，相同设置checked
+		function setChecked(id,expList,checkObj,type){
+			if(type==1){
+				for(var t=0;t<expList.length;t++){
+
+					if(expList[t].id==id){
+						checkObj.prop("checked",true);
+					 }
+				}
+			}else{
+				for(var a=0;a<expList.length;a++){
+					for(var g=0;g<expList[a].expParamsList.length;g++){
+						if(expList[a].expParamsList[g].id==id){
+							checkObj.prop("checked",true);
+							var code=checkObj.attr('code');
+							var tableId=checkObj.parents('.form_exp').find('.addtable1');
+							getInstrument(code,checkObj,tableId);
+
+						}
+					}
+				}
+			}
+		}
+		
+	</script>
+</body>
+</html>

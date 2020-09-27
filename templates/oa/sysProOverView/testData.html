@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div>
+    [[${testData}]]
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+
+</script>
+</body>
+</html>

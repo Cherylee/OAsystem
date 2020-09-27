@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改欠发票记录')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaPaymentOweBill-edit" th:object="${oaPaymentOweBill}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                        <input id="projectId" name="projectId" th:field="*{projectId}" class="form-control"
+                               type="hidden">
+                        <input id="paymentDetailId" name="paymentDetailId" th:field="*{paymentDetailId}"
+                               class="form-control"
+                               type="hidden">
+                        <input id="paymentId" name="paymentId" th:field="*{paymentId}" class="form-control"
+                               type="hidden">
+                        <input id="costBillId" name="costBillId" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>核销申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">支付单据编号</td>
+                                <td>
+                                    <input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+                                </td>
+                                <td class="active">申请人</td>
+                                <td>
+                                    <input id="userName" name="proposer" th:field="*{userName}" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">项目名称</td>
+                                <td>
+                                    <input id="projectName" name="projectName" th:field="*{projectName}"
+                                           class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">收款人（开票方）</td>
+                                <td>
+                                    <input id="payee" name="payee" th:field="*{payee}"
+                                           class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">收票方</td>
+                                <td>
+                                    <input id="drawee" name="drawee" th:field="*{drawee}" class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">金额</td>
+                                <td>
+                                    <input id="money" name="money" th:field="*{money}" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">收票截止日期</td>
+                                <td>
+                                    <input id="billExpirationDate" name="billExpirationDate"
+                                           th:value="${#dates.format(oaPaymentOweBill.billExpirationDate, 'yyyy-MM-dd HH:mm:ss')}"
+                                           class="form-control time-input" type="text">
+                                </td>
+                                <td class="active">备注</td>
+                                <td>
+                                    <input id="remark" name="remark" th:field="*{remark}" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">关联发票</td>
+                                <td colspan="3">
+                                    <input id="costBillName" name="costBillName" class="form-control"
+                                           onclick="selectBill()"
+                                           type="text">
+                                </td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+<!--                            <button type="button" th:if="${oaPaymentOweBill.status} == '3'"-->
+<!--                                    class="btn btn-sm btn-primary" onclick="submitHandler()">-->
+<!--                                <i class="fa fa-check"></i>提交-->
+<!--                            </button>-->
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/oaPaymentOweBill";
+    $("#form-oaPaymentOweBill-edit").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/cancelCostBill", $('#form-oaPaymentOweBill-edit').serialize());
+        }
+    }
+    //流程
+    var data = {};
+    data.procInstId = [[${oaPaymentOweBill.procInstId}]];
+    data.id = [[${oaPaymentOweBill.id}]];
+    selectActProcessList(data, "approveInfoId");
+
+    //关联发票
+    //关联 弹框
+    function selectBill() {
+        var options = {
+            title: '成本票',
+            width: "800",
+            url: ctx + 'oa/sysProCostBill',
+            callBack: doSubmit4
+        };
+        $.modal.openOptions(options);
+    }
+
+    ////成本票
+    function doSubmit4(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        var text = []
+        var code = []
+        var flag = false;
+        for (var i = 0; i < data.length; i++) {
+            text.push(data[i].id);
+            code.push(data[i].code);
+            if (data[i].linkAmount >= data[i].billAmount) {
+                $.modal.alertWarning("不允许选择金额不足的记录来核销！");
+                flag = true;
+            }
+        }
+        if (!flag) {
+            $('#costBillId').val(text + '')
+            $('#costBillName').val(code + '')
+        }
+
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:include="include :: header('新增银行账户')" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<!-- 弹出框 -->
+<!-- 模态框（Modal） -->
+<!--	<div class="modal fade" id="myModal" tabindex="-1" role="dialog"-->
+<!--		aria-labelledby="myModalLabel" aria-hidden="true">-->
+<!--		<div class="modal-dialog">-->
+<!--			<div class="modal-content">-->
+<!--				<div class="modal-header">-->
+<!--					<button type="button" class="close" data-dismiss="modal"-->
+<!--						aria-hidden="true">&times;</button>-->
+<!--					<h4 class="modal-title" id="myModalLabel">请选择你要操作的类型</h4>-->
+<!--				</div>-->
+<!--				<div class="modal-body">-->
+<!--					<div class="row">-->
+<!--						<form class="form-horizontal m" id="form-Condition-add">-->
+<!--							<div class="col-sm-10">-->
+<!--								<div class="form-group">-->
+<!--									<label class="col-sm-4 control-label">类型：</label>-->
+<!--									<div class="col-sm-8">-->
+<!--										<select name="type" class="form-control"-->
+<!--											th:with="type=${@dict.getType('oa_bank_type')}">-->
+<!--											<option th:each="dict : ${type}" th:text="${dict.dictLabel}"-->
+<!--												th:value="${dict.dictValue}"></option>-->
+<!--										</select>-->
+<!--									</div>-->
+<!--								</div>-->
+<!--							</div>-->
+<!--						</form>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--				<div class="modal-footer">-->
+<!--					<button type="button" class="btn btn-primary" onclick="getType()">确认</button>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--			&lt;!&ndash; /.modal-content &ndash;&gt;-->
+<!--		</div>-->
+<!--		&lt;!&ndash; /.modal &ndash;&gt;-->
+<!--	</div>-->
+<!-- 弹出框  end -->
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<form class="form-horizontal m" id="form-oaBankAccount-add" th:object="${oaBankAccount}">
+		<input id="type" name="type" class="form-control" type="hidden" value="1">
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">申请人：</label>
+				<div class="col-sm-8">
+					<input id="userName" name="userName" th:field="*{userName}"
+						   class="form-control" type="text" readonly>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">公司：</label>
+				<div class="col-sm-8">
+					<input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}" />
+					<input type="text" name="companyName" id="companyName" class="form-control"
+						   onclick="selectDeptTree('companyId','companyName','0')" th:value="${company.deptName}" />
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">部门：</label>
+				<div class="col-sm-8">
+					<input id="treeId" name="deptId" class="form-control" type="hidden" th:field="*{deptId}">
+					<input id="treeName" name="deptName" class="form-control" type="text"
+						   onclick="selectDeptTree('treeId','treeName','1')" th:field="*{deptName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">工程名称：</label>
+				<div class="col-sm-8">
+					<input id="projectId" class="form-control"
+						   name="projectId" type="hidden">
+					<input id="projectName" class="form-control"
+						   name="projectName" type="text" onclick="selectPro('projectId','projectName')">
+				</div>
+			</div>
+		</div>
+<!--		<div class="col-sm-6 open">-->
+<!--			<div class="form-group">-->
+<!--				<label class="col-sm-4 control-label">关联模块：</label>-->
+<!--				<div class="col-sm-8">-->
+<!--					<select name="relaType" class="form-control" onchange="selectModel(this)" id="relaType" th:field="*{relaType}">-->
+<!--						<option value="0">无</option>-->
+<!--						<option value="1">工程合同</option>-->
+<!--						<option value="3">投标申请单</option>-->
+<!--					</select>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="col-sm-6 hide">-->
+<!--			<div class="form-group">-->
+<!--				<label class="col-sm-4 control-label">工程合同：</label>-->
+<!--				<div class="col-sm-8">-->
+<!--					<input id="contractId" name="contractId" class="form-control" type="hidden" th:field="*{contractId}">-->
+<!--					<input id="contractName" name="contractName" class="form-control" type="text" th:field="*{contractName}"-->
+<!--						   onclick="showLinkM('contractId','contractName','oa/oaContract','工程合同',doSubmit1)">-->
+<!--				</div>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="col-sm-6 hide">-->
+<!--			<div class="form-group">-->
+<!--				<label class="col-sm-4 control-label">申请单：</label>-->
+<!--				<div class="col-sm-8">-->
+<!--					<input id="tenderId" name="tenderId" class="form-control" type="hidden" th:field="*{tenderId}">-->
+<!--					<input id="tenderName" name="tenderName" class="form-control" type="text" th:field="*{tenderName}"-->
+<!--						   onclick="showLinkM('tenderId','tenderName','business/jyTenderNotice','投标申请单',doSubmit2)">-->
+
+<!--				</div>-->
+<!--			</div>-->
+<!--		</div>-->
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label"><span style="color: red;">*</span>账户类型：</label>
+				<div class="col-sm-8">
+					<select name="accountType" class="form-control" th:with="type=${@dict.getType('oa_bankAccount_type')}"
+							required="required" id="accountType" th:field="*{accountType}">
+						<option value="">--请选择--</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>
+
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">印鉴保管人：</label>
+				<div class="col-sm-8">
+					<input id="keeper" name="keeper" class="form-control" type="text" th:field="*{keeper}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 ">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">开户所在地：</label>
+				<div class="col-sm-8">
+					<input id="area" name="area" class="form-control" type="text" th:field="*{area}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 ">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">开户所在银行：</label>
+				<div class="col-sm-8">
+					<input id="bankName" name="bankName" class="form-control" type="text" th:field="*{bankName}">
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" class="form-control" type="text" th:field="*{remark}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">账户预留印鉴：</label>
+				<div class="col-sm-8">
+					<input id="reserveSeal" name="reserveSeal" class="form-control" type="text" th:field="*{reserveSeal}">
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">项目部联系人：</label>
+				<div class="col-sm-8">
+					<input id="projectDeptLinkman" name="projectDeptLinkman" class="form-control" type="text" th:field="*{projectDeptLinkman}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">项目部联系电话：</label>
+				<div class="col-sm-8">
+					<input id="projectDeptPhone" name="projectDeptPhone" class="form-control" type="text" th:field="*{projectDeptPhone}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">业主是否指定银行：</label>
+				<div class="col-sm-8">
+					<select name="projectDeptAppoint" class="form-control"
+							th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{projectDeptAppoint}">
+						<option value="">--请选择--</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">指定银行联系电话：</label>
+				<div class="col-sm-8">
+					<input id="projectDeptAppointPhone" name="projectDeptAppointPhone" class="form-control" type="text" th:field="*{projectDeptAppointPhone}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">银行账户名称：</label>
+				<div class="col-sm-8">
+					<input id="accountName" name="accountName" class="form-control" type="text" th:field="*{accountName}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">银行账号：</label>
+				<div class="col-sm-8">
+					<input id="accountNo" name="accountNo" class="form-control" type="text" th:field="*{accountNo}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">最迟办结时间：</label>
+				<div class="col-sm-8">
+					<input id="openAccountDate" name="openAccountDate" class="form-control currentTime" type="text" th:field="*{openAccountDate}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">短信通知：</label>
+				<div class="col-sm-8">
+					<input id="smsMessage" name="smsMessage" class="form-control" type="text" th:field="*{smsMessage}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">对账方式：</label>
+				<div class="col-sm-8">
+					<select name="accountCheckingType" class="form-control"
+							th:with="type=${@dict.getType('oa_checking_type')}" th:field="*{accountCheckingType}">
+						<option value="">--请选择--</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">客户经理电话：</label>
+				<div class="col-sm-8">
+					<input id="accountManagerPhone" name="accountManagerPhone" class="form-control" type="text" th:field="*{accountManagerPhone}">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 cancel">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">销户时关联的开户：</label>
+				<div class="col-sm-8">
+					<input id="openId" name="openId" class="form-control" type="hidden" th:field="*{openId}">
+					<input id="openCode" class="form-control" type="text" onclick="showOpen('openId','openCode')">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 open">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">销户原因：</label>
+				<div class="col-sm-8">
+					<input  name="reason" class="form-control" type="text">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">申请日期：</label>
+				<div class="col-sm-8">
+					<input id="applyTime" name="applyTime"
+						   class="form-control currentTime" type="text" readonly>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-8">
+			<div class="form-group">
+				<label class="col-sm-3 control-label">开户材料：</label>
+				<div class="col-sm-6">
+					<div class="file-loading">
+						<input id="uploadFileId" type="file" multiple>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<div class="row">
+		<div class="col-sm-offset-5 col-sm-10">
+			<button type="button" class="btn btn-sm btn-info"
+					onclick="saveDraft()">
+				<i class="fa fa-check"></i>保存草稿
+			</button>
+			<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+				<i class="fa fa-check"></i>提交
+			</button>
+			<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+				<i class="fa fa-reply-all"></i>关 闭
+			</button>
+		</div>
+	</div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script type="text/javascript">
+	var prefix = ctx + "oa/oaBankAccount"
+	//上传附件
+	var attachmentList = new Array();
+	var option = {
+		id : 'uploadFileId',
+		uploadUrl : null,
+		deleteUrl : null,
+		deleteExtraData : null,
+		imgsUrl : new Array(),
+		initialPreviewConfig : null,
+		showPreview : false
+	}
+	$.common.uploadFile(option);
+	downFile();
+	//显示隐藏
+	function selectModel(obj) {
+		var num = $(obj).val();
+		var obj = $('#form-oaBankAccount-add')
+		var contract = obj.find('input[name="contractId"]').parent()
+				.parent().parent();
+		var tender = obj.find('input[name="tenderId"]').parent().parent()
+				.parent();
+		//清空
+		contract.find('input').val('')
+		tender.find('input').val('')
+		if (num == '0') {
+			contract.addClass('hide')
+			tender.addClass('hide')
+		} else if (num == '1') {//工程合同
+			contract.removeClass('hide')
+			tender.addClass('hide')
+		} else if (num == '3') {//投标申请
+			tender.removeClass('hide')
+			contract.addClass('hide')
+		}
+	}
+	//关联 弹框
+	var lId = null;
+	var lName = null;
+	function showLinkM(id, name, url, text, doSubmit) {
+		lId = id;
+		lName = name
+		var options = {
+			title : text,
+			width : "1200",
+			url : ctx + url,
+			callBack : doSubmit
+		};
+		$.modal.openOptions(options);
+	}
+	////工程合同
+	function doSubmit1(index, layero) {
+		var iframeWin = layero.find('iframe')[0];
+		var result = iframeWin.contentWindow.submitHandler();
+		var data = result;
+		$('#' + lId).val(data.id)
+		$('#' + lName).val(data.contractName)
+	}
+	////投标申请单
+	function doSubmit2(index, layero) {
+		var iframeWin = layero.find('iframe')[0];
+		var result = iframeWin.contentWindow.submitHandler();
+		var data = result;
+		$('#' + lId).val(data.id)
+		$('#' + lName).val(data.projectName)
+	}
+	//
+	function submitHandler() {
+		var data = {}
+		var dataForm = $('#form-oaBankAccount-add').serializeObject();
+		data.oaBankAccount = dataForm;
+		data.attachmentList = attachmentList;
+		if ($.validate.form()) {
+			$.operate.saveJsonTab(prefix + "/add", data);
+		}
+
+	}
+	//提交
+	function submitHandler() {
+		var data = {}
+		var dataForm = $('#form-oaBankAccount-add').serializeObject();
+		data.oaBankAccount = dataForm;
+		data.attachmentList = attachmentList;
+		if ($.validate.form()) {
+			$.operate.saveJsonTab(prefix + "/add", data);
+		}
+
+	}
+	//保存草稿
+	function saveDraft() {
+		var data = {}
+		var dataForm = $('#form-oaBankAccount-add').serializeObject();
+		data.oaBankAccount = dataForm;
+		data.attachmentList = attachmentList;
+		if ($.validate.form()) {
+			$.operate.saveJsonTab(prefix + "/saveDraft", data);
+		}
+
+	}
+
+	//确认按钮
+	getType('1')
+	function getType(type) {
+		if (type == '0') {//开户
+			$('.open').show().siblings('.cancel').hide()
+		} else {//销户
+			$('.cancel').show().siblings('.open').find('input').attr('readonly','true')
+			$('.cancel').show().siblings('.open').find('select').attr('readonly','true')
+
+		}
+	}
+	//选择开户
+	// var OId = null;
+	// var OName = null;
+	// function showOpen(id,name){
+	// 	OId = id;
+	// 	OName = name
+	// 	var options = {
+	// 		title : '选择开户记录',
+	// 		width : "1200",
+	// 		url : ctx + "oa/oaBankAccount",
+	// 		callBack : doSubmitOpen
+	// 	};
+	// 	$.modal.openOptions(options);
+	// }
+	// function doSubmitOpen(index, layero) {
+	// 	var iframeWin = layero.find('iframe')[0];
+	// 	var result = iframeWin.contentWindow.submitHandler();
+	// 	var data = result;
+	// 	$('#' + OId).val(data.id)
+	// 	$('#' + OName).val(data.code)
+	// 	//关联模块
+	// 	$('#relaType').val(data.relaType)
+	// 	selectModel('#relaType')
+	// 	if(data.relaType=='1'){
+	// 		$('#contractId').val(data.contractId);
+	// 		$('#contractName').val(data.contractName);
+	// 	}else if(data.relaType=='3'){
+	// 		$('#tenderId').val(data.tenderId);
+	// 		$('#tenderName').val(data.tenderName);
+	// 	}
+	// 	//账户类型
+	// 	$('#accountType').val(data.accountType);
+	// 	//印鉴保管人
+	// 	$('#keeper').val(data.keeper);
+	// 	//开户所在地
+	// 	$('#area').val(data.area);
+	// 	//开户所在银行
+	// 	$('#bankName').val(data.bankName);
+	// 	//开户理由
+	// 	$('#reason').val(data.reason);
+	// }
+	// $(function() {
+	// 	$('#myModal').modal('show');
+	// })
+</script>
+</body>
+</html>

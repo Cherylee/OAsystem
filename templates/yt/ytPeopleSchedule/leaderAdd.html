@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>负责人项目汇总录入</title>
+<th:block th:include="include :: header('新增人员进度')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<div class="addPeopleSchedule has_content">
+							<form id="form-ytPeopleSchedule-add">
+								<input type="hidden" name="configDetailId" th:value="${leaderAddVo.detailId}">
+								<input type="hidden" name="id" th:value="${leaderAddVo.scheduleMainId}">
+								<input type="hidden" name="totalProgress" th:value="${leaderAddVo.totalProgress}">
+								<table class="table table-bordered table-bot">
+									<caption>
+										<strong>进度汇报</strong>
+									</caption>
+									<tbody>
+										<tr>
+											<td class="active">任务明细</td>
+											<td colspan="3">[[${leaderAddVo.content}]]</td>
+										</tr>
+										<tr>
+											<td class="active">当前进度</td>
+											<td colspan="3"><div class="progress">
+													<div th:style="'width:'+@{${leaderAddVo.totalProgress}}+'%'" class="progress-bar"></div>
+												</div>
+											</td>											
+										</tr>
+
+										<tr>
+											<td class="active">工作汇报</td>
+											<td colspan="3">
+												<div class="form-group">
+													<textarea name="detailText" class="form-control" rows="3"></textarea>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="active">关联附件</td>
+											<td colspan="3">
+												<div class="file-loading">
+													<input id="uploadFileId" type="file" multiple>
+												</div>
+											</td>
+										</tr>
+                                        <tr>
+									<td class="active">时间段</td>
+									<td>
+										<div class="input-daterange input-group col-sm-4">
+											<input type="text"
+												class="input-sm form-control time-input-data startTime"
+												name="startTime" placeholder="开始时间" ><span
+												class="input-group-addon">到</span><input type="text"
+												class="input-sm form-control time-input-data endTime"
+												name="endTime" placeholder="结束时间" >
+										</div>
+
+									</td>
+
+								</tr>
+									</tbody>
+								</table>
+							</form>
+							<div class="row">
+								<div class="col-sm-offset-5 col-sm-10">
+								   <br>
+									<button type="button" class="btn btn-sm btn-primary"
+										onclick="submitHandler()">
+										<i class="fa fa-check"></i>提交
+									</button>
+									&nbsp;
+									<button type="button" class="btn btn-sm btn-danger"
+										onclick="closeItem()">
+										<i class="fa fa-reply-all"></i>关 闭
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "yt/ytPeopleSchedule"
+		console.log([[${leaderAddVo}]])
+		 //上传附件
+        var attachmentList = new Array();
+		var option={
+				id:'uploadFileId',
+				uploadUrl:null,
+				deleteUrl:null,
+				deleteExtraData:null,
+				imgsUrl:new Array(),
+				initialPreviewConfig:null,
+				showPreview:false
+		}
+		$.common.uploadFile(option);  
+        downFile();
+        
+        function submitHandler() {
+			var data=$('#form-ytPeopleSchedule-add').serializeObject();
+			data.state = "02";
+			data.attachmentUrls=attachmentList
+			console.log(data)
+			$.operate.saveJsonTab(prefix + "/add",data);
+        } 
+	</script>
+</body>
+</html>

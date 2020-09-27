@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改人员进度')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<div class="addPeopleSchedule has_content">
+
+							<table class="table table-condensed">
+								<tr>
+									<td>任务明细: <span style="color: #337ab7">[[${editVo.content}]]</span></td>
+									<td>计划完工时间：<span style="color: #337ab7">[[${#dates.format(editVo.planEndTime, 'yyyy-MM-dd')}]]
+									</span></td>
+								</tr>
+							</table>
+							<h4>
+								累计进度: <span>[[${editVo.totalProgress}]]%</span>
+							</h4>
+							<div class="progress">
+								<div th:style="'width:'+@{${editVo.totalProgress}}+'%'"
+									class="progress-bar"></div>
+							</div>
+
+							<h4 th:if="${editVo.state != null}" class="proState"
+								th:name="${editVo.state}">[[${editVo.state}]]</h4>
+							<h4 th:unless="${editVo.state != null}">暂未审核</h4>
+
+							<input type="hidden" class="state" th:if="${editVo.state=='05'}"
+								name="state" value="01"> <input type="hidden"
+								class="state" th:if="${editVo.state=='06'}" name="state"
+								value="02"> <input type="hidden" class="state"
+								th:if="${editVo.state=='07'}" name="state" value="03">
+
+							<table class="table table-bordered dataTable"
+								th:each="list,sampleStat : ${editVo.scheduleDetailList}">
+
+								<tr>
+									<td class="active">当前进度</td>
+									<td><input type="hidden" class="thisId" name="id"
+										th:value="${list.id}"> <input type="hidden"
+										class="mainId" name="mainId" th:value="${list.mainId}">
+										<input class="form-control currentProgress"
+										name="currentProgress" type="number" min="1" max="100"
+										th:value="${list.currentProgress}" readonly></td>
+								</tr>
+								<tr>
+									<td class="active">进度汇报</td>
+									<td><textarea name="detailText"
+											class="form-control detailText" rows="3">[[${list.detailText}]]</textarea></td>
+
+								</tr>
+								<tr>
+									<td class="active">时间段</td>
+									<td>
+										<div class="input-daterange input-group col-sm-4">
+											<input type="text"
+												class="input-sm form-control time-input-data startTime"
+												name="startTime" placeholder="开始时间"
+												th:value="*{#dates.format(list.startTime, 'yyyy-MM-dd')}"><span
+												class="input-group-addon">到</span><input type="text"
+												class="input-sm form-control time-input-data endTime"
+												name="endTime" placeholder="结束时间"
+												th:value="*{#dates.format(list.endTime, 'yyyy-MM-dd')}">
+										</div>
+
+									</td>
+
+								</tr>
+								<tr>
+									<td class="active">关联附件</td>
+									<td colspan="3">
+										<div class="file-loading">
+											<input th:id="uploadFileId+${sampleStat.index}" type="file" multiple>
+										</div>
+									</td>
+								</tr>
+							</table>
+
+							<div class="row btns">
+								<div class="col-sm-offset-5 col-sm-10">
+								<br>
+									<button type="button" class="btn btn-sm btn-primary"
+										onclick="submitHandler()" th:if="${editVo.state=='05'||editVo.state=='06'||editVo.state=='07'}">
+										<i class="fa fa-check"></i>修改
+									</button>
+									&nbsp;
+									<button type="button" class="btn btn-sm btn-danger"
+										onclick="closeItem()">
+										<i class="fa fa-reply-all"></i>关 闭
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "yt/ytPeopleSchedule";
+		
+		//保存数据			
+		function saveData(){
+			var data={};
+			var table=$('.dataTable')			
+			data.state=$('.state').val();
+			data.scheduleDetailList=[];
+			for(var i=0;i<table.length;i++){
+				var listD={};
+				listD.id=table.eq(i).children().find('.thisId').val();
+				listD.mainId=table.eq(i).children().find('.mainId').val();
+				listD.detailText=table.eq(i).children().find('.detailText').val();
+				listD.startTime=table.eq(i).children().find('.startTime').val();
+				listD.endTime=table.eq(i).children().find('.endTime').val();
+				data.scheduleDetailList.push(listD);
+			}
+			return data;
+		}
+		
+		function submitHandler() {
+	       var data=saveData()
+	       for(var i=0;i<data.scheduleDetailList.length;i++){
+        	   for(var a=0;a<fileList.length;a++){
+        		   if(fileList[a].id=='uploadFileId'+i){
+        			   data.scheduleDetailList[i].attachmentUrls=fileList[a].attachmentList;
+        		   }
+        	   }
+           }
+	       console.log(data)
+	       $.operate.saveJsonTab(prefix + "/edit",data);
+	    }
+		//回显状态
+		function returnState(state){
+			var text=''
+			if(state=='01'){
+				text='负责人审核中'
+			}else if(state=='02'){
+				text='校核中'
+			}else if(state=='03'){
+				text='审核中'
+			}else if(state=='04'){
+				text='已确认'
+			}else if(state=='05'){
+				text='负责人驳回'
+			}else if(state=='06'){
+				text='校核人员驳回'
+			}else if(state=='07'){
+				text='审核人员驳回'
+			}
+			return text;
+		}
+		var sta=$('.proState')
+        for(var i=0;i<sta.length;i++){
+       	 var state=sta.eq(i).attr('name')
+       	 sta.eq(i).text(returnState(state))
+        }
+		var attachmentList = new Array();
+        //图片反显出来
+        
+        function ytAttachment(objId,uploadFileId){
+        	var config = {
+        	        url: ctx+"yt/ytAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": objId},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "yt_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        		}
+        	        		var option1={
+        	    					id:uploadFileId,
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig,
+        	    					attachmentList : new Array(),
+        	    					callback : callback
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:uploadFileId,
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null,
+        	    					attachmentList : new Array(),
+        	    					callback : callback
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+		     			downFile();
+        	        }
+        	    };
+        	$.ajax(config)
+        }
+        var fileList=[]
+        function callback(id){
+        	var dataF={
+        			'id':id,
+        			'attachmentList':attachmentList
+        	}
+        	fileList.push(dataF)
+		}
+        $(function () {
+           for(var i=0;i<[[${editVo.scheduleDetailList}]].length;i++){
+        	   var objId=[[${editVo.scheduleDetailList}]][i].id
+        	   ytAttachment(objId,'uploadFileId'+i);
+           } 
+  
+	    });
+        
+    
+	</script>
+</body>
+</html>

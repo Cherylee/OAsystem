@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改发布')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaInformation-edit" th:object="${oaInformation}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+							<input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>新增发布</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">申请部门</td>
+									<td>
+										<input type="hidden" name="deptId" th:value="*{deptId}">
+										<input type="text" class="form-control" th:value="*{deptName}" readonly="readonly" />
+									</td>
+									<td class="active">申请人</td>
+									<td>
+										<input id="proposer" th:value="*{proposer}" name="proposer"  type="hidden"  />
+										<input th:value="*{userName}" class="form-control" type="text" readonly="readonly" />
+									</td>
+								</tr>
+								<tr>
+									<td class="active"><span style="color: red;">*</span>缓急等级</td>
+									<td>
+										<select required="required" name="urgencyGrade" th:field="*{urgencyGrade}" class="form-control" th:with="type=${@dict.getType('oa_urgency_grade')}">
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active"><span style="color: red;">*</span>秘密等级</td>
+									<td>
+										<select required="required" name="secretGrade" th:field="*{secretGrade}" class="form-control" th:with="type=${@dict.getType('oa_secret_grade')}">
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active"><span style="color: red;">*</span>类别</td>
+									<td>
+										<select required="required" name="type" th:field="*{type}" class="form-control" th:with="type=${@dict.getType('oa_information_type')}">
+											<option value="">--请选择--</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active"><span style="color: red;">*</span>标题</td>
+									<td>
+										<input required="required" id="title" name="title" th:field="*{title}" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">内容</td>
+									<td>
+										<textarea id="remark" name="remark" class="form-control" type="text" th:field="*{remark}">
+										</textarea>
+									</td>
+									<td class="active"><span style="color: red;">*</span>查收部门</td>
+									<td>
+										<input id="receiptDeptId" name="receiptDeptId" th:field="*{receiptDeptId}" type="hidden" />
+										<input id="treeName" onclick="selectDeptTree()" th:value="*{deptName}"
+											   placeholder="请选择查收部门" class="form-control" type="text" required>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">状态</td>
+									<td>
+										<select name="status" class="form-control" th:with="type=${@dict.getType('oa_leave_status')}" th:field="*{status}" disabled="disabled">
+											<option value="">所有</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">申请日期</td>
+									<td>
+										<input id="createTime" name="createTime" disabled="disabled" class="form-control time-input" type="text"
+											   th:value="${#dates.format(oaInformation.createTime, 'yyyy-MM-dd HH:mm:ss')}">
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+								<button type="button" class="btn btn-sm btn-success"
+										th:onclick="selectUser('','','0',[[${oaInformation.id}]],'oa/oaInformation/copy','flag')">
+										抄送</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关闭
+								</button>
+							</div>
+						</div>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="bootstrap-table" data-mobile-responsive="true"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: lastNode" />
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaInformation";
+		var lastNodeId=[[${oaInformation.id}]];
+		var actDefineId=[[${oaInformation.actDefineId}]];
+		var lastStatus=[[${oaInformation.status}]];
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+$("#taskId").val()+"/6/oa_information/"+[[${oaInformation.id}]]);
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+$("#taskId").val()+"/6/oa_information/"+[[${oaInformation.id}]]);
+	    }
+		//返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		
+		//选择部门树
+		function selectDeptTree() {
+        	var treeId = $("#receiptDeptId").val();
+        	var deptId = $.common.isEmpty(treeId) ? "100" : $("#receiptDeptId").val();
+        	var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title: '选择部门',
+				width: "380",
+				url: ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		
+		function doSubmit(index, layero){
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+    			$("#receiptDeptId").val(body.find('#treeId').val());
+    			$("#treeName").val(body.find('#treeName').val());
+    			layer.close(index);
+			}
+		}
+		 //流程
+		var data = {};
+    	data.procInstId=[[${oaInformation.procInstId}]];
+    	data.id = [[${oaInformation.id}]];
+		selectActProcessList(data);
+	</script>
+</body>
+</html>

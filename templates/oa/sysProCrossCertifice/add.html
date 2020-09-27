@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增跨区涉税报验证')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProCrossCertifice-add">
+                            <input type="hidden" name="chargeOff" value="4" id="chargeOff">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>跨区涉税报验证</h2>
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        <td class="active">申请人：</td>
+                                        <td>
+                                            <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control" type="hidden">
+                                            <input th:value="${user.userName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">所属公司：</td>
+                                        <td>
+                                            <input id="companyId" name="companyId" th:value="${company.deptId}" class="form-control" type="hidden">
+                                            <input id="companyName" name="companyName" th:value="${company.deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请部门：</td>
+                                        <td>
+                                            <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}" type="hidden">
+                                            <input id="deptName" name="deptName" th:value="${user.dept.deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">工程名称：</td>
+                                        <td>
+                                            <input id="projectId" name="projectId" type="hidden" />
+                                            <input id="proName" name="proName" class="form-control" type="text"
+                                                   onclick="selectPro('projectId','proName')" required="required">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请日期：</td>
+                                        <td>
+                                            <div class="input-group data">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <input id="applyTime" name="applyTime" class="form-control time-input-data currentDate" type="text" >
+                                            </div>
+                                        </td>
+                                        <td class="active">工程地点：</td>
+                                        <td>
+                                            <input id="address" name="address" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">建设单位：</td>
+                                        <td>
+                                            <input id="constructUnit" name="constructUnit" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">税务机关：</td>
+                                        <td>
+                                            <input id="taxAuthority" name="taxAuthority" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">押金：</td>
+                                        <td>
+                                            <input id="calshPledge" name="calshPledge" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">开具金额：</td>
+                                        <td>
+                                            <input id="amount" name="amount" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">金额大写：</td>
+                                        <td>
+                                            <input id="moneyUpper" name="moneyUpper" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">收件方式：</td>
+                                        <td>
+                                            <select id="receiveWay" name="receiveWay" class="form-control" th:with="type=${@dict.getType('sys_pro_cross_receiveWay')}">-->
+                                                <option value="">------所有------</option>
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                            <table class="hidden receiveWay-1" style="width: 100%">
+                                                <tr>
+                                                    <td class="active">邮寄地址：</td>
+                                                    <td>
+                                                        <input id="postAddress" name="postAddress" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">电话：</td>
+                                                    <td>
+                                                        <input id="postPhone" name="postPhone" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">收件人：</td>
+                                                    <td>
+                                                        <input id="receiver" name="receiver" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="active">付款方式：</td>
+                                                    <td>
+                                                        <select id="payType" name="payType" class="form-control" th:with="type=${@dict.getType('sys_pro_cross_payType')}">
+                                                            <option value="">------所有------</option>
+                                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td class="active">备注：</td>
+                                        <td colspan="3">
+                                            <input id="remark" name="remark" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10">
+                                <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProCrossCertifice";
+		$("#form-sysProCrossCertifice-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		//下拉框选择方式
+        $('#receiveWay').change(function () {
+            if($(this).val()==='1'){
+                $('.receiveWay-1').removeClass('hidden')
+            }else{
+                $('.receiveWay-1 ').children().find('input').val('');
+                $('.receiveWay-1 ').children().find('select').val('');
+                $('.receiveWay-1').addClass('hidden');
+            }
+        });
+
+
+
+		//提交
+		function submitHandler() {
+	        if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProCrossCertifice-add').serializeObject();
+                data.flag = true;
+                $.operate.saveJsonTab(prefix + "/add", data);
+	        }
+	    }
+        //自动大小写转换
+        $("input[name='amount']").bind("input propertychange",
+            function() {//监控输入框的变化
+                var num = $(this).val();
+                var a = parseInt(num);
+                var config = {
+                    url : ctx + "common/converMoneyToCN/" + a,
+                    type : "get",
+                    dataType : "json",
+                    success : function(result) {
+                        if (result.code == '0') {
+                            $("input[name='moneyUpper']").val(result.msg)
+                        }
+                    }
+                };
+                $.ajax(config)
+            });
+        //保存草稿
+        function saveDraft(){
+            if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProCrossCertifice-add').serializeObject();
+                data.flag = true;
+                $.operate.saveJsonTab(prefix + "/saveDraft", data);
+            }
+        }
+	</script>
+</body>
+</html>

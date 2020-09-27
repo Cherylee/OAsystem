@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('用户列表')" />
+	<th:block th:include="include :: layout-latest-css" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="gray-bg">
+	<div class="ui-layout-west">
+		<div class="main-content">
+			<div class="box box-main">
+				<div class="box-header">
+					<div class="box-title">
+						<i class="fa icon-grid"></i> 组织机构
+					</div>
+					<div class="box-tools pull-right">
+					    <!-- <a type="button" class="btn btn-box-tool menuItem" href="#" onclick="dept()" title="管理部门"><i class="fa fa-edit"></i></a> -->
+						<button type="button" class="btn btn-box-tool" id="btnExpand" title="展开" style="display:none;"><i class="fa fa-chevron-up"></i></button>
+						<button type="button" class="btn btn-box-tool" id="btnCollapse" title="折叠"><i class="fa fa-chevron-down"></i></button>
+						<button type="button" class="btn btn-box-tool" id="btnRefresh" title="刷新部门"><i class="fa fa-refresh"></i></button>
+					</div>
+				</div>
+				<div class="ui-layout-content">
+					<div id="tree" class="ztree"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container-div ui-layout-center">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="user-form">
+					<input type="hidden" id="deptId" name="deptId">
+	                <input type="hidden" id="parentId" name="parentId">
+					<div class="select-list">
+						<ul>
+							<li>
+								登录名称：<input type="text" name="loginName"/>
+							</li>
+							<li>
+								手机号码：<input type="text" name="phonenumber"/>
+							</li>
+							<li>
+								用户状态：<select name="status" th:with="type=${@dict.getType('sys_normal_disable')}">
+									<option value="">所有</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li class="select-time">
+								<label>创建时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: layout-latest-js" />
+	<th:block th:include="include :: ztree-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "system/user";
+		var datas = [[${@dict.getType('sys_normal_disable')}]];
+
+		$(function() {
+		    var panehHidden = false;
+		    if ($(this).width() < 769) {
+		        panehHidden = true;
+		    }
+		    $('body').layout({ initClosed: panehHidden, west__size: 185 });
+		    queryUserList();
+		    queryDeptTree();
+		});
+
+		function queryUserList() {
+		    var options = {
+		        url: prefix + "/list",
+		        sortName: "createTime",
+		        sortOrder: "desc",
+		        modalName: "用户",
+		        showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                showSearch: false,
+                clickToSelect : true,
+				onClickRow:onClickRow,
+		        columns: [{
+		            checkbox: true
+		        },
+		        {
+		            field: 'userId',
+		            title: '用户ID'
+		        },
+		        {
+		            field: 'loginName',
+		            title: '登录名称',
+		            sortable: true
+		        },
+		        {
+		            field: 'userName',
+		            title: '用户名称'
+		        },
+		        {
+		            field: 'dept.deptName',
+		            title: '部门'
+		        },
+		        {
+		            field: 'email',
+		            title: '邮箱',
+		            visible: false
+		        },
+		        {
+		            field: 'phonenumber',
+		            title: '手机'
+		        },
+		        {
+		            field: 'hireDate',
+		            title: '入职时间',
+		            sortable: true
+		        },
+		        {
+		            field: 'yearHoliday',
+		            title: '剩余年假',
+		            sortable: true,
+		            formatter: function (value, row, index) {
+		        		return value+"天";
+		        	}
+		        },
+		        {
+		        	title: '用户状态',
+		        	align: 'center',
+		        	formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(datas, value);
+		        	}
+		        },
+		        {
+		            field: 'createTime',
+		            title: '创建时间',
+		            sortable: true
+		        }]
+		    };
+		    $.table.init(options);
+		}
+		var user=[];
+		function onClickRow(row) {
+			console.log(row)
+			var userId = row.userId
+			if (user.indexOf(userId)==-1){
+				user.push(userId)
+			}
+		}
+		
+		function queryDeptTree()
+		{
+			var url = ctx + "system/dept/treeData";
+			var options = {
+		        url: url,
+		        expandLevel: 2,
+		        onClick : zOnClick
+		    };
+			$.tree.init(options);
+			
+			function zOnClick(event, treeId, treeNode) {
+				$("#deptId").val(treeNode.id);
+				$("#parentId").val(treeNode.pId);
+				$.table.search();
+			}
+		}
+		
+		$('#btnExpand').click(function() {
+			$._tree.expandAll(true);
+		    $(this).hide();
+		    $('#btnCollapse').show();
+		});
+		
+		$('#btnCollapse').click(function() {
+			$._tree.expandAll(false);
+		    $(this).hide();
+		    $('#btnExpand').show();
+		});
+		
+		$('#btnRefresh').click(function() {
+			queryDeptTree();
+		});
+
+		
+		/* 添加用户-选择用户-提交 */
+		function submitHandler() {
+			var resulta=''
+			var target=$('#bootstrap-table').bootstrapTable('getSelections');
+			
+			
+			if (target.length == 0) {
+       			$.modal.alertWarning("请选择一条记录");
+       			return;
+       		}
+			if (target.length > 1) {
+       			$.modal.alertWarning("只能选择一条记录");
+       			return;
+       		}
+			if(target.length == 1){
+				var userId=target[0].userId
+				var data = {"userId": userId };
+				$.ajax({
+		            url: ctx + "oa/oaApplyTemplate/selectUser",
+		            data: data,
+		            type: "post",
+		            async:false, //同步
+		            dataType: "json",
+		            success: function(result) {
+		            	if (result.code == 0) {
+		            		resulta = result;
+		            		console.log(resulta)
+		            	} else {
+		            		$.modal.alertError(result.msg);
+		            	}
+		            }
+		        }); 
+				$.modal.close();
+				return resulta;
+			}
+			
+	        /* console.log(target.length) */
+	        
+		}
+		
+		/* 审批流程回显，多选的 */
+		function submitHandlerMore(){
+			var target = $('#bootstrap-table').bootstrapTable('getSelections');
+			if (target.length == 0) {
+       			$.modal.alertWarning("请选择一条记录");
+       			return;
+       		}
+			
+			/* var data = {"userId": target[0] };
+			$.ajax({
+	            url: ctx + "oa/oaApplyTemplate/selectUser",
+	            data: data,
+	            type: "post",
+	            async:false, //同步
+	            dataType: "json",
+	            success: function(result) {
+	            	if (result.code == 0) {
+	            		target = result;
+	            		console.log(target)
+	            	} else {
+	            		$.modal.alertError(result.msg);
+	            	}
+	            }
+	        });  */
+	        /* console.log(target.length) */
+	        var data={
+	        		namesArry:'',
+	        		idArry:''
+	        }
+	        var namesArry=[]
+	        var idArry=[]
+	        for(var i=0;i<target.length;i++){
+	        	namesArry.push(target[i].userName)
+	        	idArry.push(target[i].userId)
+	        }
+	        data.namesArry=namesArry+'';
+	        data.idArry=idArry+'';
+	        
+			$.modal.close();
+			return data;
+			//$.operate.saveModal(ctx + "oa/oaApplyTemplate/selectUser", data);
+		}
+		/* 审批流程回显，多选的 */
+		function submitHandlerMore1(){
+			var target = $('#bootstrap-table').bootstrapTable('getSelections');
+			if (target.length == 0) {
+       			$.modal.alertWarning("请选择一条记录");
+       			return;
+       		}
+			$.modal.close();
+			return target;
+			//$.operate.saveModal(ctx + "oa/oaApplyTemplate/selectUser", data);
+		}
+		/* 项目完工，多选的 */
+		function submitHandlerMore2(){
+			var target = $('#bootstrap-table').bootstrapTable('getSelections');
+			if (target.length == 0) {
+				$.modal.alertWarning("请选择一条记录");
+				return;
+			}
+			$.modal.close();
+			return user;
+		}
+	</script>
+</body>
+<form id="importForm" enctype="multipart/form-data" class="mt20 mb10" style="display: none;">
+	<div class="col-xs-offset-1">
+		<input type="file" id="file" name="file"/>
+		<div class="mt10 pt5">
+			<input type="checkbox" id="updateSupport" name="updateSupport" title="如果登录账户已经存在，更新这条数据。"> 是否更新已经存在的用户数据
+			 &nbsp;	<a onclick="$.table.importTemplate()" class="btn btn-default btn-xs"><i class="fa fa-file-excel-o"></i> 下载模板</a>
+		</div>
+		<font color="red" class="pull-left mt10">
+			提示：仅允许导入“xls”或“xlsx”格式文件！
+		</font>
+	</div>
+</form>
+</html>

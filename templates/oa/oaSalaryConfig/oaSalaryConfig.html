@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('缴费基数与缴费比例配置列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+
+							<li>
+								是否本市户口（Y是，N否）：
+								<select  name="cityAccount"
+								th:with="type=${@dict.getType('sys_yes_no')}">
+									<option value="">--请选择--</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+							   </select>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaSalaryConfig:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:oaSalaryConfig:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaSalaryConfig:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaSalaryConfig:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaSalaryConfig:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaSalaryConfig:remove')}]];
+        var prefix = ctx + "oa/oaSalaryConfig";
+
+        var sysYesNo = [[${@dict.getType('sys_yes_no')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "缴费基数与缴费比例配置",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'cityAccount', 
+					title : '是否本市户口',
+					sortable: true,
+					width:'100',
+					formatter: function (value, row, index) {
+			        	return $.table.selectDictLabel(sysYesNo, value);
+			        }
+				},
+				{
+					field : 'oldInsureBase', 
+					title : '养老保险缴费基数',
+					width:'150',
+					sortable: true
+				},
+				{
+					field : 'oldInsureBaseMax',
+					width:'150',
+					title : '养老保险最高缴费基数',
+					sortable: true
+				},
+				{
+					field : 'companyOldRate', 
+					title : '公司养老保险缴费比率',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'personOldRate', 
+					title : '个人养老保险缴费比率',
+					sortable: true,
+					width:'150',
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'companyInjuryRate', 
+					title : '公司工伤保险缴纳比率',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'cureBase', 
+					title : '医疗保险缴费基数',
+					width:'150',
+					sortable: true
+				},
+				{
+					field : 'cureBaseMax', 
+					title : '医疗保险最高缴费基数',
+					width:'150',
+					sortable: true
+				},
+				{
+					field : 'companyCureRate', 
+					title : '公司医疗保险缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'personCureRate', 
+					title : '个人医疗保险缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'loseBase', 
+					title : '失业保险最低缴费基数',
+					width:'150',
+					sortable: true
+				},
+				{
+					field : 'companyLoseRate', 
+					title : '公司失业保险缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'personLoseRate', 
+					title : '个人失业保险缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'companyBirthBase', 
+					title : '公司生育险缴费基数',
+					width:'150',
+					sortable: true
+				},
+				{
+					field : 'companyBirthBaseMax', 
+					title : '公司生育险最高缴费基数',
+					width:'150',
+					sortable: true
+				},
+				{
+					field : 'companyBirthRate', 
+					title : '公司生育险缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'companyCommonRate', 
+					title : '公司公积金缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+				{
+					field : 'personCommonRate', 
+					title : '个人公积金缴纳比例',
+					width:'150',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return value+"%";
+			        }
+				},
+		        {
+		            title: '操作',
+					width:'150',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

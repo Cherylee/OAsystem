@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div style="position: fixed; z-index: 10; top: 30px;right: 40px">
+    <button class="btn btn-warning btn-rounded btn-sm" onclick="printing()"><i class="fa fa-download"></i>打印</button>
+</div>
+<div id="printing">
+    <div th:each="oaTravel,oaTravelStat :${oaTravelVoList}">
+        <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+            <!--抬头  -->
+            <div class="hr-line-dashed"></div>
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <form class="form-horizontal m" id="form-oaTravel-edit" th:object="${oaTravel}">
+                                <table class="table table-bordered table-condensed" >
+                                    <caption class="text-center">
+                                        <h2>出差申请</h2>
+                                    </caption>
+                                    <tbody>
+                                    <th colspan="4">
+                                        表单信息
+                                    </th>
+                                    <tr>
+                                        <td class="active" style="width: 15%">申请人</td>
+                                        <td style="width: 35%">[[${oaTravel.oaTravel.userName}]]</td>
+                                        <td class="active" style="width: 15%">归属部门</td>
+                                        <td>[[${oaTravel.oaTravel.deptName}]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">出差开始时间</td>
+                                        <td>[[${#dates.format(oaTravel.oaTravel.applyTimeFrom, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        <td class="active">出差结束时间</td>
+                                        <td>[[${#dates.format(oaTravel.oaTravel.applyTimeTo, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">出差天数</td>
+                                        <td>[[${oaTravel.oaTravel.applyDays}]]</td>
+                                        <td class="active">出差原因</td>
+                                        <td>[[${oaTravel.oaTravel.applyReason}]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">创建日期</td>
+                                        <td>[[${#dates.format(oaTravel.oaTravel.createTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        <td class="active">是否公司购票</td>
+                                        <td th:if="${oaTravel.oaTravel.isCompanyTicket == 'Y'}">是</td>
+                                        <td th:unless="${oaTravel.oaTravel.isCompanyTicket == 'Y'}">否</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">是否借款</td>
+                                        <td th:if="${oaTravel.oaTravel.isBorrowMoney == 'Y'}">是</td>
+                                        <td th:unless="${oaTravel.oaTravel.isBorrowMoney == 'Y'}">否</td>
+                                        <td class="active">乘坐交通工具</td>
+                                        <td th:classappend="${'vehicle'+ (oaTravelStat.index) }"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">预算</td>
+                                        <td>[[${oaTravel.oaTravel.budget}]]</td>
+                                        <td class="active">出差目的地</td>
+                                        <td>[[${oaTravel.oaTravel.travelDestination}]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">职务代理人</td>
+                                        <td>[[${oaTravel.oaTravel.deputyName}]]</td>
+                                        <td class="active">备注</td>
+                                        <td>[[${oaTravel.oaTravel.remark}]]</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>审批流程</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th></th>
+                                            <th style="width: 25%">流程名称</th>
+                                            <th style="width: 25%">开始时间</th>
+                                            <th style="width: 25%">审批信息</th>
+                                            <th style="width: 25%">审核时间</th>
+                                        </tr>
+                                        <tr th:each="approval,approvalStat :${oaTravelVoList[oaTravelStat.index].processList}">
+                                            <td>[[${approvalStat.index}]]</td>
+                                            <td>[[${approval.actName}]]</td>
+                                            <td>[[${#dates.format(approval.startTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${approval.message}]]</td>
+                                            <td>[[${#dates.format(approval.endTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="page-break-after:always;"></div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+
+    //乘坐交通工具
+    var vehicleList = [[${@dict.getType('oa_travel_tool')}]];
+    selectDictionary(vehicleList,[[${oaTravelVoList}]],'oaTravel','vehicle');
+
+    function printing() {
+        $('#printing').jqprint({
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: false
+        });
+    }
+</script>
+</body>
+</html>

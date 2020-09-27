@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新建附属协议')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style type="text/css">
+caption {
+	font-size: 16px !important;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content"
+		th:object="${vo}">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<!-- 合同申请 -->
+						<form id="form-supAgre">
+
+							<table class="table table-bordered">
+								<caption>
+									<strong>合同申请 </strong>
+								</caption>
+
+
+								<tbody>
+									<tr>
+										<td class="active">申请人</td>
+										<td class="active"><span th:text="*{curUser.userName}"></span></td>
+										<td class="active">申请部门</td>
+										<td class="active"><span
+											th:text="*{curUser.dept.deptName}"></span></td>
+										<td class="active">申请日期</td>
+										<td class="active"><span class="currentTime"></span></td>
+									</tr>
+									<tr>
+										<td class="active">合同类型</td>
+										<td class="active"><span class="oaProject"></span></td>
+										<td>合同金额</td>
+										<td><input type="text" name="contractAmount"
+											class="form-control"></td>
+										<td>合同金额大写</td>
+										<td><input type="text" name="amountUpper"
+											class="form-control"></td>
+									</tr>
+									<tr class="ifshowProject hide">
+										<td class="active">工程名称</td>
+										<td class="active" colspan="5"><span
+											th:text="*{oaProject.projectName}"></span></td>
+									</tr>
+									<tr>
+										<td>合同名称</td>
+										<td colspan="5"><input type="text" name="contractName"
+											class="form-control"></td>
+									</tr>
+									<tr>
+										<td>签约方名称</td>
+										<td colspan="2"><input type="text" name="signingParties"
+											class="form-control"></td>
+										<td class="active">付款方式</td>
+										<td class="active" colspan="2"><span class="payWay"></span></td>
+									</tr>
+									<tr>
+										<td>第三方名称</td>
+										<td colspan="2"><input type="text" name="thirdPartyName"
+											class="form-control"></td>
+										<td>第三方负责人</td>
+										<td colspan="2"><input type="text" name="thirdPartPerson"
+											class="form-control"></td>
+									</tr>
+									<tr>
+										<td>签约方资质证明</td>
+										<td colspan="5">
+											<div class="file-loading">
+												<input id="uploadFileId1" type="file" multiple>
+											</div> <input id="fileUrl1" name="qualifications"
+											class="form-control" type="hidden">
+										</td>
+									</tr>
+									<tr>
+										<td>合同附件</td>
+										<td colspan="5">
+											<div class="file-loading">
+												<input id="uploadFileId2" type="file" multiple>
+											</div> <input id="fileUrl2" name="contractF" class="form-control"
+											type="hidden">
+										</td>
+									</tr>
+									<tr>
+										<td>签约背景/备注说明</td>
+										<td colspan="5"><input
+											type="hidden" name="type1" value="7" class="form-control"><input type="hidden" name="effectDate"
+											th:value="*{#dates.format(oaContract.effectDate, 'yyyy-MM-dd HH:mm:ss')}"> <input
+											type="hidden" name="expirationDate"
+											th:value="*{#dates.format(oaContract.expirationDate, 'yyyy-MM-dd HH:mm:ss')}"> <input
+											type="hidden" name="projectId"
+											th:value="*{oaContract.projectId}"> <input
+											type="hidden" name="parentId" th:value="*{oaContract.id}">
+											<input type="hidden" name="contractType" value="1"> <input
+											type="text" name="remark" class="form-control"></td>
+									</tr>
+
+								</tbody>
+							</table>
+
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>申请
+								</button>
+								&nbsp;
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+	
+		/* console.log([[${vo}]]); */
+		
+		var prefix = ctx + "oa/oaContract"
+		var oaContractType=[[${@dict.getType('oa_contract_type1')}]]
+		
+		uploadFile('uploadFileId1', 'fileUrl1')
+        uploadFile('uploadFileId2', 'fileUrl2')
+		//文件上传
+		function uploadFile(id,url) {			
+			var attachmentUrls = null;
+			$('#' + id).fileinput({
+				'theme' : 'explorer-fas',
+				uploadUrl : ctx + 'common/bootstrapFileInputUpload',
+				overwriteInitial : false,
+				initialPreviewAsData : true,
+				uploadAsync : true
+			/* initialPreview: [
+			    "/img/profile.jpg"
+			] */
+			}).on("fileuploaded", function(event, data, previewId, index) {
+				if (attachmentUrls == null) {
+					attachmentUrls = data.response.fileName;
+				} else {
+					attachmentUrls += "," + data.response.fileName;
+				}
+				$("#" + url).val(attachmentUrls);
+			});
+		}
+		function currentDate(obj){
+		    var myDate = new Date;
+		    var year = myDate.getFullYear(); //获取当前年
+		    var mon = myDate.getMonth() + 1; //获取当前月
+		    var date = myDate.getDate(); //获取当前日
+		    // var h = myDate.getHours();//获取当前小时数(0-23)
+		    // var m = myDate.getMinutes();//获取当前分钟数(0-59)
+		    // var s = myDate.getSeconds();//获取当前秒
+		    /* var week = myDate.getDay();
+		    var weeks = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]; */
+		   /*  console.log(year + "-" + mon + "-" + date) */
+		    obj.html(year + "-" + mon + "-" + date);
+	    }
+		 var currentTime=function(){
+			   if($('.currentTime').length>0){
+				  $(".currentTime").each(function (index, item) {
+					var thisObj=$(item);
+					currentDate(thisObj)
+				  })
+			    }
+		    }
+
+		function submitHandler() {
+			/* console.log($('#form-supAgre').serialize()) */
+			$.operate.saveTab(prefix + "/add", $('#form-supAgre').serialize());
+		}
+		
+		
+	
+		
+		//回显字典 封装的公用方法
+		function dictV(id,d,v){//d:字典名 v:键值
+			$(id).html($.table.selectDictLabel(d, v));
+		}
+		
+		$(function(){	
+			
+			//当前时间
+			currentTime()
+			//判断是否显示工程字段&&副总审核
+			if([[${vo.oaContract.type1}]]==7){/*工程合同*/
+				$('.ifshowProject').removeClass('hide')
+			}
+			
+			//回显合同类型字段 
+			dictV('.oaContractType',[[${@dict.getType('oa_contract_type1')}]],[[${vo.oaContract.type1}]])
+			
+			dictV('.oaProject',[[${@dict.getType('oa_contract_type2')}]],[[${vo.oaProject.type}]])
+			
+			
+			
+			//回显付款方式
+			dictV('.payWay',[[${@dict.getType('oa_contact_payway')}]],[[${vo.oaContract.payType}]])
+			
+			if([[${vo.nodeFlag}]]=='key1'){
+				$('#nodeFlag').val('key1')
+			}
+
+		})
+	</script>
+</body>
+</html>

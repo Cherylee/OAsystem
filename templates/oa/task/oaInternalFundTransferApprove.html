@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('内部资金调拨单审批')" />
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <form class="form-horizontal m" id="form-oaInternalFundTransfer-edit" th:object="${oaInternalFundTransfer}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+                            <table class="table table-bordered table-condensed table-bot">
+                                <caption class="text-center">
+                                    <h2>内部资金调拨单</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">编号</td>
+                                    <td>
+                                        <input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">所属公司</td>
+                                    <td>
+                                        <input type="hidden" name="companyId" id="companyId" th:value="*{companyId}"/>
+                                        <input type="text" name="companyName" id="companyName" class="form-control"
+                                               onclick="selectDeptTree('companyId','companyName','0')" th:value="*{companyName}"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人</td>
+                                    <td>
+                                        <input id="userName" name="userName" th:field="*{userName}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">申请日期</td>
+                                    <td>
+                                        <input id="applyTime" name="applyTime" th:value="${#dates.format(oaInternalFundTransfer.applyTime, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门</td>
+                                    <td>
+                                        <input id="treeId" name="deptId" class="form-control" type="hidden" th:value="*{deptId}">
+                                        <input id="treeName" name="deptName" class="form-control" type="text"
+                                               onclick="selectDeptTree('treeId','treeName','1')" th:value="*{deptName}">
+                                    </td>
+                                    <td class="active">付款类型</td>
+                                    <td>
+                                        <input id="payType" name="payType" th:field="*{payType}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款人</td>
+                                    <td>
+                                        <input id="payee" name="payee" th:field="*{payee}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">收款人</td>
+                                    <td>
+                                        <input id="receivabler" name="receivabler" th:field="*{receivabler}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款账号</td>
+                                    <td>
+                                        <input id="payeeAccount" name="payeeAccount" th:field="*{payeeAccount}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">收款人账号</td>
+                                    <td>
+                                        <input id="receivablerAccount" name="receivablerAccount" th:field="*{receivablerAccount}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款开户行</td>
+                                    <td>
+                                        <input id="payeeOpenBank" name="payeeOpenBank" th:field="*{payeeOpenBank}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">收款人开户行</td>
+                                    <td>
+                                        <input id="receivablerOpenBank" name="receivablerOpenBank" th:field="*{receivablerOpenBank}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款事由</td>
+                                    <td colspan="3">
+                                        <input id="reason" name="reason" th:field="*{reason}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">付款金额</td>
+                                    <td>
+                                        <input id="money" name="money" th:field="*{money}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">金额大写</td>
+                                    <td>
+                                        <input id="moneyUpper" name="moneyUpper" th:field="*{moneyUpper}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple
+                                                   th:disabled="${oaInternalFundTransfer.status!='3'&&oaInternalFundTransfer.status!='99'}? true : false">
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                                <br>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                                <button type="button" class="btn btn-sm btn-success"
+                                        th:onclick="selectUser('','','0',[[${oaInternalFundTransfer.id}]],'oa/oaInternalFundTransfer/copy','flag')">
+                                    抄送</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关闭
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js"/>
+    <th:block th:include="include :: lastNode" />
+    <script type="text/javascript"  th:inline="javascript">
+		var prefix = ctx + "oa/oaInternalFundTransfer";
+        var lastNodeId=[[${oaInternalFundTransfer.id}]];
+        var actDefineId=[[${oaInternalFundTransfer.actDefineId}]];
+        var lastStatus=[[${oaInternalFundTransfer.status}]];
+		$("#form-oaInternalFundTransfer-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-oaInternalFundTransfer-edit').serialize());
+	        }
+	    }
+
+
+        //流程
+
+        var data = {};
+        data.procInstId= [[${oaInternalFundTransfer.procInstId}]];
+        data.id = [[${oaInternalFundTransfer.id}]];
+        selectActProcessList(data);
+
+        //同意
+        function agree(){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/"+[[${type}]]+"/oa_internal_fund_transfer/"+[[${oaInternalFundTransfer.id}]]);
+        }
+        //不同意
+        function disagree(){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/"+[[${type}]]+"/oa_internal_fund_transfer/"+[[${oaInternalFundTransfer.id}]]);
+        }
+        //返回
+        function backAway(){
+            $.modal.close();
+            var parent = window.parent;
+            parent.$.table.refresh();
+        }
+
+        //图片反显出来
+        var attachmentList = new Array();
+        $(function () {
+            var config = {
+                url: ctx + "oa/oaAttachment/selectAttachByObjectId",
+                type: "post",
+                dataType: "json",
+                data: {"objId": [[${oaInternalFundTransfer.id}]]},
+                success: function (result) {
+                    var imgsUrl = new Array();
+                    var attachList = result.data;
+                    if (attachList != null && attachList.length > 0) {
+                        var downloadConfig = new Array();
+                        for (var i = 0; i < attachList.length; i++) {
+                            var down = {};
+                            var attach = attachList[i];
+                            imgsUrl.push(attach.attachmentName);
+                            down.key = attach.attachmentName;
+                            down.caption = attach.fileName;
+                            down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                            if (isAssetTypeAnImage(attach.attachmentName)) {
+                                down.type = 'image';
+                            } else {
+                                down.type = 'object';
+                            }
+                            downloadConfig.push(down);
+                            attachmentList.push({
+                                "objectId": [[${oaInternalFundTransfer.id}]],
+                                "attachmentName": attach.attachmentName,
+                                "fileName": attach.fileName
+                            })
+                        }
+                        var option1 = {
+                            id: 'uploadFileId',
+                            uploadUrl: null,
+                            deleteUrl: null,
+                            //deleteExtraData:deleteExtraData,
+                            imgsUrl: imgsUrl,
+                            downloadConfig: downloadConfig
+                        }
+                        $.common.uploadFile(option1);
+                    } else {
+                        var option2 = {
+                            id: 'uploadFileId',
+                            uploadUrl: null,
+                            deleteUrl: null,
+                            deleteExtraData: null,
+                            imgsUrl: new Array(),
+                            initialPreviewConfig: null
+                        }
+                        $.common.uploadFile(option2);
+                    }
+                }
+            };
+            $.ajax(config)
+        });
+    </script>
+</body>
+</html>

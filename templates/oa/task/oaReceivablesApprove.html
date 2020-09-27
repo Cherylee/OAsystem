@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('收款申请审批')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style>
+.add_btn_mt {
+	margin-top: 15px;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaPurchase-edit"
+							th:object="${oaReceivables}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<input id="taskId" name="taskId" th:value="${taskId}"
+								type="hidden">
+							<table class="table table-bordered table-condensed"
+								style="width: 90%; margin: 0 auto">
+								<caption class="text-center">
+									<h2>收款单</h2>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">编号：</td>
+										<td>[[*{code}]]</td>
+										<td class="active">所属公司：</td>
+										<td>[[*{companyName}]]</td>
+
+									</tr>
+									<tr>
+										<td class="active">申请人：</td>
+										<td>[[*{userName}]]</td>
+										<td class="active"><span style="color: red;">*</span>项目名称：</td>
+										<td>[[*{projectName}]]</td>
+									</tr>
+									<tr>
+										<td class="active">申请部门：</td>
+										<td>[[*{deptName}]]</td>
+										<td class="active">申请日期：</td>
+										<td colspan="3">[[${#dates.format(oaReceivables.applyDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+									</tr>
+									<tr>
+										<td class="active"><span style="color: red;">*</span>收款事由：</td>
+										<td>[[*{reason}]]</td>
+										<td class="active">收款日期：</td>
+										<td colspan="3">[[${#dates.format(oaReceivables.receivablesDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+									</tr>
+									<tr>
+										<td class="active">金额：</td>
+										<td>[[*{money}]]</td>
+										<td class="active">金额大写：</td>
+										<td colspan="3">[[*{moneyUpcase}]]</td>
+									</tr>
+									<tr>
+										<td class="active">附件：</td>
+										<td colspan="3">
+											<div class="file-loading">
+												<input id="uploadFileId" type="file" multiple disabled>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<!-- 冲抵借款 -->
+						<h3>收款明细</h3>
+						<table class="table table-bordered " id="receivableDetail"
+							   data-mobile-responsive="true">
+
+						</table>
+
+                        <!-- 冲抵借款 -->
+						<h3>冲抵借款</h3>
+						<table class="table table-bordered " id="borrowTable"
+							data-mobile-responsive="true">
+
+						</table>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+				<button type="button" class="btn btn-sm btn-success"
+						th:onclick="selectUser('','','0',[[${oaReceivables.id}]],'oa/oaReceivables/copy','flag')">
+						抄送</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关闭
+				</button>
+			</div>
+		</div>
+		<div class="col-sm-12 select-table table-striped">
+			<table id="approveTaskId" data-mobile-responsive="true"></table>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<th:block th:include="include :: lastNode" />
+	<th:block th:include="include :: jquery-cxselect-js"/>
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaReceivables";
+		var lastNodeId=[[${oaReceivables.id}]];
+		var actDefineId=[[${oaReceivables.actDefineId}]];
+		var lastStatus=[[${oaReceivables.status}]];
+
+		var sys_pro_payment_type_relation = [[${@dict.getType('sys_pro_payment_type_relation')}]];
+		var sys_pro_payment_type = [[${@dict.getType('sys_pro_payment_type')}]];
+		var sys_pro_payment_type2_1 = [[${@dict.getType('sys_pro_payment_type2_1')}]];
+		var sys_pro_payment_type2_2 = [[${@dict.getType('sys_pro_payment_type2_2')}]];
+		var sys_pro_payment_type2_3 = [[${@dict.getType('sys_pro_payment_type2_3')}]];
+		var sys_pro_payment_type2_4 = [[${@dict.getType('sys_pro_payment_type2_4')}]];
+		var sys_pro_payment_type2_5 = [[${@dict.getType('sys_pro_payment_type2_5')}]];
+		$(function () {
+			var dictD = []
+			for (var i = 0; i < sys_pro_payment_type_relation.length; i++) {
+
+				dictD.push({
+					'v': sys_pro_payment_type[i].dictValue,
+					'n': sys_pro_payment_type[i].dictLabel,
+					's': []
+				})
+				var vlp = eval(sys_pro_payment_type_relation[i].dictValue)
+				for (var a = 0; a < vlp.length; a++) {
+					var dictD_2 = {}
+					dictD_2.v = vlp[a].dictValue
+					dictD_2.n = vlp[a].dictLabel
+					dictD[i].s.push(dictD_2)
+				}
+
+			}
+
+			$('#element2').cxSelect({
+				selects: ['first', 'second'],
+				jsonValue: 'v',
+				data: dictD
+			});
+		});
+
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+$("#taskId").val()+"/160/oa_receivables/"+[[${oaReceivables.id}]]);
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+$("#taskId").val()+"/160/oa_receivables/"+[[${oaReceivables.id}]]);
+	    }
+	    //关闭
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		//对应的明细信息
+		$(function() {
+    	        var attachmentList = new Array();
+    	        //回显附件
+    	        var config = {
+            	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+            	        type: "post",
+            	        dataType: "json",
+            	        data: {"objId": [[${oaReceivables.id}]]},
+            	        success: function(result) {
+    				        var imgsUrl = new Array();
+            	        	var attachList = result.data;
+            	        	if(attachList!=null && attachList.length>0){
+            	        		var downloadConfig = new Array();
+            	        		for(var i=0; i<attachList.length; i++){
+            	        			var down = {};
+            	        			var attach = attachList[i];
+		    	        			imgsUrl.push(attach.attachmentUrl);
+            	        			down.key = attach.attachmentName;
+            	        			down.caption = attach.fileName;
+            	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+            	        			if(isAssetTypeAnImage(attach.attachmentName)){
+    		    	        			down.type = 'image';
+    	    	        			}else{
+    	    	        				down.type = 'object';
+    	    	        			}
+            	        			downloadConfig.push(down);
+            	        		}
+            	        		var option1={
+            	    					id:'uploadFileId',
+            	    					uploadUrl:null,
+            	    					deleteUrl:null,
+            	    					imgsUrl:imgsUrl,
+            	    					downloadConfig:downloadConfig
+            	    			}
+            	        		$.common.uploadFile(option1); 
+            	        	}else{
+            	        		 var option2={
+            	    					id:'uploadFileId',
+            	    					uploadUrl:null,
+            	    					deleteUrl:null,
+            	    					deleteExtraData:null,
+            	    					imgsUrl:new Array(),
+            	    					initialPreviewConfig:null
+            	    			}
+            	        		$.common.uploadFile(option2);  
+            	        	}
+    		     			downFile();
+            	        }
+            	    };
+            	    $.ajax(config)
+			$.table.init(options);
+			$.table.init(options1);
+        });
+		var options = {
+			id:'borrowTable',
+			contentType : "application/json;charset=UTF-8",
+			url: ctx + "oa/oaBorrowMoney/getBorrowMoneyByOther",
+			clickToSelect : true,
+			showSearch : false,
+			toolBar:'toolbar-borrow',
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			modalName: "借款申请",
+			showExport: false,
+			queryParams: {
+				"tableColumn":"borrow_id",
+				"tableName":"oa_receivables_borrow",
+				"tableMid":"receivables_id",
+				"midValue":[[${oaReceivables.id}]]
+			},
+			columns: [{
+				checkbox: true
+			},
+				{
+					field : 'id',
+					title : 'id',
+					visible:false
+				},
+				{
+					field : 'borrowId',
+					title : 'id',
+					visible:false,
+					formatter: function(value, row, index) {
+						return row.id
+					}
+				},
+				{
+					field : 'code',
+					title : '借款编号'
+				},
+				{
+					field : 'borrowReason',
+					title : '借款用途'
+				},
+				{
+					field : 'borrowAmount',
+					title : '借款金额'
+				},
+				{
+					field : 'offsetAmount',
+					title : '冲抵金额'
+				},
+				{
+					field : 'borrowMoney',
+					title : '剩余可冲抵金额'
+				}]
+		};
+		var receivableType=[[${@dict.getType("oa_receivable_type")}]];
+		var options1 = {
+			url:ctx + "oa/oaReceivables/detailList",
+			id:"receivableDetail",
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			showFooter: true,
+			modalName: "收款明细",
+			toolBar:"toolbar-detail",
+			queryParams: {
+				"mainId":[[${oaReceivables.id}]]
+			},
+			uniqueId:'id',
+			showExport: false,
+			columns: [
+				{
+					title : '序号',
+					formatter: function(value, row, index) {
+						return index+1
+					}
+				},
+				{
+					field : 'id',
+					title : 'id',
+					visible:false
+				},
+				{
+					field : 'receivableType',
+					title : '收款类型',
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(receivableType, value);
+					}
+				},
+				{
+					field : 'paymentType',
+					title : '款项类别',
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(sys_pro_payment_type, value);
+					}
+				},
+				{
+					field : 'moneyPurpost',
+					title : '款项用途',
+					formatter:function (value, row, index) {
+						var relation=[];
+						for (var i = 0; i < sys_pro_payment_type_relation.length; i++) {
+							if(sys_pro_payment_type_relation[i].dictLabel==row.paymentType){
+								relation=eval(sys_pro_payment_type_relation[i].dictValue)
+							}
+						}
+						return $.table.selectDictLabel(relation, value);
+					}
+				},
+				{
+					field : 'receivableCost',
+					title : '收款金额',
+					footerFormatter:function (value) {
+						var sumBalance = 0;
+						for (var i in value) {
+							sumBalance += parseFloat(value[i].receivableCost);
+						}
+						return  '合计：'+sumBalance;
+					}
+				},
+				{
+					field : 'remark',
+					title : '备注'
+				}]
+		};
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaReceivables.procInstId}]];
+    	data.id = [[${oaReceivables.id}]];
+		selectActProcessList(data,'approveTaskId');
+	</script>
+</body>
+</html>

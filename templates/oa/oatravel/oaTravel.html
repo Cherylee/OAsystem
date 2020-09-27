@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('出差列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" id="proposerId" name="proposer"/>
+                            <input type="text" id="proposerName" name="proposerName"
+                                   onclick="selectUserById('proposerId','proposerName')" placeholder="申请人"/>
+                        </li>
+                        <li><input type="hidden" id="CompanyId" name="companyId"/> <input
+                                type="text" id="CompanyName"
+                                onclick="selectDeptTree('CompanyId','CompanyName','0')" placeholder="申请公司"/>
+                        </li>
+                        <li><input type="hidden" id="deptId" name="deptId"/> <input
+                                type="text" id="deptName"
+                                onclick="selectDeptTree('deptId','deptName','1')" placeholder="申请部门"/>
+                        </li>
+                        <li>
+                            <select name="leave_type" th:with="type=${@dict.getType('oa_leave_status')}">
+                                <option value="">状态</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaTravel:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()"
+               shiro:hasPermission="oa:oaTravel:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaTravel:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+            <a class="btn btn-warning" onclick="printing()"><i class="fa fa-download"></i>&nbsp;批量打印</a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaTravel:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaTravel:remove')}]];
+
+    var travelStatus = [[${@dict.getType('oa_leave_status')}]];
+    var vehicleList = [[${@dict.getType('oa_travel_tool')}]];
+
+    var prefix = ctx + "oa/oatravel";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "出差",
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'userName',
+                    title: '申请人'
+                },
+                {
+                    field: 'deptName',
+                    title: '申请部门',
+                    sortable: true
+                },
+                {
+                    field: 'companyName',
+                    title: '公司名称',
+                    sortable: true
+                },
+                {
+                    field: 'deputyName',
+                    title: '职务代理人'
+                },
+                {
+                    field: 'applyTimeFrom',
+                    title: '申请时间从',
+                    sortable: true
+                },
+                {
+                    field: 'applyTimeTo',
+                    title: '申请时间到',
+                    sortable: true
+                },
+                {
+                    field: 'applyDays',
+                    title: '出差天数',
+                    sortable: true
+                },
+                {
+                    field: 'deptId',
+                    title: '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'status',
+                    title: '状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(travelStatus, value);
+                    }
+                },
+                {
+                    field: 'applyReason',
+                    title: '出差原因',
+                    sortable: true
+                },
+                {
+                    field: 'procInstId',
+                    title: '流程id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'vehicle',
+                    title: '乘坐交通工具',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(vehicleList, value);
+                    }
+                },
+                {
+                    field: 'budget',
+                    title: '预算',
+                    sortable: true
+                },
+                {
+                    field: 'financeRoleId',
+                    title: '对应公司财务人员角色id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'ticketRoleId',
+                    title: '购票人员角色id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'isCompanyTicket',
+                    title: '是否公司购票',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        if (value == 'Y') {
+                            return '是'
+                        } else {
+                            return '否'
+                        }
+                    }
+                },
+                {
+                    field: 'isBorrowMoney',
+                    title: '是否借款',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        if (value == 'Y') {
+                            return '是'
+                        } else {
+                            return '否'
+                        }
+                    }
+                },
+                {
+                    field: 'travelDestination',
+                    title: '出差目的地',
+                    sortable: true
+                },
+                {
+                    field: 'isDelay',
+                    title: '是否出差延期',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        if (value == 'Y') {
+                            return '是'
+                        } else {
+                            return '否'
+                        }
+                    }
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var text = '查看详情'
+                        var edit = ''
+                        var classN = 'btn-info'
+                        if (row.status == '3' || row.status == '99') {
+                            if (row.allowedEdit == true) {
+                                edit = editFlag
+                                text = '编辑'
+                                classN = 'btn-success'
+                                actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                                actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="remove(\'' + row.id + '\',\'' + row.status + '\')"><i class="fa fa-remove"></i>删除</a> ');
+                            }
+                        } else {
+                            actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                        }
+                        if (row.status == '0' && row.allowedEdit == true) {
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+
+    //删除
+    function remove(id, status) {
+        if (status != 3 && status != 0) {
+            $.modal.alertWarning("只有申请和驳回状态能被删除！");
+            return;
+        }
+        $.modal.confirm("确定删除该条" + $.table._option.modalName + "信息吗？", function () {
+            var url = $.common.isEmpty(id) ? $.table._option.removeUrl : $.table._option.removeUrl.replace("{id}", id);
+            if ($.table._option.type == table_type.bootstrapTreeTable) {
+                $.operate.get(url);
+            } else {
+                var data = {"ids": id};
+                $.operate.submit(url, "post", "json", data);
+            }
+        });
+
+    }
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+        $.modal.close();
+        return target[0];
+    }
+
+    //打印
+    function printing() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+        if (target.length == 0) {
+            $.modal.alertWarning("请选择一条记录");
+        } else {
+            var number = 0;
+            var idList = [];
+            for (var i = 0; i < target.length; i++) {
+                if (target[i].status == '2'||target[i].status == '16'){
+                    idList.push(target[i].id);
+                } else {
+                    number = number + 1
+                }
+            }
+            if (number==0){
+                $.modal.openFullS('批量打印', prefix + "/print/" + idList);
+            }else {
+                $.modal.alertWarning("只可以打印已完成和审批通过的单据");
+            }
+        }
+    }
+</script>
+</body>
+</html>

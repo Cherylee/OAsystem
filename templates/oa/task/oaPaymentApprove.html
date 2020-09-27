@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('收款申请审批')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <th:block th:include="include :: sysProCss"/>
+    <style>
+        table td {
+            position: relative
+        }
+
+        .fixed-table-toolbar .bs-bars {
+            display: none !important;
+        }
+
+        .box-center-title {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center
+        }
+
+        .box-center-title hr {
+            position: initial;
+            left: auto;
+            top: auto;
+            height: 1px;
+            background: rgb(216, 216, 216);
+            width: 100%;
+        }
+
+        .box-center-title span {
+            padding: 0 10px 0 5px;
+        }
+
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form id="form-oaPayment-edit"
+                          th:object="${oaPayment}" >
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="taskId" name="taskId" th:value="${taskId}"
+                               type="hidden">
+                        <table class="table table-bordered table-condensed table-bot">
+                            <caption class="text-center">
+                                <h2>付款单</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">编号：</td>
+                                <td>[[*{code}]]</td>
+                                <td class="active">所属公司：</td>
+                                <td>[[*{companyName}]]</td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>[[*{userName}]]</td>
+                                <td class="active">申请部门：</td>
+                                <td>[[*{deptName}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;" th:unless="${oaPayment.projectId==null}">*</span>项目名称：</td>
+                                <td>[[*{projectName}]]</td>
+                                <td class="active">关联投标公告：</td>
+                                <td>[[*{tenderNoticeProjectName}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请日期：</td>
+                                <td>[[${#dates.format(oaPayment.applyDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                <td class="active">支付日期：</td>
+                                <td >[[${#dates.format(oaPayment.payDate, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                            </tr>
+
+                            <tr>
+                                <td class="active">付款金额：</td>
+                                <td>[[*{money}]]</td>
+                                <td class="active">金额大写：</td>
+                                <td colspan="3">[[*{moneyUpcase}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">付款方：</td>
+                                <td>[[*{drawee}]]</td>
+                                <td class="active" th:if="${oaPayment.projectId==null}">付款方式：</td>
+                                <td th:if="${oaPayment.projectId==null}">
+                                    <select name="payType" class="form-control" th:field="*{payType}" disabled="disabled"
+                                            th:with="type=${@dict.getType('oa_payment_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active" th:unless="${oaPayment.projectId==null}">付款类型：</td>
+                                <td th:unless="${oaPayment.projectId==null}">
+                                    <select name="payType" id="sysPayType" class="form-control" th:field="*{payType}" disabled="disabled"
+                                            th:with="type=${@dict.getType('sys_pro_pay_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">到账截止日期：</td>
+                                <td>
+                                    <input id="expirationDate" th:value="${#dates.format(oaPayment.expirationDate, 'yyyy-MM-dd HH:mm:ss')}"
+                                           name="expirationDate" class="form-control time-input" type="text">
+                                </td>
+                                <td class="active">是否代收代付：</td>
+                                <td>
+                                    <select name="isAgent" class="form-control" th:field="*{isAgent}" disabled="disabled" th:with="type=${@dict.getType('sys_yes_no')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">关联收款：</td>
+                                <td>
+                                    <input id="receivablesId" th:field="*{receivablesId}" name="receivablesId" class="form-control" type="hidden">
+                                    <input id="receivablesName" th:field="*{receivablesName}" name="receivablesName"
+                                           class="form-control" type="text" onclick="selectReci()">
+                                </td>
+                                <td class="active">是否委托关联公司代付：</td>
+                                <td>
+                                    <select name="companyPay" class="form-control" th:field="*{companyPay}" disabled="disabled"
+                                            th:with="type=${@dict.getType('sys_yes_no')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple disabled>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">实际付款金额：</td>
+                                <td>[[*{actualMoney}]]</td>
+                                <td class="active">实际付款金额大写：</td>
+                                <td colspan="3">[[*{actualMoneyUpcase}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">关联公司：</td>
+                                <td>[[*{company}]]</td>
+                                <td class="active">金额：</td>
+                                <td colspan="3">[[*{companyPayMoney}]]</td>
+                            </tr>
+                            <tr>
+                                <td class="active">关联公司账号：</td>
+                                <td>[[*{companyAccount}]]</td>
+                                <td class="active">关联公司开户行：</td>
+                                <td colspan="3">[[*{companyOpenBank}]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <!-- 明细 -->
+                    <!-- 付款明细 -->
+                    <div>
+                        <div class="box-center-title ">
+                            <div class="arrow arrow-bottom"></div>
+                            <span>付款明细</span>
+                            <hr>
+                        </div>
+                        <div class=" select-table table-striped arrow-box ">
+                            <table class="table table-bordered table-bot" id="detailTable">
+
+                            </table>
+                        </div>
+
+                    </div>
+                    <div>
+                        <div class="box-center-title ">
+                            <div class="arrow arrow-bottom"></div>
+                            <span>扣款明细</span>
+                            <hr>
+                        </div>
+                        <div class="arrow-box">
+                            <table class="table table-bordered table-bot" id="detailTable1">
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意
+            </button>
+            <button type="button" class="btn btn-sm btn-success"
+                    th:onclick="selectUser('','','0',[[${oaPayment.id}]],'oa/oaPayment/copy','flag')">
+                抄送
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关闭
+            </button>
+            <button type="button" th:if="${oaPayment.companyPay} eq 'Y'and ${oaPayment.company}== null" class="btn btn-sm btn-primary"
+                    id="addCon">添加信息
+            </button>
+        </div>
+    </div>
+    <div class="col-sm-12 select-table table-striped">
+        <table id="approveTaskId" data-mobile-responsive="true"></table>
+    </div>
+</div>
+<!-- 弹出框 -->
+<div class="modal inmodal fade" id="myModal5" role="dialog"
+     aria-hidden="true">
+    <input id="myModal5Value" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+
+                <form class="form-horizontal m" id="form-Condition-add">
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">付款事由：</label>
+                                <div class="col-sm-8">
+                                    <input name="paymentReason" class="form-control" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">付款金额：</label>
+                                <div class="col-sm-8">
+                                    <input name="money" class="form-control" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" th:if="${oaPayment.projectId == null }">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">付款类型：</label>
+                                <div class="col-sm-8">
+                                    <input id="payType" name="payType" type="hidden">
+                                    <input id="payTypeName" name="payTypeName" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" th:unless="${oaPayment.projectId == null }">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label"><span style="color: red; ">*</span>工程大类：</label>
+                                <div class="col-sm-8">
+                                    <select id="proCategory" required="required" name="proCategory" class="form-control" th:with="type=${@dict.getType('sys_payment_big_type')}" >
+                                        <option value="">------所有------</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" th:unless="${oaPayment.projectId == null }">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label"  ><span style="color: red; ">*</span>工程小类：</label>
+                                <div class="col-sm-8">
+                                    <select id="detailCategory" required="required" name="detailCategory" class="form-control" >
+                                        <option value="">------所有------</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">收款人：</label>
+                                <div class="col-sm-8">
+                                    <input name="payee" class="form-control" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">收款人账号：</label>
+                                <div class="col-sm-8">
+                                    <input name="payeeAccount" class="form-control" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">收款人开户行：</label>
+                                <div class="col-sm-8">
+                                    <input id="payeeOpenBank" name="payeeOpenBank"
+                                           class="form-control" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+<!--                        <div class="col-sm-6">-->
+<!--                            <div class="form-group">-->
+<!--                                <label class="col-sm-4 control-label">付款方：</label>-->
+<!--                                <div class="col-sm-8">-->
+<!--                                    <input name="drawee" class="form-control" type="text" readonly>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">关联发票：</label>
+                                <div class="col-sm-8">
+                                    <select name="relationBillType" class="form-control" readonly
+                                            onchange="linkBillChange(this.value)"
+                                            th:with="type=${@dict.getType('oa_payment_link')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 billLink hide">
+                            <div class="form-group ">
+                                <label class="col-sm-4 control-label">欠票金额：</label>
+                                <div class="col-sm-8">
+                                    <input name="oweBillMoney" class="form-control" type="number" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 billLink hide">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">收票截止日期：</label>
+                                <div class="col-sm-8">
+                                    <input name="billExpirationDate" class="form-control time-input" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 billLink1 hide">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">发票：</label>
+                                <div class="col-sm-8">
+                                    <input name="relationBill" id="relationBill" class="form-control " type="hidden" readonly>
+                                    <input name="relationBillName" id="relationBillName" class="form-control "
+                                           type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">关联合同：</label>
+                                <div class="col-sm-8">
+                                    <select name="relationContractType" class="form-control"
+                                            onchange="linkContractChange(this.value)" readonly
+                                            th:with="type=${@dict.getType('oa_payment_linkC')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}" ></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6  cLink hide">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">欠合同金额：</label>
+                                <div class="col-sm-8">
+                                    <input name="oweContractMoney" class="form-control" type="number" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6  cLink hide">
+                            <div class="form-group ">
+                                <label class="col-sm-4 control-label">补合同截止日期：</label>
+                                <div class="col-sm-8">
+                                    <input name="contractExpirationDate" class="form-control time-input" type="text" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6  cLink1 hide">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">合同：</label>
+                                <div class="col-sm-8">
+                                    <input name="relationContract" id="relationContract" class="form-control "
+                                           type="hidden" readonly>
+                                    <input name="relationContractName" id="relationContractName" class="form-control "
+                                           type="text"  readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 弹出框 收款公司-->
+<div class="modal inmodal fade" id="myModal6" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+
+                <form class="form-horizontal m" id="form-Condition-add-info">
+                    <input name="id" th:value="${oaPayment.id}" type="hidden">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">关联公司：</label>
+                                <div class="col-sm-8">
+                                    <input name="company" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">金额：</label>
+                                <div class="col-sm-8">
+                                    <input name="companyPayMoney" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">关联公司账号：</label>
+                                <div class="col-sm-8">
+                                    <input name="companyAccount" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">备注：</label>
+                                <div class="col-sm-8">
+                                    <input name="remark" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">关联公司开户行：</label>
+                                <div class="col-sm-8">
+                                    <input name="companyOpenBank" class="form-control" type="text" >
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                        id="insertCondition">保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaPayment";
+    var lastNodeId = [[${oaPayment.id}]];
+    var actDefineId = [[${oaPayment.actDefineId}]];
+    var lastStatus = [[${oaPayment.status}]];
+    var bigTpye=[[${@dict.getType('sys_payment_big_type')}]];
+    var smallTpye1=[[${@dict.getType('sys_payment_small_type1')}]];
+    var smallTpye2=[[${@dict.getType('sys_payment_small_type2')}]];
+    var smallTpye3=[[${@dict.getType('sys_payment_small_type3')}]];
+    var smallTpye4=[[${@dict.getType('sys_payment_small_type4')}]];
+    var smallTpye5=[[${@dict.getType('sys_payment_small_type5')}]];
+    function selectProCategory(number) {
+        var html='';
+        if(number==='0'){
+            for (var i=0;i<smallTpye1.length;i++){
+                html += '<option value="'+smallTpye1[i].dictLabel+'">'+smallTpye1[i].dictLabel+'</option>'
+            }
+            $('#detailCategory').html(html)
+        }else if (number==='1') {
+            for (var i=0;i<smallTpye2.length;i++){
+                html += '<option value="'+smallTpye2[i].dictLabel+'">'+smallTpye2[i].dictLabel+'</option>'
+            }
+            $('#detailCategory').html(html)
+        }else if (number==='2') {
+            for (var i=0;i<smallTpye2.length;i++){
+                html += '<option value="'+smallTpye3[i].dictLabel+'">'+smallTpye3[i].dictLabel+'</option>'
+            }
+            $('#detailCategory').html(html)
+        }else if (number==='3') {
+            for (var i=0;i<smallTpye4.length;i++){
+                html += '<option value="'+smallTpye4[i].dictLabel+'">'+smallTpye4[i].dictLabel+'</option>'
+            }
+            $('#detailCategory').html(html)
+        }else if (number==='4'){
+            for (var i=0;i<smallTpye5.length;i++){
+                html += '<option value="'+smallTpye5[i].dictLabel+'">'+smallTpye5[i].dictLabel+'</option>'
+            }
+            $('#detailCategory').html(html)
+        }else {
+            html += '<option value="">------所有------</option>'
+            $('#detailCategory').html(html)
+        }
+    }
+    //同意
+    function agree() {
+        $.modal.open("同意备注", ctx + "oa/task/paymentAgree/" + $("#taskId").val() + "/170/"+[[${oaPayment.id}]]+"/oa_payment");
+    }
+
+    //不同意
+    function disagree() {
+        $.modal.open("不同意原因", ctx + "oa/task/paymentDisagree/" + $("#taskId").val() + "/170/"+[[${oaPayment.id}]]+"/oa_payment");
+    }
+
+    //返回
+    function backAway() {
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+    //修改行
+    function editRow(id, rowId, rowIndex) {
+        var da = $('#' + id).bootstrapTable('getRowByUniqueId', rowId);
+        $('#myModal5Value').val(rowIndex);
+        linkContractChange(da.relationContractType)
+        linkBillChange(da.relationBillType)
+        selectProCategory(da.proCategory);
+        var payTypeName =  $.table.selectDictLabel([[${@dict.getType("oa_reimbursement_type")}]], da.payType);
+        payTypeName = $('#payTypeName').html(payTypeName).text()
+        $('#payTypeName').val(payTypeName);
+        $('#form-Condition-add').loadData(da)
+        $('#myModal5').modal('show');
+
+    }
+    //下拉框选择--合同
+    function linkContractChange(v) {
+        if (v == '0') {
+            $('.cLink').removeClass('hide')
+        } else if (v == '2') {
+            $('.cLink1').removeClass('hide')
+            $('.cLink').addClass('hide')
+            $('.cLink').find('input').val('')
+        } else {
+            $('.cLink').addClass('hide')
+            $('.cLink1').addClass('hide')
+            $('.cLink').find('input').val('')
+            $('.cLink1').find('input').val('')
+        }
+    }
+
+    //下拉框选择--发票
+    function linkBillChange(v) {
+
+        if (v == '0') {
+            $('.billLink').removeClass('hide')
+        } else if (v == '2') {
+            $('.billLink1').removeClass('hide')
+            $('.billLink').addClass('hide')
+            $('.billLink').find('input').val('')
+        } else {
+            $('.billLink').addClass('hide')
+            $('.billLink').find('input').val('')
+            $('.billLink1').addClass('hide')
+            $('.billLink1').find('input').val('')
+        }
+    }
+    //展示字典
+    function dictLabel(dict, value) {
+        var label = null
+        for (var i = 0; i < dict.length; i++) {
+            if (dict[i].dictValue == value) {
+                label = dict[i].dictLabel
+            }
+        }
+        return label
+    }
+
+    //对应的明细信息
+    $(function () {
+        var attachmentList = new Array();
+        //回显附件
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttachByObjectId",
+            type: "post",
+            dataType: "json",
+            data: {"objId": [[${oaPayment.id}]]},
+            success: function (result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                    }
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                } else {
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                }
+                downFile();
+            }
+        };
+        $.ajax(config)
+        $.table.init(options2);
+        $.table.init(detailOptions1);
+        //箭头方向
+        var arrowList = $(".arrow");
+        arrowList.click(function () {
+            var obj = $(this);
+            obj.toggleClass("arrow-top");
+            obj.toggleClass("arrow-bottom");
+            obj.parent().siblings('.arrow-box').toggleClass("box-center-table-type");
+        })
+        //添加信息
+        $('#addCon').click(function () {
+            $.form.reset('form-Condition-add-info');//清空原有数据
+            $('#myModal6').modal('show');
+        });
+        $('#insertCondition').click(function () {
+            $.operate.saveModal(ctx + "oa/oaPayment/edit", $('#form-Condition-add-info').serializeObject());
+        });
+    });
+
+    //明细表格
+    var payType = [[${@dict.getType('oa_reimbursement_type')}]];
+    var options2 = {
+        id: 'detailTable',
+        url: ctx + "oa/oaPaymentDetail/list",
+        clickToSelect: true,
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'id',
+        modalName: "明细",
+        showExport: false,
+        queryParams: {"parentId": [[${oaPayment.id}]]},
+        columns: [{
+            radio: true,
+            visible: false
+        },
+            {
+                field: 'id',
+                title: 'id',
+                visible: false
+            },
+            {
+                field: 'paymentReason',
+                title: '付款事由'
+            },
+            {
+                field: 'money',
+                title: '付款金额'
+            },
+            {
+                field: 'payType',
+                title: '付款类型',
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(payType, value);
+                }
+            },
+            {
+                field: 'payee',
+                title: '收款人'
+            },
+            {
+                field: 'payeeAccount',
+                title: '收款人账号'
+            },
+            {
+                field: 'payeeOpenBank',
+                title: '收款人开户行'
+            },
+            {
+                field : 'proCategory',
+                title : '工程大类',
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(bigTpye, value);
+                }
+            },
+            {
+                field : 'detailCategory',
+                title : '工程小类'
+            },
+            {
+                title: '操作',
+                formatter: function (value, row, index) {
+                    var action = []
+                    // action.push('<a onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a>  ')
+                    action.push('<a onclick="editRow(\'detailTable\',\'' + row.id + '\',\'' + index + '\')">详情</a>')
+                    return action.join('')
+                }
+            }]
+
+    };
+    //扣款表格
+    var detailOptions1 = {
+        id: "detailTable1",
+        url: ctx + "oa/oaPaymentCut/list",
+        modalName: "扣款明细",
+        search: false,
+        showExport: false,
+        showRefresh: false,
+        showColumns: false,
+        showToggle: false,
+        showSearch: false,
+        pagination: false,
+        uniqueId: 'id',
+        striped: true,
+        queryParams: {"parentId": [[${oaPayment.id}]]},
+        columns: [{
+            radio: true,
+            visible: false
+        }, {
+            field: 'id',
+            title: 'id',
+            visible: false
+        },
+            {
+                field: 'userId',
+                title: '审批人Id'
+            },
+            {
+                field: 'userName',
+                title: '审批人'
+            },
+            {
+                field: 'reason',
+                title: '扣款事由'
+            },
+            {
+                field: 'money',
+                title: '扣款金额'
+            }]
+    };
+    //流程
+    var data = {};
+    data.procInstId = [[${oaPayment.procInstId}]];
+    data.id = [[${oaPayment.id}]];
+    selectActProcessList(data, 'approveTaskId');
+</script>
+</body>
+</html>

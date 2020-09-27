@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: header('用户详情')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <table class="table table-bordered table-condensed" th:object="${sysUser}">
+                        <tbody>
+                        <th colspan="4">
+                            基本信息
+                        </th>
+                        <tr>
+                            <td class="active" width="15%">状态</td>
+                            <td width="35%">
+                                <select disabled class="form-control" name="status"
+                                        th:with="type=${@dict.getType('sys_normal_disable')}" th:field="*{status}">
+                                    <option value="">所有</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select>
+                            </td>
+                            <td class="active" width="15%" th:hidden='${!hasPerms}' >身份证信息</td>
+                            <td width="35%" th:hidden='${!hasPerms}' >
+                                [[*{idCard}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">入职日期</td>
+                            <td>
+                                [[${#dates.format(sysUser.hireDate, 'yyyy-MM-dd')}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >出生日期</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[${#dates.format(sysUser.birthday, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">姓名</td>
+                            <td>
+                                [[*{userName}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >家庭住址</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{homeAddress}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">性别</td>
+                            <td>
+                                <select class="form-control" name="sex" disabled="disabled"
+                                        th:with="type=${@dict.getType('sys_user_sex')}" th:field="*{sex}">
+                                    <option value="">所有</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select>
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >现居住地址</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{currentAddress}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">民族</td>
+                            <td>
+                                [[*{nation}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >婚否</td>
+                            <td th:hidden='${!hasPerms}' >
+                                <select class="form-control" name="married" th:with="type=${@dict.getType('sys_yes_no')}"
+                                        th:field="*{married}" disabled>
+                                    <option value="">--</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">所属公司</td>
+                            <td>
+                                [[*{company.deptName}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >工作开始时间</td>
+                            <td th:hidden='${!hasPerms}' >
+                               [[${#dates.format(sysUser.attackTime, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">所属部门</td>
+                            <td>
+                                [[*{dept.deptName}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >转正日期</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[${#dates.format(sysUser.correctionDate, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">所属项目</td>
+                            <td>
+                                [[*{belongProject}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >劳动合同期限</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{contractPeriod}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">直属上级</td>
+                            <td>
+                                [[*{parentUserName}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >劳动合同续签</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{contractRenewal}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">职务</td>
+                            <td>
+                                <select id="post" name="postIds" disabled="disabled"
+                                        class="form-control select2-hidden-accessible selectpicker" multiple="">
+                                    <option th:each="post:${posts}" th:value="${post.postId}"
+                                            th:selected="${post.flag}" th:text="${post.postName}"
+                                            th:disabled="${post.status == '1'}">
+
+                                    </option>
+                                </select>
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >合同签订次数</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{contractSignNum}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">职称</td>
+                            <td>
+                               [[*{professional}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >五险缴纳基数</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{insuranceBase}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">政治面貌</td>
+                            <td>
+                                [[*{politics}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >公积金缴纳基数</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{provideBase}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">联系电话</td>
+                            <td>
+                                [[*{phonenumber}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >缴纳五险日期</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[${#dates.format(sysUser.fiveRisksDate, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">邮箱</td>
+                            <td>
+                                [[*{email}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >缴纳公积金日期</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[${#dates.format(sysUser.commonFundsDate, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">剩余年假时数</td>
+                            <td>
+                                [[*{yearHoliday}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >薪酬等级</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{payGrade}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">可调休时数</td>
+                            <td>
+                                [[*{breakOffHours}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >目前月薪</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{currentSalary}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">是否享有探亲假</td>
+                            <td>
+                                <select disabled class="form-control" name="haveFamilyLeave" th:with="type=${@dict.getType('sys_yes_no')}"
+                                        th:field="*{haveFamilyLeave}">
+                                    <option value="">--</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select>
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >调薪日期</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[${#dates.format(sysUser.salaryIncreateDate, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">离职日期</td>
+                            <td>
+                                [[${#dates.format(sysUser.departureDate, 'yyyy-MM-dd')}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >上年度考评成绩</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{lastYearScore}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active" th:hidden='${!hasPerms}' >紧急联系人</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{emergency}]]
+                            </td>
+                            <td class="active" th:hidden='${!hasPerms}' >紧急联系人电话</td>
+                            <td th:hidden='${!hasPerms}' >
+                                [[*{emergencyPhone}]]
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered table-condensed" th:object="${sysUser}">
+                        <tbody>
+                        <th colspan="5">
+                            学历信息
+                        </th>
+                        <tr>
+                            <td class="active" width="15%">第一学历</td>
+                            <td width="25%">
+                                [[*{firstEducation}]]
+                            </td>
+                            <td class="active" width="15%">专业</td>
+                            <td width="45%" colspan="2">
+                                [[*{firstMajor}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">毕业院校</td>
+                            <td>
+                                [[*{firstSchool}]]
+                            </td>
+                            <td class="active">毕业时间</td>
+                            <td colspan="2">
+                                [[${#dates.format(sysUser.firstGraduationTime, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">第二学历</td>
+                            <td>
+                                [[*{secondEducation}]]
+                            </td>
+                            <td class="active">专业</td>
+                            <td colspan="2">
+                                [[*{secondMajor}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">毕业院校</td>
+                            <td>
+                                [[*{secondSchool}]]
+                            </td>
+                            <td class="active">毕业时间</td>
+                            <td colspan="2">
+                                [[${#dates.format(sysUser.secondGraduationTime, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active" ></td>
+                            <td class="active" >证件名称</td>
+                            <td class="active" >等级</td>
+                            <td class="active" >专业</td>
+                            <td class="active" >取得时间</td>
+                        </tr>
+                        <tr th:each="list,listStart : ${cerdentialsList}">
+                            <td width="15%" class="active" th:if="${listStart.index == 0}  " th:rowspan="${listStart.size}">职业资格证</td>
+                            <td>[[${list.name}]]</td>
+                            <td></td>
+                            <td>专业1：[[${list.firstSubject}]]<br>专业2：[[${list.secondSubject}]]<br>专业3：[[${list.thirdSubject}]]</td>
+                            <td>[[${#dates.format(list.holdDate, 'yyyy-MM-dd')}]]</td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered table-condensed" th:object="${sysUser}">
+                        <tbody>
+                        <th colspan="4">
+                            其他信息
+                        </th>
+                        <tr>
+                            <td class="active" width="15%">备注</td>
+                            <td colspan="3">
+                                [[*{remark}]]
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered table-condensed" th:object="${sysUser}">
+                        <tbody>
+                        <th colspan="4">
+                            附件（身份证，证件信息）
+                        </th>
+
+                        <tr>
+                            <td colspan="4">
+                                <div class="file-loading">
+                                    <input id="uploadFileId" type="file" multiple>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <br>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: select2-js"/>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/sysUser";
+    console.log([[${sysUser}]])
+    console.log([[${cerdentialsList}]])
+
+
+    var attachmentList = new Array();
+    //图片反显出来
+    $(function () {
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttach",
+            type: "post",
+            dataType: "json",
+            data: {"objectId": [[${sysUser.userId}]], "sourceTable": "sys_user"},
+            success: function (result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                    }
+                    var deleteExtraData = {
+                        "fileName": attach.attachmentName,
+                        "tableName": "oa_attachment"
+                    };
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: deleteExtraData,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                    //uploadFunction('uploadFileId',null,null,deleteExtraData,imgsUrl,downloadConfig);
+                } else {
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                    //uploadFunction('uploadFileId',null,null,null,new Array(),null);
+                }
+                downFile();
+            }
+        };
+        $.ajax(config)
+    });
+</script>
+</body>
+</html>

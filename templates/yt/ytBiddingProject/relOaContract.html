@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('oa合同列表')"/>
+    <style>
+        table td{
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li><input type="hidden" name="proposer" id="proposer"/>
+                            <input type="text" name="" id="applier"
+                                   onclick="selectUserById('proposer','applier')" placeholder="申请人"/>
+
+                        </li>
+                        <li><input type="hidden" id="CompanyId" name="companyId" /> <input
+                                type="text" id="CompanyName"
+                                onclick="selectDeptTree('CompanyId','CompanyName','0')"  placeholder="申请公司"/>
+                        </li>
+
+                        <li> <select id="status" name="status"
+                                     th:with="type=${@dict.getType('oa_ApplyStatusContract')}">
+                            <option value="">当前审核状态</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+
+                        <div id="element2">
+                            <li>合同类型1：<select id="type1"
+                                              class="select2-hidden-accessible valid first" name="type1"
+                                              th:with="type=${@dict.getType('oa_contract_type1')}" onchange="type1Change(this.value)">
+                                <option value="">合同类型1</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                            </li>
+                            <li>合同类型2：<select id="type2"
+                                              class="select2-hidden-accessible valid second" name="type2"
+                                              th:with="type=${@dict.getType('oa_contract_type2')}" onchange="type2Change(this.value)">
+                                <option value="">合同类型2</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                            </li>
+                        </div>
+                        <li> <select id="contractType" name="contractType"
+                                     th:with="type=${@dict.getType('oa_contact_species')}">
+                            <option value="">合同种类</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li><a class="btn btn-primary btn-rounded btn-sm"
+                               onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm"
+                               onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()"
+               shiro:hasPermission="oa:oaContract:add"> <i class="fa fa-plus"></i>
+                新建合同申请
+            </a> <a class="btn btn-danger btn-del btn-del disabled"
+                    onclick="$.operate.removeAll()"
+                    shiro:hasPermission="oa:oaContract:remove"> <i
+                class="fa fa-remove"></i> 删除
+        </a> <a class="btn btn-warning" onclick="$.table.exportExcel()"
+                shiro:hasPermission="oa:oaContract:export"> <i
+                class="fa fa-download"></i> 导出
+        </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: jquery-cxselect-js"/>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaContract:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaContract:remove')}]];
+
+    var FileFlag = [[${@permission.hasPermi('oa:oaContract:FileFlag')}]];
+
+    var prefix = ctx + "oa/oaContract";
+    var ContractStatus = [[${@dict.getType('oa_ApplyStatusContract')}]];
+    var ContractType1 = [[${@dict.getType('oa_contract_type1')}]];
+
+
+    var examineFlag = [[${@permission.hasPermi('oa:oaContract:examine')}]];//审核按钮 权限
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            detailUrl: prefix + "/detail/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "oa合同",
+            showExport: true,
+            showPageGo : true,
+            sortName: "createTime",
+            clickToSelect: true,
+            sortOrder: "desc",
+            onEditableSave : onEditableSave,
+            queryParams: {"relYtProjectId": [[${projectId}]]},
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'parentId',
+                    title: '主合同id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'serialNum',
+                    title: '流水号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return '<a onclick="openExamine(\'' + row.id + '\')">' + row.serialNum + '</a>'
+                    }
+                },
+                {
+                    field: 'applier',
+                    title: '申请人',
+                    sortable: true
+                },
+                {
+                    field: 'deptName',
+                    title: '申请部门',
+                    sortable: true
+                },
+                {
+                    field: 'signingParties',
+                    title: '签约相对方',
+                    sortable: true
+                },
+                {
+                    field: 'type1',
+                    title: '合同类型1',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ContractType1, value);
+                    }
+                },
+                {
+                    field: 'contractType',
+                    title: '合同种类',
+                    sortable: true,
+                    visible: false
+
+                },
+                {
+                    field: 'type2',
+                    title: '合同类型2',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var relation=[]
+                        var oa_contract_relation = [[${@dict.getType('oa_contract_relation')}]]
+                        var oa_contract_type2_1 = [[${@dict.getType('oa_contract_type2_1')}]]
+                        var oa_contract_type2_2 = [[${@dict.getType('oa_contract_type2_2')}]]
+                        var oa_contract_type2_3 = [[${@dict.getType('oa_contract_type2_3')}]]
+                        var oa_contract_type2_4 = [[${@dict.getType('oa_contract_type2_4')}]]
+                        var oa_contract_type2_5 = [[${@dict.getType('oa_contract_type2_5')}]]
+                        for (var i = 0; i < oa_contract_relation.length; i++) {
+                            if(oa_contract_relation[i].dictLabel==row.type1){
+                                relation=eval(oa_contract_relation[i].dictValue)
+                            }
+                        }
+                        return $.table.selectDictLabel(relation, value);
+                    }
+                },
+                {
+                    field: 'contractName',
+                    title: '合同名称',
+                    sortable: true,
+                    formatter:function(value, row , index){
+                        return "<div title='"+value+"'; style='white-space:nowrap;width: 10px;word-wrap:break-all;word-break:break-all;'>"+value+"</div>";
+                    }
+                },
+                {
+                    field: 'projectName',
+                    title: '工程名称',
+                    sortable: true,
+                    formatter:function(value, row , index){
+                        return "<div title='"+value+"'; style='white-space:nowrap;width: 10px;word-wrap:break-all;word-break:break-all;'>"+value+"</div>";
+                    }
+                },
+                {
+                    field: 'status',
+                    title: '合同审核状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ContractStatus, value);
+                    }
+                },
+                {
+                    field: 'userSet',
+                    title: '当前处理人姓名',
+                    sortable: true
+                },
+                {
+                    field: 'contractAmount',
+                    title: '合同金额',
+                    sortable: true
+                },
+                {
+                    field: 'amountUpper',
+                    title: '合同金额大写',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'amountPaid',
+                    title: '已付款',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'amountUnpaid',
+                    title: '未付款',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'invoiced',
+                    title: '已开票',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'settled',
+                    title: '已结算',
+                    sortable: true,
+                    visible: false
+                },
+
+                {
+                    field: 'payType',
+                    title: '付款方式（0预付，1尾款，2进度款）',
+                    sortable: true,
+                    visible: false
+                },
+
+                {
+                    field: 'proposer',
+                    title: '申请人id',
+                    sortable: true,
+                    visible: false
+                },
+
+                {
+                    field: 'deptId',
+                    title: '申请部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'currentPersonId',
+                    title: '当前处理人id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'thirdPartPerson',
+                    title: '第三方负责人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'thirdPartyName',
+                    title: '第三方名称',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'tenderDoc',
+                    title: '合同文件',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'qualifications',
+                    title: '资质证明',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '签约背景/备注说明',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createTime',
+                    title: '合同申请日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createBy',
+                    title: '创建人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '修改日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '修改人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    width: 300,
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (row.status == '9') {
+                            if (row.ytProjectChargeSend == 'N'){
+                                actions.push('<a class="btn btn-warning btn-xs" href="#" ' + 'onclick="confirmDelivery(\'' + row.id + '\')" >确认寄出</a> ');
+                            }else {
+                                actions.push('<a class="btn btn-danger btn-xs disabled href="#" >已完成 </a>');
+                            }
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //签署/归档操作
+    function exeStatusChange(id, status, msg, effectDate, expirationDate) {
+        $.modal.confirm(msg, function () {
+            var data = {};
+            data.id = id;
+            data.status = status;
+            data.effectDate = effectDate;
+            data.expirationDate = expirationDate;
+            $.operate.post(prefix + "/exeStatusChange",data);
+        });
+    }
+
+    //打开合同审核界面
+    function openExamine(id) {
+        $.modal.openTab("合同审核", prefix + "/toExamine/" + id);
+    }
+
+    function onEditableSave(field, row, oldValue, $el) {
+        alert("字段名：" + field + "，当前值：" + row[field] + "，旧值：" + oldValue);
+    }
+
+    /*用户列表*/
+    var mid = '';
+    var mname = ''
+
+    function selectUserById(id, name) {
+        mid = id;
+        mname = name;
+        var options = {
+            title: '选择用户',
+            width: "1200",
+            url: ctx + "oa/oaApplyTemplate/selectUser",
+            callBack: doSubmit1
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result.data;
+
+        $('#' + mname).val(data.userName);
+        $('#' + mid).val(data.userId);
+
+    }
+
+    function  confirmDelivery(id) {
+        $.modal.confirm("确认已经寄出?", function() {
+            var data = {};
+            data.id = id;
+            data.ytProjectChargeSend = 'Y';
+            $.operate.saveModal(ctx + 'oa/oaContract/exeStatusChange', data)
+        });
+    }
+
+    /*用户管理-新增-选择部门树*/
+    function selectDeptTree(id, deptName) {
+        divDeptId = id;
+        divDeptName = deptName;
+        var treeId = $("#" + id).val();
+        var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+        var url = ctx + "system/dept/selectDeptTree/" + deptId;
+        var options = {
+            title: '选择部门',
+            width: "380",
+            url: ctx + "system/dept/selectDeptTree/" + deptId,
+            callBack: doSubmit2
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit2(index, layero) {
+        var tree = layero.find("iframe")[0].contentWindow.$._tree;
+        if ($.tree.notAllowParents(tree)) {
+            var body = layer.getChildFrame('body', index);
+            $("#" + divDeptId).val(body.find('#treeId').val());
+            $("#" + divDeptName).val(body.find('#treeName').val());
+            layer.close(index);
+        }
+    }
+
+    //合同回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+    $(function () {
+
+        // 直接返回获取
+        var oa_contract_relation = [[${@dict.getType('oa_contract_relation')}]]
+        var oa_contract_type1 = [[${@dict.getType('oa_contract_type1')}]]
+        var oa_contract_type2_1 = [[${@dict.getType('oa_contract_type2_1')}]]
+        var oa_contract_type2_2 = [[${@dict.getType('oa_contract_type2_2')}]]
+        var oa_contract_type2_3 = [[${@dict.getType('oa_contract_type2_3')}]]
+        var oa_contract_type2_4 = [[${@dict.getType('oa_contract_type2_4')}]]
+        var oa_contract_type2_5 = [[${@dict.getType('oa_contract_type2_5')}]]
+        var dictD = []
+        for (var i = 0; i < oa_contract_relation.length; i++) {
+
+            dictD.push({
+                'v': oa_contract_type1[i].dictValue,
+                'n': oa_contract_type1[i].dictLabel,
+                's': []
+            })
+            var vlp=eval(oa_contract_relation[i].dictValue)
+            for (var a = 0; a < vlp.length; a++) {
+                var dictD_2 = {}
+                dictD_2.v = vlp[a].dictValue
+                dictD_2.n = vlp[a].dictLabel
+                dictD[i].s.push(dictD_2)
+            }
+
+        }
+
+        $('#element2').cxSelect({
+            selects: ['first', 'second'],
+            jsonValue: 'v',
+            data: dictD
+        });
+
+    })
+
+</script>
+</body>
+</html>

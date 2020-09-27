@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+<th:block th:include="include :: header('人员和菜单关联列表')" />
+<th:block th:include="include :: layout-latest-css" />
+<th:block th:include="include :: ztree-css" />
+</head>
+<body class="gray-bg">
+	<div class="container-div ui-layout-center">
+		<div class="container-div">
+			<div class="row">
+				<div class="col-sm-12 search-collapse">
+					<form id="formId">
+						<div class="select-list">
+							<ul>
+								<li>公司： <input type="hidden" id="CompanyId"
+									name="companyId" /> <input type="text" id="CompanyName"
+									onclick="selectDeptTree('CompanyId','CompanyName','0')" />
+								</li>
+
+								<li>部门： <input type="hidden" name="deptId" id="treeId" />
+									<input type="text" id="treeName" name="deptName"
+									onclick="selectDeptTree('treeId','treeName')" />
+								</li>
+
+								<li>申请人：<input type="text" name="userName" />
+								</li>
+
+								<li><a class="btn btn-primary btn-rounded btn-sm"
+									onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+									<a class="btn btn-warning btn-rounded btn-sm"
+									onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+								</li>
+							</ul>
+						</div>
+					</form>
+				</div>
+
+				<div class="btn-group-sm" id="toolbar" role="group">
+					<a class="btn btn-success" onclick="$.operate.addTab()"
+						shiro:hasPermission="system:sysUserMenu:add"> <i
+						class="fa fa-plus"></i> 添加
+					</a> <a class="btn btn-primary btn-edit disabled"
+						onclick="$.operate.editTab()"
+						shiro:hasPermission="system:sysUserMenu:edit"> <i
+						class="fa fa-edit"></i> 修改
+					</a> <a class="btn btn-danger btn-del btn-del disabled"
+						onclick="$.operate.removeAll()"
+						shiro:hasPermission="system:sysUserMenu:remove"> <i
+						class="fa fa-remove"></i> 删除
+					</a> <a class="btn btn-warning" onclick="$.table.exportExcel()"
+						shiro:hasPermission="system:sysUserMenu:export"> <i
+						class="fa fa-download"></i> 导出
+					</a>
+				</div>
+				<div class="col-sm-12 select-table table-striped">
+					<table id="bootstrap-table" data-mobile-responsive="true"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<th:block th:include="include :: layout-latest-js" />
+	<th:block th:include="include :: ztree-js" />
+	<script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:sysUserMenu:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:sysUserMenu:remove')}]];
+        var prefix = ctx + "system/sysUserMenu";
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "人员和菜单关联",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'companyId', 
+					title : '公司Id',
+					visible: false
+				},
+				{
+					field : 'companyName', 
+					title : '公司',
+					visible: false
+				},
+				{
+					field : 'deptId', 
+					title : '部门id',
+					visible: false
+				},
+				{
+					field : 'deptName', 
+					title : '部门',
+					visible: false
+				},
+				{
+					field : 'userId', 
+					title : '人员ID',
+					visible: false
+				},
+				{
+					field : 'userName', 
+					title : '人员姓名'
+				},
+				{
+					field : 'menuId', 
+					title : '菜单ID',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'menuName', 
+					title : '菜单',
+					sortable: true
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.userId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.userId + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改禹涛项目概览配置')" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-ytProjectProfileConf-edit" th:object="${ytProjectProfileConf}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label"><span
+						style="color: red;">*</span>标题：</label>
+				<div class="col-sm-8">
+					<input id="title" name="title" th:field="*{title}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label"><span
+						style="color: red;">*</span>项目描述：</label>
+				<div class="col-sm-8">
+					<input id="description" name="description" th:field="*{description}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label"><span
+						style="color: red;">*</span>项目类别：</label>
+				<div class="col-sm-8">
+					<select name="type" class="form-control" th:with="type=${@dict.getType('yt_project_type')}"  th:field="*{type}" >
+						<option value="">--请选择--</option>
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label"><span
+						style="color: red;">*</span>附件：</label>
+				<div class="col-sm-8">
+					<div class="file-loading">
+						<input id="uploadFileId" type="file" multiple>
+					</div>
+					<p class="help-block m-b-none text-warning">*注意：图片尺寸为正方形：如1024*1024，699*699</p>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<button type="button" class="btn btn-sm btn-primary"
+						onclick="submitHandler()">
+					<i class="fa fa-check"></i>提交
+				</button>
+				<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+    </div>
+    <div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+    <script type="text/javascript" th:inline="javascript">
+		var prefix = ctx + "yt/ytProjectProfileConf";
+		var attachmentList = new Array();
+
+		$(function () {
+			//图片反显出来
+			var config = {
+				url: ctx + "yt/ytAttachment/selectAttachByObjectId",
+				type: "post",
+				dataType: "json",
+				data: {"objId": [[${ytProjectProfileConf.id}]]},
+				success: function (result) {
+					var imgsUrl = new Array();
+					var attachList = result.data;
+					if (attachList != null && attachList.length > 0) {
+						var downloadConfig = new Array();
+						for (var i = 0; i < attachList.length; i++) {
+							var down = {};
+							var attach = attachList[i];
+							imgsUrl.push(attach.attachmentName);
+							down.key = attach.attachmentName;
+							down.caption = attach.fileName;
+							down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+							if (isAssetTypeAnImage(attach.attachmentName)) {
+								down.type = 'image';
+							} else {
+								down.type = 'object';
+							}
+							downloadConfig.push(down);
+							attachmentList.push({
+								"objectId": [[${ytProjectProfileConf.id}]],
+								"attachmentName": attach.attachmentName,
+								"fileName": attach.fileName
+							})
+						}
+						var option1 = {
+							id: 'uploadFileId',
+							uploadUrl: null,
+							deleteUrl: null,
+							//deleteExtraData:deleteExtraData,
+							imgsUrl: imgsUrl,
+							downloadConfig: downloadConfig
+						}
+						$.common.uploadFile(option1);
+					} else {
+						var option2 = {
+							id: 'uploadFileId',
+							uploadUrl: null,
+							deleteUrl: null,
+							deleteExtraData: null,
+							imgsUrl: new Array(),
+							initialPreviewConfig: null
+						}
+						$.common.uploadFile(option2);
+					}
+				}
+			};
+			$.ajax(config)
+		})
+		$("#form-ytProjectProfileConf-edit").validate({
+			rules:{
+				description:{
+					required: true,
+					rangelength:[50,250]
+				}
+			},
+			focusCleanup: true
+		});
+		function submitHandler() {
+			var data=$('#form-ytProjectProfileConf-edit').serializeObject();
+			data.attachmentUrls=attachmentList
+			if ($.validate.form()&&attachmentList.length>0) {
+				$.operate.saveJsonTab(prefix + "/edit",data);
+			}
+	    }
+	</script>
+</body>
+</html>

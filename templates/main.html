@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head>
+<th:block th:include="include :: header('首页')" />
+<style>
+.ad-btnBox {
+	display: flex;
+	justify-content: space-around;
+}
+
+.ad-btn {
+	text-align: center;
+}
+
+.ad-btn p {
+	line-height: 28px;
+	color: #333;
+	font-weight: bold
+}
+
+.ad-btn .btn-circle.btn-lg {
+	width: 90px;
+	height: 90px;
+	border-radius: 45px;
+}
+
+.ad-btn .btn-circle.btn-lg .fa {
+	font-size: 40px;
+	margin-top: 15px
+}
+.fixed-table-toolbar{
+display:none;
+}
+
+	.small-bubbles{
+		width: 25px;
+		height: 25px;
+		border-radius: 50px;
+		background-color: red;
+		color: white;
+		position: relative;
+		top: -130px;
+		left: 70px;
+		font-size: 14px;
+		font-weight: bold;
+		line-height: 25px;
+	}
+</style>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeIn">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">任务</div>
+					<div class="panel-body ad-btnBox" style="height: 300px">
+						<div class="ad-btn">
+							<a class="btn btn-warning btn-circle btn-lg " type="button"
+								onclick="openTabB('待办任务','oa/task/lastTask')"><i
+								class="fa fa-tasks"></i> </a>
+							<p>待办任务</p>
+							<div class="small-bubbles" th:if="${lastTaskNum}!=0" >[[${lastTaskNum}]]</div>
+						</div>
+						<div class="ad-btn">
+							<a class="btn btn-primary btn-circle btn-lg ad-btn" type="button"
+								onclick="openTabB('我完成的任务','oa/task')"><i class="fa fa-users"></i>
+							</a>
+							<p>我完成的任务</p>
+						</div>
+						<div class="ad-btn">
+							<a class="btn btn-success btn-circle btn-lg ad-btn" type="button"
+								onclick="openTabB('我发起的','oa/MyApplied')"><i
+								class="fa fa-user-plus"></i> </a>
+							<p>我发起的</p>
+						</div>
+						<div class="ad-btn">
+							<a class="btn btn-warning btn-circle btn-lg ad-btn" type="button"
+								onclick="openTabB('我的草稿','oa/MyApplied/myDraft')"><i
+								class="fa fa-reorder"></i> </a>
+							<p>我的草稿</p>
+						</div>
+						<div class="ad-btn">
+							<a class="btn btn-info btn-circle btn-lg ad-btn" type="button"
+								onclick="openTabB('任务催办','system/sysUrge')"><i
+								class="fa fa-bullhorn"></i> </a>
+							<p>任务催办</p>
+							<div class="small-bubbles" th:if="${urgeNum}!=0">[[${urgeNum}]]</div>
+						</div>
+						<div class="ad-btn">
+							<a class="btn btn-danger btn-circle btn-lg ad-btn" type="button"
+								onclick="openTabB('抄送我的','system/sysCopy')"><i
+								class="fa fa-copy"></i> </a>
+							<p>抄送我的</p>
+							<div class="small-bubbles" th:if="${copyNum}!=0">[[${copyNum}]]</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="panel panel-primary">
+					<div class="panel-heading">通知发文</div>
+					<div class="panel-body" style="height: 300px">
+						<table id="table-information" ></table>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="panel panel-primary">
+					<div class="panel-heading">投标公告栏</div>
+					<div class="panel-body" style="height: 300px">投标公告栏</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script th:inline="javascript">
+		function openTabB(text, url) {
+			$.modal.openTab(text, ctx + url)
+		}
+		//通知发文
+		$(function() {
+			var options = {
+				id : "table-information",
+				url : ctx + "oa/oaInformation/list",
+				modalName : "发布",
+				sortName : "createTime",
+				sortOrder : "desc",
+				showExport : false,
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				columns : [
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'title',
+							title : '标题',
+							sortable : true,
+							formatter:function(value, row, index){
+								return '<a onclick="openExamine(\'' + row.id + '\')">'+value+'</a>'
+							}
+						},
+						{
+							field : 'createTime',
+							title : '时间',
+							width:'200',
+							sortable : true
+						}]
+			};
+			$.table.init(options);
+		});
+		
+		//打开信息发布详情页面
+		function openExamine(id){
+			$.modal.openTab("通知发文详情", ctx + "oa/oaInformation/edit/"+id);
+		}
+	</script>
+</body>
+</html>

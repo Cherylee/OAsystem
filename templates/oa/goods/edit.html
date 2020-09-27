@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改系统物资')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-goods-edit" th:object="${goods}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>物资入库</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">物资类型</td>
+									<td>
+										<select id="goodsType" name="goodsType" class="form-control"
+												th:with="type=${@dict.getType('oa_goods_type')}" th:field="*{goodsType}">
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">物资小类</td>
+									<td>
+										<select id="subType" name="subType" class="form-control"
+												th:with="type=${@dict.getType('oa_small_goods_typ')}" th:field="*{subType}">
+											<option value="">-- 请选择 --</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">物资编号</td>
+									<td>
+										<input id="code" name="code" class="form-control" type="text" th:field="*{code}">
+									</td>
+									<td class="active">物资名称</td>
+									<td>
+										<input id="goodsName" name="goodsName" class="form-control" type="text" th:field="*{goodsName}">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">单位</td>
+									<td>
+										<input id="unit" name="unit" class="form-control" type="text" th:field="*{unit}">
+									</td>
+									<td class="active">单价</td>
+									<td>
+										<input id="price" name="price" class="form-control" type="number" th:field="*{price}">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">规格型号</td>
+									<td>
+										<input id="brand" name="brand" class="form-control" type="text" th:field="*{brand}">
+									</td>
+									<td class="active">总库存</td>
+									<td>
+										<input id="totalStock" name="totalStock" class="form-control" type="number" th:field="*{totalStock}">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">可用库存</td>
+									<td>
+										<input id="availableStock" name="availableStock" class="form-control" type="number" th:field="*{availableStock}">
+									</td>
+									<td class="active">库存状态</td>
+									<td>
+										<select id="stockStatus" name="stockStatus" class="form-control"
+												th:with="type=${@dict.getType('sys_stock_status')}" th:field="*{stockStatus}">
+											<option value="">-- 请选择 --</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">是否需要归还</td>
+									<td>
+										<select id="needBack" name="needBack" class="form-control"
+												th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{needBack}">
+											<option value="">-- 请选择 --</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">是否有效</td>
+									<td>
+										<select id="effect" name="effect" class="form-control"
+												th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{effect}">
+											<option value="">-- 请选择 --</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">保管人</td>
+									<td>
+										<input name="keeper" id="keeper" class="form-control" type="hidden" th:field="*{keeper}">
+										<input name="userName" id="userName" th:field="*{userName}" class="form-control" type="text" onclick="selectUserById('keeper','userName')">
+									</td>
+									<td class="active">存放公司</td>
+									<td>
+										<input type="hidden" name="companyId" id="companyId" th:field="*{companyId}" />
+										<input type="text" name="companyName" id="companyName" th:field="*{companyName}" class="form-control" onclick="selectDeptTree('companyId','companyName','0')" />
+									</td>
+								</tr>
+								<tr>
+									<td class="active">存放部门</td>
+									<td>
+										<input id="treeId" name="deptId" class="form-control" type="hidden" th:field="*{deptId}">
+										<input id="treeName" name="deptName" class="form-control" type="text" onclick="selectDeptTree('treeId','treeName','1')" th:field="*{deptName}">
+									</td>
+									<td class="active">入库日期</td>
+									<td>
+										<input id="inDate" name="inDate" class="form-control time-input"
+											   type="text" th:value="${#dates.format(goods.inDate, 'yyyy-MM-dd HH:mm:ss')}" >
+									</td>
+								</tr>
+								<tr>
+									<td class="active">备注</td>
+									<td colspan="3">
+										<input name="remark" class="form-control" type="text" th:field="*{remark}">
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>保 存
+								</button>
+								&nbsp;
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript" th:inline="javascript">
+		var prefix = ctx + "oa/goods";
+
+		$(function () {
+			if ($('#goodsType').val()=='1') {
+				$('.subType').removeClass('hidden')
+			}
+		});
+
+		//下拉框选择物质类型
+		$('#goodsType').change(function () {
+			if($(this).val()==='1'){
+				$('.subType').removeClass('hidden')
+			}else{
+				$('.subType ').children().find('select').val('');
+				$('.subType').addClass('hidden');
+			}
+		});
+
+		
+		
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.saveTab(prefix + "/edit", $('#form-goods-edit')
+						.serialize());
+			}
+		}
+	</script>
+</body>
+</html>

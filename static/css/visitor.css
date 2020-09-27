@@ -1,0 +1,83 @@
+.visi_box{
+    background: #26a1f9 ;
+}
+.visi_container{
+    background: #ffffff;
+    padding-left: 8%;
+    padding-right: 8%;
+}
+.visi_left{
+    padding: 25px 0;
+ }
+.visi_left .visi_left_icon{
+    width: 50%;
+    margin: 0 auto;
+    cursor: pointer;
+}
+.visi_left .visi_left_icon:hover{
+    opacity: 0.7;
+}
+.visi_left .visi_left_icon .visi_xiangmu_icon{
+    width: 60%;
+}
+
+.visi_left .visi_left_icon .visi_xiangmu_text{
+    width: 60%;
+    text-align: center;
+    font-size: 16px;
+    padding-top: 8px;
+    margin-top: 0;
+    cursor: pointer;
+    color: #555555;
+}
+.visi_left_icon:hover .visi_xiangmu_text,.visi_xiangmu_text:hover{
+    color: #26a1f9;
+}
+.visi_link h1{
+    text-align: left;
+    font-size: 16px;
+    padding-top: 18px;
+    border-bottom:1px solid #dddddd ;
+    line-height: 46px;
+    color: #333;
+    font-weight: 600;
+}
+.visi_left .visi_left_contact{
+    border: 1px solid #f6f6f6;
+    padding: 15px 0;
+    background: #efefef;
+}
+.visi_left .visi_left_contact .input-group{
+    margin: 0 auto;
+}
+.visi_link_title{
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
+}
+.tab-pane li{
+    padding: 25px 0;
+    list-style: none;
+    border-bottom: 1px solid #DDDDDD;
+}
+.tab-pane li img{
+    border-radius: 5px;
+    width: 100%;
+}
+.tab-pane li h1{
+    font-size: 24px;
+    line-height: 36px;
+    color: #333333;
+    border-bottom: 1px solid #DDDDDD;
+}
+.tab-pane li p{
+    font-size: 14px;
+    line-height: 42px;
+}
+.page-header{
+    display: flex;
+    align-items: center;
+}
+.info{
+    padding-top: 25px;
+}

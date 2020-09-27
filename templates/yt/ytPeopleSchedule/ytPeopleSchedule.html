@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('人员进度列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+
+							<li>
+								关联项目：<input type="hidden" name="projectId" id="projectId"/>
+								<input type="text"  id="projectName" onclick="selectPro('projectId','projectName')"/>
+							</li>
+
+							<li>
+								进度审核状态：
+								<select name="state"  th:with="type=${@dict.getType('yt_progressAudit_state')}" >
+								<option value="">--请选择--</option>
+			                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+			                    </select>
+							</li>
+
+						<!--	<li>
+								备注：<input type="text" name="remark"/>
+							</li>-->
+						
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="yt:ytPeopleSchedule:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('yt:ytPeopleSchedule:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('yt:ytPeopleSchedule:remove')}]];
+        var states=[[${@dict.getType('yt_progressAudit_state')}]];
+        var prefix = ctx + "yt/ytPeopleSchedule";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "人员进度",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '',
+					visible: false
+				},
+				{
+					field : 'roleUserName', 
+					title : '人员',
+					sortable: true
+				},
+				{
+					field : 'ytProjectMain.name', 
+					title : '项目名称',
+					sortable: true
+				},
+				{
+					field : 'ytProjectMain.code', 
+					title : '项目编号',
+					sortable: true
+				},
+				{
+					field : 'ytPeopleSchedule.state', 
+					title : '任务明细审核状态',
+					sortable: true,
+					formatter: function(value, row, index) {
+						var result=$.table.selectDictLabel(states, value);
+						if(row.ytPeopleSchedule.state==null||row.ytPeopleSchedule.state=='00'){
+							result='无审核状态'
+						}
+						return result;
+					}
+				},
+				{
+					field : 'nodeName', 
+					title : '任务明细',
+					sortable: true,
+					formatter: function(value, row, index) {
+						return row.projectName+' - '+row.stageName+' - '+row.nodeName+' - '+row.roleName
+					}
+				},
+				
+				{
+					field : 'ytPeopleSchedule.totalProgress', 
+					title : '累计进度',
+					sortable: true,
+					formatter: function(value, row, index) {
+						return '<p>'+row.ytPeopleSchedule.totalProgress+'%</p><div class="progress progress-mini"> <div style="width: '+row.ytPeopleSchedule.totalProgress+'%;" class="progress-bar"></div> </div>'
+					}
+					
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	if(row.needAudit==true){
+		            		actions.push('<a class="btn btn-info btn-xs " href="#" onclick="toAudit(\'' + row.ytPeopleSchedule.id + '\')">审核</a> ');
+		            	}
+		            	if(row.ytPeopleSchedule.state=='05'||row.ytPeopleSchedule.state=='06'||row.ytPeopleSchedule.state=='07'){
+		            		actions.push('<a class="btn btn-success btn-xs " href="#" onclick="$.operate.editTab(\'' + row.ytPeopleSchedule.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		            	}
+	            		if(row.roleCode=='01' || row.roleCode=='02' || row.roleCode=='03' || row.roleCode=='04'
+								&&row.ytPeopleSchedule.state!='04'&&row.ytPeopleSchedule.state!='02'&&row.ytPeopleSchedule.state!='03'&&row.ytPeopleSchedule.state!='06'&&row.ytPeopleSchedule.state!='07'){
+	            			actions.push('<a class="btn btn-info btn-xs " href="#" onclick="toAuditLeader(\'' + row.ytPeopleSchedule.id + '\')">提交成果</a> ');
+	            		}
+	            		actions.push('<a class="btn btn-info btn-xs " href="#" onclick="$.operate.editTab(\'' + row.ytPeopleSchedule.id + '\')">详情</a> ');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        function toAudit(id){
+        	createMenuItem(ctx+"yt/ytPeopleSchedule/audit/"+id,'人员进度审核')
+        }
+        function toAuditLeader(id){
+        	createMenuItem(ctx+"yt/ytPeopleSchedule/leaderAdd/"+id,'负责人提交成果')
+        }
+        var proId=null
+        var proName=null
+        function selectPro(id,name){
+        	proId = id;
+        	proName = name;
+			var options = {
+				title : '选择项目信息',
+				width : "1200",
+				url : ctx + "yt/ytProjectMain/biddingProject",
+				callBack : doSubmitPro
+			};
+			$.modal.openOptions(options);
+        }
+        function doSubmitPro(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			console.log(data)
+			$('#' + proId).val(data.ytProjectMain.id)
+			$('#' + proName).val(data.ytProjectMain.name)
+		}
+    </script>
+</body>
+</html>

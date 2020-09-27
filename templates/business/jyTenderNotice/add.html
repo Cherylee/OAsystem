@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增投标公告')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-jyTenderNotice-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程名称：</label>
+            <div class="col-sm-8">
+            	<input id="projectName" name="projectName" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">投标状态（0编制投标文件，1正开标，2已开标）：</label>
+            <div class="col-sm-8">
+            	<input id="status" name="status" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程造价：</label>
+            <div class="col-sm-8">
+            	<input id="projectAmount" name="projectAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">开标时间：</label>
+            <div class="col-sm-8">
+            	<input id="openTenderDate" name="openTenderDate" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">保证金金额：</label>
+            <div class="col-sm-8">
+            	<input id="promiseMoney" name="promiseMoney" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">到账截止日期：</label>
+            <div class="col-sm-8">
+            	<input id="closedAccountDate" name="closedAccountDate" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">建造师：</label>
+            <div class="col-sm-8">
+            	<input id="builderName" name="builderName" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">委托人：</label>
+            <div class="col-sm-8">
+            	<input id="consignor" name="consignor" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">投标申请id：</label>
+            <div class="col-sm-8">
+            	<input id="tenderId" name="tenderId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建日期：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建人：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">修改日期：</label>
+            <div class="col-sm-8">
+            	<input id="updateTime" name="updateTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">修改人：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "business/jyTenderNotice"
+		$("#form-jyTenderNotice-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-jyTenderNotice-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

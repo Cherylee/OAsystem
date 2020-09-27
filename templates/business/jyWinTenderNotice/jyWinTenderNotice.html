@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('经营部中标公告列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" id="companyId" name="companyId"/> <input
+                                type="text" id="companyName"
+                                onclick="selectDeptTree('companyId','companyName','0')" placeholder="中标公司"/>
+                        </li>
+                        <li>
+                            <input type="text" name="applier" placeholder="申请人"/>
+                        </li>
+                        <li>
+                            <input type="text" name="projectName" placeholder="工程名称"/>
+                        </li>
+                        <li class="select-time">
+                            <label>中标日期： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                   name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                   name="params[endTime]"/>
+                        </li>
+                        <li>
+                            <input type="text" name="constructUnit" placeholder="建设单位"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <!-- <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="business:jyWinTenderNotice:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary btn-edit disabled" onclick="$.operate.edit()" shiro:hasPermission="business:jyWinTenderNotice:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="business:jyWinTenderNotice:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a> -->
+            <a class="btn btn-warning" onclick="$.table.exportExcel()"
+               shiro:hasPermission="business:jyWinTenderNotice:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('business:jyWinTenderNotice:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('business:jyWinTenderNotice:remove')}]];
+    var prefix = ctx + "business/jyWinTenderNotice";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "经营部中标公告",
+            showExport: true,
+            showFooter: true,
+            sortName: "createTime",
+            sortOrder: "desc",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'projectName',
+                    title: '工程名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = null;
+                        if (value) {
+                            text = $.table.tooltip(value, 5, "open");
+                        } else {
+                            text = '暂无编号'
+                        }
+                        if (row.tenderId == '' || row.tenderId == null) {
+                            return row.projectName;
+                        } else {
+                            return '<a onclick="openExamine(\'' + row.tenderId + '\')">' + text + '</a>'
+                        }
+                    }
+                },
+                {
+                    field: 'code',
+                    title: '编号',
+                    sortable: true
+                },
+                {
+                    field: 'userName',
+                    title: '申请人',
+                    sortable: true
+                },
+                {
+                    field: 'companyName',
+                    title: '中标公司',
+                    sortable: true
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true
+                },
+                {
+                    field: 'timeLimit',
+                    title: '工期',
+                    sortable: true
+                },
+                {
+                    field: 'constructUnit',
+                    title: '建设单位',
+                    sortable: true
+                },
+                {
+                    field: 'winBidDate',
+                    title: '中标日期',
+                    sortable: true
+                },
+                {
+                    field: 'winBidAmount',
+                    title: '中标造价',
+                    sortable: true,
+                    footerFormatter: function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            if (value[i].winBidAmount == null) {
+                                value[i].winBidAmount = 0
+                            }
+                            sumBalance += parseFloat(value[i].winBidAmount);
+                        }
+                        return '合计:' + sumBalance;
+                    }
+                },
+                {
+                    field: 'builderName',
+                    title: '建造师',
+                    sortable: true
+                },
+                {
+                    field: 'projectDesc',
+                    title: '工程概况',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'tenderId',
+                    title: '投标申请id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createTime',
+                    title: '创建日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createBy',
+                    title: '创建人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '修改日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '修改人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (row.ytApply == 'Y' && row.status == '2'&& row.syncFinished == 'N') {//禹涛人员申请的  且 审核通过
+                            actions.push('<a class="btn btn-warning btn-xs ' + removeFlag + '" href="#" onclick="synchroYt(\'' + row.id + '\')">同步</a> ');
+                        }
+                        if (row.ytApply == 'N') {
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="submitHandler(\'' + row.id + '\')"><i class="fa fa-backward"></i> 生成项目移交单</a>');
+                            return actions.join('');
+                        } else {
+                            return null;
+                        }
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //打开合同审核界面
+    function openExamine(id) {
+        $.modal.openTab("投标详情", ctx + "business/jyTender/toJyTenderExamine/" + id);
+    }
+    //同步禹涛
+    function  synchroYt(id) {
+        $.operate.get(ctx + "business/jyWinTenderNotice/syncYtProject" + id)
+        $.table.refresh();
+    }
+
+    //同步信息
+    function submitHandler(id) {
+        var config1 = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + "/synchronization",
+            type: "post",
+            dataType: "json",
+            data: id,
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                var config = {
+                    url: ctx + "oa/MyApplied/toDetail/270/" + result,
+                    beforeSend: function () {
+                        $.modal.loading("正在处理中，请稍后...");
+                    },
+                    success: function (result) {
+                        console.log(result)
+                        $.modal.closeLoading();
+                        $.modal.openTab("任务详情", result);
+                    }
+                };
+                $.ajax(config)
+                $.modal.closeLoading();
+            }
+        };
+        $.ajax(config1)
+
+    }
+
+</script>
+</body>
+</html>

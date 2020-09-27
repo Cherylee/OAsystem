@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改培训报告')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaPersonTrain-edit"
+                          th:object="${oaPersonTrain}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>培训报告</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请公司：</td>
+                                <td>
+                                    <input type="hidden" name="applyCompanyId" id="companyId"
+                                           th:field="*{applyCompanyId}"/>
+                                    <input type="text" id="companyName" name="applyCompanyName" class="form-control"
+                                           readonly th:field="*{applyCompanyName}"/>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>申请部门：</td>
+                                <td>
+                                    <input type="hidden" name="applyDeptId" id="treeId"
+                                           th:field="*{applyDeptId}"/>
+                                    <input type="text" id="treeName" name="applyDeptName" class="form-control"
+                                           readonly th:field="*{applyDeptName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人：</td>
+                                <td>
+                                    <input type="hidden" name="proposer" id="proposer" th:value="${proposer}">
+                                    <input id="userName" name="userName" th:field="*{userName}"
+                                           class="form-control" type="text" readonly>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>报告提交时间：</td>
+                                <td>
+                                    <input id="trainTimeStart" name="trainTimeStart"
+                                           class="form-control time-input" type="text" required="required"
+                                           th:value="${#dates.format(oaPersonTrain.trainTimeStart, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>报告截至时间：</td>
+                                <td>
+                                    <input id="trainTimeEnd" name="trainTimeEnd"
+                                           class="form-control  time-input" type="text" required="required"
+                                           th:value="${#dates.format(oaPersonTrain.trainTimeEnd, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>培训课题：</td>
+                                <td>
+                                    <input id="trainTopic" name="trainTopic" class="form-control" required="required"
+                                           th:field="*{trainTopic}"></td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训内容：</td>
+                                <td>
+                                    <input id="trainContent" name="trainContent" class="form-control"
+                                           th:field="*{trainContent}">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>申请日期：</td>
+                                <td>
+                                    <input id="applyTime" name="applyTime"
+                                           th:value="${#dates.format(oaPersonTrain.applyTime, 'yyyy-MM-dd HH:mm:ss')}"
+                                           class="form-control" type="text" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>事由：</td>
+                                <td colspan="3">
+                                    <input id="reason" name="reason" th:field="*{reason}"
+                                           class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">培训报告：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple
+                                               th:disabled="${oaPersonTrain.status!='3'&&oaPersonTrain.status!='99'}? true : false">
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()" th:if="${oaPersonTrain.status=='99'}">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandlerDraft()"
+                                    th:if="${oaPersonTrain.status=='99'}">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()" th:if="${oaPersonTrain.status=='3'}">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:if="${oaPersonTrain.status!='2'&&oaPersonTrain.status!='16'&&oaPersonTrain.status!='99'}"
+                                    onclick="urge()">
+                                <i class="fa fa-check"></i>催办
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" th:if="${oaPersonTrain.status!='99'}"
+                                    th:onclick="selectUser('','','0',[[${oaPersonTrain.id}]],'oa/oaPersonTrain/copy')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: lastNode"/>
+<th:block th:include="include :: bootstrap-fileinput-css"/>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaPersonTrain";
+    var lastNodeId = [[${oaPersonTrain.id}]];
+    var actDefineId = [[${oaPersonTrain.actDefineId}]];
+    var lastStatus = [[${oaPersonTrain.status}]];
+    //流程
+    var data = {};
+    data.procInstId = [[${oaPersonTrain.procInstId}]];
+    data.id = [[${oaPersonTrain.id}]];
+    selectActProcessList(data, "approveInfoId");
+
+    //保存数据
+    function savaDta() {
+        var data = {};
+        data.oaPersonTrain = $('#form-oaPersonTrain-edit').serializeObject()
+        data.attachmentList = attachmentList
+        return data;
+    }
+
+    //提交
+    function submitHandler() {
+        var data = savaDta()
+        if ($.validate.form()) {
+            if ($.common.isEmpty(data.attachmentList) && attachmentListImg == false) {
+                $.modal.alertWarning("附件不能为空！");
+                return;
+            }
+            $.operate.saveJsonTab(prefix + "/modifyOaPersonTrain", data);
+        }
+    }
+
+    //提交草稿
+    function submitHandlerDraft() {
+        var data = savaDta()
+        if ($.validate.form()) {
+            if ($.common.isEmpty(data.attachmentList) && attachmentListImg == false) {
+                $.modal.alertWarning("附件不能为空！");
+                return;
+            }
+            $.operate.saveJsonTab(prefix + "/submitDraft", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = savaDta()
+        if ($.validate.form()) {
+            if ($.common.isEmpty(data.attachmentList) && attachmentListImg == false) {
+                $.modal.alertWarning("附件不能为空！");
+                return;
+            }
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+    }
+
+
+    var attachmentList = new Array();
+    var attachmentListImg = true
+    //图片反显出来
+    $(function () {
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttachByObjectId",
+            type: "post",
+            dataType: "json",
+            data: {"objId": [[${oaPersonTrain.id}]]},
+            success: function (result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if (isAssetTypeAnImage(attach
+                            .attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({
+                            "objectId": [[${oaPersonTrain.id}]],
+                            "attachmentName": attach.attachmentName,
+                            "fileName": attach.fileName
+                        })
+                    }
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                } else {
+                    attachmentListImg = false
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    });
+</script>
+</body>
+</html>

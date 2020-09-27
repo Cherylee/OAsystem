@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('付款明细')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<style>
+    .modal{
+        top: 130px;
+    }
+    .modal-dialog{
+        width: 90%;
+    }
+    .basic-table-title{
+        width: 150px;
+        text-align: right;
+    }
+    .monthly-input{
+        text-align: left;
+        color: black;
+        pointer-events: none;
+    }
+</style>
+<body class="">
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input class="overview-select-input" type="text" name="receivePerson" placeholder="收款人" style="width: 80px"/>
+                            <input type="hidden" name="projectId" th:value="${projectId}">
+                        </li>
+
+                        <li>
+                            <select id="proCategory" name="proCategory" style="width: 100px;" th:with="type=${@dict.getType('sys_payment_big_type')}" class="overview-select-input">
+                                <option value=""  style="display: none;"  disabled  selected>工程款大类：</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <select id="detailCategory" name="detailCategory" style="width: 100px;"  class="overview-select-input">
+                                <option value=""  style="display: none;"  disabled  selected>工程款小类：</option>
+                            </select>
+                        </li>
+                        <li>
+                            <p>支付日期：</p>
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                            -
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                        </li>
+                        <li>
+                            付款金额
+                            <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                            -
+                            <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                            元
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<!-- 明细数据弹窗 -->
+<div class="modal inmodal fade" id="paymentDetailPopup" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content col-md-12">
+            <div class="modal-headers">
+
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h3 id="proName" style="color: black"></h3>
+            </div>
+            <div class="project-overview-table col-md-12">
+                <form id="paymentDetailForm">
+                    <table class="detail-table">
+
+                        <tr>
+                            <td class="basic-table-title">付款编号：</td>
+                            <td colspan="3" id="code" ></td>
+                        </tr>
+                        <tr  id="contractCode" class="hide">
+                            <td class="basic-table-title">合同编号：</td>
+                            <td colspan="3"><input class="monthly-input"  type="text" name="contractCode"></td>
+                        </tr>
+                        <tr id="contractName" class="hide">
+                            <td class="basic-table-title" >合同名称：</td>
+                            <td colspan="3"><input class="monthly-input"  type="text" name="contractName"></td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">工程款大类：</td>
+                            <td ><input class="monthly-input proCategory"  type="text"></td>
+                            <td class="basic-table-title">收款人：</td>
+                            <td><input class="monthly-input"  type="text" name="payee"></td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">工程款小类：</td>
+                            <td><input class="monthly-input"  type="text" name="detailCategory"></td>
+                            <td class="basic-table-title">收款人账号：</td>
+                            <td><input class="monthly-input"  type="text" name="payeeAccount"></td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">支付日期：</td>
+                            <td><input class="monthly-input"  type="text" name="payDate"></td>
+                            <td class="basic-table-title">收款人开户行：</td>
+                            <td><input class="monthly-input"  type="text" name="payeeOpenBank"></td>
+                        </tr>
+                        <tr>
+                            <td class="basic-table-title">付款金额：</td>
+                            <td colspan="3"><input class="monthly-input"  type="text" name="detailMoney"></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/oaPayment";
+    var bigTpye=[[${@dict.getType('sys_payment_big_type')}]];
+
+    var smallTpye1=[[${@dict.getType('sys_payment_small_type1')}]];
+    var smallTpye2=[[${@dict.getType('sys_payment_small_type2')}]];
+    var smallTpye3=[[${@dict.getType('sys_payment_small_type3')}]];
+    var smallTpye4=[[${@dict.getType('sys_payment_small_type4')}]];
+    var smallTpye5=[[${@dict.getType('sys_payment_small_type5')}]];
+    $(function() {
+        var options = {
+            url: prefix + "/selectProPaymentData",
+            modalName: "付款明细",
+            updateUrl: prefix2 + "/edit/{id}",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams:queryParams,
+            columns: [
+                {
+                    title : '',
+                    width:'30px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        console.log(row)
+                        return $.table.serialNumber(index);
+
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'code',
+                    title : '付款编号',
+                    align:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'contractName',
+                    title : '合同名称',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'proCategory',
+                    title : '工程款大类',
+                    align:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = $.table.selectDictLabel(bigTpye, value);
+
+                        return "<a onclick='openDetail(" + JSON.stringify(row) + ")'>"+text+"</a>";
+                    }
+                },
+                {
+                    field : 'detailCategory',
+                    title : '工程款小类',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'payDate',
+                    title : '支付日期',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'payee',
+                    title : '收款人',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'detailMoney',
+                    title : '付款总金额',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].detailMoney);
+                        }
+                        return sumBalance;
+                    }
+                }
+            ]
+        };
+        $.table.init(options);
+
+        //选择大类
+        $('#proCategory').change(function () {
+            var number = $(this).val();
+            var html='<option value="" style="display: none;"  disabled  selected>工程款小类</option>';
+            if(number==='0'){
+                for (var i=0;i<smallTpye1.length;i++){
+                    html += '<option value="'+smallTpye1[i].dictLabel+'">'+smallTpye1[i].dictLabel+'</option>'
+                }
+                $('#detailCategory').html(html)
+            }else if (number==='1') {
+                for (var i=0;i<smallTpye2.length;i++){
+                    html += '<option value="'+smallTpye2[i].dictLabel+'">'+smallTpye2[i].dictLabel+'</option>'
+                }
+                $('#detailCategory').html(html)
+            }else if (number==='2') {
+                for (var i=0;i<smallTpye2.length;i++){
+                    html += '<option value="'+smallTpye3[i].dictLabel+'">'+smallTpye3[i].dictLabel+'</option>'
+                }
+                $('#detailCategory').html(html)
+            }else if (number==='3') {
+                for (var i=0;i<smallTpye4.length;i++){
+                    html += '<option value="'+smallTpye4[i].dictLabel+'">'+smallTpye4[i].dictLabel+'</option>'
+                }
+                $('#detailCategory').html(html)
+            }else if (number==='4'){
+                for (var i=0;i<smallTpye5.length;i++){
+                    html += '<option value="'+smallTpye5[i].dictLabel+'">'+smallTpye5[i].dictLabel+'</option>'
+                }
+                $('#detailCategory').html(html)
+            }else {
+                $('#detailCategory').html(html)
+            }
+        });
+    });
+    
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        var projectId = [[${projectId}]];
+        var proCategory = [[${proCategory}]];
+        var detailCategory = [[${detailCategory}]]
+        if (proCategory!='null'&&detailCategory!='null') {
+            search.projectId = projectId;
+            search.proCategory = proCategory;
+            search.detailCategory = detailCategory;
+        }else if(proCategory!='null'&&detailCategory=='null'){
+            search.projectId = projectId;
+            search.proCategory = proCategory;
+        }else{
+            search.projectId = projectId;
+        }
+        return search;
+    }
+
+    function openDetail(row) {
+        console.log(row)
+        $('#paymentDetailPopup').modal("show");
+        $('#proName').text(row.proName);
+        $('.proCategory').val($($.table.selectDictLabel(bigTpye, row.proCategory)).text());
+        $("#code").html("<a class='openPayment' data-id='"+row.id+"'>"+row.code+"</a>" );
+        openPayment()
+        if(row.contractId!=""){
+            $('#contractCode').removeClass('hide');
+            $('#contractName').removeClass('hide');
+        }else {
+            $('#contractCode').addClass('hide');
+            $('#contractName').addClass('hide');
+        }
+        $('#paymentDetailForm').loadData(row);
+
+
+    }
+
+   var openPayment=function() {
+       $('.openPayment').click(function () {
+           var url = prefix2 + "/edit/"+$(this).attr('data-id');
+           $.modal.openFullS("查看付款明细" , url);
+       })
+
+    }
+
+
+</script>
+</body>
+</html>

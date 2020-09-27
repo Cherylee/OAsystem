@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('合同列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								合同编号：<input type="text" name="code"/>
+							</li>
+
+							<!-- <li>
+								合同名称：<input type="text" name="name"/>
+							</li> -->
+
+							<!-- <li>
+								签订日期：<input type="text" name="signDate"/>
+							</li>
+
+							<li>
+								开始日期：<input type="text" name="startDate"/>
+							</li>
+
+							<li>
+								结束日期：<input type="text" name="endDate"/>
+							</li>
+
+							<li>
+								合同性质1：<input type="text" name="contractNatureFirst"/>
+							</li>
+
+							<li>
+								合同性质2：<input type="text" name="contractNatureSecond"/>
+							</li>
+
+							<li>
+								合同性质3：<input type="text" name="contractNatureThird"/>
+							</li>
+
+							<li>
+								合同金额(元)：<input type="text" name="contractAmount"/>
+							</li>
+
+							<li>
+								累计收款(元)：<input type="text" name="totalCollections"/>
+							</li>
+
+							<li>
+								收款状态(0：未收款，1：部分收款，2：已收款)：<input type="text" name="collectionStatus"/>
+							</li>
+
+							<li>
+								合同存档日期：<input type="text" name="contractFileDate"/>
+							</li>
+
+							<li>
+								合同存档编号：<input type="text" name="contractFileCode"/>
+							</li>
+
+							<li>
+								合同结算日期：<input type="text" name="contractSettleDate"/>
+							</li>
+
+							<li>
+								工程项目id：<input type="text" name="projectId"/>
+							</li>
+
+							<li>
+								负责人id：<input type="text" name="chargePersonId"/>
+							</li>
+
+							<li>
+								项目类别(0：公路，1：桥隧)：<input type="text" name="projectType"/>
+							</li>
+
+							<li>
+								项目承接人：<input type="text" name="projectHoldPerson"/>
+							</li>
+
+							<li>
+								委托单位：<input type="text" name="clientUnit"/>
+							</li>
+
+							<li>
+								行政区县：<input type="text" name="district"/>
+							</li>
+
+							<li>
+								邮政编码：<input type="text" name="zipCode"/>
+							</li>
+
+							<li>
+								街道及门牌号：<input type="text" name="streetNumber"/>
+							</li>
+
+							<li>
+								地址全称：<input type="text" name="fullAddr"/>
+							</li>
+
+							<li>
+								电话：<input type="text" name="phone"/>
+							</li>
+
+							<li>
+								传真：<input type="text" name="fax"/>
+							</li>
+
+							<li>
+								合同预审附件url：<input type="text" name="contractPretrialFile"/>
+							</li>
+
+							<li>
+								合同正式附件url：<input type="text" name="contractFormalFile"/>
+							</li> -->
+
+							<li>
+								合同文件状态：<!-- <input type="text" name="contractFileStatus"/> -->
+								<select id="contractFileStatus" class="selectpicker" name="contractFileStatus" th:with="type=${@dict.getType('bridge_contract_file_status')}">
+							         <option value=""> -- 所有 --</option>
+							         <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					            </select>
+							</li>
+
+							<!-- <li>
+								合同结算说明：<input type="text" name="contractSettlementNote"/>
+							</li>
+
+							<li>
+								完工情况：<input type="text" name="finishSitu"/>
+							</li> -->
+
+							<li>
+								是否生效：<!-- <input type="text" name="isEffect"/> -->
+								<select id="isEffect" class="selectpicker" name="isEffect" th:with="type=${@dict.getType('bridge_yes_no')}">
+							         <option value=""> -- 所有 --</option>
+							         <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					            </select>
+							</li>
+
+							<!-- <li>
+								备注：<input type="text" name="remark"/>
+							</li> -->
+
+							<!-- <li>
+								创建者：<input type="text" name="createBy"/>
+							</li>
+
+							<li>
+								创建时间：<input type="text" name="createTime"/>
+							</li>
+
+							<li>
+								更新者：<input type="text" name="updateBy"/>
+							</li>
+
+							<li>
+								更新时间：<input type="text" name="updateTime"/>
+							</li> -->
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="bridge:bridgeContractInfo:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="bridge:bridgeContractInfo:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="bridge:bridgeContractInfo:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="bridge:bridgeContractInfo:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('bridge:bridgeContractInfo:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('bridge:bridgeContractInfo:remove')}]];
+        var collectionStatus = [[${@dict.getType('bridge_collection_status')}]];
+        var contractFileStatus = [[${@dict.getType('bridge_contract_file_status')}]];
+        var isEffect = [[${@dict.getType('bridge_yes_no')}]];
+        
+        var prefix = ctx + "bridge/bridgeContractInfo";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "合同",
+		        showExport: true,
+		        sortName : "createTime",
+		        sortOrder : "desc",
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '合同信息id',
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '合同编号',
+					sortable: true
+				},
+				{
+					field : 'name', 
+					title : '合同名称',
+					sortable: true
+				},
+				{
+					field : 'signDate', 
+					title : '签订日期',
+					sortable: true
+				},
+				{
+					field : 'startDate', 
+					title : '开始日期',
+					sortable: true
+				},
+				{
+					field : 'endDate', 
+					title : '结束日期',
+					sortable: true
+				},
+				{
+					field : 'contractNatureFirst', 
+					title : '合同性质1',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractNatureSecond', 
+					title : '合同性质2',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractNatureThird', 
+					title : '合同性质3',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractAmount', 
+					title : '合同金额(元)',
+					sortable: true
+				},
+				{
+					field : 'totalCollections', 
+					title : '累计收款(元)',
+					sortable: true
+				},
+				{
+					field : 'collectionStatus', 
+					title : '收款状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(collectionStatus, value);
+		        	}
+				},
+				{
+					field : 'contractFileDate', 
+					title : '合同存档日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractFileCode', 
+					title : '合同存档编号',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractSettleDate', 
+					title : '合同结算日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'projectId', 
+					title : '工程项目id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'chargePersonId', 
+					title : '负责人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'projectType', 
+					title : '项目类别(0：公路，1：桥隧)',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'projectHoldPerson', 
+					title : '项目承接人',
+					sortable: true
+				},
+				{
+					field : 'clientUnit', 
+					title : '委托单位',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'district', 
+					title : '行政区县',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'zipCode', 
+					title : '邮政编码',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'streetNumber', 
+					title : '街道及门牌号',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'fullAddr', 
+					title : '地址全称',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'phone', 
+					title : '电话',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'fax', 
+					title : '传真',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractPretrialFile', 
+					title : '合同预审附件url',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractFormalFile', 
+					title : '合同正式附件url',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'contractFileStatus', 
+					title : '合同文件状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(contractFileStatus, value);
+		        	}
+				},
+				{
+					field : 'contractSettlementNote', 
+					title : '合同结算说明',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'finishSitu', 
+					title : '完工情况',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'isEffect', 
+					title : '是否生效',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(isEffect, value);
+		        	}
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '更新者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '更新时间',
+					sortable: true,
+					visible: false
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        
+        /*弹出框回显*/
+        function submitHandlerSelect() {
+         	var target=$('#bootstrap-table');        
+         	var len=$("input[name='btSelectItem']:checked").length;  
+         	
+         	var target ={
+ 					'id':'',
+ 					'name':'',
+ 					'projectHoldPerson':''
+ 					
+ 			}
+         	 if (len == 0) {
+      			$.modal.alertWarning("请至少选择一条记录");
+      			return;
+      		}
+         	 if (len >1) {
+       			$.modal.alertWarning("只能选择一条记录");
+       			return;
+       		}
+         	 if(len==1){
+         		  target.id = $.table.selectColumns('id');
+         		  target.name = $.table.selectColumns('name');
+         		  target.projectHoldPerson = $.table.selectColumns('projectHoldPerson');
+         		  $.modal.close();
+      			return target;  
+         	 }  
+         }
+    </script>
+</body>
+</html>

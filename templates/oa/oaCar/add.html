@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增车辆')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaCar-add">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>新增车辆</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">车牌号</td>
+									<td>
+										<input id="carNo" name="carNo" class="form-control" type="text">
+									</td>
+									<td class="active">车身颜色</td>
+									<td>
+										<input id="bodyColor" name="bodyColor" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">品牌型号</td>
+									<td>
+										<input id="carBrad" name="carBrad" class="form-control" type="text">
+									</td>
+									<td class="active">行驶证号</td>
+									<td>
+										<input id="drivingLicense" name="drivingLicense" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">发动机号</td>
+									<td>
+										<input id="carEngine" name="carEngine" class="form-control" type="text">
+									</td>
+									<td class="active">车架号</td>
+									<td>
+										<input id="carFrame" name="carFrame" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">状态</td>
+									<td>
+										<select class="form-control" name="status" th:with="type=${@dict.getType('oa_car_manage_state')}">
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">车辆归属人</td>
+									<td>
+										<input id="owner" name="ownerId" onclick="selectUserById()" class="form-control" type="text">
+										<input name="owner" type="hidden"/>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">保险到期时间</td>
+									<td>
+										<input id="insuranceExpireDate" name="insuranceExpireDate" class="form-control time-input-data" type="text">
+									</td>
+								</tr>
+								</tbody>
+							</table>
+							<div class="row">
+								<div class="col-sm-offset-5 col-sm-10">
+									 <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+									 <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaCar"
+		$("#form-oaCar-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/add", $('#form-oaCar-add').serialize());
+	        }
+	    }
+		
+		/*车辆归属人*/
+        function selectUserById(){
+    		var options = {
+    				title: '选择用户',
+    				width: "1200",
+    				url: ctx + "oa/oaApplyTemplate/selectUser",
+    				callBack: doSubmit1
+    			};
+    			$.modal.openOptions(options);
+    	}
+        function doSubmit1(index, layero){
+          var iframeWin = layero.find('iframe')[0];
+          var result = iframeWin.contentWindow.submitHandler();
+		  var data = result.data;
+		  $('#owner').val(data.userName);
+		  $("input[name='owner']").val(data.userId);
+		  /* var row = $("#bootstrap-table").bootstrapTable('getSelections');
+		  if(row.length<=0){
+			  $.modal.alertWarning('请先选择要操作的记录！');
+			  return;
+		   } */
+        } 
+	</script>
+</body>
+</html>

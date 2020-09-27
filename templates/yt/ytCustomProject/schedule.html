@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('项目进度')"/>
+    <style>
+        .schedule-title {
+            margin: 10px 0;
+            display: block;
+        }
+
+        .color1 {
+            color: #5488ff;
+        }
+
+        .color2 {
+            color: #f38804;
+        }
+
+        .pie-box {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        .pie-box-list {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper wrapper-content animated fadeInRight schedule-box">
+    <div class="col-md-12">
+        <br>
+        <h4>项目总进度</h4>
+        <br>
+        <div th:each="list,columnStat : ${scheduleVo.detailVoList}" th:if="${columnStat.index}==0">
+            <div class="stat-percent">[[${list.currentProportion}]]%</div>
+            <div class="progress progress-mini">
+                <div th:style="'width:'+${list.currentProportion}+'%;'" class="progress-bar"></div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <h4>各部分进度</h4>
+        <br>
+        <div class="pie-box">
+
+            <div class="pie-box-list" th:each="list,columnStat : ${scheduleVo.detailVoList}"
+                 th:if="${columnStat.index}>0">
+                <div th:id="'sparkline'+${columnStat.index}"></div>
+                <span class="schedule-title">[[${list.type}]]([[${list.currentProportion}]]%)</span>
+            </div>
+        </div>
+        <br>
+        <br>
+        <!-- 问题-->
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>问题</h5>
+            </div>
+            <div class="ibox-content">
+                <div th:each="list,columnStat : ${scheduleVo.problemList}">
+                    <h4>[[${list.existProblem}]]</h4>
+                    <div th:if="${list.detailList}">
+                        <p th:each="ea : ${list.detailList}" ><span th:class="${ea.type=='员工'}?'color1':'color2'">（[[${ea.type}]]）</span>[[${ea.content}]]</p>
+                    </div>
+                    <form th:id="'formComment'+${columnStat.index}">
+                        <div class="input-group">
+                            <input type="hidden" name="problemId" th:value="${list.id}">
+                            <input type="text" name="content" class="form-control" required> <span
+                                class="input-group-btn">
+                            <button type="button" class="btn btn-primary"
+                                    th:onclick="sunmitComment([[${columnStat.index}]])"> 提交 </button> </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:src="@{/ajax/libs/report/sparkline/jquery.sparkline.min.js}"></script>
+<script th:inline="javascript">
+    console.log([[${scheduleVo.problemList}]])
+    var detailVoList = [[${scheduleVo.detailVoList}]]
+    for (var i = 1; i < detailVoList.length; i++) {
+        var detailSche = detailVoList[i].currentProportion
+        var spart = [100, detailSche]
+        $("#sparkline" + i).sparkline(spart, {
+            type: 'pie',
+            height: '140',
+            sliceColors: ['#eaedf1', '#5488ff']
+        });
+    }
+
+    //    提交回复
+    function sunmitComment(num) {
+        console.log()
+        var data = $('#formComment' + num).serializeObject()
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: ctx + "yt/ytProjectProblem/addDetail",
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                // refreshItem();
+                $.modal.closeLoading()
+                var _body = window.parent;
+                var _iframe1=_body.document.getElementById('iframe');
+                _iframe1.contentWindow.location.reload(true);
+            }
+        };
+
+        if ($.validate.form('formComment' + num)) {
+            $.ajax(config)
+        }
+    }
+
+</script>
+</body>
+</html>

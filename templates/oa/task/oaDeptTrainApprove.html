@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('部门培训申请审批')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+<style>
+.add_btn_mt {
+	margin-top: 15px;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaPurchase-edit"
+							th:object="${oaDeptTrain}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<input id="taskId" name="taskId" th:value="${taskId}"
+								type="hidden">
+							<table class="table table-bordered table-condensed">
+								<caption class="text-center">
+									<h2>部门培训申请</h2>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">申请人：</td>
+										<td>[[*{userName}]]</td>
+										<td class="active">所属公司：</td>
+										<td>[[*{applyCompanyName}]]</td>
+									</tr>
+									<tr>
+										<td class="active">申请部门：</td>
+										<td>[[*{applyDeptName}]]</td>
+										<td class="active">申请日期：</td>
+										<td colspan="3">[[${#dates.format(oaDeptTrain.applyTime,
+											'yyyy-MM-dd HH:mm:ss')}]]</td>
+									</tr>
+									<tr>
+										<td class="active">培训起始时间：</td>
+										<td>[[${#dates.format(oaDeptTrain.trainTimeStart,
+											'yyyy-MM-dd HH:mm:ss')}]]</td>
+										<td class="active">培训结束时间：</td>
+										<td colspan="3">[[${#dates.format(oaDeptTrain.trainTimeEnd,
+											'yyyy-MM-dd HH:mm:ss')}]]</td>
+									</tr>
+									<tr>
+										<td class="active">培训地点：</td>
+										<td>[[*{trainArea}]]</td>
+										<td class="active">培训机构：</td>
+										<td colspan="3">[[*{trainOrg}]]</td>
+									</tr>
+									<tr>
+										<td class="active">培训类别：</td>
+										<td colspan="3">[[*{trainType}]]</td>
+									</tr>
+									<tr>
+										<td class="active">课程费用：</td>
+										<td>[[*{courseFee}]]</td>
+										<td class="active">考试费用：</td>
+										<td colspan="3">[[*{examFee}]]</td>
+									</tr>
+									<tr>
+										<td class="active">往返交通费：</td>
+										<td>[[*{trafficFee}]]</td>
+										<td class="active">酒店住宿费：</td>
+										<td colspan="3">[[*{roomFee}]]</td>
+									</tr>
+									<tr>
+										<td class="active">其他费用：</td>
+										<td>[[*{otherFee}]]</td>
+										<td class="active">总计费用：</td>
+										<td colspan="3">[[*{totalFee}]]</td>
+									</tr>
+									<tr>
+										<td class="active">人均费用：</td>
+										<td>[[*{personFee}]]</td>
+										<td class="active">费用承担：</td>
+										<td colspan="3"><select name="feeBear"
+											class="form-control"
+											th:with="type=${@dict.getType('oa_deptTrainCost_take')}"
+											th:field="*{feeBear}" disabled>
+												<option value="">--请选择--</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">合同期限：</td>
+										<td>[[*{contractTerm}]]</td>
+										<td class="active">合同状况：</td>
+										<td colspan="3"><select name="contractSign"
+											class="form-control"
+											th:with="type=${@dict.getType('oa_deptTainContract_status')}"
+											th:field="*{contractSign}" disabled>
+												<option value="">--请选择--</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">事由：</td>
+										<td colspan="3">[[*{reason}]]</td>
+									</tr>
+									<tr>
+										<td class="active">培训内容：</td>
+										<td colspan="3">[[*{trainContent}]]</td>
+									</tr>
+									<tr>
+										<td class="active">附件：</td>
+										<td colspan="3"><div class="file-loading">
+												<input id="uploadFileId" type="file" multiple disabled>
+											</div></td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<h3>学员名单</h3>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="bootstrap-table-person" data-mobile-responsive="true"></table>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+				<button type="button" class="btn btn-sm btn-success"
+						th:onclick="selectUser('','','0',[[${oaDeptTrain.id}]],'oa/oaDeptTrain/copy','flag')">
+						抄送</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关闭
+				</button>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<th:block th:include="include :: lastNode" />
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaDeptTrain";
+		var lastNodeId=[[${oaDeptTrain.id}]];
+		var actDefineId=[[${oaDeptTrain.actDefineId}]];
+		var lastStatus=[[${oaDeptTrain.status}]];
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaDeptTrain.procInstId}]];
+    	data.id = [[${oaDeptTrain.id}]];
+		selectActProcessList(data);
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+$("#taskId").val()+"/240/oa_dept_train/"+[[${oaDeptTrain.id}]]);
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+$("#taskId").val()+"/240/oa_dept_train/"+[[${oaDeptTrain.id}]]);
+	    }
+	    //返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		//学员表
+		$(function() {
+			var options = {
+				id : "bootstrap-table-person",
+				url:ctx + "oa/oaDeptTrainPerson/list",
+				modalName : "部门培训申请",
+				uniqueId:'userId',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				modalName : "学院培训",
+				queryParams:{'deptTrainId':[[${oaDeptTrain.id}]]},
+				showExport : false,
+				toolbar : "toolbar",
+				columns : [
+						{
+							checkbox : true
+						},
+						{
+							field : 'userName',
+							title : '学员姓名',
+							sortable : true
+						},
+						{
+							field : 'userId',
+							title : '学员Id',
+							sortable : true
+						},
+						{
+							field : 'userPosition',
+							title : '职位',
+							sortable : true
+						}]
+			};
+			$.table.init(options);
+		});
+		var attachmentList = new Array();
+        //图片反显出来
+        $(function () {
+        	var config = {
+        	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": [[${oaDeptTrain.id}]]},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        		}
+        	        		var option1={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+		     			downFile();
+        	        }
+        	    };
+        	    $.ajax(config)
+	    });
+	</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('付款申请列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" id="CompanyId"  name="companyId"/>
+                            <input type="text" id="CompanyName"  onclick="selectDeptTree('CompanyId','CompanyName','0')"  placeholder="所属公司"/>
+                        </li>
+
+                        <li>
+                            <input type="hidden" id="proposer" name="proposer" />
+                            <input type="text" id="userName" placeholder="申请人" onclick="selectUser('proposer','userName')"/>
+                        </li>
+
+                        <li>
+                            <select name="status"
+                                    th:with="type=${@dict.getType('oa_leave_status')}">
+                                <option value="">状态</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+
+                        <li class="select-time">
+                            <label>申请时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaPayment:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaPayment:remove')}]];
+    var prefix = ctx + "oa/oaPayment";
+    var applyState = [[${@dict.getType('oa_leave_status')}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            updateUrl: prefix + "/edit/{id}",
+            modalName: "付款申请",
+            sortName: "createTime",
+            sortOrder: "desc",
+            showFooter: true,
+            showExport: true,
+            queryParams: {"otherProjectId": [[${projectId}]]},
+            columns: [
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'code',
+                    title: '编号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = null;
+                        if (row.code) {
+                            text = row.code
+                        } else {
+                            text = '暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editTab(\'' + row.id + '\')">' + text + '</a>'
+                    }
+                },
+                {
+                    field: 'companyId',
+                    title: '所属公司id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'proposer',
+                    title: '申请人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'userName',
+                    title: '申请人',
+                },
+                {
+                    field: 'deptId',
+                    title: '部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deptName',
+                    title: '申请部门',
+                },
+                {
+                    field: 'companyName',
+                    title: '申请公司',
+                },
+
+                {
+                    field: 'status',
+                    title: '状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(applyState, value);
+                    }
+                },
+                {
+                    field: 'applyDate',
+                    title: '申请日期',
+                    sortable: true
+                },
+                {
+                    field: 'payDate',
+                    title: '支付日期',
+                    sortable: true
+                },
+                {
+                    field: 'money',
+                    title: '付款总额',
+                    sortable: true,
+                    footerFormatter: function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].money);
+                        }
+                        return '合计:' + sumBalance;
+                    }
+                },
+                {
+                    field: 'moneyUpcase',
+                    title: '金额大写',
+                    sortable: true
+                }]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

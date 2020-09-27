@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('出差申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaTravel-edit" th:object="${oaTravel}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+                        <table class="table table-bordered table-condensed" >
+                            <caption class="text-center">
+                                <h2>出差申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">申请人</td>
+                                <td>
+                                    [[${user.userName}]]
+                                </td>
+                                <td class="active">归属公司</td>
+                                <td>
+                                   [[*{companyName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">归属部门</td>
+                                <td>
+                                    [[*{deptName}]]
+                                </td>
+                                <td class="active">申请日期从</td>
+                                <td>
+                                   [[${#dates.format(oaTravel.applyTimeFrom, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请日期到</td>
+                                <td>
+                                   [[${#dates.format(oaTravel.applyTimeTo, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                                <td class="active">申请天数</td>
+                                <td>
+                                    [[*{applyDays}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">职务代理人</td>
+                                <td>
+                                    [[*{deputyName}]]
+                                </td>
+                                <td class="active">申请事由</td>
+                                <td>
+                                    [[*{applyReason}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">创建日期</td>
+                                <td>
+                                    [[${#dates.format(oaTravel.createTime, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                                <td class="active">是否公司购票</td>
+                                <td>
+                                    <select class="form-control" name="isCompanyTicket" th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{isCompanyTicket}" disabled="disabled">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">是否借款</td>
+                                <td>
+                                    <select class="form-control" name="isBorrowMoney" th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{isBorrowMoney}" disabled="disabled">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">是否出差延期</td>
+                                <td>
+                                    <select class="form-control" name="isDelay" th:with="type=${@dict.getType('sys_yes_no')}" th:field="*{isDelay}" disabled="disabled">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">乘坐交通工具</td>
+                                <td>
+                                    <select class="form-control" name="vehicle" th:with="type=${@dict.getType('oa_travel_tool')}" th:field="*{vehicle}" readonly="readonly">
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">预算</td>
+                                <td>
+                                    [[*{budget}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">出差目的地</td>
+                                <td>
+                                   [[*{travelDestination}]]
+                                </td>
+                                <td class="active">备注</td>
+                                <td>
+                                   [[*{remark}]]
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${oaTravel.id}]],'oa/oatravel/copy','flag')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+
+    var prefix = ctx + "oa/oatravel";
+    var lastNodeId = [[${oaTravel.id}]];
+    var actDefineId = [[${oaTravel.actDefineId}]];
+    var lastStatus = [[${oaTravel.status}]];
+    //流程
+    var data = {};
+    data.procInstId = [[${oaTravel.procInstId}]];
+    data.id = [[${oaTravel.id}]];
+    selectActProcessList(data);
+
+    //同意
+    function agree() {
+        $.modal.open("同意备注", ctx + "oa/task/agree/" + $("#taskId").val() + "/0/oa_travel/" + [[${oaTravel.id}]]);
+    }
+
+    //不同意
+    function disagree() {
+        $.modal.open("不同意原因", ctx + "oa/task/disagree/" + $("#taskId").val() + "/0/oa_travel/" + [[${oaTravel.id}]]);
+    }
+
+    //返回
+    function backAway() {
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+
+</script>
+</body>
+</html>

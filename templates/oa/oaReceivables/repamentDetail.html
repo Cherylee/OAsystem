@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:include="include :: header('还款')" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<!--抬头  -->
+	<div class="hr-line-dashed"></div>
+	<div class="row">
+		<div class="col-sm-offset-1 col-sm-10">
+			<div class="panel panel-default">
+				<div class="panel-body ">
+					<form class="form-horizontal m" id="form-oaRefund-add" th:object="${oaRefund}">
+						<input id="borrowId" name="borrowId" th:value="*{id}" type="hidden">
+						<table class="table table-bordered table-condensed"
+							   style="width: 90%; margin: 0 auto">
+							<caption class="text-center">
+								<h2>还款</h2>
+							</caption>
+							<tbody>
+							<tr>
+								<td class="active">编号：</td>
+								<td>
+									[[*{code}]]
+								</td>
+								<td class="active">所属公司：</td>
+								<td>
+									[[*{companyName}]]
+								</td>
+
+							</tr>
+							<tr>
+								<td class="active">申请人：</td>
+								<td>
+									[[*{userName}]]
+								</td>
+								<td class="active">项目名称：</td>
+								<td>
+									<!-- 工程id -->
+									[[*{projectName}]]
+								</td>
+							</tr>
+							<tr>
+								<td class="active">申请部门：</td>
+								<td>
+									[[*{deptName}]]
+								</td>
+								<td class="active">申请日期：</td>
+								<td>
+									[[${#dates.format(oaRefund.applyTime, 'yyyy-MM-dd')}]]
+								</td>
+
+							</tr>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>借款类型：</td>
+								<td>
+									<select name="borrowType" class="form-control" th:with="type=${@dict.getType('oa_borrow_type')}"
+										id="borrowType" th:field="*{borrowType}" disabled>
+										<option value="">--请选择--</option>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+									</select>
+								</td>
+								<td class="active">借款人：</td>
+								<td>
+									[[*{borrower}]]
+								</td>
+							</tr>
+							<tr>
+								<td class="active">借款金额：</td>
+								<td>
+									[[*{borrowAmount}]]
+								</td>
+								<td class="active">金额大写：</td>
+								<td>
+									[[*{amountUpcase}]]
+								</td>
+							</tr>
+							<tr>
+								<td class="active">还款日期：</td>
+								<td>
+									[[${#dates.format(oaRefund.refundDate, 'yyyy-MM-dd')}]]
+
+								</td>
+								<td class="active">未归还金额：</td>
+								<td>
+									[[*{outstandAmount}]]
+								</td>
+							</tr>
+							<tr>
+								<td class="active">还款金额：</td>
+								<td>
+									[[*{refundAmount}]]
+								</td>
+								<td class="active">还款金额大写：</td>
+								<td>
+									[[*{refundAmountUpcase}]]
+								</td>
+							</tr>
+							<tr>
+								<td class="active">附件：</td>
+								<td colspan="3">
+									<div class="file-loading">
+										<input id="uploadFileId" type="file" multiple disabled>
+									</div>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+					</form>
+					<div class="row">
+						<div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+
+							<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+								<i class="fa fa-reply-all"></i>关 闭
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-12 select-table table-striped">
+						<table id="bootstrap-table" data-mobile-responsive="true"></table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script th:inline="javascript">
+	var prefix = ctx + "oa/oaRefund";
+
+	var attachmentList = new Array();
+	//图片反显出来
+	$(function () {
+		var config = {
+			url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+			type: "post",
+			dataType: "json",
+			data: {"objId": [[${oaRefund.id}]]},
+			success: function(result) {
+				var imgsUrl = new Array();
+				var attachList = result.data;
+				if(attachList!=null && attachList.length>0){
+					var downloadConfig = new Array();
+					for(var i=0; i<attachList.length; i++){
+						var down = {};
+						var attach = attachList[i];
+						imgsUrl.push(attach.attachmentName);
+						down.key = attach.attachmentName;
+						down.caption = attach.fileName;
+						down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+						if(isAssetTypeAnImage(attach.attachmentName)){
+							down.type = 'image';
+						}else{
+							down.type = 'object';
+						}
+						downloadConfig.push(down);
+					}
+					var option1={
+						id:'uploadFileId',
+						uploadUrl:null,
+						deleteUrl:null,
+						//deleteExtraData:deleteExtraData,
+						imgsUrl:imgsUrl,
+						downloadConfig:downloadConfig
+					}
+					$.common.uploadFile(option1);
+				}else{
+					var option2={
+						id:'uploadFileId',
+						uploadUrl:null,
+						deleteUrl:null,
+						deleteExtraData:null,
+						imgsUrl:new Array(),
+						initialPreviewConfig:null
+					}
+					$.common.uploadFile(option2);
+				}
+			}
+		};
+		$.ajax(config)
+	});
+
+	//流程
+	var data = {};
+	data.procInstId=[[${oaRefund.procInstId}]];
+	data.id = [[${oaRefund.id}]];
+	selectActProcessList(data);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('统计报表')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body class="white-bg">
+<div class="col-md-12">
+    <div class="box-center">
+        <form  id="formId">
+            <table>
+                <tr>
+                    <input type="hidden" name="projectId" th:value="${projectId}">
+                    <td class="analysis-table-title" style="padding-right: 10px">时间范围:</td>
+                    <td><input type="radio" value="0" name="findTimeFlag" checked > 全部</td>
+                    <td><input type="radio" value="1" name="findTimeFlag">去年</td>
+                    <td><input type="radio" value="2" name="findTimeFlag">今年</td>
+                    <td><input type="radio" value="3" name="findTimeFlag">本月</td>
+                    <td><input type="radio" value="4" name="findTimeFlag">本周</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title ">
+            <div class="arrow arrow-bottom"></div>
+            收款<hr style="left: 40px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="collection" class="table table-bordered table-bot" ></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            付款<hr style="left: 40px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="payment" class=" table table-bordered table-bot" ></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            扣款<hr style="left: 40px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="deduction" class=" table table-bordered table-bot"></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            借款<hr style="left: 40px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="loan" class=" table table-bordered table-bot"></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom" ></div>
+            报销<hr style="left: 40px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="reimbursement" class=" table table-bordered table-bot" ></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            进项发票<hr style="left: 65px;">
+        </div>
+        <div class="select-table table-striped hide">
+            <table  id="inputInvoice" class=" table table-bordered table-bot" ></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            销项发票<hr style="left: 65px;">
+        </div>
+        <div class=" select-table table-striped hide">
+            <table  id="outputInvoice" class=" table table-bordered table-bot" ></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var payType=[[${@dict.getType('sys_payment_big_type')}]];
+    var debitType=[[${@dict.getType('sys_debit_type')}]];
+    var borrowType=[[${@dict.getType('oa_borrow_type')}]];
+    var paymentType =[[${@dict.getType('sys_pro_payment_type')}]];
+    var invoiceType=[[${@dict.getType('sys_pro_invoice_type')}]];
+    var reimbursementType=[[${@dict.getType('oa_reimbursement_type')}]];
+    $(function () {
+        //箭头方向
+
+        var arrowList = $(".arrow");
+        arrowList.click(function () {
+            var obj=$(this);
+            obj.toggleClass("arrow-top");
+            obj.toggleClass("arrow-bottom");
+            obj.parent().siblings().toggleClass("hide");
+        });
+
+        $('input[type=radio][name=findTimeFlag]').change(function() {
+            var tableIdList=['collection','payment','deduction','loan','reimbursement','inputInvoice','outputInvoice'];
+            $.table.searchOverView('formId',tableIdList);
+        });
+
+        //统计报表>收款表
+        var collectionList = {
+            url: prefix + '/selectStatisticsCollectionData',
+            id:'collection',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport: false,
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    field:'paymentType',
+                    title: '收款类型',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = $.table.selectDictLabel(paymentType,value);
+                        return '<a onclick="openList(\'collectionList\',\'' + row.paymentType + '\')">'+text+'</a>';
+                    }
+
+                },
+                {
+                    field:'proportion',
+                    title:'占比',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(value).toFixed(2)+'%'
+
+                    }
+                },
+                {
+                    field:'sumAmount',
+                    title:'收款总额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'receiptNumber',
+                    title:'收款次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'次'
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].receiptNumber);
+                        }
+                        return sumBalance+'次';
+                    }
+                },
+                {
+                    field:'lastReceiptDate',
+                    title:'上次收款日期',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                }]
+        };
+        $.table.init(collectionList);
+
+        //统计报表>付款表
+        var paymentList = {
+            id:'payment',
+            url:prefix + '/selectStatisticsPaymentData',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    field : 'proCategory',
+                    title: '工程款大类',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = $.table.selectDictLabel(payType,value);
+                        return '<a onclick="openList(\'paymentList\',\'' + row.proCategory + '\')">'+text+'</a>';
+                    }
+
+                },
+                {
+                    field : 'proportion',
+                    title:'占比',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(value).toFixed(2)+'%'
+
+                    }
+                },
+                {
+                    field:'sumAmount',
+                    title:'付款总额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'paymentNumber',
+                    title:'付款次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = value+'次';
+                        return '<a onclick="openDetailList(\'paymentDetailList\',\'' + row.proCategory + '\')">'+text+'</a>';
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].paymentNumber);
+                        }
+                       return sumBalance+'次';
+                    }
+                },
+                {
+                    field:'lastPaymentDate',
+                    title:'上次付款日期',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                }]
+        };
+        $.table.init(paymentList);
+
+        //统计报表>扣款表
+        var deductionList = {
+            id:'deduction',
+            url:prefix+'/selectStatisticsDebitData',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    field : 'debitType',
+                    title: '扣款类型',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(debitType, value);
+                    }
+
+                },
+                {
+                    field : 'proportion',
+                    title:'占比',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(value).toFixed(2)+'%'
+
+                    }
+                },
+                {
+                    field : 'sumMoney',
+                    title:'累计扣款总计',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumMoney);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'actualSumMoney',
+                    title:'实际扣款总计',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].actualSumMoney);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'debitNumber',
+                    title:'扣款次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text = value+'次';
+                        return '<a onclick="openDetailList(\'deductionDetailList\',\'' + row.debitType + '\')">'+text+'</a>';
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].debitNumber);
+                        }
+                        return sumBalance+'次';
+                    }
+                },
+                {
+                    field : 'lastDebitDate',
+                    title:'上次扣款日期',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                }]
+        };
+        $.table.init(deductionList);
+
+        //统计报表>借款表
+        var loanList = {
+            id:'loan',
+            url:prefix + '/selectStatisticsBorrowData',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    field:'borrowType',
+                    title: '款项用途',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(borrowType,value)
+
+                    }
+                },
+                {
+                    field:'proportion',
+                    title:'占比',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(value).toFixed(2)+'%'
+
+                    }
+                },
+                {
+                    field:'borrowNumber',
+                    title:'借款次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'次 '
+
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].borrowNumber);
+                        }
+                        return sumBalance+'次';
+                    }
+                },
+                {
+                    field:'sumAmount',
+                    title:'累计借款金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'alsoReimbursement',
+                    title:'累计报销金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].alsoReimbursement);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'alsoReceivables',
+                    title:'累计退回金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].alsoReceivables);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'notPay',
+                    title:'未归还金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'次 '
+
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].notPay);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'borrowType',
+                    title:'未还清次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].borrowType);
+                        }
+                        return sumBalance+'次';
+                    }
+                },
+                {
+                    field:'lastBorrowDate',
+                    title:'上次借款日期',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                }]
+        };
+        $.table.init(loanList);
+
+        //统计报表>报销表
+        var reimbursementList = {
+            id:'reimbursement',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            url:prefix + '/selectStatisticsReimbursementData',
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    title: '报销类别',
+                    field:'reimbursementType',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(reimbursementType, value);
+                    }
+
+                },
+                {
+                    title:'占比',
+                    field:'proportion',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value) {
+                        return value+'%'
+                    },
+
+                },
+                {
+                    field:'reimbursementNumber',
+                    title:'报销次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+
+                        var text = value+'次'
+                        return '<a onclick="openDetailList(\'reimbursementDetails\',\'' + row.reimbursementType + '\')">'+text+'</a>';
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].reimbursementNumber);
+                        }
+                        return sumBalance+'次';
+                    }
+                },
+                {
+                    field:'sumAmount',
+                    title:'报销总额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'maxActualMoney',
+                    title:'最大报销金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].maxActualMoney);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'lastReimbursementDate',
+                    title:'上次报销日期',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                }]
+        };
+        $.table.init(reimbursementList);
+
+        //统计报表>进项发票
+        var inputInvoiceList = {
+            id:'inputInvoice',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            url:prefix + '/selectStatisticsIncomeBillData',
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    field:'invoiceType',
+                    title: '发票类型',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter:function (value) {
+                        return $.table.selectDictLabel(invoiceType,value)
+                    }
+
+                },
+                {
+                    field:'proportion',
+                    title:'占比',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(value).toFixed(2)+'%'
+
+                    }
+                },
+                {
+                    field:'effectiveInvoice',
+                    title:'有效发票',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'张'
+
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].effectiveInvoice);
+                        }
+                        return sumBalance+'张';
+                    }
+                },
+                {
+                    field:'redInvoice',
+                    title:'冲红发票',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'张'
+
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].redInvoice);
+                        }
+                        return sumBalance+'张';
+                    }
+                },
+                {
+                    field:'cancellationInvoice',
+                    title:'作废发票',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'张'
+
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].cancellationInvoice);
+                        }
+                        return sumBalance+'张';
+                    }
+                },
+                {
+                    field:'',
+                    title:'未抵扣发票',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                },
+                {
+                    field:'',
+                    title:'未抵扣金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true
+                },
+                {
+                    field:'sumTax',
+                    title:'有效发票税额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumTax);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'sumMoney',
+                    title:'有效发票总额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumMoney);
+                        }
+                        return sumBalance;
+                    }
+                }]
+        };
+        $.table.init(inputInvoiceList);
+
+        //统计报表>销项发票
+        var outputInvoiceList = {
+            id:'outputInvoice',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            showFooter:true,
+            url:prefix + '/selectStatisticsOutputBillData',
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    title : '',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    }
+                },
+                {
+                    field:'invoiceType',
+                    title: '发票类型',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter:function (value) {
+                        return $.table.selectDictLabel(invoiceType,value)
+                    }
+
+                },
+                {
+                    field:'invoiceNumber',
+                    title:'开票次数',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return value+'次'
+
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiceNumber);
+                        }
+                        return sumBalance+'次';
+                    }
+                },
+                {
+                    field:'sumAmount',
+                    title:'累计开票金额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'sumTax',
+                    title:'累计开票税额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].sumTax);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'arrivalAmount',
+                    title:'已到账总额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].arrivalAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field:'notArrivalAmount',
+                    title:'未到账总额',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].notArrivalAmount);
+                        }
+                        return sumBalance;
+                    }
+                }]
+        };
+        $.table.init(outputInvoiceList);
+
+
+    })
+
+    function openList(id,type){
+        switch (id) {
+            case 'collectionList':
+                window.parent.openDetail(id,type,[[${projectId}]]);
+                break;
+            case 'paymentList':
+                window.parent.openDetail(id,type,[[${projectId}]]);
+                break;
+        }
+
+    }
+
+
+    function openDetailList(id,type) {
+        switch (id) {
+            case 'collectionDetailList':
+                window.parent.openDetailPopup(id,type,"null",[[${projectId}]]);
+                break;
+            case 'paymentDetailList':
+                window.parent.openDetailPopup(id,type,"null",[[${projectId}]]);
+                break;
+            case 'deductionDetailList':
+                window.parent.openDetailPopup(id,type,"null",[[${projectId}]]);
+                break;
+            case 'reimbursementDetails':
+                window.parent.openDetailPopup(id,type,"null",[[${projectId}]]);
+                break;
+        }
+
+    }
+
+</script>
+</body>
+</html>

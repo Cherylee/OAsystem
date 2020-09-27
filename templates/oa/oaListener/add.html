@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增对应类型的监听')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-oaListener-add">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">类型：</label>
+				<div class="col-sm-8">
+				    <select id="type" class="form-control" name="type" th:with="type=${@dict.getType('oa_examine_type')}">
+							<option value=""> -- 所有 --</option>
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>	
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">监听类名：</label>
+				<div class="col-sm-8">
+					<input id="listenerName" name="listenerName" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">监听类型：</label>
+				<div class="col-sm-8">
+					 <select id="event" class="form-control" name="event" th:with="type=${@dict.getType('oa_examine_event_type')}">
+							 <option value=""> -- 所有 --</option>
+							 <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					 </select>	
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" class="form-control" type="text">
+				</div>
+			</div>
+			<!-- <div class="form-group">	
+				<label class="col-sm-3 control-label">创建日期：</label>
+				<div class="col-sm-8">
+					<input id="createTime" name="createTime" class="form-control" type="text">
+				</div>
+			</div> -->
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaListener"
+		$("#form-oaListener-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-oaListener-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

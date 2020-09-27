@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改项目问题描述')"/>
+    <style>
+        .input-group label.error {
+            z-index: -1;
+        }
+
+        .form-control1 {
+            background: #ececec
+        }
+    </style>
+</head>
+<body class="white-bg">
+
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-ytProjectProblem-edit" th:object="${ytProjectProblem}">
+        <input id="id" name="id" th:field="*{id}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">关联工程：</label>
+            <div class="col-sm-8">
+                <input id="projectId" name="projectId" class="form-control" type="hidden" th:field="*{projectId}">
+                <input id="projectName" name="projectName" th:field="*{projectName}" class="form-control" type="text" onclick="selectPoject()">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">存在问题：</label>
+            <div class="col-sm-8">
+                <input id="existProblem" name="existProblem" th:field="*{existProblem}" class="form-control"
+                       type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">备注：</label>
+            <div class="col-sm-8">
+                <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group" th:if="${ytProjectProblem.detailList}" th:each="ea : ${ytProjectProblem.detailList}">
+            <label class="col-sm-3 control-label">回复：</label>
+            <div class="col-sm-8">
+                <p class="form-control form-control1"><span th:class="${ea.type=='员工'}?'color1':'color2'">（[[${ea.type}]]）</span>[[${ea.content}]]
+                </p>
+            </div>
+        </div>
+    </form>
+
+    <div class="form-horizontal m form-group">
+        <label class="col-sm-3 control-label">回复：</label>
+        <div class="col-sm-8">
+            <div class="input-group">
+                <input type="text" name="content" id="content" class="form-control" required> <span
+                    class="input-group-btn">
+                            <button type="button" class="btn btn-primary" onclick="submitComment()"> 提交回复 </button> </span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <br>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+            <br>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "yt/ytProjectProblem";
+    console.log([[${ytProjectProblem.detailList}]])
+
+    ////工程
+    function selectPoject() {
+        var options = {
+            title: '工程',
+            width: "1200",
+
+            url: ctx + 'yt/ytProjectMain',
+            callBack: doSubmit2
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit2(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#projectId').val(data.id);
+        $('#projectName').val(data.name);
+    }
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/edit", $('#form-ytProjectProblem-edit').serialize());
+        }
+    }
+
+    //    提交回复
+    function submitComment() {
+        $('#content-error').attr('display', 'none')
+        var data = {}
+        data.problemId=[[${ytProjectProblem.id}]]
+        data.content=$('#content').val()
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: ctx + "yt/ytProjectProblem/addDetail",
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.modal.closeLoading();
+                refreshItem();
+                // $.operate.successTabCallback(result);
+            }
+        };
+        console.log(data)
+        if(data.content!=''){
+            $.ajax(config)
+        }else{
+            $.modal.alertWarning('回复意见必填！')
+        }
+
+    }
+</script>
+</body>
+</html>

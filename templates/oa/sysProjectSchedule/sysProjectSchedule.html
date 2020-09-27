@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('项目进度')" />
+	<th:block th:include="include :: sysProCss" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-md-3">
+				<div class=" select-table table-striped">
+					<table id="bootstrap-table" data-mobile-responsive="true"></table>
+				</div>
+			</div>
+			<div class="col-md-9 hide" id="project-schedule" style="margin-top: 10px">
+				<div class="panel panel-default">
+					<div id="projectName" class="panel-heading"></div>
+					<div class="panel-body ad-btnBox" style="height: 710px;">
+						<div class="choice-List">
+							<ul>
+								<li class="choice-li choice-li-active" >项目总计划</li>
+								<li class="choice-li">项目月报</li>
+							</ul>
+						</div>
+						<div>
+							<iframe class="layui-layer-iframes" id="iframe"  src=""></iframe>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/oaProject";
+		var prefix2 = ctx + "oa/sysProjectSchedule";
+		var projectId = '';
+		$(function() {
+			var options = {
+				url: prefix + "/list",
+				modalName: "工程列表",
+				sortName : "createTime",
+				sortOrder : "desc",
+				striped:true,
+				showExport: true,
+				showColumns:false,
+				showExport:false,
+				columns: [
+					{
+						title: "",
+						align: "center",
+						width: "50px",
+						formatter: function (value, row, index) {
+							return $.table.serialNumber(index);
+						}
+					},
+					{
+						field : 'projectName',
+						title : '项目名称',
+						sortable: true,
+						align:'left',
+						formatter:function (value, row, index) {
+							var projectName=$.table.tooltip(row.projectName,25);
+							if (index=='0'){
+								displayBox(row.id)
+							}
+							return '<a href="#"  onclick="displayBox(\'' + row.id + '\')">'+projectName+'</a>';
+						}
+					}]
+			};
+			$.table.init(options);
+		});
+
+		function displayBox(id) {
+			$("#project-schedule").removeClass('hide');
+			projectId=id;
+			var choiceList = $(".choice-li");
+			choiceList.eq(0).addClass('choice-li-active').siblings().removeClass('choice-li-active');
+			var config = {
+				url: prefix+'/detail/'+id,
+				type: 'get',
+				dataType: 'json',
+				success: function(result) {
+					$("#projectName").text(result.projectName);
+					$('.layui-layer-iframes').attr("src", prefix2+'/masterPlan/'+id);
+				}
+			};
+			$.ajax(config)
+		};
+
+		$(document).ready(function () {
+			//导航栏样式
+			var choiceList = $(".choice-li");
+			choiceList.click(function () {
+				var obj = $(this);
+				obj.addClass('choice-li-active').siblings().removeClass('choice-li-active');
+				if (obj.index()=='0'){
+					$('.layui-layer-iframes').attr("src", prefix2+'/masterPlan/'+projectId);
+				}else if(obj.index()=='1') {
+					$('.layui-layer-iframes').attr("src", prefix2+'/monthlyReport/'+projectId);
+				}
+			});
+		});
+
+		//刷新iframe
+		function func() {
+			$('#iframe').attr('src', $('#iframe').attr('src'));
+		}
+    </script>
+</body>
+</html>

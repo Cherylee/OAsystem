@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+<th:block th:include="include :: header('员工绩效列表')" />
+</head>
+<body class="gray-bg">
+
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>年份：<input type="text" name="yearNum" />
+							</li>
+							<li>月份：<input type="text" name="monthNum" />
+							</li>
+							<li>人员：<input type="hidden" id="userId" name="userId"/>
+								<input type="text" id="userName" name="userName" onclick="selectUserById('userId','userName')"/>
+							</li>
+							<li>关联项目：<input type="hidden" name="projectId"
+								id="projectId" /> <input type="text" id="projectName"
+								onclick="selectPro('projectId','projectName')" />
+							</li>
+
+							<!--<li>评分：<input type="text" name="grade" />
+							</li>-->
+
+							<li><a class="btn btn-primary btn-rounded btn-sm"
+								onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm"
+								onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+
+			<div class="btn-group-sm" id="toolbar" role="group">
+
+				<a class="btn btn-primary btn-edit disabled"
+					onclick="$.operate.edit()"
+					shiro:hasPermission="yt:ytPeoplePerformance:edit"> <i
+					class="fa fa-edit"></i> 修改
+				</a> <a class="btn btn-warning" onclick="$.table.exportExcel()"
+					shiro:hasPermission="yt:ytPeoplePerformance:export"> <i
+					class="fa fa-download"></i> 导出
+				</a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('yt:ytPeoplePerformance:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('yt:ytPeoplePerformance:remove')}]];
+        var prefix = ctx + "yt/ytPeoplePerformance";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "员工绩效",
+                showFooter: true,
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '',
+					visible: false
+				},
+				{
+					field : 'yearNum', 
+					title : '年份'
+				},
+				{
+					field : 'monthNum', 
+					title : '月份'
+				},
+				{
+					field : 'projectId', 
+					title : '关联项目id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'userId', 
+					title : '人员id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'userName', 
+					title : '人员',
+					sortable: true
+				},
+				{
+					field : 'projectName', 
+					title : '项目',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.tooltip(value,5, "open");
+					}
+				},
+				{
+					field : 'itemName', 
+					title : '专业名称',
+					sortable: true
+				},
+				{
+					field : 'stageName', 
+					title : ' 阶段名称',
+					sortable: true
+				},
+				{
+					field : 'nodeName', 
+					title : '节点名称',
+					sortable: true
+				},
+				{
+					field : 'roleName', 
+					title : '岗位',
+					sortable: true
+				},
+				{
+					field : 'effectiveValue', 
+					title : '有效产值',
+					sortable: true
+				},
+				{
+					field : 'effectiveProportion', 
+					title : '计算绩效产值比例',
+					sortable: true
+				},
+				{
+					field : 'bonusProportion', 
+					title : '绩效提成比例',
+					sortable: true
+				},
+				{
+					field : 'grade', 
+					title : '评分',
+					sortable: true
+				},
+				{
+					field : 'assessmentValueCal', 
+					title : '考核值K1',
+					sortable: true
+				},
+				{
+					field : 'assessmentValuePrint', 
+					title : '考核值K2',
+					sortable: true
+				},
+				{
+					field : 'predictBonusAmount', 
+					title : '本月实际预发绩效（万）',
+					sortable: true,
+				    footerFormatter:function (value) {
+				    	var sumBalance = 0;
+				        for (var i in value) {
+				        	if(value[i].predictBonusAmount==null||value[i].predictBonusAmount=='undefined'||value[i].predictBonusAmount==''){
+				        		//本月实际预发绩效如果是'undefined'或者 空 或者 null 且 保证金金额如果是'undefined'或者 空 或者 null  总计+=0
+			        			sumBalance+=0
+				        	}else{
+				        		//本月实际预发绩效不是'undefined'或者 空 或者 null 总计+=审批金额
+				        		sumBalance += parseFloat(value[i].predictBonusAmount);
+				        	}
+				        	
+			        	
+				        }
+				       
+				        return  '合计:'+sumBalance;
+				    }
+				},
+				{
+					field : 'reward', 
+					title : '扣款/奖励',
+					sortable: true
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	console.log(row)
+		            	if(row.editable=='Y'){
+		            		actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		            	}
+		            	
+                       
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        var proId=null
+        var proName=null
+        function selectPro(id,name){
+        	proId = id;
+        	proName = name;
+			var options = {
+				title : '选择项目信息',
+				width : "1200",
+				url : ctx + "yt/ytProjectMain/biddingProject",
+				callBack : doSubmitPro
+			};
+			$.modal.openOptions(options);
+        }
+        function doSubmitPro(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			console.log(data)
+			$('#' + proId).val(data.ytProjectMain.id)
+			$('#' + proName).val(data.ytProjectMain.name)
+		}
+    </script>
+</body>
+</html>

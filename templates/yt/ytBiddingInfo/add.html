@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增招标')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-ytBiddingInfo-add">
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">标题：</label>
+					<div class="col-sm-8">
+						<input id="title" name="title" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">地区：</label>
+					<div class="col-sm-8">
+						<input id="area" name="area" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">来源平台：</label>
+					<div class="col-sm-8">
+						<input id="sourcePlatform" name="sourcePlatform"
+							class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">信息类型：</label>
+					<div class="col-sm-8">
+						<input id="bizType" name="bizType" class="form-control"
+							type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">发布时间：</label>
+					<div class="col-sm-8">
+						<div class="input-group data">
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							<input id="publishDate" name="publishDate"
+								class="form-control time-input-data" type="text">
+						</div>
+						<!-- <input id="publishDate" name="publishDate" class="form-control"
+							type="text"> -->
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">行业：</label>
+					<div class="col-sm-8">
+						<select name="trade" class="form-control"
+							th:with="type=${@dict.getType('yt_bid_trade')}">
+							<option value="">-----所有-----</option>
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+						</select>
+						<!-- <input id="trade" name="trade" class="form-control" type="text"> -->
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">链接地址：</label>
+					<div class="col-sm-8">
+						<input id="linkLoc" name="linkLoc" class="form-control"
+							type="text">
+					</div>
+				</div>
+			</div>
+			
+		</form>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript">
+		var prefix = ctx + "yt/ytBiddingInfo"
+		$("#form-ytBiddingInfo-add").validate({
+			rules : {
+				xxxx : {
+					required : true,
+				},
+			},
+			focusCleanup : true
+		});
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				$.operate.save(prefix + "/add", $('#form-ytBiddingInfo-add')
+						.serialize());
+			}
+		}
+	</script>
+</body>
+</html>

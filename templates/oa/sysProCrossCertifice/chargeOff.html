@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('核销')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content" >
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-sysProCrossCertifice-chargeOff" th:object="${sysProCrossCertifice}">
+                        <input id="id" name="id" th:field="*{id}"  type="hidden">
+                        <input id="projectId" name="projectId" th:field="*{projectId}"  type="hidden">
+                        <input id="status" name="status" th:field="*{status}"  type="hidden">
+                        <table class="table table-bordered table-condensed table-bot">
+                            <caption class="text-center">
+                                <h2>核销</h2>
+                            </caption>
+                            <tbody>
+                                <tr>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                                        <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">所属公司：</td>
+                                    <td>
+                                        <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                        <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                        <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">工程名称：</td>
+                                    <td>
+                                        <input id="proName" name="proName" th:field="*{proName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期：</td>
+                                    <td>
+                                        <input id="applyTime" name="applyTime" th:value="${#dates.format(sysProCrossCertifice.applyTime, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">工程地点：</td>
+                                    <td>
+                                        <input id="address" name="address" th:field="*{address}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">建设单位：</td>
+                                    <td>
+                                        <input id="constructUnit" name="constructUnit" th:field="*{constructUnit}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">税务机关：</td>
+                                    <td>
+                                        <input id="taxAuthority" name="taxAuthority" th:field="*{taxAuthority}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">押金：</td>
+                                    <td>
+                                        <input id="calshPledge" name="calshPledge" th:field="*{calshPledge}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">开具金额：</td>
+                                    <td>
+                                        <input id="amount" name="amount" th:field="*{amount}" class="form-control" type="text">
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="active">金额大写：</td>
+                                    <td>
+                                        <input id="moneyUpper" name="moneyUpper" th:field="*{moneyUpper}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">报验证编号：</td>
+                                    <td>
+                                        <input id="code" name="code" th:field="*{code}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="active">报验证合同期限：</td>
+                                    <td>
+                                        <input id="contractPeriod" name="contractPeriod" th:field="*{contractPeriod}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">延期/核销：</td>
+                                    <td>
+                                        <select id="cancelOper" name="cancelOper" class="form-control">
+                                            <option value="">------所有------</option>
+                                            <option value="0">延期</option>
+                                            <option value="1">核销</option>
+                                        </select>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="active">报验证到期时间：</td>
+                                    <td>
+                                        <input id="predictDate" name="predictDate" th:value="${#dates.format(sysProCrossCertifice.predictDate, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">备注：</td>
+                                    <td>
+                                        <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row"  >
+                        <div class="col-sm-offset-5 col-sm-10"  style="margin-top: 20px">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript">
+    var prefix = ctx + "oa/sysProCrossCertifice";
+    $("#form-sysProCrossCertifice-edit").validate({
+        rules:{
+            xxxx:{
+                required:true,
+            },
+        },
+        focusCleanup: true
+    });
+
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProCrossCertifice-chargeOff').serializeObject();
+                $.operate.saveJsonTab(prefix + "/cancelCrossCertifice", data);
+        }
+    }
+
+
+    //自动大小写切换
+    $("input[name='amount']").bind("input propertychange",
+        function() {//监控输入框的变化
+            var num = $(this).val();
+            var a = parseInt(num);
+            var config = {
+                url : ctx + "common/converMoneyToCN/" + a,
+                type : "get",
+                dataType : "json",
+                success : function(result) {
+                    if (result.code == '0') {
+                        $("input[name='moneyUpper']").val(result.msg)
+                    }
+                }
+            };
+            $.ajax(config)
+        });
+
+</script>
+</body>
+</html>

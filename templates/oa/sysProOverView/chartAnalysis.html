@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('图表分析')" />
+    <th:block th:include="include :: sysProCss" />
+    <style>
+        .span-title{
+            background-color: #f3f3f3;
+            color: #555555;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .tooltip-popup{
+            position: absolute;
+            display: none;
+            z-index: 9900000;
+            background-color: #f5f5f5;
+            color: black;
+            outline: none;
+            padding: 5px 15px;
+            border: 1px solid #555555;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .popup-text{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="col-md-12">
+        <div class="box-center">
+            <div class="box-center-title">
+                款项支出总计<hr style="left: 80px">
+            </div>
+            <div>
+                <table class="analysis-table">
+                    <tr>
+                        <td class="analysis-table-title">
+                            <span class="span-title">已支出:</span>
+                            <span class="popup-text">已付款+已扣款+报销</span>
+                        </td>
+                        <td width="18%" id="sumPaymentSum"></td>
+                        <td class="analysis-table-title">
+                            <span class="span-title">已付款:</span>
+                            <span class="popup-text">实付金额</span>
+                        </td>
+                        <td width="18%">[[${sumPayment.payment}]]</td>
+                        <td class="analysis-table-title">
+                            <span class="span-title">已扣款:</span>
+                            <span class="popup-text">扣款总计</span>
+                        </td>
+                        <td width="18%">[[${sumPayment.debit}]]</td>
+                        <td class="analysis-table-title">
+                            <span class="span-title">已报销:</span>
+                            <span class="popup-text">报销金额</span>
+                        </td>
+                        <td width="18%">[[${sumPayment.reimbursement}]]</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="box-center">
+            <div class="box-center-title">
+                <span class="box-center-text">工程款占比</span>
+                <span class="analysis-table-line"></span>
+                <span class="box-center-text">扣款占比</span>
+                <span class="analysis-table-line"></span>
+            </div>
+            <div>
+                <table>
+                    <tr>
+                        <td width="50%">
+                            <div class="echarts" id="echarts-pie-chart"></div>
+                        </td>
+                        <td>
+                            <div class="echarts" id="echarts-pie-deduction"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="box-center">
+            <div class="box-center-title">
+                <span class="box-center-text">收款情况</span>
+                <span class="analysis-table-line"></span>
+                <span class="box-center-text">付款情况</span>
+                <span class="analysis-table-line"></span>
+            </div>
+            <div>
+                <table>
+                    <tr>
+                        <td width="50%">
+                            <div class="echarts" id="echarts-bar-chart"></div>
+                        </td>
+                        <td>
+                            <div class="echarts" id="echarts-line-chart"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="chartPopup hide">
+            <div class="col-md-12">
+                <p class="chartPopup-title">标题</p>
+                <div class="col-md-4">
+                    <div class="echarts" id="chartPopup-chart"></div>
+                </div>
+                <div class="col-md-8">
+                    <div class="col-sm-12 table-striped">
+                        <table id="paymentPopupTable" data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/sysProOverView";
+        var payType=[[${@dict.getType('sys_payment_big_type')}]];
+        $('#sumPaymentSum').text(parseFloat([[${sumPayment.sum}]]).toFixed(2));
+        $(function (){
+            //报表饼图
+            var pieChartData=[];
+            var pieChartName=[];
+            var pieChartConfig = {
+                url: prefix + '/selectStatisticsPaymentData ',
+                type: 'post',
+                dataType: 'json',
+                data:  {"projectId": [[${projectId}]]},
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function(result) {
+                    $.modal.closeLoading();
+                    var data = result.rows;
+                        for (var i=0;i<data.length;i++){
+                        var	CategoryName = $($.table.selectDictLabel(payType,data[i].proCategory)).text();
+                        var arry = {};
+                        arry.name = CategoryName;
+                        arry.value = data[i].sumAmount;
+                        pieChartData.push(arry);
+                        pieChartName.push(CategoryName);
+                    }
+                    var pieChart = echarts.init(document.getElementById("echarts-pie-chart"));
+                    var pieoptions = {
+                        tooltip : {
+                            show:false,
+                        },
+                        legend: {
+                            orient : 'vertical',
+                            x : 'left',
+                            data:pieChartName
+                        },
+                        calculable : true,
+                        series : [
+                            {
+                                name:'费用名称',
+                                type:'pie',
+                                radius : '80%',
+                                center: ['50%', '50%'],
+                                data:pieChartData,
+                            }
+                        ]
+                    };
+                    pieChart.setOption(pieoptions);
+                    pieChart.on('mouseover', function (params) {
+                        //设置提示框显示位置
+                        var chartPopup =$('.chartPopup');
+                        chartPopup.removeClass('hide');
+                        chartPopup.css({position: "absolute",'top':params.event.event.pageY,'left':params.event.event.pageX+20,'z-index':10000});
+                        //设置标题
+                        var text ="累计已付"+params.name+""+params.value+"元,占总额的"+params.percent+"%";
+                        $('.chartPopup-title').text(text)
+                        //设置提示框显示内容
+                        //表格内容
+                        var proCategory = data[parseInt(params.dataIndex)].proCategory;
+                        var expenseList = {
+                            id:'paymentPopupTable',
+                            url:prefix + '/selectStatisticsPaymentData',
+                            showSearch:false,
+                            showRefresh:false,
+                            showColumns:false,
+                            showToggle:false,
+                            showExport:false,
+                            queryParams: {"projectId": [[${projectId}]],'proCategory':proCategory},
+                            columns:[
+                                {
+                                    title : '',
+                                    width:'30px',
+                                    formatter: function (value, row, index) {
+                                        return $.table.serialNumber(index);
+                                    }
+                                },
+                                {
+                                    field : 'detailCategory',
+                                    title: '工程款小类',
+                                    align:'center',
+                                    halign:'center',
+                                    sortable: true,
+                                },
+                                {
+                                    field:'sumAmount',
+                                    title:'付款总额',
+                                    align:'center',
+                                    halign:'center',
+                                    sortable: true,
+                                },
+                                {
+                                    field : 'proportion',
+                                    title:'占比',
+                                    align:'center',
+                                    halign:'center',
+                                    sortable: true,
+                                    formatter: function (value, row, index) {
+                                        return parseFloat(value).toFixed(2)+'%'
+
+                                    }
+                                }
+                                ]
+                        };
+                        $.table.destroy('paymentPopupTable');
+                        $.table.init(expenseList);
+
+                        //设置饼图数据
+                        var pieData=[];
+                        var pieConfig = {
+                            url: prefix + '/selectStatisticsPaymentData ',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {"projectId": [[${projectId}]],'proCategory':proCategory},
+                            success: function (result) {
+                                var data = result.rows;
+                                for (var i=0 ;i< data.length ;i++){
+                                    var dateJson ={};
+                                    dateJson.value= data[i].sumAmount;
+                                    dateJson.name = data[i].detailCategory;
+                                    pieData.push(dateJson);
+                                }
+                                var pie = echarts.init(document.getElementById("chartPopup-chart"));
+                                var pieOptions2 = {
+                                    calculable : true,
+                                    series : [
+                                        {
+                                            name:'费用名称',
+                                            type:'pie',
+                                            radius : '75%',
+                                            center: ['50%', '45%'],
+                                            data:pieData,
+                                            label: {
+                                                show: true,
+                                                position: 'inner',
+                                                rotate:true
+                                            },
+                                        }
+                                    ]
+                                };
+                                pie.setOption(pieOptions2);
+                                $(window).resize(pie.resize);
+                            }
+                        };
+                        $.ajax(pieConfig);
+                    });
+                    pieChart.on('mouseout', function (params) {
+                        $('.chartPopup').addClass('hide');
+                    });
+                    $(window).resize(pieChart.resize);
+                }
+            };
+            $.ajax(pieChartConfig);
+
+            //扣款饼图
+            var debitType=[[${@dict.getType('sys_debit_type')}]];
+            var deductionChartData=[];
+            var deductionChartName=[];
+            var deduction = {
+                url: prefix + '/selectStatisticsDebitData ',
+                type: 'post',
+                dataType: 'json',
+                data: {"projectId": [[${projectId}]]},
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function (result) {
+                    $.modal.closeLoading();
+                    var data = result.rows;
+                    for (var i = 0; i < data.length; i++) {
+                        var CategoryName = $($.table.selectDictLabel(debitType, data[i].debitType)).text();
+                        var arry = {};
+                        arry.name = CategoryName;
+                        arry.value = data[i].actualSumMoney;
+                        deductionChartData.push(arry);
+                        deductionChartName.push(CategoryName);
+                    }
+                    var pieChart = echarts.init(document.getElementById("echarts-pie-deduction"));
+                    var pieoptions = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            x: 'left',
+                            data: deductionChartName
+                        },
+                        calculable: true,
+                        series: [
+                            {
+                                name: '费用名称',
+                                type: 'pie',
+                                radius: '80%',
+                                center: ['50%', '50%'],
+                                data: deductionChartData,
+                            }
+                        ]
+                    };
+                    pieChart.setOption(pieoptions);
+                }
+            };
+            $.ajax(deduction);
+
+            //条形图
+            var categoryData=[
+                {
+                    name: '工程款',
+                    type: 'bar',
+                    data: []
+                },
+                {
+                    name: '垫付款',
+                    type: 'bar',
+                    data: []
+                },
+                {
+                    name: '预借款',
+                    type: 'bar',
+                    data: []
+                },
+                {
+                    name: '清账款',
+                    type: 'bar',
+                    data: []
+                },
+                {
+                    name: '其他费用',
+                    type: 'bar',
+                    data: []
+                }
+            ];
+            var categoryName=[];
+            var categoryConfig = {
+                url: prefix + '/selectChartReceivablesData ',
+                type: 'post',
+                dataType: 'json',
+                data:  {"projectId": [[${projectId}]]},
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function(result) {
+                    $.modal.closeLoading();
+                    for (var i=0 ;i< result.length ;i++){
+                        categoryName.push(result[i].month);
+                        var data = result[i].monthData[0];
+                        for (var j=0;j<5;j++){
+                            var text = 'type'+j;
+                            categoryData[j].data.push(data[text]);
+                        }
+
+                    }
+                    var barChart = echarts.init(document.getElementById("echarts-bar-chart"));
+                    var baroption = {
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'shadow',
+                            },
+                            confine:true
+                        },
+                        legend: {
+                            data: ['工程款','垫付款','预借款','清账款','其他费用']
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '8%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            name:'收款金额',
+                            nameLocation:'middle',
+                            nameGap:25,
+                            type: 'value'
+                        },
+                        yAxis: {
+                            type: 'category',
+                            data : categoryName
+                        },
+                        series: categoryData
+
+                    };
+                    barChart.setOption(baroption);
+                    $(window).resize(barChart.resize);
+                }
+            };
+            $.ajax(categoryConfig);
+
+
+
+            //折线图
+            var lineData=[];
+            var lineDataName=[];
+            var lineConfig = {
+                url: prefix + '/selectChartPaymentData',
+                type: 'post',
+                dataType: 'json',
+                data:  {"projectId": [[${projectId}]]},
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function(result) {
+                    $.modal.closeLoading();
+                    for (var i=0;i<result.length;i++){
+                        lineData.push(result[i].sum);
+                        lineDataName.push(result[i].date);
+                    }
+                    var lineChart = echarts.init(document.getElementById("echarts-line-chart"));
+                    var lineoption = {
+                        tooltip : {
+                            show:false,
+                        },
+                        grid:{
+                            x:40,
+                            x2:40,
+                            y2:40,
+                            left:'85'
+                        },
+                        calculable : true,
+                        xAxis : [
+                            {
+                                type : 'category',
+                                boundaryGap : false,
+                                data : lineDataName
+                            }
+                        ],
+                        yAxis : [
+                            {
+                                name : '付款金额',
+                                type : 'value'
+                            }
+                        ],
+                        series : [
+                            {
+                                type:'line',
+                                data:lineData,
+                                symbol:'circle',
+                                symbolSize:13,
+                            },
+                        ]
+                    };
+                    lineChart.setOption(lineoption);
+                    lineChart.on('mouseover', function (params) {
+                        //设置提示框显示位置
+                        var chartPopup =$('.chartPopup');
+                        chartPopup.removeClass('hide');
+                        chartPopup.css({position: "absolute",'top':params.event.event.pageY-300,'left':params.event.event.pageX-550,'z-index':10000});
+                        //设置标题
+                        var text = params.name+"月总共支付工程款"+params.value+"元";
+                        $('.chartPopup-title').text(text);
+
+                        //设置提示框显示内容
+                        //表格内容
+                        var expenseList = {
+                            id:'paymentPopupTable',
+                            url:prefix + '/selectStatisticsPaymentData',
+                            showSearch:false,
+                            showRefresh:false,
+                            showColumns:false,
+                            showToggle:false,
+                            showExport:false,
+                            pagination:false,
+                            queryParams: {'projectId': [[${projectId}]],'applyTime':params.name},
+                            columns:[
+                                {
+                                    title : '',
+                                    width:'30px',
+                                    formatter: function (value, row, index) {
+                                        return $.table.serialNumber(index);
+                                    }
+                                },
+                                {
+                                    field : 'proCategory',
+                                    title: '工程款大类',
+                                    align:'center',
+                                    halign:'center',
+                                    sortable: true,
+                                    formatter: function (value, row, index) {
+                                        return $.table.selectDictLabel(payType, value);
+                                    }
+                                },
+                                {
+                                    field:'sumAmount',
+                                    title:'付款金额',
+                                    align:'center',
+                                    halign:'center',
+                                    sortable: true,
+                                },
+                                {
+                                    field : 'proportion',
+                                    title:'占比',
+                                    align:'center',
+                                    halign:'center',
+                                    sortable: true,
+                                    formatter: function (value, row, index) {
+                                        return parseFloat(value).toFixed(2)+'%'
+
+                                    }
+                                }
+                            ]
+                        };
+                        $.table.destroy('paymentPopupTable');
+                        $.table.init(expenseList);
+
+                        //设置饼图
+                        var linePicData=[];
+                        var linePicConfig = {
+                            url: prefix + '/selectStatisticsPaymentData',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {'projectId': [[${projectId}]],'applyTime':params.name},
+                            success: function (result) {
+                                var data = result.rows;
+                                for(var i=0;i<data.length;i++){
+                                   var dataJson = {};
+                                   var	CategoryName = $($.table.selectDictLabel(payType,data[i].proCategory)).text();
+                                   dataJson.name=CategoryName;
+                                   dataJson.value=data[i].sumAmount;
+                                   linePicData.push(dataJson);
+                                }
+
+                                var pie = echarts.init(document.getElementById("chartPopup-chart"));
+                                var pieOptions2 = {
+                                    calculable : true,
+                                    series : [
+                                        {
+                                            name:'费用名称',
+                                            type:'pie',
+                                            radius : '75%',
+                                            center: ['50%', '45%'],
+                                            data:linePicData,
+                                            label: {
+                                                show: true,
+                                                position: 'inner',
+                                                rotate:true
+                                            },
+                                        }
+                                    ]
+                                };
+                                pie.setOption(pieOptions2);
+                                $(window).resize(pie.resize);
+                            }
+                        };
+
+                        $.ajax(linePicConfig);
+                    });
+                    lineChart.on('mouseout', function (params) {
+                        $('.chartPopup').addClass('hide');
+                    });
+                    $(window).resize(lineChart.resize);
+                }
+            };
+            $.ajax(lineConfig);
+
+            $('.span-title').mouseover(function (e) {
+                var obj = $(this);
+                var text = obj.next().text()
+                var tooltipHtml = "<p id='tooltip-popup' class='tooltip-popup'>"+text+"</p>";
+                obj.parent().append(tooltipHtml); //添加到页面中
+                $("#tooltip-popup").css({
+                    "top": (e.pageY - 30) + "px",
+                    "left": (e.pageX + 20) + "px"
+                }).show("fast"); //设置提示框的坐标，并显示
+            })
+            $('.span-title').mouseout(function () {
+                $("#tooltip-popup").remove();
+            })
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('销项发票审批')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-sysProInvoice-edit" th:object="${sysProInvoice}">
+                        <input id="id" name="id" th:field="*{id}"  type="hidden">
+                        <input id="projectId" name="projectId" th:value="*{projectId}" type="hidden">
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>销项发票</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>
+                                    <input id="proposerId" name="proposerId" th:field="*{proposerId}" class="form-control" type="hidden">
+                                    <input th:field="*{proposerName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">所属公司：</td>
+                                <td>
+                                    <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                    <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td>
+                                    <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                    <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">工程名称：</td>
+                                <td>
+                                    <input id="projectName" name="projectName" th:field="*{projectName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请日期：</td>
+                                <td>
+                                    <input id="applyDate" name="applyDate" th:value="${#dates.format(sysProInvoice.applyDate, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text">
+                                </td>
+                                <td class="active">工程地点：</td>
+                                <td>
+                                    <input id="projectLoc" name="projectLoc" th:field="*{projectLoc}" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">建设单位：</td>
+                                <td>
+                                    <input id="constructUnit" name="constructUnit" th:field="*{constructUnit}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">开票类型：</td>
+                                <td>
+                                    <select id="billType" name="billType" class="form-control"
+                                            th:field="*{billType}" th:with="type=${@dict.getType('sys_pro_invoice_type')}">
+                                        <option value="">------所有------</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">开票金额：</td>
+                                <td>
+                                    <input id="billAmount" name="billAmount" th:field="*{billAmount}" class="form-control" type="text">
+                                </td>
+                                <td class="active">税率：</td>
+                                <td>
+                                    <input id="taxRate" name="taxRate" th:field="*{taxRate}" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">不含税开票金额：</td>
+                                <td>
+                                    <input id="invoiceTaxAmount" name="invoiceTaxAmount" th:field="*{invoiceTaxAmount}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">税额：</td>
+                                <td>
+                                    <input id="taxAmount" name="taxAmount" th:field="*{taxAmount}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">开票信息：</td>
+                                <td>
+                                    <table class="receiveWay-1" style="width: 100%">
+                                        <tr>
+                                            <td class="active">开票公司名称:</td>
+                                            <td>
+                                                <input id="billCompanyName" name="billCompanyName" th:value="*{billCompanyName}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">纳税人识别号:</td>
+                                            <td>
+                                                <input id="taxpayerId" name="taxpayerId" th:value="*{taxpayerId}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">地址:</td>
+                                            <td>
+                                                <input id="billLoc" name="billLoc" th:value="*{billLoc}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">电话:</td>
+                                            <td>
+                                                <input id="billPhone" name="billPhone" th:value="*{billPhone}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">开户行:</td>
+                                            <td>
+                                                <input id="bankName" name="bankName" th:value="*{bankName}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">银行账号:</td>
+                                            <td>
+                                                <input id="bankAccount" name="bankAccount" th:value="*{bankAccount}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="active">发票领取方式：</td>
+                                <td>
+                                    <select id="invoiceTakeWay" name="invoiceTakeWay" class="form-control" disabled
+                                            th:field="*{invoiceTakeWay}" th:with="type=${@dict.getType('sys_pro_cross_receiveWay')}">
+                                        <option value="">------所有------</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                    <table class="hidden invoiceTakeWay-1" style="width: 100%">
+                                        <tr>
+                                            <td class="active">收件人：</td>
+                                            <td>
+                                                <input id="receiver" name="receiver" th:value="*{receiver}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">地址：</td>
+                                            <td>
+                                                <input id="sendLoc" name="sendLoc" th:value="*{sendLoc}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">电话：</td>
+                                            <td>
+                                                <input id="sendPhone" name="sendPhone" th:value="*{sendPhone}" class="form-control" type="text">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="active">付款方式：</td>
+                                            <td>
+                                                <select id="freight" name="freight" class="form-control" disabled
+                                                        th:field="*{freight}" th:with="type=${@dict.getType('sys_pro_cross_payType')}">
+                                                    <option value="">------所有------</option>
+                                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注：</td>
+                                <td>
+                                    <input id="remark" name="remark" th:value="*{remark}"  class="form-control" type="text">
+                                </td>
+                                <td class="active">审批状态：</td>
+                                <td>
+                                    <select id="status" name="status" class="form-control" disabled="disabled"
+                                            th:with="type=${@dict.getType('oa_leave_status')}" th:field="*{status}" >
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <!--                        //缴税记录-->
+                    <div>
+                        <div class=" select-table table-striped">
+                            <table class="table table-bordered table-bot" id="detail">
+
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <div class=" select-table table-striped">
+                            <table class="table table-bordered table-bot" id="detail-2">
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${sysProInvoice.id}]],'oa/sysProInvoice/copy','flag')">
+                                抄送</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/sysProInvoice";
+
+    $("#form-sysProInvoice-edit").validate({
+        rules:{
+            xxxx:{
+                required:true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/edit", $('#form-sysProInvoice-edit').serialize());
+        }
+    }
+
+
+    //取件方式判断
+    var receiveWay =$('#invoiceTakeWay');
+    var receiveWays =  $('.invoiceTakeWay-1');
+    if(receiveWay.val()=='1'){
+        receiveWays.removeClass('hidden');
+    };
+    receiveWay.change(function () {
+        if($(this).val()==='1'){
+            receiveWays.removeClass('hidden')
+        }else{
+            receiveWays.children().find('input').val('');
+            receiveWays.children().find('select').val('');
+            receiveWays.addClass('hidden');
+        }
+    });
+
+
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+            var data = {};
+            data.sysProInvoice = $('#form-sysProInvoice-edit').serializeObject();
+            data.payTaxList=$('#detail').bootstrapTable('getData');
+            data.status = 0;
+            data.flag=false;
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+    }
+    //同意
+
+    function agree(){
+        if([[${sysProInvoice.billStatus}]]=='0'){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-18/sys_pro_invoice/"+[[${sysProInvoice.id}]]);
+        }else if([[${sysProInvoice.billStatus}]]=='1'){
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-19/sys_pro_invoice/"+[[${sysProInvoice.id}]]);
+        }else{
+            $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-20/sys_pro_invoice/"+[[${sysProInvoice.id}]]);
+        }
+
+    }
+    //不同意
+    function disagree(){
+        if([[${sysProInvoice.billStatus}]]=='0'){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-18/sys_pro_invoice/"+[[${sysProInvoice.id}]]);
+        }else if([[${sysProInvoice.billStatus}]]=='1'){
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-19/sys_pro_invoice/"+[[${sysProInvoice.id}]]);
+        }else{
+            $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-20/sys_pro_invoice/"+[[${sysProInvoice.id}]]);
+        }
+    }
+
+    //返回
+    function backAway(){
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+
+    $(function() {
+        //缴税记录
+        var options = {
+            id: 'detail',
+            url:ctx+'oa/sysProInvoicePayTax/list',
+            clickToSelect: true,
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: false,
+            pagination: false,
+            uniqueId: 'id',
+            queryParams:queryParams,
+            modalName: "缴税记录",
+            showExport: false,
+            columns: [{
+                checkbox: false,
+                visible: false
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field:'mainId',
+                    title:'mainId',
+                    visible: false
+                },
+                {
+                    field:'prepaidTaxId',
+                    title:'prepaidTaxId',
+                    visible:false
+                },
+                {
+                    field: 'code',
+                    title: '预缴税金编号',
+                    sortable: true
+                },
+                {
+                    field: 'applyTime',
+                    title: '申请日期',
+                    sortable: true
+                },
+                {
+                    field: 'totalTax',
+                    title: '税额总计',
+                    sortable: true
+                },
+                {
+                    field: 'salesAmount',
+                    title: '销售金额',
+                    sortable: true,
+                },
+                {
+                    field: 'invoicedAmount',
+                    title: '已开票金额',
+                    sortable: true
+                },
+                {
+                    field: 'billAmount',
+                    title: '本次开票金额',
+                    sortable: true
+                },
+                {
+                    field: 'restBillAmount',
+                    title: '剩余开票金额',
+                    sortable: true
+                }]
+        };
+        $.table.init(options);
+
+
+        //发票明细
+        var options2 = {
+            id: 'detail-2',
+            url:ctx+'oa/sysProInvoiceDetail/list',
+            clickToSelect: true,
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: false,
+            pagination: false,
+            uniqueId: 'id',
+            queryParams:queryParams2,
+            modalName: "发票明细",
+            showExport: false,
+            columns: [
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible:false
+                },
+                {
+                    field:'mainId',
+                    title:'mainId',
+                    visible: false
+                },
+                {
+                    field: 'billCode',
+                    title: '发票编号',
+                    sortable: true
+                },
+                {
+                    field: 'billDate',
+                    title: '开票日期',
+                    sortable: true
+                },
+                {
+                    field: 'billAmount',
+                    title: '发票金额',
+                    sortable: true
+                },
+                {
+                    field: 'taxAmount',
+                    title: '税额',
+                    sortable: true,
+                },
+                {
+                    field: '',
+                    title: '价税合计',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(row.billAmount) +parseFloat(row.taxAmount) ;
+                    }
+                },
+                {
+                    field : 'attachmentList',
+                    title : '关联其他模块',
+                    formatter: function(value, row, index) {
+                        var imgName=''
+                        for (var i=0;i<value.length;i++){
+                            imgName+=value[i].attachmentName+'<br>'
+                        }
+                        return '<span style="color: blue;">'+imgName+'</span>'
+                    },
+                    visible:false
+                }]
+        };
+        $.table.init(options2);
+    });
+
+    //预缴税金记录查询你条件
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        if ([[${sysProInvoice.billStatus}]]=='0'){
+            search.mainId=[[${sysProInvoice.id}]];
+        }else{
+            search.mainId=[[${sysProInvoice.parentId}]];
+        }
+        return search;
+    }
+
+
+    //发票明细记录查询你条件
+    function queryParams2(params) {
+        var search = $.table.queryParams(params);
+        if ([[${sysProInvoice.billStatus}]]=='0'){
+            search.mainId=[[${sysProInvoice.id}]];
+            search.status='0';
+        }else{
+            search.optMainId=[[${sysProInvoice.id}]];
+            search.status=[[${sysProInvoice.billStatus}]];
+        }
+        return search;
+    }
+    //流程
+    var data = {};
+    data.procInstId=[[${sysProInvoice.procInstId}]];
+    data.id = [[${sysProInvoice.id}]];
+    selectActProcessList(data,"approveInfoId");
+</script>
+</body>
+</html>

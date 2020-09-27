@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改审批节点明细')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-oaActNode-edit" th:object="${oaActNode}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">主表id：</label>
+				<div class="col-sm-8">
+					<input id="actDefineId" name="actDefineId" th:field="*{actDefineId}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">角色id：</label>
+				<div class="col-sm-8">
+					<input id="roleId" name="roleId" th:field="*{roleId}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">节点名称：</label>
+				<div class="col-sm-8">
+					<input id="nodeName" name="nodeName" th:field="*{nodeName}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">指定人员id（一个角色有多人，请指定一人审批）：</label>
+				<div class="col-sm-8">
+					<input id="appointUserId" name="appointUserId" th:field="*{appointUserId}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备选人员id：</label>
+				<div class="col-sm-8">
+					<input id="backupUserId" name="backupUserId" th:field="*{backupUserId}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">序号（步骤顺序，从小往上排）：</label>
+				<div class="col-sm-8">
+					<input id="idx" name="idx" th:field="*{idx}" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaActNode";
+		$("#form-oaActNode-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-oaActNode-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

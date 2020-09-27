@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('技术标')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <!--分配人员-->
+                    <table class="table table-bordered table-condensed">
+                        <tbody>
+                        <th colspan="4">
+                            生产经营部经理分配
+                        </th>
+                        <form id="form-dispose" th:unless="${ytProjectBidCharge.chargeIds}">
+                            <input type="hidden" name="tenderNoticeId" th:value="${tenderNoticeId}">
+                            <input type="hidden" name="type" value="1">
+                            <tr>
+                                <td class="active">技术标负责人员</td>
+                                <td>
+                                    <input type="hidden" id="chargeIds" name="chargeIds">
+                                    <input id="chargeNames" class="form-control" type="text"
+                                           onclick="selectUser('chargeIds','chargeNames')">
+                                </td>
+                                <td class="active">计划完成日期</td>
+                                <td>
+                                    <input name="planDate" class="form-control time-input-data" type="text">
+                                </td>
+
+                            </tr>
+                            <tr th:if="${ytProjectBidCharge.chosen}">
+                                <td class="text-center" colspan="4">
+                                    <button type="button" class="btn btn-sm btn-info"
+                                            onclick="disposePerson('form-dispose')">提交
+                                    </button> &nbsp;
+                                </td>
+                            </tr>
+                        </form>
+                        <tr th:if="${ytProjectBidCharge.chargeIds}">
+                            <td class="active" width="15%">商务标负责人员</td>
+                            <td>
+                                [[${ytProjectBidCharge.chargeNames}]]
+                            </td>
+                            <td class="active" width="15%">计划完成日期</td>
+                            <td>
+                                [[${#dates.format(ytProjectBidCharge.planDate, 'yyyy-MM-dd')}]]
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <!--技术标人员上传附件-->
+                    <table class="table table-bordered table-condensed">
+                        <tbody>
+                        <th colspan="4">
+                            技术标人员上传附件
+                        </th>
+                        <tr>
+                            <th colspan="4">
+                                当前审核状态：<span class="status"></span>
+                            </th>
+                        </tr>
+                        <form id="form-file">
+                            <tr>
+                                <td class="active">技术标文件</td>
+                                <td colspan="2">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple th:disabled="${ytProjectBidCharge.status!='2'}?'false':'true'">
+                                    </div>
+                                </td>
+                            </tr>
+                        </form>
+                        <tr>
+                            <td class="text-center" colspan="6" th:if="${ytProjectBidCharge.status!='2'}">
+                                <button type="button" class="btn btn-sm btn-info"
+                                        th:if="${ytProjectBidCharge.chosen==false}" onclick="changeState('1')">提交
+                                </button>
+                                <!-- 生产经营部经理确认-->
+                                <span th:if="${ytProjectBidCharge.attachmentUrls!=''}">
+                                <button type="button" class="btn btn-sm btn-info"
+                                        onclick="changeState('2')" th:if="${ytProjectBidCharge.chosen==true}">确认
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="changeState('3')" th:if="${ytProjectBidCharge.chosen==true}">驳回
+                                </button>
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var dataBidCharge = {}
+    dataBidCharge['id'] = [[${ytProjectBidCharge.id}]]
+    dataBidCharge['type'] = 1
+    //上传附件
+    var attachmentList = new Array();
+    var config = {
+        url: ctx + "yt/ytAttachment/selectAttachByObjectId",
+        type: "post",
+        dataType: "json",
+        data: {"objId": [[${ytProjectBidCharge.id}]], "sourceTable": "yt_project_bid_charge"},
+        success: function (result) {
+            var imgsUrl = new Array();
+            var attachList = result.data;
+            if (attachList != null && attachList.length > 0) {
+                var downloadConfig = new Array();
+                for (var i = 0; i < attachList.length; i++) {
+                    var down = {};
+                    var attach = attachList[i];
+                    imgsUrl.push(attach.attachmentUrl);
+                    down.key = attach.attachmentName;
+                    down.caption = attach.fileName;
+                    down.extra = {"fileName": attach.attachmentName, "tableName": "yt_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                    if (isAssetTypeAnImage(attach.attachmentName)) {
+                        down.type = 'image';
+                    } else {
+                        down.type = 'object';
+                    }
+                    downloadConfig.push(down);
+                    attachmentList.push({
+                        "objectId": [[${ytProjectBidCharge.id}]],
+                        "attachmentName": attach.attachmentName,
+                        "fileName": attach.fileName
+                    })
+                }
+                var option1 = {
+                    id: 'uploadFileId',
+                    uploadUrl: null,
+                    deleteUrl: null,
+                    //deleteExtraData:deleteExtraData,
+                    imgsUrl: imgsUrl,
+                    downloadConfig: downloadConfig
+                }
+                $.common.uploadFile(option1);
+            } else {
+                var option = {
+                    id: 'uploadFileId',
+                    uploadUrl: null,
+                    deleteUrl: null,
+                    deleteExtraData: null,
+                    imgsUrl: new Array(),
+                    initialPreviewConfig: null,
+                    showPreview: true
+                }
+                $.common.uploadFile(option);
+                downFile();
+            }
+            downFile();
+        }
+    };
+    if ([[${ytProjectBidCharge.id}]]) {
+        $.ajax(config)
+    } else {
+        var option = {
+            id: 'uploadFileId',
+            uploadUrl: null,
+            deleteUrl: null,
+            deleteExtraData: null,
+            imgsUrl: new Array(),
+            initialPreviewConfig: null,
+            showPreview: true
+        }
+        $.common.uploadFile(option);
+        downFile();
+    }
+
+    //分配人员
+    function disposePerson(formId) {
+        $.operate.saveJsonTab(ctx + "business/jyTenderNotice/insertProjectBidCharge", $('#' + formId).serializeObject());
+    }
+
+    //修改状态
+    function changeState(state) {
+        dataBidCharge['status'] = state
+        dataBidCharge.attachmentUrls = attachmentList;
+        $.operate.saveJsonTab(ctx + "business/jyTenderNotice/insertProjectBidCharge", dataBidCharge);
+    }
+
+    //字典回显
+    var optionDict = {
+        'className': 'status',
+        'dict': [[${@dict.getType('oa_leave_status')}]],
+        'value': [[${ytProjectBidCharge.status}]]
+    }
+    $.common.dictV(optionDict)
+
+</script>
+</body>
+</html>

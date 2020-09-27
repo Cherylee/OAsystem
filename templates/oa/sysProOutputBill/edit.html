@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改销项发票')" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProOutputBill-edit" th:object="${sysProOutputBill}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>销项发票</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active">项目：</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="hidden">
+                                        <input th:field="*{proName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">编号：</td>
+                                    <td>
+                                        <input id="code" name="code" th:field="*{code}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                                        <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">公司名称：</td>
+                                    <td>
+                                        <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                        <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                        <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">审批状态：</td>
+                                    <td>
+                                        <select class="form-control" name="status" th:with="type=${@dict.getType('oa_leave_status')}"
+                                                th:field="*{status}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期：</td>
+                                    <td>
+                                        <input id="applyTime" name="applyTime" th:value="${#dates.format(sysProOutputBill.applyTime, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">发票类型：</td>
+                                    <td>
+                                        <select name="invoiceType" class="form-control"  th:with="type=${@dict.getType('sys_pro_invoice_type')}"
+                                                th:field="*{invoiceType}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"> </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">发票税率：</td>
+                                    <td>
+                                        <select name="invoiceRate" class="form-control" th:with="type=${@dict.getType('sys_pro_invoice_rate')}"
+                                                th:field="*{invoiceRate}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"> </option>
+                                        </select>
+                                    </td>
+                                    <td class="active">发票税额：</td>
+                                    <td>
+                                        <input id="totalTax" name="totalTax" th:field="*{totalTax}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">发票金额大写：</td>
+                                    <td>
+                                        <input id="invoiceMoneyUpper" name="invoiceMoneyUpper" th:field="*{invoiceMoneyUpper}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">不含税金额总计：</td>
+                                    <td>
+                                        <input id="notTotalMoney" name="notTotalMoney" class="form-control" type="text" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">备注：</td>
+                                    <td colspan="3">
+                                        <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple
+                                                   th:disabled="${sysProOutputBill.status!='3'&&sysProOutputBill.status!='99'}? true : false">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <th colspan="4">购买方信息</th>
+                                <tr>
+                                    <td class="active">购买方公司名称：</td>
+                                    <td>
+                                        <input id="purchaseCompanyName" name="purchaseCompanyName" th:field="*{purchaseCompanyName}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">购买方银行账号：</td>
+                                    <td>
+                                        <input id="purchaseBankAccount" name="purchaseBankAccount" th:field="*{purchaseBankAccount}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">购买方电话：</td>
+                                    <td>
+                                        <input id="purchasePhoneNum" name="purchasePhoneNum" th:field="*{purchasePhoneNum}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">购买方开户行：</td>
+                                    <td>
+                                        <input id="purchaseOpenBank" name="purchaseOpenBank" th:field="*{purchaseOpenBank}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">购买方地址：</td>
+                                    <td>
+                                        <input id="purchaseAddress" name="purchaseAddress" th:field="*{purchaseAddress}" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">购买方税号：</td>
+                                    <td>
+                                        <input id="purchaseTaxNum" name="purchaseTaxNum" th:field="*{purchaseTaxNum}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+
+                             <div class="row">
+                                 <div class="col-sm-12 select-table table-striped">
+                                        <div class="btn-group-sm" id="toolbar1" role="group">
+                                            <a class="btn btn-warning" data-toggle="modal" onclick="addPrepaidTax()"> <i class="fa fa-plus"></i> 添加缴税记录 </a>
+                                            <a class="btn btn-danger" onclick="removeRowAll('prepaidTaxTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                                        </div>
+                                        <div class="fixed-table-container">
+                                            <table id="prepaidTaxTable" data-mobile-responsive="true"></table>
+                                        </div>
+                                    </div>
+                             </div>
+
+                              <div class="row">
+                                 <div class="col-sm-12 select-table table-striped">
+                                        <div class="btn-group-sm" id="toolbar2" role="group">
+                                            <a class="btn btn-warning" data-toggle="modal" onclick="addIncomeRecord()"> <i class="fa fa-plus"></i> 添加进项发票</a>
+                                            <a class="btn btn-danger" onclick="removeRowAll('incomeBillTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                                        </div>
+                                        <div class="fixed-table-container">
+                                            <table id="incomeBillTable" data-mobile-responsive="true"></table>
+                                        </div>
+                                    </div>
+                             </div>
+
+                            <div class="row">
+                                 <div class="col-sm-12 select-table table-striped">
+                                        <div class="btn-group-sm" id="toolbar3" role="group">
+                                            <a class="btn btn-warning" data-toggle="modal" onclick="addPayRecord()"> <i class="fa fa-plus"></i> 添加收款记录 </a>
+                                            <a class="btn btn-danger" onclick="removeRowAll('payTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+                                        </div>
+                                        <div class="fixed-table-container">
+                                            <table id="payTable" data-mobile-responsive="true"></table>
+                                        </div>
+                                    </div>
+                             </div>
+
+
+                        </form>
+
+
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10" style="padding-top: 20px">
+                                <button type="button" th:if="${sysProOutputBill.status} == '99'"
+                                        class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+
+                                <button type="button" th:if="${sysProOutputBill.status} == '99'"
+                                        class="btn btn-sm btn-primary" onclick="submitHandlerDraft()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="submitHandler()" th:if="${sysProOutputBill.status=='3'}">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 审批流程记录 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/sysProOutputBill";
+		$("#form-sysProOutputBill-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+
+        //不含税金额总计计算
+        $("input[name='totalTax']").bind("input propertychange",
+            function () {
+                var num = $(this).val();
+                if ($('#totalAmount').val()==''){
+                    $('#notTotalMoney').val(0);
+                }else {
+                    $('#notTotalMoney').val(parseFloat($('#totalAmount').val())-num);
+                }
+            });
+        $("input[name='totalAmount']").bind("input propertychange",
+            function () {
+                var num = parseFloat($(this).val());
+                if ($('#totalTax').val()==''){
+                    $('#notTotalMoney').val(num);
+                }else {
+                    $('#notTotalMoney').val(num-parseFloat($('#totalTax').val()));
+                }
+
+            });
+
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	var data = {};
+	        	data.flag = false;
+	        	data.bill = $('#form-sysProOutputBill-edit').serializeObject();
+	        	var relList = new Array();
+	        	var payData = $('#payTable').bootstrapTable('getData');
+	        	var incomeData = $('#incomeBillTable').bootstrapTable('getData');
+	        	var prepaidData = $('#prepaidTaxTable').bootstrapTable('getData');
+                data.attachmentList=attachmentList;
+	        	if(incomeData!=null&&incomeData.length>0){
+	        		for(var i=0; i<incomeData.length; i++){
+	        			incomeData[i].relType='GC-4';
+	        		}
+	        	}
+	        	if(prepaidData!=null&&prepaidData.length>0){
+	        		for(var i=0; i<prepaidData.length; i++){
+	        			prepaidData[i].relType='GC-6';
+	        		}
+	        	}
+                if(payData!=null&&payData.length>0){
+                    for(var i=0; i<payData.length; i++){
+                        payData[i].relType='GC-2';
+                    }
+                }
+	        	data.relList = relList.concat(getAvailableFiles(prepaidData),getAvailableFiles(incomeData),getAvailableFiles(payData));
+	        	$.operate.saveJsonTab(prefix + "/submitDraft", data);
+	        }
+	    }
+		
+		//上传附件
+		var attachmentList = new Array();
+        $(function () {
+            //图片反显出来
+            var config = {
+                url: ctx+"oa/oaAttachment/selectAttach",
+                type: "post",
+                dataType: "json",
+                data: {"objectId": [[${sysProOutputBill.id}]]},
+                success: function(result) {
+                    var imgsUrl = new Array();
+                    var attachList = result.data;
+                    if(attachList!=null && attachList.length>0){
+                        var downloadConfig = new Array();
+                        for(var i=0; i<attachList.length; i++){
+                            var down = {};
+                            var attach = attachList[i];
+                            imgsUrl.push(attach.attachmentName);
+                            down.key = attach.attachmentName;
+                            down.caption = attach.fileName;
+                            down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                            if(isAssetTypeAnImage(attach.attachmentName)){
+                                down.type = 'image';
+                            }else{
+                                down.type = 'object';
+                            }
+                            downloadConfig.push(down);
+                            attachmentList.push({"objectId":[[${sysProOutputBill.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+                        }
+                        var option1={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            //deleteExtraData:deleteExtraData,
+                            imgsUrl:imgsUrl,
+                            downloadConfig:downloadConfig
+                        }
+                        $.common.uploadFile(option1);
+                    }else{
+                        var option2={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            deleteExtraData:null,
+                            imgsUrl:new Array(),
+                            initialPreviewConfig:null
+                        }
+                        $.common.uploadFile(option2);
+                    }
+                }
+            };
+            $.ajax(config)
+        });
+		
+		//预缴税金弹框
+		function addPrepaidTax(){
+			var options = {
+				title : '选择预缴税金',
+				width : "1200",
+				url : ctx + "oa/sysProPrepaidTax",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			data.relType='GC-6';
+			insertRow('prepaidTaxTable',data);
+		}
+		
+		//进项发票弹框
+		function addIncomeRecord(){
+			var options = {
+				title : '选择进项发票',
+				width : "1200",
+				url : ctx + "oa/sysProIncomeBill",
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			data.relType='GC-4';
+			insertRow('incomeBillTable',data);
+		}
+
+        //收款记录弹窗
+        function addPayRecord(){
+            var options = {
+                title : '选择进项发票',
+                width : "1200",
+                url : ctx + "oa/sysProReceivables",
+                callBack : doSubmit3
+            };
+            $.modal.openOptions(options);
+        }
+        function doSubmit3(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            data.relType='GC-2';
+            insertRow('payTable',data);
+        }
+		
+		//插入行
+		function insertRow(tableId,data){
+			$("#"+tableId).bootstrapTable('insertRow', {
+				index : 0, // 你想插入到哪，0表示第一行
+				row : data
+			})
+		}
+		
+		/* 删除指定表格行 */
+		function removeRow(id, rowId) {
+			$.modal.confirm("确定删除该行数据吗?", function() {
+				$("#" + id).bootstrapTable('removeByUniqueId', rowId);
+    		});
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$.modal.confirm("确定删除所有行吗?", function() {
+				$("#" + id).bootstrapTable('removeAll');
+    		});
+		}
+		
+		//缴税记录
+		var options1 = {
+				id : 'prepaidTaxTable',
+				url : ctx + 'oa/sysProPrepaidTax/getProPrepaidByRel',
+				//contentType:'application/json',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "预缴税金",
+				showExport : false,
+				clickToSelect : true,
+				queryParams : {"tableName" : "sys_pro_output_rel",
+								"tableColType":"rel_type",
+								"tableColId":"output_id",
+								"relType":"GC-6",
+								"outputId":[[${sysProOutputBill.id}]]
+							  },
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'relType',
+							title : '关联类型',
+							formatter: function (value, row, index) {
+				        		return 'GC-6';
+				        	},
+							visible : false
+						},
+						{
+							field : 'code',
+							title : '编号'
+						},
+						{
+							field : 'applyTime',
+							title : '申请日期'
+						},
+						{
+							field : 'totalTax',
+							title : '税额总计'
+						},
+						{
+							field : 'salesAmount',
+							title : '销售金额'
+						},
+						{
+							field : 'taxationBureau',
+							title : '税务机关'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'prepaidTaxTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+
+			};
+		//进项发票
+		var options2 = {
+				id : 'incomeBillTable',
+				url : ctx + 'oa/sysProIncomeBill/getInComeBillByRel',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "进项发票",
+				showExport : false,
+				clickToSelect : true,
+				queryParams : {"tableName" : "sys_pro_output_rel",
+					"tableColType":"rel_type",
+					"tableColId":"output_id",
+					"relType":"GC-4",
+					"outputId":[[${sysProOutputBill.id}]]
+				  },
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'relType',
+							title : '关联类型',
+							formatter: function (value, row, index) {
+				        		return 'GC-4';
+				        	},
+							visible : false
+						},
+						{
+							field : 'code',
+							title : '编号'
+						},
+						{
+							field : 'applyTime',
+							title : '申请日期'
+						},
+						{
+							field : 'totalTax',
+							title : '税额总计'
+						},
+						{
+							field : 'totalMoney',
+							title : '价税总计'
+						},
+						{
+							field : 'issuingOffice',
+							title : '开票单位'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'incomeBillTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+
+			};
+		
+		//收款记录
+		var options3 = {
+				id : 'payTable',
+                url : ctx + 'oa/sysProReceivables/getReceivablesByRel',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "收款记录",
+				showExport : false,
+				clickToSelect : true,
+            queryParams : {
+                "outputId":[[${sysProOutputBill.id}]]
+            },
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'relType',
+							title : '关联类型',
+							visible : false
+						},
+						{
+							field : 'code',
+							title : '编号'
+						},
+						{
+							field : 'paymentDate',
+							title : '交款日期'
+						},
+						{
+							field : 'paymentPeople',
+							title : '交款人'
+						},
+						{
+							field : 'amount',
+							title : '收款金额'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'payTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+
+			};
+		
+		$(function() {
+			$.table.init(options1);
+			$.table.init(options2);
+			$.table.init(options3);
+			//流程
+			var data = {};
+	    	data.procInstId= [[${sysProOutputBill.procInstId}]];
+	    	data.id = [[${sysProOutputBill.id}]];
+			selectActProcessList(data);
+		});
+		
+		//保存草稿
+		function saveDraft(){
+        	var data = {};
+        	data.flag = true;
+        	data.bill = $('#form-sysProOutputBill-edit').serializeObject();
+        	var relList = new Array();
+        	var payData = $('#payTable').bootstrapTable('getData');
+        	var incomeData = $('#incomeBillTable').bootstrapTable('getData');
+        	var prepaidData = $('#prepaidTaxTable').bootstrapTable('getData');
+            data.attachmentList=attachmentList;
+        	if(incomeData!=null&&incomeData.length>0){
+        		for(var i=0; i<incomeData.length; i++){
+        			incomeData[i].relType='GC-4';
+        		}
+        	}
+        	if(prepaidData!=null&&prepaidData.length>0){
+        		for(var i=0; i<prepaidData.length; i++){
+        			prepaidData[i].relType='GC-6';
+        		}
+        	}
+            if(payData!=null&&payData.length>0){
+                for(var i=0; i<payData.length; i++){
+                    payData[i].relType='GC-2';
+                }
+            }
+        	data.relList = relList.concat(getAvailableFiles(prepaidData),getAvailableFiles(incomeData),getAvailableFiles(payData));
+        	$.operate.saveJsonTab(prefix + "/saveDraft", data);
+		}
+		
+		function submitHandlerDraft() {
+	        if ($.validate.form()) {
+	        	var data = {};
+	        	data.flag = true;
+	        	data.bill = $('#form-sysProOutputBill-edit').serializeObject();
+	        	var relList = new Array();
+	        	var payData = $('#payTable').bootstrapTable('getData');
+	        	var incomeData = $('#incomeBillTable').bootstrapTable('getData');
+	        	var prepaidData = $('#prepaidTaxTable').bootstrapTable('getData');
+                data.attachmentList=attachmentList;
+	        	if(incomeData!=null&&incomeData.length>0){
+	        		for(var i=0; i<incomeData.length; i++){
+	        			incomeData[i].relType='GC-4';
+	        		}
+	        	}
+	        	if(prepaidData!=null&&prepaidData.length>0){
+	        		for(var i=0; i<prepaidData.length; i++){
+	        			prepaidData[i].relType='GC-6';
+	        		}
+	        	}
+                if(payData!=null&&payData.length>0){
+                    for(var i=0; i<payData.length; i++){
+                        payData[i].relType='GC-2';
+                    }
+                }
+	        	data.relList = relList.concat(getAvailableFiles(prepaidData),getAvailableFiles(incomeData),getAvailableFiles(payData));
+	        	$.operate.saveJsonTab(prefix + "/submitDraft", data);
+	        }
+	    }
+		
+		//获取有效字段的值
+		function getAvailableFiles(data){
+			var list = new Array();
+			if(data!=null && data!='undefined'){
+				for(var i=0; i<data.length; i++){
+					var obj = {};
+					obj.relId = data[i].id;
+					obj.relType = data[i].relType;
+					list.push(obj);
+				}
+			}
+			return list;
+		}
+		
+	</script>
+</body>
+</html>

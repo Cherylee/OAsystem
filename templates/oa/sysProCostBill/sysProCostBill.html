@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('进项发票列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li><input type="hidden" id="companyId" name="companyId"/>
+                            <input type="text" id="companyName"
+                                   onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+                        </li>
+                        <li>
+                            <input type="text" name="proposerName" placeholder="申请人"/>
+                        </li>
+                        <li>
+                            <input type="text" name="projectName" placeholder="项目名称"/>
+                        </li>
+                        <li>
+                            <select name="billType"
+                                    th:with="type=${@dict.getType('sys_pro_invoice_type')}">
+                                <option value="">发票类型</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <select name="billStatus"
+                                    th:with="type=${@dict.getType('oa_invoice_status')}">
+                                <option value="">单据状态</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:sysProCostBill:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()"
+               shiro:hasPermission="oa:sysProCostBill:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:sysProCostBill:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:sysProCostBill:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:sysProCostBill:remove')}]];
+    var prefix = ctx + "oa/sysProCostBill";
+    var applyState = [[${@dict.getType('oa_leave_status')}]];
+    var billState = [[${@dict.getType('oa_invoice_status')}]];
+    var billType = [[${@dict.getType('sys_pro_invoice_type')}]];
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add/"+[[${flag}]],
+            updateUrl: prefix + "/edit/{id}",
+            returnUrl: prefix + "/returnBill/{id}",
+            redInkUrl: prefix + "/redInkBill/{id}",
+            redInkEditUrl: prefix + "/redInkBillEdit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "进项发票",
+            sortName: "createTime",
+            sortOrder: "desc",
+            showExport: true,
+            clickToSelect: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+
+                {
+                    field: 'companyName',
+                    title: '申请公司',
+                    sortable: true
+                }, {
+                    field: 'proposerName',
+                    title: '申请人',
+                    sortable: true
+                }, {
+                    field: 'deptName',
+                    title: '申请部门',
+                    sortable: true
+                }, {
+                    field: 'code',
+                    title: '编号',
+                    sortable: true
+                }, {
+                    field: 'projectName',
+                    title: '项目名称',
+                    sortable: true
+                }, {
+                    field: 'applyDate',
+                    title: '申请日期',
+                    sortable: true
+                },
+
+                {
+                    field: 'billAmount',
+                    title: '发票金额（含税）',
+                    sortable: true
+                },
+                {
+                    field: 'nonTaxAmount',
+                    title: '不含税金额',
+                    sortable: true
+                },
+                {
+                    field: 'taxAmount',
+                    title: '税额',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'billType',
+                    title: '发票类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(billType, value);
+                    }
+                },
+                {
+                    field: 'taxRate',
+                    title: '税率',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'saleCompanyName',
+                    title: '销售公司名称',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'taxpayerId',
+                    title: '纳税人识别号',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'saleLocation',
+                    title: '销售方地址',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'salePhone',
+                    title: '销售方电话',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'bankName',
+                    title: '开户行',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'bankAccount',
+                    title: '银行账号',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'payWay',
+                    title: '付款方式（0：银行转账，1：现金）',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'signed',
+                    title: '是否签字',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'procInstId',
+                    title: '流程id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'linkAmount',
+                    title: '已关联金额',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'billStatus',
+                    title: '单据状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(billState, value);
+                    }
+                },
+                {
+                    field: 'status',
+                    title: '审批状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(applyState, value);
+                    }
+                },
+
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var text = '查看详情'
+                        var edit = ''
+                        var classN = 'btn-info'
+
+                        if (row.status == '3' || row.status == '99') {
+                            if (row.allowedEdit == true) {//本人才能编辑
+                                edit = editFlag
+                                text = '编辑'
+                                classN = 'btn-success'
+                                actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+
+                            }
+                        } else {
+                            if (row.billStatus == '2') {//红字的详情页面
+                                actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="openReturnBillEdit(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                            } else {
+                                actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                            }
+
+                        }
+                        if (row.status == '2' && row.allowedEdit == true) {
+                            if (row.billStatus == '0') {//单据状态是常规的时候，且审核通过，才是有退回和红字
+                                actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="openReturnBillTab(\'' + row.id + '\')">退回</a> ');
+                                actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="#" onclick="openRedInkBillTab(\'' + row.id + '\')">红字</a> ');
+                            }
+
+                        }
+                        if (status == '99' && row.allowedEdit == true) {//草稿状态才能删除
+                            actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        }
+                        if (row.status == '0') {
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    function openReturnBillTab(id) {
+        var url = $.table._option.returnUrl.replace("{id}", id);
+        $.modal.openTab("进项发票退回", url);
+    }
+
+    function openRedInkBillTab(id) {
+        var url = $.table._option.redInkUrl.replace("{id}", id);
+        $.modal.openTab("进项发票红字", url);
+    }
+
+    //打开红字编辑页面
+    function openReturnBillEdit(id) {
+        var url = $.table._option.redInkEditUrl.replace("{id}", id);
+        $.modal.openTab("进项发票红字详情", url);
+    }
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if (isAudit(target, '2') == false) {
+            $.modal.alertWarning("只能选择审核通过的哦！");
+            return;
+        }
+
+
+        $.modal.close();
+        return target;
+    }
+
+    //判斷是否有審核不通過的
+    function isAudit(data, value) {
+        var res = true;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].status != value) {
+                res = false;
+            }
+        }
+        return res;
+    }
+</script>
+</body>
+</html>

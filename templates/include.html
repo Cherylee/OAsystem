@@ -1,0 +1,467 @@
+<!-- 通用CSS -->
+<head th:fragment=header(title)>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="keywords" content="">
+<meta name="description" content="">
+<title th:text="${title}"></title>
+<link rel="shortcut icon" href="favicon.ico">
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{/css/font-awesome.min.css}" rel="stylesheet" />
+<!-- bootstrap-table 表格插件样式 -->
+<link th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}"
+	rel="stylesheet" />
+<link th:href="@{/css/animate.css}" rel="stylesheet" />
+<link th:href="@{/css/style.css}" rel="stylesheet" />
+<link th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet" />
+<link
+	th:href="@{/ajax/libs/bootstrap-table/extensions/editable/bootstrap-editable.css}"
+	rel="stylesheet" />
+<!-- 	<link th:href="@{/ajax/libs/staps/jquery.steps.css}" rel="stylesheet"> -->
+</head>
+
+
+
+<!-- ztree树插件 -->
+<div th:fragment="ztree-css">
+	<link th:href="@{/ajax/libs/jquery-ztree/3.5/css/metro/zTreeStyle.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="ztree-js">
+	<script
+		th:src="@{/ajax/libs/jquery-ztree/3.5/js/jquery.ztree.all-3.5.js}"></script>
+</div>
+
+<!-- select下拉框插件 -->
+<div th:fragment="select2-css">
+	<link th:href="@{/ajax/libs/select/select2.css}" rel="stylesheet" />
+</div>
+<div th:fragment="select2-js">
+	<script th:src="@{/ajax/libs/select/select2.js}"></script>
+</div>
+
+<!-- bootstrap-select下拉框插件 -->
+<div th:fragment="bootstrap-select-css">
+	<link th:href="@{/ajax/libs/bootstrap-select/bootstrap-select.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="bootstrap-select-js">
+	<script th:src="@{/ajax/libs/bootstrap-select/bootstrap-select.js}"></script>
+</div>
+
+<!-- datetimepicker日期和时间插件 -->
+<div th:fragment="datetimepicker-css">
+	<link
+		th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="datetimepicker-js">
+	<script
+		th:src="@{/ajax/libs//datapicker/bootstrap-datetimepicker.min.js}"></script>
+</div>
+
+<!-- ui布局插件 -->
+<div th:fragment="layout-latest-css">
+	<link th:href="@{/ajax/libs/jquery-layout/jquery.layout-latest.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="layout-latest-js">
+	<script th:src="@{/ajax/libs/jquery-layout/jquery.layout-latest.js}"></script>
+</div>
+
+<!-- summernote富文本编辑器插件 -->
+<div th:fragment="summernote-css">
+	<link th:href="@{/ajax/libs/summernote/summernote.css}"
+		rel="stylesheet" />
+	<link th:href="@{/ajax/libs/summernote/summernote-bs3.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="summernote-js">
+	<script th:src="@{/ajax/libs/summernote/summernote.min.js}"></script>
+	<script th:src="@{/ajax/libs/summernote/summernote-zh-CN.js}"></script>
+</div>
+
+<!-- cropbox图像裁剪插件 -->
+<div th:fragment="cropbox-css">
+	<link th:href="@{/ajax/libs/cropbox/cropbox.css}" rel="stylesheet" />
+</div>
+<div th:fragment="cropbox-js">
+	<script th:src="@{/ajax/libs/cropbox/cropbox.js}"></script>
+</div>
+
+<!-- jsonview格式化和语法高亮JSON格式数据查看插件 -->
+<div th:fragment="jsonview-css">
+	<link th:href="@{/ajax/libs/jsonview/jquery.jsonview.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="jsonview-js">
+	<script th:src="@{/ajax/libs/jsonview/jquery.jsonview.js}"></script>
+</div>
+
+<!-- jasny功能扩展插件 -->
+<div th:fragment="jasny-bootstrap-css">
+	<link th:href="@{/ajax/libs/jasny/jasny-bootstrap.min.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="jasny-bootstrap-js">
+	<script th:src="@{/ajax/libs/jasny/jasny-bootstrap.min.js}"></script>
+</div>
+
+<!-- fileinput文件上传插件 -->
+<div th:fragment="bootstrap-fileinput-css">
+	<link th:href="@{/ajax/libs/bootstrap-fileinput/fileinput.min.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="bootstrap-fileinput-js">
+	<script th:src="@{/ajax/libs/bootstrap-fileinput/fileinput.min.js}"></script>
+</div>
+
+<!-- duallistbox双列表框插件 -->
+<div th:fragment="bootstrap-duallistbox-css">
+	<link th:href="@{/ajax/libs/duallistbox/bootstrap-duallistbox.min.css}"
+		rel="stylesheet" />
+</div>
+<div th:fragment="bootstrap-duallistbox-js">
+	<script th:src="@{/ajax/libs/duallistbox/bootstrap-duallistbox.min.js}"></script>
+</div>
+
+<!-- suggest搜索自动补全 -->
+<div th:fragment="bootstrap-suggest-js">
+	<script th:src="@{/ajax/libs/suggest/bootstrap-suggest.min.js}"></script>
+</div>
+
+<!-- typeahead搜索自动补全 -->
+<div th:fragment="bootstrap-typeahead-js">
+	<script th:src="@{/ajax/libs/typeahead/bootstrap3-typeahead.min.js}"></script>
+</div>
+
+<!-- jquery.steps表单向导插件 -->
+<div th:fragment="jquery-steps-css">
+	<link th:href="@{/ajax/libs/staps/jquery.steps.css}" rel="stylesheet" />
+</div>
+<div th:fragment="jquery-steps-js">
+	<script th:src="@{/ajax/libs/staps/jquery.steps.min.js}"></script>
+</div>
+
+<!-- ECharts百度统计图表插件 -->
+<div th:fragment="echarts-js">
+	<script th:src="@{/ajax/libs/report/echarts/echarts-all.js}"></script>
+</div>
+
+<!-- peity图表组合插件 -->
+<div th:fragment="peity-js">
+	<script th:src="@{/ajax/libs/report/peity/jquery.peity.min.js}"></script>
+</div>
+
+<!-- sparkline线状图插件 -->
+<div th:fragment="sparkline-js">
+	<script th:src="@{/ajax/libs/report/sparkline/jquery.sparkline.min.js}"></script>
+</div>
+
+<!-- 表格拖拽插件 -->
+<div th:fragment="bootstrap-table-reorder-js">
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/reorder/bootstrap-table-reorder.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/reorder/jquery.tablednd.js}"></script>
+</div>
+
+<!-- 通用JS -->
+<div th:fragment="footer">
+	<script th:src="@{/js/jquery.min.js}"></script>
+	<script th:src="@{/js/bootstrap.min.js}"></script>
+	<!-- bootstrap-table 表格插件 -->
+	<script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/toolbar/bootstrap-table-toolbar.min.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/columns/bootstrap-table-fixed-columns.js}"></script>
+	<!-- jquery-validate 表单验证插件 -->
+	<script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/ajax/libs/validate/messages_zh.min.js}"></script>
+	<script th:src="@{/ajax/libs/validate/jquery.validate.extend.js}"></script>
+	<!-- jquery-validate 表单树插件 -->
+	<script th:src="@{/ajax/libs/bootstrap-treetable/bootstrap-treetable.js}"></script>
+	<script th:src="@{/ajax/libs/colResizable/colResizable-1.6.js}"></script>
+	<script th:src="@{/ajax/libs/bootstrap-table/extensions/resizable/bootstrap-table-resizable.js}"></script>
+	<!-- jquery-export 表格导出插件 -->
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/export/bootstrap-table-export.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/export/tableExport.js}"></script>
+	<!-- 遮罩层 -->
+	<script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+	<script th:src="@{/ajax/libs/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+	<script th:src="@{/ajax/libs/layui/layui.js}"></script>
+	<script th:src="@{/ruoyi/js/common.js?v=3.3.0}"></script>
+	<script th:src="@{/ruoyi/js/ry-ui.js?v=3.3.0}"></script>
+	<script th:src="@{/ruoyi/js/jquery.jqprint-0.3.js?v=3.3.0}"></script>
+	<script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/editable/bootstrap-editable.min.js}"></script>
+	<script
+		th:src="@{/ajax/libs/bootstrap-table/extensions/editable/bootstrap-table-editable.js}"></script>
+	<!-- 	<script th:src="@{/ajax/libs/staps/jquery.steps.min.js}"></script> -->
+	<script th:src="@{/ajax/libs/jquery-jtemplates/jquery-jtemplates.js}"></script>
+	<script th:src="@{/ajax/libs/report/echarts/echarts-all.js}"></script>
+
+
+</div>
+
+<!--项目概览 css-->
+<div th:fragment="sysProCss">
+	<link th:href="@{/css/sysPro.css}" rel="stylesheet" />
+</div>
+
+<!-- 通用最后一个节点html -->
+<div th:fragment="lastNode">
+	<div class=" ibox-content">
+		<div class="col-sm-12 select-table table-striped">
+			<table id="last_Node_Table" data-mobile-responsive="true"></table>
+		</div>
+	</div>
+	<script>
+	$(function() {
+        var optionsLast = {
+			id:'last_Node_Table',
+            url:ctx+"oa/oaProcExeNode/selectNodeVoTableInfo",
+            modalName: "最后节点",
+            queryParams: {"actDefineId": actDefineId,"objId":lastNodeId},
+	        showExport: true,
+	        onLoadSuccess:onLoadSuccess,
+	        uniqueId: "node.userId",
+	        search: false,
+            showExport: false,
+            showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+	        onEditableSave: onEditableSave,
+            columns: [{
+	            checkbox: true
+	        },
+	        {
+				field : 'comment.id', 
+				title : 'id',
+				visible: false
+			},
+			{
+				field : 'node.userId', 
+				title : '用户id',
+				visible: false
+			},
+			{
+				field : 'node.userName', 
+				title : '用户名称'
+			},
+			{
+				field : 'content', 
+				title : '已留言',
+				align : 'center',
+				editable : {
+					type : 'text',
+					emptytext:'留言不能为空',
+					title : '留言',
+                    validate: function (v) {
+                        if (!v) return '不能为空';
+                    }
+
+				},
+				formatter : function(value, row, index) {
+					var content='';
+					if(row.comment!=null&&row.comment!='undefined'){
+						content=row.comment.content
+					}
+					
+					return content;
+				}
+			},{
+				title : '附件',
+				formatter : function(value, row, index) {
+					var disa='';
+					if(lastStatus=='16'||row.node.flag!=true){
+						disa='disabled'
+						
+					}else{
+						disa='';
+					}
+					var file='<div class="file-loading">'+
+					     '<input id="uploadFileId'+index+'" type="file" multiple '+disa+'>'+
+				         '</div>'
+					
+					return file;
+				}
+			},{
+				title : '操作',
+					align : 'center',
+				formatter : function(value, row, index) {
+					var actions = [];
+					var html=''
+					if(lastStatus=='16'){
+						html=''
+					}else{
+						if(row.node.flag==true&&lastStatus=='2'){
+							html='<a class="btn btn-info" href="#" onclick="toSubmit(\'' + row.node.userId + '\',\'' + index + '\')">确认</a> '
+						}
+					}
+	            	actions.push(html);
+					return actions.join('');
+				}
+			}]
+        };
+        $.table.init(optionsLast);
+    });
+	//表格编辑
+	function onEditableSave (field, row, oldValue, $el) {
+    	alert("字段名：" + field + "，当前值：" + row[field]  + "，旧值：" + oldValue);
+    }
+	//毁掉函数，附件
+	var fileList=[]
+	function callback(id){
+    	var dataF={
+    			'id':id,
+    			'attachmentList':attachmentList
+    	}
+    	fileList.push(dataF)
+	}
+	//确认操作
+    function toSubmit(id,index){
+    	var data={}
+    	data.parentId=lastNodeId;
+    	data.userId=id;
+       	//附件赋值 
+       	var listTable=$('#last_Node_Table').bootstrapTable('getData');
+       	for(var i=0;i<listTable.length;i++){
+        	   for(var a=0;a<fileList.length;a++){
+        		   if(fileList[a].id=='uploadFileId'+index){
+        			   data.attachmentList=fileList[a].attachmentList;
+        		   }
+        	   }
+        	   if(i==index){
+        		   if(listTable[i].comment ==''||listTable[i].comment =='undefined'||listTable[i].comment ==null){
+        			   data.content=listTable[i].content
+        		   }else{
+        			   data.content=listTable[i].comment.content 
+        		   }
+        		   
+        	   }
+        	  
+        }
+       if(data.content==''||data.content=='undefined'||data.content==null){
+    	   $.modal.alertWarning('留言不能为空！')
+       }else{
+
+		   var config = {
+			   contentType : "application/json;charset=UTF-8",
+			   url : prefix + "/insertExeComment",
+			   type : "post",
+			   dataType: "json",
+			   data : JSON.stringify(data),
+			   beforeSend : function() {
+				   $.modal.loading("正在处理中，请稍后...");
+			   },
+			   success : function(result) {
+				   $.modal.closeLoading();
+				   refreshItem();
+				   $.operate.successCallback(result);
+			   }
+		   };
+		   $.ajax(config)
+    	   // $.operate.saveJsonTab(prefix + "/insertExeComment", data);
+       }
+        
+	}
+	
+    var attachmentList = new Array();
+    function onLoadSuccess(){
+       
+       var listTable=$('#last_Node_Table').bootstrapTable('getData');
+ 	   for(var i=0;i<listTable.length;i++){
+ 		 if(listTable[i].comment=='undefined'||listTable[i].comment==null){
+ 			var option2={
+	   	    			id:'uploadFileId'+i,
+	   	    			uploadUrl:null,
+	   	    			deleteUrl:null,
+	   	    			deleteExtraData:null,
+	   	    			imgsUrl:new Array(),
+	   	    			initialPreviewConfig:null,
+	   	    			attachmentList : new Array(),
+	   	    			callback:callback
+	   	    	}
+	   	    	$.common.uploadFile(option2); 
+		 }else{
+			 var objId=listTable[i].comment.id;
+			 var idx=i
+			 oaAttachment(objId,idx)
+		    }
+  	   		  
+  	     }
+    }
+    
+    function oaAttachment(objId,idx){
+    	var config = {
+    	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+    	        type: "post",
+    	        dataType: "json",
+    	        data: {"objId": objId},
+    	        success: function(result) {
+			        var imgsUrl = new Array();
+     	        	var attachList = result.data;
+     	        	if(attachList!=null && attachList.length>0){
+     	        		var downloadConfig = new Array();
+     	        		for(var i=0; i<attachList.length; i++){
+     	        			var down = {};
+     	        			var attach = attachList[i];
+     	        			imgsUrl.push(attach.attachmentName);
+     	        			down.key = attach.attachmentName;
+     	        			down.caption = attach.fileName;
+     	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+     	        			if(isAssetTypeAnImage(attach.attachmentName)){
+    	        			down.type = 'image';
+   	        			}else{
+   	        				down.type = 'object';
+   	        			}
+     	        			downloadConfig.push(down);
+     	        		}
+     	        		var option1={
+     	    					id:'uploadFileId'+idx,
+     	    					uploadUrl:null,
+     	    					deleteUrl:null,
+     	    					//deleteExtraData:deleteExtraData,
+     	    					imgsUrl:imgsUrl,
+     	    					downloadConfig:downloadConfig
+     	    			}
+     	        		$.common.uploadFile(option1); 
+     	        	}else{
+     	        		 var option3={
+	     	        			id:'uploadFileId'+idx,
+	   	    					uploadUrl:null,
+	   	    					deleteUrl:null,
+	   	    					deleteExtraData:null,
+	   	    					imgsUrl:new Array(),
+	   	    					initialPreviewConfig:null,
+	      	   	    			showPreview:false,
+	      	   	    			callback:callback
+     	    			}
+     	        		$.common.uploadFile(option3); 
+     	        		 
+     	        	}
+    	        }
+           };
+ 	       $.ajax(config) 
+    }
+    
+	</script>
+</div>
+
+<!-- 多级联动下拉 -->
+<div th:fragment="jquery-cxselect-js">
+	<script th:src="@{/ajax/libs/cxselect/jquery.cxselect.js}"></script>
+</div>

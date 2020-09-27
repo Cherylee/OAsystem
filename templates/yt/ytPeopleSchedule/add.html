@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增人员进度')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<h3 class="no_content hide">您暂时没有分配到任务哦！</h3>
+						<!-- 合同申请 -->
+						<div class="addPeopleSchedule has_content">
+							<form id="form-ytPeopleSchedule-add">
+								<input type="hidden" name="configDetailId" value="123">
+								<input type="hidden" name="state" value="00">
+								<input type="hidden" class="projectId" name="projectId"
+									th:value="${ytPeopleScheduleAddVo.ytProjectMain.id}">
+								<table class="table table-bordered table-bot">
+									<caption>
+										<strong>人员进度录入</strong>
+									</caption>
+									<tbody>
+										<tr>
+											<td class="active">项目名称</td>
+											<td colspan="3">[[${ytPeopleScheduleAddVo.ytProjectMain.name}]]</td>
+										</tr>
+										<tr>
+											<td class="active">项目编号</td>
+											<td>[[${ytPeopleScheduleAddVo.ytProjectMain.code}]]</td>
+											<td class="active">工程类型</td>
+											<td><span class="projectType"></span></td>
+										</tr>
+										<tr>
+											<td class="active">任务明细</td>
+											<td colspan="3"><select
+												class="form-control contentSelect"
+												onchange="show_content(this,'form-ytPeopleSchedule-add')">
+													<option
+														th:each="list : ${ytPeopleScheduleAddVo.ytPeopleScheduleTaskVoList}"
+														th:value="${list.detailId}" th:text="${list.content}"></option>
+											</select></td>
+										</tr>
+										<tr>
+											<td class="active">角色名称</td>
+											<td><span class="roleName"></span></td>
+											<td class="active">专业类型</td>
+											<td><span class="itemName"></span></td>
+										</tr>
+										<tr>
+											<td class="active">项目阶段</td>
+											<td><span class="stageName"></span></td>
+											<td class="active">考核节点</td>
+											<td><span class="checkNodeName"></span></td>
+										</tr>
+										<tr>
+											<td class="active">工期开始</td>
+											<td><span class="planStartTime"></span></td>
+											<td class="active">工期结束</td>
+											<td><span class="planEndTime"></span></td>
+										</tr>
+										<tr>
+											<td class="active">历史提交</td>
+											<td colspan="3">
+												<div class="historyDat"></div>
+											</td>
+										</tr>
+										<tr>
+											<td class="active">累计进度</td>
+											<td><input type="text"
+												class="form-control totalProgress" name="totalProgress"
+												readonly></td>
+											<td class="active"><span style="color: red; ">*</span>本次提交进度</td>
+											<td><input type="number" min="1" max="100"
+												class="form-control" name="currentProgress" placeholder="%" required></td>
+										</tr>
+										<tr>
+											<td class="active"><span style="color: red; ">*</span>开始时间</td>
+											<td><input type="text"
+												class="form-control time-input-data" name="startTime"
+												placeholder="yyyy-mm-dd" required></td>
+											<td class="active"><span style="color: red; ">*</span>结束时间</td>
+											<td><input type="text"
+												class="form-control time-input-data" name="endTime"
+												placeholder="yyyy-mm-dd" required></td>
+										</tr>
+
+										<tr>
+											<td class="active"><span style="color: red; ">*</span>工作汇报</td>
+											<td colspan="3">
+												<div class="form-group">
+													<textarea name="detailText" class="form-control" rows="3" required></textarea>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="active">关联附件</td>
+											<td colspan="3">
+												<div class="file-loading">
+													<input id="uploadFileId" type="file" multiple>
+												</div>
+											</td>
+										</tr>
+
+									</tbody>
+								</table>
+							</form>
+							<div class="row ifshow">
+								<div class="col-sm-offset-5 col-sm-10">
+									<button type="button" class="btn btn-sm btn-primary"
+										onclick="submitHandler()">
+										<i class="fa fa-check"></i>提交
+									</button>
+									&nbsp;
+									<button type="button" class="btn btn-sm btn-danger"
+										onclick="closeItem()">
+										<i class="fa fa-reply-all"></i>关 闭
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "yt/ytPeopleSchedule"
+		$("#form-ytPeopleSchedule-add").validate({
+			rules: {
+				xxxx: {
+					required: true,
+				},
+			},
+			focusCleanup: true
+		});
+		console.log([[${ytPeopleScheduleAddVo}]])	
+		//回显字典 封装的公用方法
+		function dictV(id,d,v){//d:字典名 v:键值
+			$(id).html($.table.selectDictLabel(d, v));
+		}
+		
+	    //下拉框选择
+	    //show_content(this,'form-ytPeopleSchedule-add')
+		function show_content(obj,id){
+			var val_s=$(obj).val();	
+			var mainId=$('#'+id)
+			var list=[[${ytPeopleScheduleAddVo.ytPeopleScheduleTaskVoList}]]
+			var data=null;
+			for(var i=0;i<list.length;i++){
+				if(list[i].detailId==val_s){
+					data=list[i];
+				}
+			}
+			//console.log(data);			
+			mainId.children('input[name="configDetailId"]').val(data.detailId)
+			mainId.children().find('.roleName').text(data.roleName)
+			mainId.children().find('.itemName').text(data.itemName)
+			mainId.children().find('.stageName').text(data.stageName)
+			mainId.children().find('.checkNodeName').text(data.checkNodeName)
+			mainId.children().find('.planStartTime').text(data.planStartTime)
+			mainId.children().find('.planEndTime').text(data.planEndTime)
+			mainId.children().find('.totalProgress').val(data.totalProgress)
+			if(data.totalProgress=='100'){
+				$('.ifshow').addClass('hide')
+			}
+			var hisData='<ol>'
+			if(data.scheduleDetailList==null){
+				hisData='<p>无历史提交进度明细</p>'
+			}else{
+				hisData+='<input name="id" type="hidden" value="'+data.scheduleDetailList[0].mainId+'">'
+				for(var a=0;a<data.scheduleDetailList.length;a++){
+					
+					hisData+='<li>开始时间：'+data.scheduleDetailList[a].startTime+' / 结束时间：'+data.scheduleDetailList[a].endTime+
+					'<br>本次提交进度：'+data.scheduleDetailList[a].currentProgress+
+					'<br>汇报内容：'+data.scheduleDetailList[a].detailText+'</li>'
+				}
+			}
+			hisData+='</ol>'
+			mainId.children().find('.historyDat').html(hisData)
+			
+		}
+		 //上传附件
+        var attachmentList = new Array();
+		var option={
+				id:'uploadFileId',
+				uploadUrl:null,
+				deleteUrl:null,
+				deleteExtraData:null,
+				imgsUrl:new Array(),
+				initialPreviewConfig:null,
+				showPreview:false
+		}
+		$.common.uploadFile(option);  
+        downFile(); 
+      
+		
+		function submitHandler() {
+			if ($.validate.form()) {
+				var data=$('#form-ytPeopleSchedule-add').serializeObject();
+				data.attachmentUrls=attachmentList
+				console.log(data)
+				$.operate.saveJsonTab(prefix + "/add",data);
+			}
+        } 
+		$(function(){
+			//回显项目状态
+		    dictV('.projectType',[[${@dict.getType('yt_project_type')}]],[[${ytPeopleScheduleAddVo.ytProjectMain.projectType}]])		
+		    
+			if([[${#arrays.isEmpty(ytPeopleScheduleAddVo.ytPeopleScheduleTaskVoList)}]]){
+				$('.has_content').html('')
+				$('.no_content').removeClass('hide')
+			}else{
+				show_content('select.contentSelect','form-ytPeopleSchedule-add')
+			}
+		})
+	</script>
+</body>
+</html>

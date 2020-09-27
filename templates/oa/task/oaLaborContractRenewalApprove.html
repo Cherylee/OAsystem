@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('审批劳动合同续签')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaLaborContractRenewal-edit"
+                          th:object="${oaLaborContractRenewal}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>合同续签申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                            <tr>
+                                <td class="active">申请人</td>
+                                <td>
+                                    [[*{userName}]]
+                                </td>
+                                <td class="active">公司</td>
+                                <td>
+                                    [[*{companyName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">归属部门</td>
+                                <td>
+                                    [[*{deptName}]]
+                                </td>
+                                <td class="active">申请时间</td>
+                                <td>
+                                    [[${#dates.format(oaLaborContractRenewal.applyTime, 'yyyy-MM-dd HH:mm:ss')}]]
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">续签人员姓名</td>
+                                <td>[[*{renewalName}]]
+                                </td>
+                                <td class="active">合同起始日期</td>
+                                <td>
+                                    [[${#dates.format(oaLaborContractRenewal.contractTimeFrom, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">合同结束日期</td>
+                                <td>
+                                    [[${#dates.format(oaLaborContractRenewal.contractTimeTo, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                                <td class="active">合同续签年限从</td>
+                                <td>
+                                    [[${#dates.format(oaLaborContractRenewal.renewalTimeFrom, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">合同续签年限到</td>
+                                <td>
+                                    [[${#dates.format(oaLaborContractRenewal.renewalTimeTo, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                                <td class="active">自我评价</td>
+                                <td>
+                                    [[*{selfAssessment}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple disabled="disabled">
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${oaLaborContractRenewal.id}]],'oa/oaLaborContractRenewal/copy','flag')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaLaborContractRenewal";
+    //流程
+    var data = {};
+    data.procInstId = [[${oaLaborContractRenewal.procInstId}]];
+    data.id = [[${oaLaborContractRenewal.id}]];
+    selectActProcessList(data, "approveInfoId");
+
+    //同意
+    function agree(){
+        $.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/370/oa_labor_contract_renewal/"+[[${oaLaborContractRenewal.id}]]);
+    }
+    //不同意
+    function disagree(){
+        $.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/370/oa_labor_contract_renewal/"+[[${oaLaborContractRenewal.id}]]);
+    }
+
+    var attachmentList = new Array();
+    //图片反显出来
+    $(function () {
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttach",
+            type: "post",
+            dataType: "json",
+            data: {"objectId": [[${oaLaborContractRenewal.id}]], "sourceTable": "oa_labor_contract_renewal"},
+            success: function (result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({
+                            "objectId": [[${oaLaborContractRenewal.id}]],
+                            "attachmentName": attach.attachmentName,
+                            "fileName": attach.fileName
+                        })
+                    }
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                } else {
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    });
+</script>
+</body>
+</html>

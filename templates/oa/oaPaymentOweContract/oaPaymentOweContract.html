@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('欠合同记录列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="text" name="projectName" placeholder="项目名称"/>
+                        </li>
+                        <li>
+                            <input type="text" name="payee" placeholder="对方公司（开票方）"/>
+                        </li>
+                        <li>
+                            <input type="text" name="proposer" placeholder="申请人"/>
+                        </li>
+                        <li class="select-time">
+                            <label>补合同截止日期： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                   name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                   name="params[endTime]"/>
+                        </li>
+
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-warning" onclick="$.table.exportExcel()"
+               shiro:hasPermission="oa:oaPaymentOweContract:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaPaymentOweContract:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaPaymentOweContract:remove')}]];
+    var prefix = ctx + "oa/oaPaymentOweContract";
+    var billCancelStatus = [[${@dict.getType('contract_cancel_status')}]];
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "欠合同记录",
+            showExport: true,
+            queryParams: {"isCancel": "N"},
+            detailView: true,
+            onExpandRow: function (index, row, $detail) {
+                initChildTable(index, row, $detail);
+            },
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'code',
+                    title: '支付单据编号',
+                    sortable: true
+                },
+                {
+                    field: 'proposer',
+                    title: '申请人',
+                    sortable: true
+                },
+
+                {
+                    field: 'projectName',
+                    title: '项目名称',
+                    sortable: true
+                },
+                {
+                    field: 'payee',
+                    title: '对方公司（开票方）',
+                    sortable: true
+                },
+                {
+                    field: 'drawee',
+                    title: '我方公司（收票方）',
+                    sortable: true
+                },
+                {
+                    field: 'money',
+                    title: '金额',
+                    sortable: true
+                },
+                {
+                    field: 'contractExpirationDate',
+                    title: '补合同截止日期',
+                    sortable: true
+                },
+                {
+                    field : 'status',
+                    title : '状态',
+                    sortable: true,
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(billCancelStatus, value);
+                    }
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var dis=''
+                        if(row.status=='1'){
+                            dis='disabled'
+                        }
+                        if (row.allowedEdit == true) {
+                            actions.push('<a class="btn btn-success btn-xs '+dis+'' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>关联</a> ');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    initChildTable = function (index, row, $detail) {
+        var childTable = $detail.html('<table id="detail-table" style="table-layout:fixed"></table>').find('table');
+        $(childTable).bootstrapTable({
+            url: prefix + "/list",
+            method: 'post',
+            sidePagination: "server",
+            contentType: "application/x-www-form-urlencoded",
+            pagination: true,
+            pageNumber: 1,
+            pageSize: 10,
+            queryParams: function (params) {
+                return {
+                    pageSize: params.limit,
+                    pageNum: params.offset / params.limit + 1,
+                    searchValue: params.search,
+                    orderByColumn: params.sort,
+                    isAsc: params.order,
+                    parentId: row.id,
+                    params: {"beginTime": $("#startTime").val(), "endTime": $("#endTime").val()}
+                }
+            },
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'contractName',
+                    title: '合同名称',
+                    sortable: true
+                },
+                {
+                    field: 'code',
+                    title: '支付单据编号',
+                    sortable: true
+                },
+                {
+                    field: 'proposer',
+                    title: '申请人',
+                    sortable: true
+                },
+                {
+                    field: 'projectName',
+                    title: '项目名称',
+                    sortable: true
+                },
+                {
+                    field: 'payee',
+                    title: '对方公司（开票方）',
+                    sortable: true
+                },
+                {
+                    field: 'drawee',
+                    title: '我方公司（收票方）',
+                    sortable: true
+                },
+                {
+                    field: 'money',
+                    title: '金额',
+                    sortable: true
+                },
+
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'paymentId',
+                    title: '关联付款单id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'paymentDetailId',
+                    title: '关联付款单明细id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var text = '查看详情'
+                        var edit = ''
+                        var classN = 'btn-info'
+                        if (row.status == '3' || row.status == '99') {
+                            if (row.allowedEdit == true) {
+                                edit = editFlag
+                                classN = 'btn-success'
+                                actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                            }
+                        } else {
+                            actions.push('<a class="btn ' + classN + ' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>' + text + '</a> ');
+                        }
+                        return actions.join('');
+                    }
+                }]
+        });
+    };
+</script>
+</body>
+</html>

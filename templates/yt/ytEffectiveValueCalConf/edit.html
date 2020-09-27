@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改有效产值计算配置')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-ytEffectiveValueCalConf-edit" th:object="${ytEffectiveValueCalConf}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">工程专业类型：</label>
+				<div class="col-sm-8">
+					<select id="projectType" class="form-control" name="projectType"
+							th:with="type=${@dict.getType('yt_project_type')}"
+							th:value="*{projectType}" >
+						<option th:each="dict : ${type}"
+								th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">专业产值下限(万)：</label>
+				<div class="col-sm-8">
+					<input id="downLimitValue" name="downLimitValue" th:field="*{downLimitValue}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">专业产值上限(万)：</label>
+				<div class="col-sm-8">
+					<input id="upLimitValue" name="upLimitValue" th:field="*{upLimitValue}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">调整系数下限：</label>
+				<div class="col-sm-8">
+					<input id="downLimitAdjust" name="downLimitAdjust" th:field="*{downLimitAdjust}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">调整系数上限：</label>
+				<div class="col-sm-8">
+					<input id="upLimitAdjust" name="upLimitAdjust" th:field="*{upLimitAdjust}" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "yt/ytEffectiveValueCalConf";
+		$("#form-ytEffectiveValueCalConf-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-ytEffectiveValueCalConf-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

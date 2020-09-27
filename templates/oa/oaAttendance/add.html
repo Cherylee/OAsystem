@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增考勤记录')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-oaAttendance-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">公司id：</label>
+            <div class="col-sm-8">
+            	<input id="companyId" name="companyId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">部门id：</label>
+            <div class="col-sm-8">
+            	<input id="deptId" name="deptId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">打卡人id：</label>
+            <div class="col-sm-8">
+            	<input id="userId" name="userId" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建者：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">上班时间：</label>
+            <div class="col-sm-8">
+            	<input id="workTime" name="workTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新者：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">下班时间：</label>
+            <div class="col-sm-8">
+            	<input id="closingTime" name="closingTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">经度：</label>
+            <div class="col-sm-8">
+            	<input id="longitude" name="longitude" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">纬度：</label>
+            <div class="col-sm-8">
+            	<input id="latitude" name="latitude" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">标记（0上班打卡，1下班打卡，2更新下班打卡）：</label>
+            <div class="col-sm-8">
+            	<input id="flag" name="flag" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">打卡点到公司的距离：</label>
+            <div class="col-sm-8">
+            	<input id="distance" name="distance" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaAttendance"
+		$("#form-oaAttendance-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-oaAttendance-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

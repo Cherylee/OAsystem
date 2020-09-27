@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增买标申请')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-jyConstructInfo-add">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请人：</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text"
+                           th:value="${user.userName}" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请公司：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="companyId" id="companyId"
+                           th:value="${company.deptId}"/>
+                    <input type="text" id="companyName" name="companyName" class="form-control"
+                           onclick="selectDeptTree('companyId','companyName','0')"
+                           th:value="${company.deptName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请部门：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="deptId" id="treeId"
+                           th:value="${user.dept.deptId}"/>
+                    <input type="text" id="treeName" name="deptName" class="form-control"
+                           onclick="selectDeptTree('treeId','treeName','1')"
+                           th:value="${user.dept.deptName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目名称：</label>
+                <div class="col-sm-8">
+                    <input id="projectName" name="projectName" class="form-control"
+                           type="text" th:value="${info.projName}">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目规模：</label>
+                <div class="col-sm-8">
+                    <input id="projectScale" name="projectScale" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目编号：</label>
+                <div class="col-sm-8">
+                    <input id="code" name="code" class="form-control" type="text" th:value="${info.tenderProjCode}"
+                           readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标公告网址：</label>
+                <div class="col-sm-8">
+                    <input name="projectId" type="hidden" th:value="${info.projectId}">
+                    <input name="biddingInfoId" type="hidden" th:value="${info.bid}">
+                    <input id="tenderDoc" name="tenderDoc" th:value="${info.detailUrl}" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提 交
+            </button>
+            &nbsp;
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script type="text/javascript">
+    var prefix = ctx + "business/jyTender"
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/add", $(
+                '#form-jyConstructInfo-add').serialize());
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增报销与借款关系')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-oaReimbursementBorrow-add">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">借款单id：</label>
+				<div class="col-sm-8">
+					<input id="borrowId" name="borrowId" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaReimbursementBorrow"
+		$("#form-oaReimbursementBorrow-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-oaReimbursementBorrow-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

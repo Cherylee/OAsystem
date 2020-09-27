@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('业绩申请列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li><input type="hidden" id="companyId" name="companyId"/>
+								<input type="text" id="companyName"
+									   onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+							</li>
+							<li>
+								<input type="text" name="userName" placeholder="申请人"/>
+							</li>
+							<li>
+								<input type="text" name="proName" placeholder="项目名称"/>
+							</li>
+
+							<li>
+								<select name="performaceStatus" th:with="type=${@dict.getType('sys_pro_performance')}">
+									<option value="">业绩状态</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li class="select-time">
+								<label>申请时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:sysProPerformance:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:sysProPerformance:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+<!--				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:sysProPerformance:remove">-->
+<!--					<i class="fa fa-remove"></i> 删除-->
+<!--				</a>-->
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:sysProPerformance:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:sysProPerformance:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:sysProPerformance:remove')}]];
+        var prefix = ctx + "oa/sysProPerformance";
+		var applyState=[[${@dict.getType('oa_leave_status')}]];
+		var performance=[[${@dict.getType('sys_pro_performance')}]];
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "业绩申请",
+		        showExport: true,
+				sortName : "createTime",
+				sortOrder : "desc",
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'projectId', 
+					title : '项目id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '编号',
+					sortable: true
+				},
+				{
+					field : 'proName',
+					title : '项目名称',
+					sortable: true
+				},
+				{
+					field : 'proposer',
+					title : '申请人',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'userName',
+					title : '申请人',
+					sortable: true
+				},
+				{
+					field : 'companyName',
+					title : '申请公司',
+					sortable: true
+				},
+				{
+					field : 'deptId', 
+					title : '部门id',
+					sortable: true,
+					visible: false
+				},
+					{
+					field : 'deptName',
+					title : '申请部门',
+					sortable: true
+				},
+				{
+					field : 'applyTime',
+					title : '申请日期',
+					sortable: true
+				},
+				{
+					field : 'reason',
+					title : '借业绩事由',
+					sortable: true
+				},
+				{
+					field : 'expectBackDate',
+					title : '预计归还日期',
+					sortable: true
+				},
+				{
+					field : 'prove',
+					title : '证明材料',
+					sortable: true
+				},
+				{
+					field : 'status',
+					title : '审批状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(applyState, value);
+					}
+				},
+				{
+					field : 'backDate', 
+					title : '实际归还日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'performaceStatus', 
+					title : '业绩状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(performance, value);
+					}
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'procInstId', 
+					title : '流程id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '修改时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改者',
+					sortable: true,
+					visible: false
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+						if (row.allowedEdit==true)
+						{
+							var actions = [];
+							var text='查看详情';
+							var edit='';
+							var classN='btn-info';
+							if(row.status=='3'||row.status=='99'){
+								if (row.allowedEdit==true)
+								{
+									edit=editFlag
+									text='编辑'
+									classN='btn-success'
+									actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+									// actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+								}
+							}else
+							{
+								actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+							}
+							if(row.performaceStatus=='0'){
+								actions.push('<a class="btn btn-success btn-xs " href="#" onclick="backPer(\'' + row.id + '\')"><i class="fa fa-backward"></i>&nbsp;还业绩</a>');
+							}
+							if(row.status=='0'){
+								actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+							}
+						}
+		            	
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+
+        //还业绩申请
+        function  backPer(id) {
+			$.modal.confirm("确定发起还业绩申请吗？" , function() {
+				$.operate.get(prefix+"/backPer/"+id);
+			});
+		}
+
+    </script>
+</body>
+</html>

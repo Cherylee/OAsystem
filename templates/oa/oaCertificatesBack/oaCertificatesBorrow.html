@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('已借出证件列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+	        
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+        var sysCredentialsStatus = [[${@dict.getType('oa_sysCredentials_status')}]];
+        var sysCredentialsType = [[${@dict.getType('oa_sysCredentials_type')}]];
+        var sysYesNo = [[${@dict.getType('sys_yes_no')}]];
+        $(function() {
+            var options = {
+                url: ctx + "system/sysCredentials/selectBorrowedCredentials",
+                modalName: "还证申请",
+		        showExport: true,
+		        clickToSelect : true,
+		        columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'name', 
+					title : '证件名称',
+					sortable: true
+				},
+				{
+					field : 'code', 
+					title : '证件编号',
+					sortable: true
+				},
+				{
+					field : 'owner', 
+					title : '持证人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'user.userName', 
+					title : '持证人',
+					sortable: true
+				},
+				{
+					field : 'safeKeepName', 
+					title : '保管人',
+					sortable: true
+				},
+				{
+					field : 'dept.deptName', 
+					title : '当前所在公司',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysCredentialsStatus, value);
+		        	}
+				},
+				{
+					field : 'type', 
+					title : '证件类型',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysCredentialsType, value);
+		        	}
+					
+				},
+				{
+					field : 'canAppoint', 
+					title : '可预约',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysYesNo, value);
+		        	}
+				},
+				{
+					field : 'inCompany', 
+					title : '在公司',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysYesNo, value);
+		        	}
+				},
+				{
+					field : 'paySocial', 
+					title : '缴纳社保',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysYesNo, value);
+		        	}
+				},
+				{
+					field : 'scanCopy', 
+					title : '有扫描件',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysYesNo, value);
+		        	}
+				},
+				{
+					field : 'effect', 
+					title : '有效',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(sysYesNo, value);
+		        	}
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				}]
+            };
+            $.table.init(options);
+        });
+        //证件回显
+        function submitHandlerMore(){
+        	var target = $('#bootstrap-table').bootstrapTable('getSelections');
+			if (target.length == 0) {
+       			$.modal.alertWarning("请至少选择一条记录");
+       			return;
+       		}
+			$.modal.close();
+			return target;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('借款申请列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								编号：<input type="text" name="code"/>
+							</li>
+							<li>
+								状态：<select name="status"  th:with="type=${@dict.getType('oa_leave_status')}" >
+								<option value="">--请选择--</option>
+			                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+			                    </select>
+							</li>
+
+							<li>
+								项目名称：<input type="text" name="projectName"/>
+							</li>
+
+							<li>
+								<p>申请日期：</p><input type="text" name="applyTime" class="time-input"/>
+							</li>
+
+							<li>
+								备注：<input type="text" name="remark"/>
+							</li>
+
+							<li>
+								借款金额：<input type="number" name="borrowAmount"/>
+							</li>
+
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaBorrowMoney:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaBorrowMoney:remove')}]];
+        var prefix = ctx + "oa/oaBorrowMoney";
+        var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/personalList",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+				clickToSelect : true,
+				showFooter: true,
+                modalName: "借款申请",
+                sortName: "createTime",
+    		    sortOrder: "desc",
+		        showExport: true,
+				queryParams:{'status':'2'},
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '编号',
+					sortable: true,
+					formatter: function (value, row, index) {
+						var text=null;
+						if(row.code){
+							text=row.code
+						}else{
+							text='暂无编号'
+						}
+						
+						return text
+					}
+				},
+				{
+					field : 'userName', 
+					title : '申请人',
+					sortable: true
+				},
+				{
+					field : 'companyId', 
+					title : '公司id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'companyName', 
+					title : '申请公司',
+					sortable: true
+				},
+				{
+					field : 'deptId', 
+					title : '部门id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'deptName', 
+					title : '申请部门',
+					sortable: true,
+				},
+				{
+					field : 'status', 
+					title : '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(oaStatus, value);
+		        	}
+				},
+				{
+					field : 'projectName', 
+					title : '项目名称',
+					sortable: true,
+					formatter: function (value, row, index) {
+						return $.table.tooltip(value,5, "open");
+					}
+				},
+				{
+					field : 'applyTime', 
+					title : '申请日期',
+					sortable: true
+				},
+				{
+					field : 'borrowReason', 
+					title : '借款事由',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'preBackDate', 
+					title : '预计归还时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				},
+				{
+					field : 'procInstId', 
+					title : '流程id',
+					sortable: true
+				},
+				{
+					field : 'borrowAmount', 
+					title : '借款金额',
+					sortable: true,
+				    footerFormatter:function (value) {
+				    	var sumBalance = 0;
+				        for (var i in value) {
+				        	if(value[i].borrowAmount){
+				        		sumBalance += parseFloat(value[i].borrowAmount);
+				        	}else{
+				        		sumBalance += 0
+				        	}
+				        	
+				        }
+				        return   '合计:'+sumBalance;
+				    }
+				},
+				{
+					field : 'amountUpcase', 
+					title : '金额大写',
+					sortable: true,
+					visible: false
+				}]
+            };
+            $.table.init(options);
+        });
+        //回显
+        function submitHandler(){
+        	var target =$('#bootstrap-table').bootstrapTable('getSelections');
+         	if ($.table.selectColumns("id").length == 0) {
+     			$.modal.alertWarning("请至少选择一条记录");
+     			return;
+     		}
+         	if(isAudit(target,'2')==false){
+         		$.modal.alertWarning("只能选择审核通过的哦！");
+         		return;
+         	}
+    		$.modal.close();
+    		return target;
+        }
+        //判斷是否有審核不通過的
+        function isAudit(data,value){
+        	var res=true;
+        	for(var i=0;i<data.length;i++){
+        		if(data[i].status!=value){
+        			res=false;
+        		}
+        	}
+        	return res;
+        }
+    </script>
+</body>
+</html>

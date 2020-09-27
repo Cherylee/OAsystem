@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增费用报销')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <style>
+        table td {
+            position: relative
+        }
+
+        .fixed-table-toolbar .bs-bars {
+            display: none !important;
+        }
+
+        .fixed-table-body {
+            border-bottom: 1px solid #ddd
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="" id="form-oaReimbursement-add">
+                        <table class="table table-bordered table-condensed table-bot">
+                            <caption class="text-center">
+                                <h2>报销单</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">编号：</td>
+                                <td><input class="form-control" type="text" name="code" disabled="disabled"/></td>
+                                <td class="active">所属公司：</td>
+                                <td><input type="hidden" name="companyId" id="companyId"
+                                           th:value="${company.deptId}"/> <input type="text"
+                                                                                 name="companyName" id="companyName"
+                                                                                 class="form-control"
+                                                                                 onclick="selectDeptTree('companyId','companyName','0')"
+                                                                                 th:value="${company.deptName}"/></td>
+
+                            </tr>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td><input class="form-control" type="text" readonly
+                                           th:value="${user.userName}"/></td>
+                                <td class="active"><span style="color: red;" th:if="${flag=='sys'}">*</span>项目名称：</td>
+                                <td>
+                                    <input id="projectId" name="projectId" type="hidden"/>
+                                    <input id="title" name="title" class="form-control" type="text"
+                                           onclick="selectPro('projectId','title')">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td><input id="treeId" name="deptId" class="form-control"
+                                           type="hidden" th:value="${user.dept.deptId}"> <input
+                                        id="treeName" name="deptName" class="form-control"
+                                        type="text" onclick="selectDeptTree('treeId','treeName','1')"
+                                        th:value="${user.dept.deptName}"></td>
+                                <td class="active">申请日期：</td>
+                                <td colspan="3"><input id="applyDate" name="applyDate"
+                                                       class="form-control currentTime" type="text" readonly></td>
+                            </tr>
+
+                            <tr>
+                                <td class="active">报销金额：</td>
+                                <td><input type="number" class="form-control"
+                                           name="money" id="money" readonly/></td>
+                                <td class="active">金额大写：</td>
+                                <td><input id="moneyUpcase"
+                                           name="moneyUpcase" class="form-control" type="text" readonly></td>
+                            </tr>
+                            <tr>
+                                <td class="active">报销人：</td>
+                                <td>
+                                    <input id="receiver" name="receiver" class="form-control" type="text"
+                                           list="payeeList">
+                                    <datalist id="payeeList">
+                                        <option th:each="item : ${payeeDataList}" th:text="${item.dictLabel}"
+                                                th:data-value="${item.dictValue}">
+                                        </option>
+                                    </datalist>
+                                </td>
+                                <td class="active">收款账号：</td>
+                                <td><input id="receiverAccount" name="receiverAccount" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">收款开户行：</td>
+                                <td colspan="3">
+                                    <input id="receiverOpenBank" name="receiverOpenBank" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="btn-group-sm" id="toolbar-detail" role="group">
+                        <br>
+                        <a class="btn btn-success" id="addCon"> <i class="fa fa-plus"></i>
+                            报销明细
+                        </a>
+                    </div>
+                    <div class=" select-table table-striped">
+                        <table class="table table-bordered table-bot" id="detailTable">
+
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- 弹出框 -->
+<div class="modal inmodal fade" id="myModal5" role="dialog"
+     aria-hidden="true">
+    <input id="myModal5Value" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+
+                <form class="form-horizontal m" id="form-Condition-add">
+
+                    <div class="">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">报销事由：</label>
+                            <div class="col-sm-8">
+                                <input name="reimbursementReason" class="form-control"
+                                       type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><span style="color: red; ">*</span>报销类型：</label>
+                            <div class="col-sm-8">
+                                <input id="reimbursementType" name="reimbursementType" class="form-control"
+                                       type="hidden">
+                                <input id="reimbursement" class="form-control" type="text" required="required"
+                                       onclick="selectType('reimbursementType','reimbursement')">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><span style="color: red; ">*</span>金额：</label>
+                            <div class="col-sm-8">
+                                <input name="money" class="form-control" type="number" required="required">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">关联表单类型：</label>
+                            <div class="col-sm-8">
+                                <select name="relationType" class="form-control" id="relationType"
+                                        th:with="type=${@dict.getType('oa_reimbursement_link')}"
+                                        onchange="clearRelation(this.value)">
+                                    <option value="">--请选择--</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select>
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">关联表单：</label>
+                            <div class="col-sm-8">
+                                <input name="relationId" id="relationId" class="form-control" type="text"
+                                       onclick="selectRelation()">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                        id="insertCondition">保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaReimbursement";
+    $("#form-oaReimbursement-add").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+    if ([[${flag}]] == 'sys') {
+        $('#projectId').attr("required", "true");
+        $('#title').attr("required", "true");
+    }
+    var payerList = [];
+    //上传附件
+    var attachmentList = new Array();
+    var uploadOption = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true,
+        attachmentList: new Array()
+    }
+    $.common.uploadFile(uploadOption);
+
+    //选择报销类型
+    var tId = null;
+    var tName = null
+
+    function selectType(id, name) {
+        tId = id;
+        tName = name;
+        var options = {
+            title: '选择报销类型 ',
+            width: "800",
+            url: ctx + "system/dict/detail/" + 132,
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + tId).val(data.dictValue)
+        $('#' + tName).val(data.dictLabel)
+    }
+
+    //关联其他模块
+    function selectRelation() {
+        var vl = $('#relationType').val()
+        var url = ''
+        if (vl == 'jyTender') {
+            url = 'business/' + vl
+        } else {
+            url = 'oa/' + vl
+        }
+        if (vl != '') {
+            var options = {
+                title: '请选择表单',
+                width: "1200",
+                url: ctx + url,
+                callBack: doSubmit1
+            };
+            $.modal.openOptions(options);
+        } else {
+            $.modal.alertWarning("请先选择关联其他模块的类型！");
+            return;
+        }
+
+    }
+
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#relationId').val(data.id)
+    }
+
+    //清除已经选择的单据
+    function clearRelation(v) {
+        if ($('#relationId').val() != '') {
+            $.modal.confirm('重新选择将清空已经选择的表单！', function () {
+                $('#relationId').val('')
+            })
+        }
+    }
+
+    /*新增行*/
+    var idxId = 1;
+
+    function insertRow(data, id, editId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var table_row = '';
+        table_row = data
+        table_row[0] = false;
+        if (id == 'borrowTable') {
+            table_row.borrowMoney = [[${user.borrowMoney}]]
+            table_row.borrowId = data.id
+            var countDate = $("#" + id).bootstrapTable('getData');
+            if (isHas(countDate, data.id) == false) {
+                $("#" + id).bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: table_row
+                })
+            }
+        } else {
+            if (editId != null) {
+                table_row.id = randomId
+                $("#" + id).bootstrapTable('updateRow', {
+                    index: editId, // 你想修改哪行，0表示第一行
+                    row: table_row
+                })
+
+            } else {
+                table_row.id = randomId
+                $("#" + id).bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: table_row
+                })
+            }
+
+
+        }
+
+    }
+
+    //判断是否已经添加
+    function isHas(data, id) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id == id) {
+                isTF = true;
+            }
+        }
+        return isTF;
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id, rowId) {
+        $("#" + id).bootstrapTable('removeByUniqueId', rowId)
+
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $("#" + id).bootstrapTable('removeAll')
+        idxx = 0;
+    }
+
+    //修改行
+    function editRow(id, rowId, rowIndex) {
+        var da = $('#' + id).bootstrapTable('getRowByUniqueId', rowId);
+        $('#myModal5Value').val(rowIndex);
+        $('#myModal5').modal('show');
+        $('#form-Condition-add').loadData(da)
+
+    }
+
+    //提交
+    function submitHandler() {
+        var data = savaData();
+        if ($.validate.form()) {
+            if (data.detailList.length == 0) {
+                $.modal.alertWarning("报销明细必填！");
+                return;
+            } else {
+                $.operate.saveJsonTab(prefix + "/add", data);
+                var data2 = {};
+                data2.payee = $('#receiver').val();
+                data2.account = $('#receiverAccount').val();
+                data2.openingBank = $('#receiverOpenBank').val();
+                $.operate.saveTab(ctx + 'oa/oaPayeeAccountInformation/add', data2)
+            }
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = savaData();
+        if (data.detailList.length == 0) {
+            $.modal.alertWarning("报销明细必填！");
+            return;
+        } else {
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+            var data2 = {};
+            data2.payee = $('#receiver').val();
+            data2.account = $('#receiverAccount').val();
+            data2.openingBank = $('#receiverOpenBank').val();
+            $.operate.saveTab(ctx + 'oa/oaPayeeAccountInformation/add', data2)
+        }
+    }
+
+    //保存数据
+    function savaData() {
+        var data = {};
+        data.oaReimbursement = $('#form-oaReimbursement-add').serializeObject();
+        data.attachmentList = attachmentList;
+        data.detailList = $('#detailTable').bootstrapTable('getData');
+        return data;
+    }
+
+    //明细表格
+    var bxType = [[${@dict.getType('oa_reimbursement_type')}]];
+    var raType = [[${@dict.getType('oa_reimbursement_link')}]];
+    var totalMoney = 0
+    var options1 = {
+        id: 'detailTable',
+        clickToSelect: true,
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        uniqueId: 'id',
+        modalName: "明细",
+        showFooter: true,
+        toolBar: 'toolbar-detail',
+        showExport: false,
+        columns: [{
+            radio: true,
+            visible: false
+        },
+            {
+                field: 'id',
+                title: 'id',
+                visible: false
+            },
+
+            {
+                field: 'reimbursementReason',
+                title: '报销事由'
+            },
+            {
+                field: 'reimbursementType',
+                title: '报销类型',
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(bxType, value);
+                }
+            },
+            {
+                field: 'money',
+                title: '金额',
+                footerFormatter: function (value) {
+                    var sumBalance = 0;
+                    for (var i in value) {
+                        if (value[i].money) {
+                            sumBalance += parseFloat(value[i].money);
+                        }
+                    }
+                    totalMoney = sumBalance
+                    $('#money').val(totalMoney)
+                    //自动大小写转换
+                    var config = {
+                        url: ctx + "common/converMoneyToCN/" + parseFloat(totalMoney),
+                        type: "get",
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.code == '0') {
+                                $("input#moneyUpcase").val(result.msg)
+                            }
+                        }
+                    };
+                    $.ajax(config)
+                    return '合计：' + sumBalance;
+                }
+            },
+            {
+                field: 'relationType',
+                title: '关联其他模块类型',
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(raType, value);
+                }
+            },
+            {
+                field: 'relationId',
+                title: '关联其他模块表单',
+                formatter: function (value, row, index) {
+                    var flag = 0
+                    if (row.relationType == 'jyTender') {
+                        flag = 1
+                    }
+                    return '<a onclick="editTab(\'' + row.relationType + '\',\'' + row.relationId + '\',\'' + flag + '\')">' + row.relationId + '</a>'
+                }
+            },
+            {
+                title: '操作',
+                formatter: function (value, row, index) {
+                    var action = []
+                    action.push('<a onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a>  ')
+                    action.push('<a onclick="editRow(\'detailTable\',\'' + row.id + '\',\'' + index + '\')">编辑</a>')
+                    return action.join('')
+                }
+            }]
+
+    };
+
+    //跳转到详情页面
+    function editTab(url, id, flag) {
+        var url_a = '';
+        if (flag == 0) {
+            url_a = "oa/"
+        } else {
+            url_a = "business/"
+        }
+        $.modal.openTab("详情", ctx + url_a + url + "/edit/" + id);
+    }
+
+    $(function () {
+        $.table.init(options1);
+        //点击弹框
+        $('#addCon').click(function () {
+            $.form.reset('form-Condition-add');//清空原有数据
+            $('#myModal5Value').val('00');
+            $('#myModal5').modal('show');
+        });
+        $('#insertCondition').click(function () {
+            var indexV = $('#myModal5Value').val()
+            var formData = $('#form-Condition-add').serializeObject();
+            if (indexV == '00') {
+                insertRow(formData, 'detailTable', null)
+            } else {
+                insertRow(formData, 'detailTable', indexV)
+            }
+        });
+    })
+    $('#receiver').bind('input propertychange', function () {
+        payee = $(this).val()
+        var config = {
+            url: ctx + 'oa/oaPayeeAccountInformation/list',
+            type: 'post',
+            dataType: 'json',
+            data: {'payee': payee},
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.modal.closeLoading();
+                var html = ""
+                for (var i = 0; i < result.length; i++) {
+                    html += "<option data-value=" + result[i].id + "> " + result[i].payee + "</option>"
+                    if ($('#receiver').val() == result[i].payee) {
+                        payerList = result[i]
+                        $('#receiverAccount').val(result[i].account)
+                        $('#receiverOpenBank').val(result[i].openingBank)
+                    }
+                }
+                $('#payeeList').html(html)
+            }
+        };
+        $.ajax(config)
+    })
+
+</script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('项目概况')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<style>
+    .finance-table td{
+        padding-left: 5px;
+        height: 40px;
+        line-height: 30px;
+    }
+    .finance-table-top{
+        text-align: center;
+    }
+    .span-title{
+        background-color: #f3f3f3;
+        color: #555555;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .tooltip-popup{
+        position: absolute;
+        display: none;
+        z-index: 9900000;
+        background-color: #f5f5f5;
+        color: black;
+        outline: none;
+        padding: 5px 15px;
+        border: 1px solid #555555;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .popup-text{
+        display: none;
+    }
+</style>
+<body>
+<div class="col-md-12" style="color: black">
+    <div class="box-center">
+        <div class="box-center-title">
+            基本信息<hr>
+        </div>
+        <table class="project-overview-table" style="border: 0;">
+            <tr>
+                <td class="basic-table-title">项目编号:</td>
+                <td colspan="3">[[${oaProject.code}]]</td>
+            </tr>
+            <tr>
+                <td class="basic-table-title">业主单位:</td>
+                <td colspan="3">[[${oaProject.developer}]]</td>
+            </tr>
+            <tr>
+                <td class="basic-table-title">工程类型:</td>
+                <td class="projectType" style="width: 40%"></td>
+                <td class="basic-table-title">项目类型:</td>
+                <td class="type"></td>
+            </tr>
+            <tr>
+                <td class="basic-table-title">工程总价:</td>
+                <td>[[${oaProject.totalPrices}]]</td>
+                <td class="basic-table-title">开工日期:</td>
+                <td>[[${#dates.format(oaProject.startDate,'yyyy-MM-dd')}]]</td>
+            </tr>
+            <tr>
+                <td class="basic-table-title">当前余额:</td>
+                <td>[[${oaProject.currentBalance}]]</td>
+                <td class="basic-table-title">完工日期:</td>
+                <td>[[${#dates.format(oaProject.endDate,'yyyy-MM-dd')}]]</td>
+            </tr>
+            <tr>
+                <td class="basic-table-title">保底余额:</td>
+                <td></td>
+                <td class="basic-table-title">剩余工期:</td>
+                <td th:if="${oaProject.remainingPeriod>0}">[[${oaProject.remainingPeriod}]]天</td>
+                <td th:if="${oaProject.remainingPeriod==0}" style="color: red">[[${oaProject.remainingPeriod}]]天</td>
+                <td th:if="${oaProject.remainingPeriod<0 && oaProject.remainingPeriod != null}" style="color: red">过期[[${oaProject.remainingPeriod*-1}]]天</td>
+
+            </tr>
+        </table>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            款项信息<hr>
+        </div>
+        <table class="finance-table">
+            <tr>
+                <td class="finance-table-top">
+                    <span class="box-center-text">工程款</span>
+                </td>
+                <td>
+                    <span class="box-center-line"></span>
+                </td>
+                <td  class="finance-table-top">
+                    <span class="box-center-text">发票</span>
+                </td>
+                <td>
+                    <span class="box-center-line"></span>
+                </td>
+                <td class="finance-table-top">
+                    <span class="box-center-text">增值税</span>
+                </td>
+                <td colspan="3">
+                    <span class="box-center-line"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="finance-table-title">
+                    <span class="span-title">已收工程款:</span>
+                    <span class="popup-text">该项目审批通过的收款单主表收款金额总和</span>
+                </td>
+                <td style="width: 13%">[[${oaProjectData.alreadyReceivables}]]</td>
+                <td class="finance-table-title">
+                    <span class="span-title">已收进项发票:</span>
+                    <span class="popup-text">该项目审批通过的进项发票明细金额总和</span>
+                </td>
+                <td style="width: 13%">[[${oaProjectData.alreadyIncomeBill }]]</td>
+                <td class="finance-table-title">
+                    <span class="span-title">累计缴税金额:</span>
+                    <span class="popup-text">销项发票额税总计</span>
+                </td>
+                <td style="width: 13%">[[${oaProjectData.outputBill1TotalTax }]]</td>
+                <td class="finance-table-title">
+                    <span class="span-title">抵税金额:</span>
+                    <span class="popup-text">进项发票的税额总计</span>
+                </td>
+                <td style="width: 13%">[[${oaProjectData.incomeBillTotalTax }]]</td>
+            </tr>
+            <tr>
+                <td class="finance-table-title">
+                    <span class="span-title">已付工程款:</span>
+                    <span class="popup-text">该项目审批通过的付款单主表收款金额总和</span>
+                </td>
+                <td>[[${oaProjectData.alreadyPayment}]]</td>
+                <td class="finance-table-title">
+                    <span class="span-title">已开销项发票:</span>
+                    <span class="popup-text">该项目审批通过的销项发票金额总和</span>
+                </td>
+                <td>[[${oaProjectData.alreadyOutputBill}]]</td>
+                <td class="finance-table-title">
+                    <span class="span-title">外地预缴增值税额:</span>
+                    <span class="popup-text">预缴税金中的增值税</span>
+                </td>
+                <td>[[${oaProjectData.addedValueTax}]]</td>
+                <td class="finance-table-title">
+                    <span class="span-title">累计实缴增值税:</span>
+                    <span class="popup-text">累计缴税金额 - 抵税金额 - 外地预缴增值税额</span>
+                </td>
+                <td>[[${oaProjectData.outputBill1TotalTax}-${oaProjectData.incomeBillTotalTax }-${oaProjectData.addedValueTax}]]</td>
+            </tr>
+            <tr>
+                <td class="finance-table-top">
+                    <span class="box-center-text">企业所得税</span>
+                </td>
+                <td colspan="3">
+                    <span class="box-center-line"></span>
+                </td>
+                <td  class="finance-table-top">
+                    <span class="box-center-text">支出</span>
+                </td>
+                <td colspan="3">
+                    <span class="box-center-line"></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="finance-table-title">
+                    <span class="span-title">累计欠票金额:</span>
+                    <span class="popup-text">销项发票中的不含税金额总计 - 已开进项发票的不含税金额总计</span>
+                </td>
+                <td colspan="2">[[${oaProjectData.alreadyOutputBill }-${oaProjectData.alreadyIncomeBill}]]</td>
+                <td colspan="2" class="finance-table-title">
+                    <span class="span-title">缴纳总计:</span>
+                    <span class="popup-text"></span>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="finance-table-title">
+                    <span class="span-title">累计外地预缴企业所得税额:</span>
+                    <span class="popup-text">预缴税金中的企业所得税(外地)</span>
+                </td>
+                <td colspan="2">[[${oaProjectData.nonlocalPrepayTax}]]</td>
+                <td colspan="2" class="finance-table-title">
+                    <span class="span-title">成本总计:</span>
+                    <span class="popup-text"></span>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="finance-table-title">
+                    <span class="span-title">累计需交企业所得税:</span>
+                    <span class="popup-text">累计欠票金额*0.25 - 累计外地预缴企业所得税额</span>
+                </td>
+                <td colspan="2">[[(${oaProjectData.alreadyOutputBill }-${oaProjectData.alreadyIncomeBill})*0.25-${oaProjectData.nonlocalPrepayTax}]]</td>
+                <td colspan="2" class="finance-table-title">
+                    <span class="span-title">公司收入:</span>
+                    <span class="popup-text"></span>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            待办事项<hr>
+        </div>
+        <div class="select-table table-striped">
+            <table  id="backlog" class=" table table-bordered table-bot"></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            潜在风险<hr>
+        </div>
+        <div class="select-table table-striped">
+            <table id="risk" class="table table-bordered table-bot"></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title" id="popup">
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<script th:inline="javascript">
+
+    var projectDetails = [[${oaProject}]];
+    var prefix = ctx + "oa/sysProOverView";
+    $(function () {
+        var options1={
+            className:'projectType',
+            dict:[[${@dict.getType("business_engineer_type")}]],
+            value:projectDetails.projectType
+        };
+        $.common.dictV(options1);
+
+        var options2={
+            className:'type',
+            dict:[[${@dict.getType("business_project_type")}]],
+            value:projectDetails.type
+        };
+        $.common.dictV(options2);
+
+        // 项目概况>代办事项表
+        var backlogList = {
+            id:'backlog',
+            url:prefix + '/selectSchedule',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    title : '',
+                    width:'30px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    }
+                },
+                {
+                    field: 'type',
+                    title: '类型',
+                    width:'150px',
+                    align:'center',
+                    halign:'center'
+                },
+                {
+                    field: 'money',
+                    title:'金额',
+                    width:'130px',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                },
+                {
+                    field:'detail',
+                    title:'描述',
+                    halign:'center'
+                }]
+        };
+        $.table.init(backlogList);
+
+        //项目概况>潜在风险表
+        var riskList = {
+            id:'risk',
+            url:prefix + '/selectPotentialRisk',
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns:[
+                {
+                    title : '',
+                    align:'center',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    }
+                },
+                {
+                    field: 'type',
+                    title: '类型',
+                    width:'150px',
+                    align:'center',
+                    halign:'center'
+
+                },
+                {
+                    field: 'count',
+                    title:'数量',
+                    width:'100px',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                },
+                {
+                    field: 'amount',
+                    title:'数额',
+                    width:'120px',
+                    align:'center',
+                    halign:'center',
+                    sortable: true,
+                },
+                {
+                    field: 'describes',
+                    title:'描述',
+                    halign:'center'
+                },
+                {
+                    field: 'way',
+                    title:'解决方案',
+                    align:'center',
+                    halign:'center',
+                    class:''
+                }]
+        };
+        $.table.init(riskList);
+
+        $('.span-title').mouseover(function (e) {
+            var obj = $(this);
+            var text = obj.next().text()
+            var tooltipHtml = "<p id='tooltip-popup' class='tooltip-popup'>"+text+"</p>";
+            obj.parent().append(tooltipHtml); //添加到页面中
+            $("#tooltip-popup").css({
+                "top": (e.pageY - 30) + "px",
+                "left": (e.pageX + 20) + "px"
+            }).show("fast"); //设置提示框的坐标，并显示
+        })
+        $('.span-title').mouseout(function () {
+            $("#tooltip-popup").remove();
+        })
+    });
+
+
+</script>
+</body>
+</html>

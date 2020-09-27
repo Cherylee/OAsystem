@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head>
+	<th:block th:include="include :: header('出差申请流程')" />
+</head>
+<body class="gray-bg">
+
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="config-form">
+					<div class="select-list">
+						<ul>
+						    <li>
+								申请人：<input type="text" name="proposer"/>
+							</li>
+							<li>
+								类别：<select name="leave_type" th:with="type=${@dict.getType('oa_leave_type')}">
+									<option value="">所有</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+			<div class="btn-group-sm hidden-xs" id="toolbar" role="group">
+				<a class="btn btn-success " onclick="$.operate.add()" shiro:hasPermission="oa:oaLeave:add">
+					<i class="fa fa-plus"></i> 申请
+				</a>
+				<a class="btn btn-danger btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaLeave:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oatravel";
+
+    $(function () {
+        var options = {
+        	uniqueId: "id",
+            url: prefix + "/queryTaskList",
+            createUrl: prefix + "/add",
+            modalName: "任务处理",
+            search: false,
+            showExport: false,
+            columns: [{
+                checkbox: true
+            },
+            {
+                field: 'processId',
+                title: '流程id'
+            },
+            {
+                field: 'taskId',
+                title: '任务id'
+            },
+            {
+                field: 'taskName',
+                title: '任务名称'
+            },
+            {
+                field: 'taskAssignee',
+                title: '任务申请人'
+            },
+            {
+                field: 'taskCreateTime',
+                title: '任务创建时间'
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var actions = [];
+                    actions.push('<a class="btn btn-sm btn-primary" href="#" onclick="agree(' + row.taskId + ')"><i class="fa fa-check"></i>同意</a>');
+                    actions.push('<a class="btn btn-sm btn-danger"  href="#" onclick="disagree(' + row.taskId + ')"><i class="fa fa-remove"></i>不同意</a>');
+                    return actions.join('');
+                }
+            }]
+        };
+        $.table.init(options);
+    });
+    
+    //同意
+    function agree(taskId){
+    	$.modal.loading("正在处理中，请稍后...");
+    	$.ajax({
+    		type : "post",
+    		url : ctx+"oa/oatravel/completeCurTask",
+    		dataType : "json",
+    		data:{"opinion":"同意","isLeaderPass":"Y","taskId":taskId},
+    		success : function(res){
+    			$.operate.ajaxSuccess(res);
+    		}
+    	});
+    }
+    //不同意
+    function disagree(taskId){
+    	$.table._option.createUrl = ctx+"oa/oatravel/disagree/{id}";
+    	$.table._option.modalName = "不同意原因";
+    	$.operate.add(taskId);
+    }
+
+</script>
+</body>
+</html>

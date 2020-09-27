@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改动态流程配置主')" />
+<style>
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-oaActDefine-add"
+			th:object="${oaActDefine}">
+			<input type="hidden" name="id" th:field="*{id}">
+
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"> 类型：</label>
+					<div class="col-sm-8">
+						<select id="type" class="form-control" name="type"
+							th:field="*{type}"
+							th:with="type=${@dict.getType('oa_examine_type')}">
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+								th:value="${dict.dictValue}"></option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"> 备注：</label>
+					<div class="col-sm-8">
+						<input id="remark" name="remark" class="form-control" type="text"
+							th:field="*{remark}">
+					</div>
+				</div>
+			</div>
+
+		</form>
+		<!-- 审批节点 -->
+		<div class="col-sm-12 select-table table-striped">
+			<div class="btn-group-sm" id="toolbar1" role="group">
+				<a class="btn btn-warning" data-toggle="modal" id="addConAudi">
+					<i class="fa fa-plus"></i> 添加审批条件
+				</a> <a class="btn btn-danger" onclick="removeRowAll('detailTable1')">
+					<i class="fa fa-remove"></i> 删除所有行
+				</a>
+			</div>
+			<div class="fixed-table-container">
+				<table id="detailTable1" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		<!-- 审批节点 -->
+		<div class="col-sm-12 select-table table-striped">
+			<div class="btn-group-sm" id="toolbar1" role="group">
+				<a class="btn btn-warning" data-toggle="modal" id="addCon"> <i
+					class="fa fa-plus"></i> 添加审批节点
+				</a> <a class="btn btn-danger" onclick="removeRowAll('detailTable')">
+					<i class="fa fa-remove"></i> 删除所有行
+				</a>
+			</div>
+			<div class="fixed-table-container">
+				<table id="detailTable" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		<!-- 最后节点处理人 -->
+		<div class="col-sm-12 select-table table-striped">
+			<div class="btn-group-sm" id="toolbar2" role="group">
+				<a class="btn btn-warning" onclick="selectTrainUser()"> <i
+					class="fa fa-plus"></i> 最后节点处理人
+				</a> <a class="btn btn-danger" onclick="removeRowAll('lastNodeTable')">
+					<i class="fa fa-remove"></i> 删除所有行
+				</a>
+			</div>
+			<div class="fixed-table-container">
+				<table id="lastNodeTable" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<br>
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+				&nbsp;
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+	</div>
+	<!-- 弹出框 -->
+	<div class="modal inmodal fade" id="myModal5" role="dialog"
+		aria-hidden="true">
+		<input id="myModal5Value" type="hidden">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+				</div>
+				<div class="modal-body ">
+					<form class="form-horizontal m" id="form-Condition-add">
+						<div class="">
+							<input name="idx" class="form-control" type="hidden">
+							<!-- <div class="form-group">
+								<label class="col-sm-3 control-label">序号：</label>
+								<div class="col-sm-8">
+									<input id="idx" name="idx" class="form-control" type="text"
+										placeholder="步骤顺序，从小往上排">
+								</div>
+							</div> -->
+							<div class="form-group">
+								<label class="col-sm-3 control-label">角色：</label>
+								<div class="col-sm-8">
+									<input type="hidden" name="roleId" id="roleId"> <input
+										id="roleName" name="roleName" class="form-control" type="text"
+										onclick="selectUserByRole('roleId','roleName')">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">节点名称：</label>
+								<div class="col-sm-8">
+									<input id="nodeName1" name="nodeName1" class="form-control"
+										type="text">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">备注：</label>
+								<div class="col-sm-8">
+									<input id="remark" name="remark" class="form-control"
+										type="text">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">指定人员：</label>
+								<div class="col-sm-8">
+									<input type="hidden" name="appointUserId" id="appointUserId">
+									<input id="appointUserName" name="appointUserName"
+										class="form-control" type="text" placeholder="一个角色有多人，请指定一人审批"
+										onclick="selectUserById('appointUserId','appointUserName')">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">备选人员：</label>
+								<div class="col-sm-8">
+									<input type="hidden" name="backupUserId" id="backupUserId">
+									<input id="backupUserName" name="backupUserName"
+										class="form-control" type="text"
+										onclick="selectUserById('backupUserId','backupUserName')">
+								</div>
+							</div>
+
+						</div>
+					</form>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal"
+						id="insertCondition">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 弹出框 -->
+	<div class="modal inmodal fade" id="myModal6" role="dialog"
+		aria-hidden="true">
+		<input id="myModal6Value" type="hidden">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+				</div>
+				<div class="modal-body ">
+					<form class="form-horizontal m" id="form-Condition-add1">
+						<input name="idx" class="form-control" type="hidden">
+						<div class="">
+							<div class="form-group">
+								<label class="col-sm-3 control-label">业务字段：</label>
+								<div class="col-sm-8" id="businessField_select"></div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">判断条件：</label>
+								<div class="col-sm-8">
+									<select id="businessSymbol" required="required"
+										class="form-control select2-hidden-accessible valid"
+										name="businessSymbol"
+										th:with="type=${@dict.getType('oa_condition_symbol')}">
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+											th:value="${dict.dictValue}"></option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">业务字段值：</label>
+								<div class="col-sm-8">
+									<input id="businessValue" name="businessValue"
+										class="form-control" type="text">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">逻辑条件值：</label>
+								<div class="col-sm-8">
+									<select id="businessLogic" required="required"
+										class="form-control select2-hidden-accessible valid"
+										name="businessLogic"
+										th:with="type=${@dict.getType('oa_condition_logic')}">
+										<option value="">(空)</option>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+											th:value="${dict.dictValue}"></option>
+									</select>
+								</div>
+							</div>
+							<input id="tableNameId" type="hidden" name="businessTalbe" />
+						</div>
+					</form>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal"
+						id="insertCondition1">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaActDefine"
+		//弹框选择角色
+		var rId= null;
+		var rName= null;
+		function selectUserByRole(id, name) {
+			rId = id;
+			rName = name;
+			var options = {
+				title : '选择角色',
+				width : "1200",
+				url : ctx + "oa/oaActDefine/toRole",
+				callBack : doSubmitRole
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmitRole(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			console.log(data)
+			$('#' + rId).val(data.roleId)
+			$('#' + rName).val(data.roleName)
+		}
+
+		/*新增行*/
+		var idxId = 1;
+		var idxx = 0;
+		function insertRow(data, id, editId) {
+			var randomId = 100 + ~~(Math.random() * 100);
+			var table_row = '';
+			table_row = data;
+			table_row[0] = false;
+			if (editId != null) {
+				table_row.id = randomId
+				$("#" + id).bootstrapTable('updateRow', {
+					index : editId, // 你想修改哪行，0表示第一行
+					row : table_row
+				})
+			} else {
+				if(id=='detailTable'){
+					table_row.idx = idxId;
+				}else if(id=='detailTable1'){
+					table_row.idx = idxx;
+					var numD=$("#"+id).bootstrapTable('getData');
+					var numI=numD.length;
+					if(numI==0){
+						table_row.idx =0
+					}
+				}
+				table_row.id = randomId
+				$("#" + id).bootstrapTable('insertRow', {
+					index : 0, // 你想插入到哪，0表示第一行
+					row : table_row
+				});
+				idxId++;
+				idxx++;
+			}
+
+		}
+
+		//判断是否已经添加
+		function isHas(data, id) {
+			var isTF = false;
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].id == id) {
+					isTF = true;
+				}
+			}
+			return isTF;
+		}
+		/* 删除指定表格行 */
+		function removeRow(id, rowId,idx) {
+			$("#" + id).bootstrapTable('removeByUniqueId', rowId);
+			if(id=='detailTable1'){
+				if(idx=='0'){
+					var numD=$("#"+id).bootstrapTable('getData');
+					var numI=numD.length;
+					if(numI==0){
+						idxx=0;
+					}else{
+						$("#" +id).bootstrapTable('updateRow', {
+			        		index: numI-1, // 你想修改哪行，0表示第一行
+			                row: {
+			                	idx: 0	
+			                }
+			        	})
+					}
+				}
+				
+			}
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$("#" + id).bootstrapTable('removeAll')
+		}
+		//修改行
+		function editRow(modal,modalV,tableId,id, rowId, rowIndex) {
+			var da = $('#' + id).bootstrapTable('getRowByUniqueId', rowId);
+			if(id=='detailTable'){
+				da.nodeName1=da.nodeName
+			}
+			$('#'+modalV).val(rowIndex);
+			$('#'+modal).modal('show');
+			$('#'+tableId).loadData(da)
+
+		}
+		/* 多选用户 */
+		function selectTrainUser() {
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmitTrainUser
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmitTrainUser(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerMore1();
+			var data = result;
+			for (var i = 0; i < data.length; i++) {
+				insertRow(data[i], 'lastNodeTable')
+			}
+
+		}
+		//保存数据
+		function submitHandler(){
+			var data = {}
+			if ($.validate.form()) {
+			data.oaActDefine=$('#form-oaActDefine-add').serializeObject();
+			data.nodeList=$('#detailTable').bootstrapTable('getData');
+			data.conditionList = $('#detailTable1').bootstrapTable('getData');
+			data.exeNodeList = $('#lastNodeTable').bootstrapTable('getData');
+			$.operate.saveJsonTab(prefix + "/modifyOaActDefineVo",data);
+			}
+		}
+
+		$(function() {
+			$.table.init(options1);
+			$.table.init(options2);
+			$.table.init(options3);
+			//点击-----添加节点----弹框
+			$('#addCon').click(function() {
+				$.form.reset('form-Condition-add');//清空原有数据
+				$("#form-Condition-add input[type='hidden']").val("")
+				$('#myModal5Value').val('00');
+				$('#myModal5').modal("show");
+			});
+			$('#insertCondition').click(function() {
+				var indexV = $('#myModal5Value').val()
+				var formData = $('#form-Condition-add').serializeObject();
+				formData.nodeName = formData.nodeName1;
+				if (indexV == '00') {
+					insertRow(formData, 'detailTable', null)
+				} else {
+					insertRow(formData, 'detailTable', indexV)
+				}
+			});
+			//点击-----添加条件----弹框
+			$('#addConAudi').click(function() {
+				$.form.reset('form-Condition-add1');//清空原有数据
+				$("#form-Condition-add1 input[type='hidden']").val("")
+				$('#myModal6Value').val('00');
+				$('#myModal6').modal("show");
+			});
+			$('#insertCondition1').click(function() {
+				var indexV = $('#myModal6Value').val()
+				var formData = $('#form-Condition-add1').serializeObject();
+				formData.nodeName = formData.nodeName1;
+				if (indexV == '00') {
+					insertRow(formData, 'detailTable1', null)
+				} else {
+					insertRow(formData, 'detailTable1', indexV)
+				}
+			});
+		})
+		console.log([[${oaActDefine}]])
+		var options1 = {
+			id : 'detailTable',
+			url: ctx + "oa/oaActNode/list",
+			clickToSelect : true,
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			uniqueId : 'id',
+			modalName : "审批节点信息",
+			sortName: "idx",
+		    sortOrder: "asc",
+			queryParams:{'actDefineId':[[${oaActDefine.id}]]},
+			showExport : false,
+			columns : [
+					{
+						radio : true
+					},
+					{
+						field : 'id',
+						title : 'id',
+						visible : false
+					},
+					{
+						field : 'roleId',
+						title : '角色Id',
+						visible : false
+					},
+					{
+						field : 'roleName',
+						title : '角色'
+					},
+					{
+						field : 'nodeName',
+						title : '节点名称'
+					},
+					{
+						field : 'appointUserId',
+						title : '指定人员Id',
+						visible : false
+					},
+					{
+						field : 'appointUserName',
+						title : '指定人员'
+					},
+					{
+						field : 'backupUserId',
+						title : '备选人员Id',
+						visible : false
+					},
+					{
+						field : 'backupUserName',
+						title : '备选人员'
+					},
+					{
+						field : 'idx',
+						title : '序号'
+					},
+					{
+						title : '操作',
+						formatter : function(value, row, index) {
+							return '<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\''
+									+ row.id
+									+ '\',\''
+									+ row.idx
+									+ '\')">删除</a> '
+									+ '<a class="btn btn-success" onclick="editRow(\'myModal5\',\'myModal5Value\',\'form-Condition-add\',\'detailTable\',\''
+									+ row.id + '\',\'' + index + '\')">编辑</a>'
+						}
+					} ]
+
+		};
+		//审批条件表格
+		var tableInfos = new Array();
+	var datasbusinessField =null;
+	function selectTable(value){
+  		 var datas = [[${@dict.getType('oa_apptype_table')}]];
+  		$.each(datas, function(index, dict) {
+            if (dict.dictLabel == ('' + value)) {
+            	$("#tableNameId").val(dict.dictValue);
+            }
+        });
+  		 //
+		 var tar = [];
+			$.ajax({
+            url : ctx + "oa/oaProcessCondition/selectTableInfoByTableName",
+            async : false,
+            type : "post",
+            data : {tableName : $("#tableNameId").val()},
+            success : function(result) {
+            	tar = result;
+            	datasbusinessField=result
+            	
+            	var html_a=''
+            	var html_b=''
+            	for(var i=0;i<tar.length;i++){
+            		html_a+='<option value="'+tar[i].value+'">'+tar[i].text+'</option>'
+            	}
+            	html_b='<select name="businessField" id="businessField" class="form-control select2-hidden-accessible valid">'+
+				
+				html_a+
+		        '</select>'
+				$('#businessField_select').html(html_b);
+  				}
+           });
+	}
+		//关联下拉框的值
+		var mysel = $("#type");
+		selectTable(mysel.val())
+		var symbolDatas = [[${@dict.getType('oa_condition_symbol')}]];
+        var logic = [[${@dict.getType('oa_condition_logic')}]];
+        mysel.data("last",mysel.val()).change(function(){
+			 var oldvalue = mysel.data("last");
+			 mysel.data(oldvalue, mysel.val()); //每次改变都附加上去，以便下次变化时获取 改变之前获取并保存
+		    var iDta=$("#detailTable1").bootstrapTable('getData')
+         
+		    if(iDta!=''){			    	 
+		    	layer.confirm("重新选择类型将清空当前所有审批条件，是否继续？", {
+      	        icon: 3,
+      	        title: "系统提示",
+      	        btn: ['确认', '取消'],
+      	        btnclass: ['btn btn-primary', 'btn btn-danger'],
+      	    }, function (index) {
+      	    	layer.close(index);
+      	    	 removeRowAll('detailTable1');	 
+      	    	 idxx=0;
+      	    	 mysel.data("last", mysel.val());
+      	    },function(index){
+      	    	layer.close(index);
+      	    	mysel.val(oldvalue);
+      	    });
+		    	
+		    }
+		});
+		//
+		var options2 = {
+			id : 'detailTable1',
+			url: ctx + "oa/oaProcessCondition/list",
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			sortName: "idx",
+		    sortOrder: "asc",
+			uniqueId : 'id',
+			queryParams : {"type" : [[${oaActDefine.type}]],"userId":[[${oaActDefine.userId}]],"deptId":[[${oaActDefine.deptId}]],"procDefId":[[${oaActDefine.processDefine}]]},
+			height : 200,
+			columns : [{
+				radio : true
+			},{
+				field : 'idx',
+				title : '序号'
+			},{
+				field : 'id',
+				title : 'id'
+			},{
+				field : 'businessField',
+				title : '业务字段',
+				width:300,
+				formatter: function (value, row, index) {
+					var key=[];
+				    var val=[];
+					for(var i=0;i<datasbusinessField.length;i++){
+						key.push(datasbusinessField[i].value)
+						val.push(datasbusinessField[i].text)
+					}
+					 var ind=null
+					 $.each(key,function(idx){
+						 /* console.log(value) */
+				            if(key[idx] == value){
+				            	
+				            	ind=idx//idx为数组下标
+				            }
+				        });
+					var text=val[ind]
+	        		return text
+	        	}
+				
+			}, {
+				field : 'businessSymbol',
+				title : '判断条件',
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(symbolDatas, value);
+	        	}
+				
+			}, {
+				field : 'businessValue',
+				title : '业务字段值'
+				/* editable : true */
+			}, {
+				field : 'businessLogic',
+				title : '逻辑条件',
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(logic, value);
+	        	}
+				
+			},
+			{
+				title : '操作',
+				formatter : function(value, row, index) {
+					return '<a class="btn btn-danger" onclick="removeRow(\'detailTable1\',\''
+							+ row.id
+							+ '\',\''
+							+ row.idx
+							+ '\')">删除</a> '
+							+ '<a class="btn btn-success" onclick="editRow(\'myModal6\',\'myModal6Value\',\'form-Condition-add1\',\'detailTable1\',\''
+							+ row.id + '\',\'' + index + '\')">编辑</a>'
+				}
+			} ]
+
+		};
+		//最后节点处理人
+		var options3 = {
+				id : 'lastNodeTable',
+				url: ctx + "oa/oaProcExeNode/list",
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'userId',
+				queryParams:{'actDefineId':[[${oaActDefine.id}]]},
+				height : 300,
+				columns : [{
+					radio : true
+				},{
+					field : 'userId',
+					title : '用户Id'
+					
+				}, {
+					field : 'userName',
+					title : '用户名称'
+					
+				},
+				{
+					title : '操作',
+					formatter : function(value, row, index) {
+						return '<a class="btn btn-danger" onclick="removeRow(\'lastNodeTable\',\''
+								+ row.userId
+								+ '\')">删除</a> '								
+					}
+				} ]
+
+			};
+	</script>
+</body>
+</html>

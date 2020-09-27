@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+<th:block th:include="include :: header('合同审核人员设定')" />
+</head>
+<body class="white-bg">
+
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<form class="form-horizontal m" id="form-oaContract-add">
+		    <input type="hidden" name="contractType" id="contractType" value="0">
+			<div class="form-group">
+				<label class="col-sm-2 control-label"><span style="color: red">*</span>合同类型</label>
+				<div class="col-sm-4">
+					<select id="type" required="required"
+						class="form-control select2-hidden-accessible valid" name="type1"
+						th:with="type=${@dict.getType('oa_contract_type1')}">
+
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+							th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label"><span style="color: red">*</span>当前所在公司：</label>
+				<div class="col-sm-4">
+					<!-- <input id="deptId" name="deptId" class="form-control" type="text"> -->
+					<input type="hidden" name="deptId" id="treeId" /> 
+					<input type="text" id="treeName" name="deptName" class="form-control" onclick="selectDeptTree('treeId','treeName')" />
+				</div>
+			</div>
+
+
+			<div class="form-group hide" id="projectContactType">
+				<label class="col-sm-2 control-label">工程合同类型</label>
+				<div class="col-sm-4">
+					<select  required="required"
+						class="form-control select2-hidden-accessible valid" name="type2"
+						th:with="type=${@dict.getType('oa_contract_type2')}">
+						<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+							th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label">相关部门审核</label>
+				<div class="col-sm-8">
+					<div class="col-sm-12 select-table table-striped">
+
+						<div class="btn-group-sm" id="toolbar1" role="group">
+							<a class="btn btn-success"
+								onclick="selectUserById('bootstrap-table1')"> <i
+								class="fa fa-plus"></i> 添加部门审核人员
+							</a> <a class="btn btn-danger multiple"
+								onclick="removeRow('bootstrap-table1')"> <i
+								class="fa fa-remove"></i> 删除选择行
+							</a> <a class="btn btn-danger"
+								onclick="removeRowAll('bootstrap-table1')"> <i
+								class="fa fa-remove"></i> 删除所有行
+							</a>
+						</div>
+						<div class="fixed-table-container">
+							<table id="bootstrap-table1" data-mobile-responsive="true"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">总经理裁决</label>
+					<div class="col-sm-4">
+						<input id="zongjlId" type="hidden" name="generalManager"> <input id="zongjlName"
+							 class="form-control" type="text"
+							onclick="selectUser('zongjlId','zongjlName')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">法务签发</label>
+					<div class="col-sm-4">
+						<input id="legalIssueId" name="legalIssue" type="hidden"> 
+						<input id="legalIssueName"  class="form-control" type="text" onclick="selectUser('legalIssueId','legalIssueName')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">法务用印</label>
+					<div class="col-sm-4">
+						<input id="legalSealId" name="legalSeal" type="hidden"> 
+						<input id="legalSealName"  class="form-control" type="text" onclick="selectUser('legalSealId','legalSealName')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">综合部用印</label>
+					<div class="col-sm-4">
+						<input id="comdeptSealId" name="comdeptSeal" type="hidden"> 
+						<input id="comdeptSealName"  class="form-control" type="text" onclick="selectUser('comdeptSealId','comdeptSealName')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">归档人员</label>
+					<div class="col-sm-4">
+						<input id="archiving" type="hidden" name="archiving"> <input
+							id="archivingName"  class="form-control" type="text"
+							onclick="selectUser('archiving','archivingName')">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">备注：</label>
+					<div class="col-sm-4">
+						<input id="remark" name="remark" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-sm-offset-5 col-sm-10">
+					<button type="button" class="btn btn-sm btn-primary"
+						onclick="submitHandler()">
+						<i class="fa fa-check"></i>保 存
+					</button>
+					&nbsp;
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+						<i class="fa fa-reply-all"></i>关 闭
+					</button>
+				</div>
+			</div>
+
+		</form>
+	</div>
+
+
+	<div th:include="include :: footer"></div>
+	<script>
+	var prefix = ctx + "oa/oaContractNode";
+	//相关部门申请表格
+	var options1 = {
+			id : "bootstrap-table1",
+			toolbar : "toolbar1",
+			modalName : "审批节点",
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : true,
+			pagination:false,
+			uniqueId : "id",
+			height : 300,
+			clickToSelect : true,
+			columns : [
+					{
+						radio : true
+					},
+					{
+						field : 'id',
+						title : 'id',
+						visible : true
+					},
+					{
+						field:'userId',
+						title:'用户id',
+						formatter: function(value, row, index) {
+							return '<input type="hidden" name="deptStaff" value="'+row.userId+'"/>'+row.userId
+						}
+					},
+					{
+						field : 'dept',
+						title : '部门'
+					},
+					{
+						field : 'name',
+						title : '部门审核人员'
+					}]
+		};
+	
+
+	/*新增行*/
+		var idxId = 1;
+		function insertRow(id,data) {	
+			var randomId = 100 + ~~(Math.random() * 100);
+			var table_row = '';
+			var table1_row = {
+				id : randomId,
+				userId:data.userId,
+				dept : data.dept.deptName,
+				name : data.userName
+			}
+			if(id="bootstrap-table1"){
+				table_row=table1_row
+			}
+			
+			if ($('#type').val() == '') {
+				$.modal.alertWarning("请先选择合同类型");
+				idxId = 1;
+				return;
+			} else {
+				var count = $("#" + id).bootstrapTable('getData').length;
+				$("#" + id).bootstrapTable('insertRow', {
+					index : count, // 你想插入到哪，0表示第一行
+					row : table_row
+				})
+			}
+		}
+		/* 删除指定表格行 */
+		function removeRow(id) {
+			var ids = $.map($('#' + id).bootstrapTable('getSelections'),
+					function(row) {
+						return row["id"];
+					});
+			if (ids.length == 0) {
+				$.modal.alertWarning("请至少选择一条记录");
+				return;
+			}
+			$("#" + id).bootstrapTable('remove', {
+				field : 'id',
+				values : ids
+			})
+			
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$("#" + id).bootstrapTable('removeAll')
+			idxx=0;
+		}
+		//弹框选择人员
+		var domId=null;
+		function selectUserById(id) {
+			domId = id;
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+			insertRow(domId,data)
+			
+		}
+		/* 多选用户 */
+		var UId=null;
+		var UName=null;
+		function selectUser(id,name){
+			UId = id;
+			UName=name;
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerMore();
+			var data = result;
+			$('#'+UId).val(data.idArry)
+			$('#'+UName).val(data.namesArry)
+			
+			
+			
+		}
+		/*用户管理-新增-选择部门树*/
+		function selectDeptTree(id, deptName) {
+			divDeptId = id;
+			divDeptName = deptName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowLastLevel(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#" + divDeptId).val(body.find('#treeId').val());
+				$("#" + divDeptName).val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+		function submitHandler() {
+			var data=$('#form-oaContract-add').serializeObject();
+        	$.each(data, function (n, value) {		
+	               if ($.isArray(value)) {
+	            	   var att={
+	            			   'rey':value+''
+	            	   }
+	            	   data[n]=att.rey
+					}
+	           });
+			var config = {
+					contentType : "application/json;charset=UTF-8",
+					url : prefix + "/checkDeptAndTypeUnique",
+					type : "post",
+					dataType: "json",
+					data : JSON.stringify(data),
+					beforeSend : function() {
+						$.modal.loading("正在处理...");
+					},
+					success : function(result) {
+						$.modal.closeLoading();
+						if($.validate.unique(result)){
+							sumbit(data);
+						}else{
+							 $.modal.alertWarning("此公司此合同类型已存在！！！");
+						}
+					}
+				};
+	        	$.ajax(config); 
+	    }
+		
+		//提交方法
+		function sumbit(data){
+			 if ($.validate.form()) {	        	
+		        	var config = {
+						contentType : "application/json;charset=UTF-8",
+						url : prefix + "/add",
+						type : "post",
+						data : JSON.stringify(data),
+						beforeSend : function() {
+							$.modal.loading("正在处理...");
+						},
+						success : function(result) {
+							$.operate.successTabCallback(result);
+						}
+					};
+		        	$.ajax(config); 
+		        }
+		}
+		
+		$(function(){
+			$('#type').change(function(){   
+				 var p1=$(this).children('option:selected').val();//这就是selected的值  
+				$('#contractType').val(p1)
+				 if(p1==7){
+					$('#projectContactType').removeClass('hide');
+				}else{
+					$('#projectContactType').addClass('hide')
+				}　  
+			});
+			//初始化相关部门申请表格
+			$.table.init(options1);
+			
+		})
+	</script>
+</body>

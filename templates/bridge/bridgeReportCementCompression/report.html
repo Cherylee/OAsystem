@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增水泥混凝土抗压强度试验检测报告')" />
+</head>
+<style>
+	.form-control{
+		padding: 0;
+		text-align: center;
+	}
+</style>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<!--抬头  -->
+	<div class="hr-line-dashed"></div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+				<div class="panel-body ">
+					<table class="table table-bordered table-condensed" style="text-align: center">
+						<caption class="text-center">
+							<h2>水泥混凝土抗压强度试验检测报告</h2>
+						</caption>
+						<form class="form-horizontal m" id="form-report-add" th:object="${reportVo}">
+							<tbody>
+							<tr>
+								<td class="active" colspan="3">检测单位名称:</td>
+								<td colspan="12">
+									<input class="form-control" type="text" value="厦门百川建设工程检测有限公司" disabled>
+								</td>
+								<td class="active" colspan="3">报告编号:</td>
+								<td colspan="12">
+									<input name="reportCode" class="form-control" type="text" th:value="*{reportCode}" readonly>
+								</td>
+							</tr>
+							<tr>
+								<td class="active" colspan="3" width="10%">委托单位</td>
+								<td colspan="7" width="23%">
+									<input name="clientUnit" class="form-control" type="text" th:value="*{clientUnit}">
+								</td>
+								<td class="active" colspan="3" width="10%">委托编号</td>
+								<td colspan="7" width="23%">
+									<input name="orderCode" class="form-control" type="text" th:value="*{orderCode}">
+								</td>
+								<td class="active" colspan="3" width="10%">委托日期</td>
+								<td colspan="7" width="23%">
+									<input name="orderDate" class="form-control time-input-data" type="text"
+										   th:value="${#dates.format(reportVo.orderDate, 'yyyy-MM-dd')}">
+								</td>
+							</tr>
+							<tr>
+								<td class="active" colspan="3">建设单位</td>
+								<td colspan="7">
+									<input name="constructUnit" class="form-control" type="text" th:value="*{constructUnit}">
+								</td>
+								<td class="active" colspan="3">检验性质</td>
+								<td colspan="7">
+									<select name="checkType" id="checkType" class="form-control" th:value="*{checkType}"
+											th:with="type=${@dict.getType('bridge_order_checkType')}" readonly>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+									</select>
+								</td>
+								<td class="active" colspan="3">检测日期</td>
+								<td colspan="7">
+									<input name="trialDate" class="form-control time-input" type="text"
+										   th:value="${#dates.format(reportVo.trialDate, 'yyyy-MM-dd HH:mm:ss')}">
+								</td>
+							</tr>
+							<tr>
+								<td class="active" colspan="3">工程名称</td>
+								<td colspan="7">
+									<input name="projectName" class="form-control" type="text" th:value="*{projectName}">
+								</td>
+								<td class="active" colspan="3">样品描述</td>
+								<td colspan="7">
+									<input name="sampleDescription" class="form-control" type="text" th:value="*{sampleDescription}">
+								</td>
+								<td class="active" colspan="3">报告日期</td>
+								<td colspan="7">
+									<input name="reportDate" class="form-control time-input currentTime" type="text">
+								</td>
+							</tr>
+							<tr>
+								<td class="active" colspan="3">施工单位</td>
+								<td colspan="7">
+									<input name="constructionUnit" class="form-control" type="text" th:value="*{constructionUnit}">
+								</td>
+								<td class="active" colspan="3">取样员/<br/>取样员编号</td>
+								<td colspan="7">
+									<table>
+										<tr>
+											<td width="30%"><input name="samplingPersonName" class="form-control" type="text" th:value="*{samplingPersonName}"></td>
+											<td><input name="samplingPersonCode" class="form-control" type="text" th:value="*{samplingPersonCode}"></td>
+										</tr>
+									</table>
+								</td>
+								<td class="active" colspan="3">试验条件</td>
+								<td colspan="7">
+									<table>
+										<tr>
+											<td>温度:</td>
+											<td width="30%"><input name="temperature" class="form-control" type="text" th:value="*{temperature}"></td>
+											<td>℃,&nbsp;&nbsp;&nbsp;相对湿度:</td>
+											<td width="30%"><input name="humidity" class="form-control" type="text" th:value="*{humidity}"></td>
+											<td>%</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td class="active" colspan="3">见证单位</td>
+								<td colspan="7">
+									<input name="witnessUnit" class="form-control" type="text" th:value="*{witnessUnit}">
+								</td>
+								<td class="active"  colspan="3">见证人/<br/>见证人编号</td>
+								<td colspan="7">
+									<table>
+										<tr>
+											<td width="30%"><input name="witnessPersonName" class="form-control" type="text" th:value="*{witnessPersonName}"></td>
+											<td><input name="witnessPersonCode" class="form-control" type="text" th:value="*{witnessPersonCode}"></td>
+										</tr>
+									</table>
+								</td>
+								<td class="active"  colspan="3">委托人/<br/>联系方式</td>
+								<td  colspan="7">
+									<table>
+										<tr>
+											<td width="30%"><input name="clientName" class="form-control" type="text" th:value="*{clientName}"></td>
+											<td><input name="clientUnitPhone" class="form-control" type="text" th:value="*{clientUnitPhone}"></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td class="active"  colspan="3">检测依据</td>
+								<td colspan="7">
+									<input name="according" class="form-control" type="text" th:value="*{according}">
+								</td>
+								<td class="active"  colspan="3">拌制单位</td>
+								<td colspan="7">
+									<input name="param6" class="form-control" type="text" th:value="*{param6}">
+								</td>
+								<td class="active"  colspan="3">养护方法</td>
+								<td colspan="7">
+									<select name="param1" id="param1" class="form-control" th:value="*{param1}"
+											th:with="type=${@dict.getType('bridge_order_curing')}" readonly>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td class="active"  colspan="3">判定依据</td>
+								<td colspan="7">
+									<input name="judgeReference" class="form-control" type="text" value="设计文件">
+								</td>
+								<td class="active"  colspan="3">搅拌方法</td>
+								<td colspan="7">
+									<input name="param4" class="form-control" type="text" th:value="*{param4}">
+								</td>
+								<td class="active"  colspan="3">试块尺寸(mm)</td>
+								<td colspan="7">
+									<select name="param3" id="param3" class="form-control" th:value="*{param3}"
+											th:with="type=${@dict.getType('bridge_sample_size')}" readonly>
+										<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+									</select>
+								</td>
+							</tr>
+							</tbody>
+						</form>
+						<tbody>
+						<tr>
+							<td class="active" rowspan="2" colspan="3">样品编号</td>
+							<td class="active" rowspan="2" colspan="5">使用部位</td>
+							<td class="active" rowspan="2" colspan="2">生产流水号</td>
+							<td class="active" rowspan="2" colspan="2">配合比报告编号</td>
+							<td class="active" rowspan="2" colspan="2">强度等级</td>
+							<td class="active" rowspan="2" colspan="2">制作日期</td>
+							<td class="active" rowspan="2" colspan="2">检测日期</td>
+							<td class="active" rowspan="2" colspan="2">龄期(d)</td>
+							<td class="active" colspan="6">检测结果(MPa)</td>
+							<td class="active" rowspan="2" colspan="2">代表值(MPa)</td>
+							<td class="active" rowspan="2" colspan="2">达到设计强度等级(%)</td>
+						</tr>
+						<tr>
+							<td class="active" colspan="2">试件1</td>
+							<td class="active" colspan="2">试件2</td>
+							<td class="active" colspan="2">试件3</td>
+						</tr>
+						<tr class="testing-sample" th:each="sample,sampleStat :${reportVo.bridgeReportCementCompressionSampleList}">
+							<td colspan="3"><input name="code" class="form-control" type="text" th:value="${sample.code}"></td>
+							<td colspan="5"><input name="usePlace" class="form-control" type="text" th:value="${sample.usePlace}"></td>
+							<td colspan="2"><input name="lot" class="form-control" type="text" th:value="${sample.lot}"></td>
+							<td colspan="2"><input name="specification" class="form-control" type="text" th:value="${sample.specification}"></td>
+							<td colspan="2"><input name="level" class="form-control" type="text" th:value="${sample.level}"></td>
+							<td colspan="2">
+								<input name="manufactureDate" class="form-control time-input-data" type="text"
+									  th:value="${#dates.format(sample.manufactureDate, 'yyyy-MM-dd')}">
+							</td>
+							<td colspan="2">
+								<input name="trialDate" class="form-control time-input-data" type="text"
+									   th:value="${#dates.format(sample.trialDate, 'yyyy-MM-dd')}">
+							</td>
+							<td colspan="2"><input name="age" class="form-control" type="text" th:value="${sample.age}"></td>
+							<td colspan="2" th:each="sampleDetai,sampleDetaiStat :${sample.bridgeReportCementCompressionSampleDetailList}">
+								<input name="intensity" class="form-control" type="text" th:value="${sampleDetai.intensity}">
+							</td>
+							<td colspan="2"><input name="intensityRepresentative" class="form-control" type="text" th:value="${sample.intensityRepresentative}"></td>
+							<td colspan="2"><input name="intensityLevel" class="form-control" type="text" th:value="${sample.intensityLevel}"></td>
+						</tr>
+						</tbody>
+						<tbody>
+						<tr>
+							<td class="active" rowspan="2" colspan="3">主要设备</td>
+							<td class="active" colspan="3">管理编号</td>
+							<td class="active" colspan="3">仪器名称</td>
+							<td class="active" colspan="3">有效期至</td>
+							<td class="active" colspan="3">管理编号</td>
+							<td class="active" colspan="3">仪器名称</td>
+							<td class="active" colspan="3">有效期至</td>
+							<td class="active" colspan="3">管理编号</td>
+							<td class="active" colspan="3">仪器名称</td>
+							<td class="active" colspan="3">有效期至</td>
+						</tr>
+						<tr>
+							<td class="testing-instrument" colspan="9" th:each="instrument,instrumentStat :${reportVo.bridgeReportCementCompressionInstrumentList}" th:if="${instrumentStat.index}<3">
+								<table>
+									<tr>
+										<td>
+											<input name="code" type="text" class="form-control" th:value="${instrument.code}">
+										</td>
+										<td>
+											<input name="instrumentName" type="text" class="form-control" th:value="${instrument.instrumentName}">
+										</td>
+										<td>
+											<input name="validityDate" type="text" class="form-control time-input"
+												   th:value="${#dates.format(instrument.validityDate, 'yyyy-MM-dd HH:mm:ss')}">
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						</tbody>
+						<tbody>
+						<tr>
+							<td class="active" colspan="3">结论</td>
+							<td colspan="27">
+								<input name="conclusion" class="form-control" style="text-align: left;padding-left: 10px" type="text" value="经检测，该砼试块抗压强度符合设计文件要求。">
+							</td>
+						</tr>
+						<tr>
+							<td class="active" colspan="3">备注</td>
+							<td colspan="27"><input name="remark" class="form-control" style="text-align: left;padding-left: 10px" type="text" th:value="*{remark}"></td>
+						</tr>
+						<tr>
+							<td class="active" colspan="2">声明</td>
+							<td class="active" colspan="13" style="text-align: left">
+								1.本报告（含完整复制件）未加盖“检验检测专用章”无效；<br/>
+								2.报告签名不全无效，改动、换页无效；<br/>
+								3.未经本公司书面批准，不得复制（全文复制除外）该试验检测报告；<br/>
+								4.对于非本公司负责抽样的情况，本公司的检测结果仅适用于客户提供的样品；<br/>
+								5.若对本报告有异议，请于收到之日起15日内向本公司提出书面复议申请，逾期不予受理。
+							</td>
+							<td class="active" colspan="2">联系方式</td>
+							<td class="active" colspan="13" style="text-align: left">
+								地址：厦门市集美区同集南路369~371号<br/>
+								邮编：361021<br/>
+								传真：0592-6362187<br/>
+								电话：0592-6362187
+							</td>
+						</tr>
+						</tbody>
+					</table>
+					<div class="row">
+						<div class="col-sm-offset-5 col-sm-10">
+							<br>
+							<button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+								<i class="fa fa-check"></i>生成报告
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div th:include="include::footer"></div>
+<script th:inline="javascript">
+	var prefix = ctx + "bridge/bridgeReportCementCompression";
+
+
+	function getData() {
+		var testingSampleList = $('.testing-sample');
+		var bridgeReportCementCompressionSampleList = [];
+		for (var i=0; i<testingSampleList.length;i++){
+			var testingSampleData = {};
+			var sampleDetailData = [];
+			var sampleDetailDataList = testingSampleList.eq(i).find("input[name='intensity']");
+			for (var j=0; j<sampleDetailDataList.length;j++){
+				var sampleDetail = {};
+				sampleDetail.intensity = sampleDetailDataList.eq(j).val();
+				sampleDetailData.push(sampleDetail);
+			}
+			testingSampleData.code = testingSampleList.eq(i).find("input[name='code']").val();
+			testingSampleData.usePlace = testingSampleList.eq(i).find("input[name='usePlace']").val();
+			testingSampleData.lot = testingSampleList.eq(i).find("input[name='lot']").val();
+			testingSampleData.specification = testingSampleList.eq(i).find("input[name='specification']").val();
+			testingSampleData.level = testingSampleList.eq(i).find("input[name='level']").val();
+			testingSampleData.manufactureDate = testingSampleList.eq(i).find("input[name='manufactureDate']").val();
+			testingSampleData.trialDate = testingSampleList.eq(i).find("input[name='trialDate']").val();
+			testingSampleData.age = testingSampleList.eq(i).find("input[name='age']").val();
+			testingSampleData.intensityRepresentative = testingSampleList.eq(i).find("input[name='intensityRepresentative']").val();
+			testingSampleData.bridgeReportCementCompressionSampleDetailList = sampleDetailData;
+			bridgeReportCementCompressionSampleList.push(testingSampleData);
+		}
+		var testingInstrumentList = $('.testing-instrument');
+		var bridgeReportCementCompressionInstrumentList =[];
+		for (var i=0; i<testingInstrumentList.length;i++){
+			var testingInstrumentData = {};
+			testingInstrumentData.code = testingInstrumentList.eq(i).find("input[name='code']").val();
+			testingInstrumentData.instrumentName = testingInstrumentList.eq(i).find("input[name='instrumentName']").val();
+			testingInstrumentData.validityDate = testingInstrumentList.eq(i).find("input[name='validityDate']").val();
+			bridgeReportCementCompressionInstrumentList.push(testingInstrumentData)
+		}
+		var data = {};
+		data = $('#form-report-add').serializeObject();
+		var checkType = $.table.selectDictLabel([[${@dict.getType('bridge_order_checkType')}]],data.checkType);
+		var param3 = $.table.selectDictLabel([[${@dict.getType('bridge_sample_size')}]],data.param3);
+		var param1 = $.table.selectDictLabel([[${@dict.getType('bridge_order_curing')}]],data.param1);
+		data.checkType = $(checkType).html();
+		data.param3 = $(param3).html();
+		data.param1 = $(param1).html();
+		data.conclusion = $('input[name="conclusion"]').val();
+		data.remark = $('input[name="remark"]').val();
+		data.bridgeReportCementCompressionSampleList = bridgeReportCementCompressionSampleList;
+		data.bridgeReportCementCompressionInstrumentList = bridgeReportCementCompressionInstrumentList;
+		return data
+	};
+
+	//修改强度代表值
+	$("input[name='intensityRepresentative']").bind("input propertychange" , function () {
+		var obj = $(this);
+		var level = obj.parent().parent().find("input[name='level']").val();
+		level = parseInt(level.substr(1));
+		var intensityLevel = parseFloat(obj.val())/level*100;
+		intensityLevel = evenRound(intensityLevel,0);
+		obj.parent().parent().find("input[name='intensityLevel']").val(intensityLevel);
+	});
+
+	//修改强度等级
+	$("input[name='level']").bind("input propertychange" , function () {
+		var obj = $(this);
+		var intensityRepresentative = obj.parent().parent().find("input[name='intensityRepresentative']").val();
+		intensityRepresentative = parseInt(intensityRepresentative.substr(1));
+		var intensityLevel = intensityRepresentative/parseFloat(obj.val())*100;
+		intensityLevel = evenRound(intensityLevel,0);
+		obj.parent().parent().find("input[name='intensityLevel']").val(intensityLevel);
+	});
+
+    function submitHandler() {
+        var data = getData();
+        var reportCode = $('input[name="reportCode"]').val();
+        var config = {
+            contentType : "application/json;charset=UTF-8",
+            url : prefix+"/exportReport",
+            type : "post",
+            dataType: "json",
+            data : JSON.stringify(data),
+            success : function(result) {
+                location.href = prefix+"/exportReport/"+reportCode;
+            }
+        };
+        $.ajax(config);
+    }
+</script>
+</body>
+</html>

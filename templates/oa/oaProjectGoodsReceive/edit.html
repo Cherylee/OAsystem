@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改物资领用申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaProjectGoodsReceive-edit" th:object="${oaProjectGoodsReceive}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+                        <table class="table table-bordered table-condensed" >
+                            <caption class="text-center">
+                                <h2>工程物资领用申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人</td>
+                                <td>
+                                    <input name="proposer" type="hidden" id="proposer" th:value="*{proposer}" />
+
+                                    <input th:field="*{userName}" autocomplete="off" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>公司</td>
+                                <td>
+                                    <input type="hidden" name="companyId" id="companyId" th:value="*{companyId}"/>
+                                    <input type="text" name="companyName" id="companyName" class="form-control" readonly
+                                           onclick="selectDeptTree('companyId','companyName','0')" th:value="*{companyName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>归属部门</td>
+                                <td>
+                                    <input id="treeId" name="deptId" class="form-control" type="hidden" th:value="*{deptId}">
+                                    <input id="treeName" name="deptName" class="form-control" readonly
+                                           type="text" onclick="selectDeptTree('treeId','treeName','1')"  th:value="*{deptName}">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>物资类型</td>
+                                <td>
+                                    <select id="goodsType" required class="form-control "
+                                            name="goodsType" th:field="*{goodsType}"
+                                            th:with="type=${@dict.getType('oa_project_goods_type')}">
+                                        <option value="">-- 请选择 --</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>所属项目</td>
+                                <td>
+                                    <input id="projectId" name="projectId" type="hidden" th:field="*{projectId}"/>
+                                    <input id="projectName" th:field="*{projectName}" class="form-control" name="projectName" type="text"
+                                           onclick="selectPro('projectId','projectName')">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>关联合同</td>
+                                <td>
+                                    <input id="contractId" th:field="*{contractId}" name="contractId" type="hidden"/>
+                                    <input id="contractName" th:field="*{contractName}" name="contractName" class="form-control" type="text"
+                                           onclick="selectCon('contractId','contractName')">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            <tr>
+                                <td class="active">备注</td>
+                                <td>
+                                    <input id="remark" th:field="*{remark}"  name="remark" class="form-control" type="text">
+                                </td>
+                                <td class="active">申请日期</td>
+                                <td>
+                                    <input required th:value="${#dates.format(oaProjectGoodsReceive.createTime, 'yyyy-MM-dd HH:mm:ss')}" id="createTime" name="createTime" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="col-sm-12 select-table table-striped">
+                        <div class="fixed-table-container">
+                            <div class="btn-group-sm" id="toolbar1" role="group">
+                                <a class="btn btn-success" onclick="selectGoodsByType()"
+                                   th:if="${oaProjectGoodsReceive.status=='3'}"> <i class="fa fa-plus"></i>
+                                    新增领用物资
+                                </a> <a th:if="${oaProjectGoodsReceive.status=='3'}"
+                                        class="btn btn-danger multiple"
+                                        onclick="removeRow('bootstrap-table')"> <i
+                                    class="fa fa-remove"></i> 删除选择行
+                            </a> <a th:if="${oaProjectGoodsReceive.status=='3'}" class="btn btn-danger"
+                                    onclick="removeRowAll('bootstrap-table')"> <i
+                                    class="fa fa-remove"></i> 删除所有行
+                            </a>
+                            </div>
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="processTableId" data-mobile-responsive="true"></table>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()" th:if="${oaProjectGoodsReceive.status} == '99'">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    th:if="${oaProjectGoodsReceive.status} == '99'"
+                                    onclick="submitHandlerDraft()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    th:if="${oaProjectGoodsReceive.status} == '3'" onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:if="${oaProjectGoodsReceive.status!='2'&&oaProjectGoodsReceive.status!='16'&&oaProjectGoodsReceive.status!='99'}"
+                                    onclick="urge()">
+                                <i class="fa fa-check"></i>催办
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" th:if="${oaProjectGoodsReceive.status} != '99'"
+                                    th:onclick="selectUser('','','0',[[${oaProjectGoodsReceive.id}]],'oa/oaProjectGoodsReceive/copy')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaProjectGoodsReceive";
+    var lastNodeId = [[${oaProjectGoodsReceive.id}]];
+    var actDefineId = [[${oaProjectGoodsReceive.actDefineId}]];
+    var lastStatus = [[${oaProjectGoodsReceive.status}]];
+    //流程
+    var data = {};
+    data.procInstId = [[${oaProjectGoodsReceive.procInstId}]];
+    data.id = [[${oaProjectGoodsReceive.id}]];
+    selectActProcessList(data, "processTableId");
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            var rowData = $('#bootstrap-table').bootstrapTable('getData');
+            var tar = new Array();
+            if (rowData != null && rowData.length > 0) {
+                for (var i = 0; i < rowData.length; i++) {
+                    var obj = {};
+                    obj.num = rowData[i].useStock;
+                    obj.goodsId = rowData[i].id;
+                    tar.push(obj);
+                }
+            }
+            var data = $('#form-oaProjectGoodsReceive-edit').serializeObject();
+            data.receiveDetailList = tar;
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/edit", data);
+        }
+    }
+
+    //提交草稿
+    function submitHandlerDraft() {
+        if ($.validate.form()) {
+            var rowData = $('#bootstrap-table').bootstrapTable('getData');
+            var tar = new Array();
+            if (rowData != null && rowData.length > 0) {
+                for (var i = 0; i < rowData.length; i++) {
+                    var obj = {};
+                    obj.num = rowData[i].useStock;
+                    obj.goodsId = rowData[i].id;
+                    tar.push(obj);
+                }
+            }
+            var data = $('#form-oaProjectGoodsReceive-edit').serializeObject();
+            data.receiveDetailList = tar;
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/submitDraft", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        if ($.validate.form()) {
+            var rowData = $('#bootstrap-table').bootstrapTable('getData');
+            var tar = new Array();
+            if (rowData != null && rowData.length > 0) {
+                for (var i = 0; i < rowData.length; i++) {
+                    var obj = {};
+                    obj.num = rowData[i].useStock;
+                    obj.goodsId = rowData[i].id;
+                    tar.push(obj);
+                }
+            }
+            var data = $('#form-oaProjectGoodsReceive-edit').serializeObject();
+            data.receiveDetailList = tar;
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+    }
+
+    var datas = [[${@dict.getType('oa_project_goods_type')}]];
+    var options = {
+        modalName: "系统物资",
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        url: ctx + "oa/oaProjectGoodsReceiveDetail/selectDetailsByReceiveId?receiveId=" + [[${oaProjectGoodsReceive.id}]],
+        columns: [{
+            checkbox: true
+        },
+            {
+                field: 'id',
+                title: 'id',
+                visible: false
+            },
+            {
+                field: 'goodsType',
+                title: '物资类型',
+                sortable: true,
+                formatter: function (value, row, index) {
+                    return $.table.selectDictLabel(datas, value);
+                }
+            },
+            {
+                field: 'goodsName',
+                title: '物资名称',
+                sortable: true
+            },
+            {
+                field: 'totalStock',
+                title: '物资数量',
+                sortable: true
+            },
+            {
+                field: 'useStock',
+                title: '领用数量',
+                sortable: true,
+                editable: {
+                    type: 'text',
+                    title: '数量',
+                    emptytext: "【数量】必填！",
+                    validate: function (value) {
+                        if (isNaN(value)) {
+                            return '只能输入数字！';
+                        }
+                    }
+                }
+            },
+            {
+                field: 'unit',
+                title: '单位',
+                sortable: true
+            },
+            {
+                field: 'price',
+                title: '单价',
+                sortable: true
+            },
+            {
+                field: 'brand',
+                title: '规格型号',
+                sortable: true
+            },
+            {
+                field: 'inDate',
+                title: '入库日期',
+                sortable: true
+            },
+            {
+                field: 'remark',
+                title: '备注',
+                sortable: true
+            }]
+    };
+    $.table.init(options);
+    //图片反显出来
+    var attachmentList = new Array();
+    $(function () {
+        var config = {
+            url: ctx + "oa/oaAttachment/selectAttachByObjectId",
+            type: "post",
+            dataType: "json",
+            data: {"objId": [[${oaProjectGoodsReceive.id}]]},
+            success: function (result) {
+                var imgsUrl = new Array();
+                var attachList = result.data;
+                if (attachList != null && attachList.length > 0) {
+                    var downloadConfig = new Array();
+                    for (var i = 0; i < attachList.length; i++) {
+                        var down = {};
+                        var attach = attachList[i];
+                        imgsUrl.push(attach.attachmentName);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig.push(down);
+                        attachmentList.push({
+                            "objectId": [[${oaProjectGoodsReceive.id}]],
+                            "attachmentName": attach.attachmentName,
+                            "fileName": attach.fileName
+                        })
+                    }
+                    var option1 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        //deleteExtraData:deleteExtraData,
+                        imgsUrl: imgsUrl,
+                        downloadConfig: downloadConfig
+                    }
+                    $.common.uploadFile(option1);
+                } else {
+                    var option2 = {
+                        id: 'uploadFileId',
+                        uploadUrl: null,
+                        deleteUrl: null,
+                        deleteExtraData: null,
+                        imgsUrl: new Array(),
+                        initialPreviewConfig: null
+                    }
+                    $.common.uploadFile(option2);
+                }
+            }
+        };
+        $.ajax(config)
+    });
+
+    function selectGoodsByType() {
+        var selectVal = $("#goodsType").val();
+        if (selectVal == null || selectVal == '') {
+            $.modal.alertWarning("请先选择领用的物资类型！！！");
+            return;
+        }
+        var options = {
+            title: '选择物资',
+            width: "1200",
+            url: prefix + "/toSelectGoods/" + $("#goodsType").val(),
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        /* var row = $('#bootstrap-table').bootstrapTable('getSelections');
+        if(row.length<=0){
+            $.modal.alertWarning('请先选择要操作的记录！');
+            return;
+        }
+        var ids = $.map($('#bootstrap-table').bootstrapTable('getSelections'), function (row) {
+                return row["id"];
+            });
+        $("#bootstrap-table").bootstrapTable('remove', {
+            field: 'id',
+            values: ids
+        }); */
+        console.log(result)
+        var randomId = 100 + ~~(Math.random() * 100);
+        for (var i = 0; i < result.length; i++) {
+            var data = result[i];
+            insertRow('bootstrap-table', data)
+        }
+    };
+
+    function insertRow(id, data) {
+        var tableRow = null;
+        var randomId = 100 + ~~(Math.random() * 100);
+
+        tableRow = data;
+        tableRow.num = '';
+        var countDate = $("#bootstrap-table").bootstrapTable('getData');
+        if (isHas(countDate, data.id) == false) {
+            $("#" + id).bootstrapTable('insertRow', {
+                index: 0, // 你想插入到哪，0表示第一行
+                row: tableRow
+            })
+        }
+
+
+    }
+
+    //判断是否已经添加
+    function isHas(data, id) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id == id) {
+                isTF = true;
+            }
+        }
+        return isTF;
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(id) {
+        var ids = $.map($('#' + id).bootstrapTable('getSelections'), function (row) {
+            return row["id"];
+        });
+        if (ids.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        $("#" + id).bootstrapTable('remove', {
+            field: 'id',
+            values: ids
+        })
+    }
+
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $("#" + id).bootstrapTable('removeAll')
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('审批请假申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaLeave-edit" th:object="${oaLeave}">
+                        <input id="leaveId" name="leaveId" th:field="*{leaveId}" type="hidden">
+                        <input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>请假申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">申请人</td>
+                                <td>
+                                    <input name="proposer" type="hidden" id="proposer" th:value="*{proposer}"/>
+                                    <input name="procInstId" type="hidden" id="procInstId" th:value="*{procInstId}"/>
+                                    <input th:value="${user.userName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                                <td class="active">归属部门</td>
+                                <td>
+                                    <input name="deptId" type="hidden" id="deptId" th:value="*{deptId}"/>
+                                    <input th:value="${user.dept.deptName}" autocomplete="off" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">请假日期从</td>
+                                <td>
+                                    <input id="applyTimeFrom" readonly="readonly" name="applyTimeFrom"
+                                           placeholder="请假开始时间" autocomplete="off"
+                                           class="form-control time-input" type="text"
+                                           th:value="${#dates.format(oaLeave.applyTimeFrom, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                                <td class="active">请假日期到</td>
+                                <td>
+                                    <input id="applyTimeTo" readonly="readonly" name="applyTimeTo" placeholder="请假结束时间"
+                                           autocomplete="off"
+                                           class="form-control time-input" type="text"
+                                           th:value="${#dates.format(oaLeave.applyTimeTo, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>请假时数</td>
+                                <td>
+                                    <input id="leaveDays" th:field="*{leaveDays}" name="leaveDays" class="form-control"
+                                           type="text" readonly="readonly" required="required">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>请假类别</td>
+                                <td>
+                                    <select name="leaveType" class="form-control"
+                                            th:with="type=${@dict.getType('oa_leave_type')}" th:field="*{leaveType}"
+                                            disabled="disabled">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">剩余年假时数</td>
+                                <td>
+                                    <input id="yearHoliday" name="yearHoliday" th:field="*{yearHoliday}"
+                                           class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">职务代理人</td>
+                                <td>
+                                    [[*{deputyName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>请假原因</td>
+                                <td>
+                                    <input id="leaveReason" name="leaveReason" th:field="*{leaveReason}"
+                                           class="form-control" type="text" required="required" readonly="readonly">
+                                </td>
+                                <td class="active">备注</td>
+                                <td>
+                                    <input id="remark" name="remark" th:field="*{remark}" class="form-control"
+                                           type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>状态</td>
+                                <td>
+                                    <select class="form-control" name="status"
+                                            th:with="type=${@dict.getType('oa_leave_status')}" th:field="*{status}"
+                                            disabled="disabled">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">创建日期</td>
+                                <td>
+                                    <input readonly="readonly" class="form-control" id="createTime" name="createTime"
+                                           th:value="${#dates.format(oaLeave.createTime, 'yyyy-MM-dd HH:mm:ss')}"
+                                           type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:onclick="selectUser('','','0',[[${oaLeave.leaveId}]],'oa/oaLeave/copy','flag')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaLeave";
+    var lastNodeId = [[${oaLeave.leaveId}]];
+    var actDefineId = [[${oaLeave.actDefineId}]];
+    var lastStatus = [[${oaLeave.status}]];
+    //流程
+    var data = {};
+    data.procInstId = [[${oaLeave.procInstId}]];
+    data.id = [[${oaLeave.leaveId}]];
+    selectActProcessList(data);
+
+    //同意
+    function agree() {
+        $.modal.open("同意备注", ctx + "oa/task/agree/" + $("#taskId").val() + "/1/oa_leave/" + [[${oaLeave.leaveId}]]);
+    }
+
+    //不同意
+    function disagree() {
+        $.modal.open("不同意原因", ctx + "oa/task/disagree/" + $("#taskId").val() + "/1/oa_leave/" + [[${oaLeave.leaveId}]]);
+    }
+
+    //返回
+    function backAway() {
+        $.modal.close();
+        var parent = window.parent;
+        parent.$.table.refresh();
+    }
+
+
+</script>
+</body>
+</html>

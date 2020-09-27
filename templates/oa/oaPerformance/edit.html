@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改业绩申请')" />
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <style>
+        .tender-company-select{
+            position: relative;
+        }
+        .tender-company-select a{
+            display: block;
+            width: 80px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            border: 1px solid #e5e6e7;
+            outline: none;
+            text-align: center;
+            line-height: 34px;
+            background: #EFEFEF;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-oaPerformance-edit" th:object="${oaPerformance}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <table class="table table-bordered table-condensed">
+                                <caption class="text-center">
+                                    <h2>业绩库</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">项目名称：</td>
+                                    <td>
+                                        <div class="tender-company-select">
+                                            <input id="projectId" name="projectId" type="hidden" th:field="*{projectId}"/>
+                                            <input id="proName" th:field="*{projectName}" class="form-control" type="text"
+                                                   onclick="selectPro('projectId','proName')">
+                                            <!--                                        <a onclick="selectPro('projectId','proName')">选择项目</a>-->
+                                        </div>
+
+                                    </td>
+                                    <td class="active">业绩编号：</td>
+                                    <td>
+                                        <input id="code" name="code" class="form-control" type="text" th:field="*{code}" >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">业绩类型：</td>
+                                    <td>
+                                        <select id="type" name="type" class="form-control" th:field="*{type}"
+                                                th:with="type=${@dict.getType('business_engineer_type')}">-->
+                                            <option value="">------所有------</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                    th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                    <td class="active">公司名称：</td>
+                                    <td>
+                                        <input type="hidden" id="CompanyId" name="companyId" th:field="*{companyId}"/>
+                                        <input type="text" id="CompanyName" th:field="*{companyName}" class="form-control"
+                                               onclick="selectDeptTree('CompanyId','CompanyName','0')"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">部门名称：</td>
+                                    <td>
+                                        <input type="hidden" name="deptId" id="treeId" th:field="*{deptId}"/>
+                                        <input type="text" id="treeName" th:field="*{deptName}" class="form-control"
+                                               onclick="selectDeptTree('treeId','treeName','1')"/>
+                                    </td>
+                                    <td class="active">建设单位：</td>
+                                    <td>
+                                        <input id="constructUnit" th:field="*{constructUnit}" name="constructUnit" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">开工日期：</td>
+                                    <td>
+                                        <div class="input-group data">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input id="openDate" name="openDate" class="form-control time-input" type="text" th:value="${#dates.format(oaPerformance.openDate, 'yyyy-MM-dd HH:mm:ss')}">
+                                        </div>
+
+                                    </td>
+                                    <td class="active">建造师：</td>
+                                    <td>
+                                        <input id="buildPerson" th:field="*{buildPerson}" name="buildPerson" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">竣工日期：</td>
+                                    <td>
+                                        <div class="input-group data">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input id="closeDate" name="closeDate" th:value="${#dates.format(oaPerformance.closeDate, 'yyyy-MM-dd HH:mm:ss')}" class="form-control time-input" type="text">
+                                        </div>
+
+                                    </td>
+                                    <td class="active">工程状态：</td>
+                                    <td>
+
+                                        <select id="projectType" name="projectType" class="form-control" th:field="*{projectType}"
+                                                th:with="type=${@dict.getType('sys_pro_status')}">-->
+                                            <option value="">------所有------</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                    th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">中标日期：</td>
+                                    <td colspan="3">
+                                        <div class="input-group data">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input id="winBidTime" name="winBidTime" th:value="${#dates.format(oaPerformance.winBidTime, 'yyyy-MM-dd HH:mm:ss')}" class="form-control time-input" type="text">
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                                <tr th:class="${@permission.hasPermi('oa:oaPerformance:role1')}">
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="btn-group-sm" id="toolbar" role="group">
+                            <a class="btn btn-success" data-toggle="modal" onclick="insertCondition('bootstrap-table')"> <i
+                                    class="fa fa-plus"></i> 新增
+                            </a> <a class="btn btn-danger multiple"
+                                    onclick="removeRow('bootstrap-table')"> <i class="fa fa-remove"></i>
+                            删除选择明细
+                        </a> <a class="btn btn-danger" onclick="removeRowAll('bootstrap-table')">
+                            <i class="fa fa-remove"></i> 删除所有
+                        </a>
+                            <a class="btn btn-warning" data-toggle="modal" onclick="insertConditionAll('bootstrap-table')"> <i
+                                    class="fa fa-plus"></i> 新增全部
+                            </a>
+                        </div>
+                        <div class="col-sm-12 select-table table-striped">
+                            <h4>业绩库证明材料明细</h4>
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                        <div class="btn-group-sm" id="toolbar1" role="group">
+                            <a class="btn btn-success" data-toggle="modal" onclick="insertCondition('bootstrap-table1')"> <i
+                                    class="fa fa-plus"></i> 新增
+                            </a> <a class="btn btn-danger multiple"
+                                    onclick="removeRow('bootstrap-table1')"> <i class="fa fa-remove"></i>
+                            删除选择明细
+                        </a> <a class="btn btn-danger" onclick="removeRowAll('bootstrap-table1')">
+                            <i class="fa fa-remove"></i> 删除所有行
+                        </a>
+                        </div>
+                        <div class="col-sm-12 select-table table-striped">
+                            <h4>业绩指标明细</h4>
+                            <table id="bootstrap-table1" data-mobile-responsive="true"></table>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10">
+                                <br>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>修改
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js"/>
+    <script type="text/javascript" th:inline="javascript">
+		var prefix = ctx + "oa/oaPerformance";
+        var performanceType = [[${@dict.getType('oa_performance_type')}]];
+
+        //封装一下明细数据
+        function performanceTypeF(){
+            var arry=performanceType
+            for (var i = 0; i < arry.length; i++) {
+                arry[i].value = arry[i].dictValue
+                arry[i].text = arry[i].dictLabel
+            }
+            return  arry
+        }
+        var attachmentList = new Array();
+        //图片反显出来
+        $(function () {
+            var config = {
+                url: ctx + "oa/oaAttachment/selectAttach",
+                type: "post",
+                dataType: "json",
+                data: {"objectId": [[${oaPerformance.id}]] ,"sourceTable":"oa_performance"},
+                success: function (result) {
+                    var imgsUrl = new Array();
+                    var attachList = result.data;
+                    if (attachList != null && attachList.length > 0) {
+                        var downloadConfig = new Array();
+                        for (var i = 0; i < attachList.length; i++) {
+                            var down = {};
+                            var attach = attachList[i];
+                            imgsUrl.push(attach.attachmentUrl);
+                            down.key = attach.attachmentName;
+                            down.caption = attach.fileName;
+                            down.extra = {"fileName": attach.attachmentName, "tableName": "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                            if (isAssetTypeAnImage(attach.attachmentName)) {
+                                down.type = 'image';
+                            } else {
+                                down.type = 'object';
+                            }
+                            downloadConfig.push(down);
+                            attachmentList.push({
+                                "objectId": [[${oaPerformance.id}]],
+                                "attachmentName": attach.attachmentName,
+                                "fileName": attach.fileName
+                            })
+                        }
+                        var option1 = {
+                            id: 'uploadFileId',
+                            uploadUrl: null,
+                            deleteUrl: null,
+                            //deleteExtraData:deleteExtraData,
+                            imgsUrl: imgsUrl,
+                            downloadConfig: downloadConfig
+                        }
+                        $.common.uploadFile(option1);
+                    } else {
+                        var option2 = {
+                            id: 'uploadFileId',
+                            uploadUrl: null,
+                            deleteUrl: null,
+                            deleteExtraData: null,
+                            imgsUrl: new Array(),
+                            initialPreviewConfig: null
+                        }
+                        $.common.uploadFile(option2);
+                    }
+                }
+            };
+            $.ajax(config)
+        });
+
+        function onEditableSave(field, row, oldValue, $el) {
+            alert("字段名：" + field + "，当前值：" + row[field] + "，旧值：" + oldValue);
+        }
+
+        //绩库证明材料明细
+        var options = {
+            modalName: "绩库证明材料明细",
+            url:ctx+'oa/oaPerformanceEvidenceDetail/list',
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: true,
+            onEditableSave: onEditableSave,
+            queryParams:{'performactId':[[${oaPerformance.id}]]},
+            columns: [{
+                checkbox: true
+            }, {
+                field: 'id',
+                title: 'id',
+                visible: false,
+                align: 'center'
+            }, {
+                field: 'type',
+                title: '材料类型',
+                //sortable: true,
+                editable: {
+                    type: 'select',
+                    title: '材料类型',
+                    source: performanceTypeF()
+                }
+            }, {
+                field: 'notBorrow',
+                title: '未借出',
+                //sortable: true,
+                editable: true,
+                align: 'center'
+            }, {
+                field: 'totalStore',
+                title: '总库存',
+                //sortable: true,
+                editable: true,
+                align: 'center'
+            }, {
+                field: 'alreadyBorrow',
+                title: '已借出',
+                //sortable: true,
+                editable: true,
+                align: 'center'
+            }]
+        };
+        $.table.init(options);
+        //业绩指标明细
+        var options1 = {
+            id: 'bootstrap-table1',
+            toolbar: 'toolbar1',
+            url:ctx+'oa/oaPerformanceTargetDetail/list',
+            modalName: "业绩指标明细",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: true,
+            onEditableSave: onEditableSave,
+            queryParams:{'performactId':[[${oaPerformance.id}]]},
+            columns: [{
+                checkbox: true
+            }, {
+                field: 'id',
+                title: 'id',
+                visible: false,
+                align: 'center'
+            }, {
+                field: 'performactTarget',
+                title: '业绩指标',
+                //sortable: true,
+                editable: true
+            }, {
+                field: 'targetValue',
+                title: '值',
+                //sortable: true,
+                editable: true,
+                align: 'center'
+            }]
+        };
+        $.table.init(options1);
+
+        //新增
+        function insertCondition(id) {
+            var form_data = {}
+            var randomId = 100 + ~~(Math.random() * 100);
+            if (id == 'bootstrap-table') {
+                form_data = {
+                    'type': '',
+                    'totalStore': '0',
+                    'notBorrow': '0',
+                    'alreadyBorrow': '0'
+                }
+            } else {
+                form_data = {
+                    'performactTarget': '',
+                    'targetValue': 0,
+                }
+            }
+            form_data.id = randomId
+            $("#" + id).bootstrapTable('insertRow', {
+                index: 0, // 你想插入到哪，0表示第一行
+                row: form_data
+            })
+            $.modal.close();
+        }
+        //新增全部
+        function insertConditionAll(id){
+            var list=performanceTypeF()
+            for (var i = 0; i < list.length; i++) {
+                var randomId = 100 + ~~(Math.random() * 100);
+                var form_data={
+                    'type': list[i].dictValue,
+                    'totalStore': '0',
+                    'notBorrow': '0',
+                    'alreadyBorrow': '0'
+                }
+                form_data.id = randomId
+                $("#" + id).bootstrapTable('insertRow', {
+                    index: 0, // 你想插入到哪，0表示第一行
+                    row: form_data
+                })
+            }
+
+        }
+
+        /* 删除指定表格行 */
+        function removeRow(id) {
+            var ids = $.map($('#' + id).bootstrapTable('getSelections'),
+                function (row) {
+                    return row["id"];
+                });
+            if (ids.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $("#" + id).bootstrapTable('remove', {
+                field: 'id',
+                values: ids
+            })
+        }
+
+        /* 删除所有表格行 */
+        function removeRowAll(id) {
+            $("#" + id).bootstrapTable('removeAll')
+        }
+        //修改
+        function submitHandler() {
+            var data={}
+            data.oaPerformance = $('#form-oaPerformance-edit').serializeObject()
+            data.evidenceDetailList = $("#bootstrap-table").bootstrapTable('getData');
+            data.targetDetailList = $("#bootstrap-table1").bootstrapTable('getData');
+            data.attachmentList = attachmentList
+            if ($.validate.form()) {
+                $.operate.saveJsonTab(prefix + "/modifyPerformance", data);
+            }
+	    }
+	</script>
+</body>
+</html>

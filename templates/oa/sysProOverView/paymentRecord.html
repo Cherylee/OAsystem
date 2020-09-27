@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('缴纳记录')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body class="white-bg">
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="hidden" name="projectId" th:value="${projectId}">
+                            <input type="text" style="width: 100px" class="overview-select-input" name="taxationBureau"  placeholder="税务机关"/>
+                        </li>
+                        <li>
+                            <p>申请日期：</p>
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                            -
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                        </li>
+                        <li>
+                            税额总计
+                            <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                            -
+                            <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                            元
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/sysProPrepaidTax";
+    $(function() {
+        var options = {
+            url:prefix+'/selectProPrepaidTaxData',
+            modalName: "扣款明细",
+            updateUrl: prefix2 + "/edit/{id}",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]]},
+            columns: [
+                {
+                    title : '',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+                    },
+                    footerFormatter:function (value) {
+                        return '小计';
+                    }
+                },
+                {
+                    field : 'code',
+                    title : '编号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'applyTime',
+                    title : '申请日期',
+                    sortable: true
+                },
+                {
+                    field : 'taxationBureau',
+                    title : '税务机关',
+                    sortable: true
+                },
+                {
+                    field : 'salesAmount',
+                    title : '销售金额',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].salesAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'totalTax',
+                    title : '税额总计',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].totalTax);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'detailCount',
+                    title : '税票数量',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].detailCount);
+                        }
+                        return sumBalance+'张';
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

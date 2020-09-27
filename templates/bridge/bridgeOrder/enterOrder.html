@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('用户列表')" />
+	<th:block th:include="include :: layout-latest-css" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="gray-bg">
+<div class="container-div ui-layout-center">
+     <div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								工程编号：<input type="text" name="code"/>
+							</li>
+
+							<li>
+								工程名称：<input type="text" name="name"/>
+							</li>
+
+							<li>
+								项目缩写：<input type="text" name="briefCode"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		
+</div>
+
+
+
+<div th:include="include :: footer"></div>
+<script>
+
+	//查询数据
+	/* var config = {
+		contentType : "application/json;charset=UTF-8",
+		url : ctx + "bridge/bridgeProject/list",
+		type : "post",
+		beforeSend : function() {
+			$.modal.loading("正在处理中，请稍后...");
+		},
+		success : function(result) {
+			console.log(result);
+			
+			$.modal.closeLoading();
+
+		}
+	};
+	$.ajax(config) */
+	
+	var prefix = ctx + "bridge/bridgeProject";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                modalName: "工程项目",
+                clickToSelect : true,
+                columns: [{
+                	radio: true
+		        },
+				{
+					field : 'id', 
+					title : '工程项目id',
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '工程编号',
+					sortable: true
+				},
+				{
+					field : 'name', 
+					title : '工程名称',
+					sortable: true
+				},
+				{
+					field : 'briefCode', 
+					title : '项目缩写',
+					sortable: true
+				},
+				{
+					field : 'client', 
+					title : '所属客户',
+					sortable: true
+				},
+				{
+					field : 'usePlace', 
+					title : '工程用途',
+					sortable: true
+				},
+				{
+					field : 'chargePersonId', 
+					title : '工程负责人id',
+					sortable: true
+				},
+				{
+					field : 'contactPersonName', 
+					title : '联系人姓名',
+					sortable: true
+				},
+				{
+					field : 'contactPhone', 
+					title : '联系人电话',
+					sortable: true
+				},
+				{
+					field : 'detailAddr', 
+					title : '详细地址',
+					sortable: true
+				},
+				{
+					field : 'zipCode', 
+					title : '邮政编码',
+					sortable: true
+				},
+				{
+					field : 'constructUnit', 
+					title : '建设单位',
+					sortable: true
+				},
+				{
+					field : 'designUnit', 
+					title : '设计单位',
+					sortable: true
+				},
+				{
+					field : 'workingUnit', 
+					title : '施工单位',
+					sortable: true
+				},
+				{
+					field : 'monitorUnit', 
+					title : '监督单位',
+					sortable: true
+				},
+				{
+					field : 'planStartDate', 
+					title : '计划开工时间',
+					sortable: true
+				},
+				{
+					field : 'planEndDate', 
+					title : '计划完工时间',
+					sortable: true
+				},
+				{
+					field : 'difficultPoint', 
+					title : '项目重难点',
+					sortable: true
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '更新者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '更新时间',
+					sortable: true,
+					visible: false
+				}]
+            };
+            $.table.init(options);
+        });
+        
+        /* 添加用户-选择用户-提交 */
+		function submitHandler() {
+			var target =$('#bootstrap-table').bootstrapTable('getSelections');
+			
+			
+        	if ($.table.selectColumns("id").length == 0) {
+    			$.modal.alertWarning("请至少选择一条记录");
+    			return;
+    		}
+        	
+			$.modal.close();
+			return target[0];
+			
+		}
+</script>
+</body>
+</html>

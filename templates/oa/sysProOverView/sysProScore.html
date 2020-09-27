@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('项目概况')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body>
+<div class="col-md-12" style="color: black">
+    <div class="box-center">
+        <div class="box-center-title">
+            项目评分<hr>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+
+<div th:include="include::footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/sysProScore";
+    $(function() {
+        var options = {
+            url:prefix2+'/list',
+            modalName: "项目评分",
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport: false,
+            showFooter:true,
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]]},
+            columns: [
+                {
+                    field : 'id',
+                    title : 'id',
+                    visible: false
+                },
+                {
+                    title : '',
+                    width:'30px',
+                    formatter: function (value, row, index) {
+                        console.log(row)
+                        return $.table.serialNumber(index);
+                    }
+                },
+                {
+                    field : 'personnelName',
+                    title : '评分人员',
+                    sortable: true
+                },
+                {
+                    field : 'companyName',
+                    title : '公司名称',
+                    sortable: true
+                },
+                {
+                    field : 'deptName',
+                    title : '所属部门',
+                    sortable: true
+                },
+                {
+                    field : 'score',
+                    title : '分数',
+                    sortable: true,
+                    formatter:function(value, row, index){
+                      if (row.status=='0'){
+                          return '未评分';
+                      }else {
+                          return value+'分';
+                      }
+                    },
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        var sum=0;
+                        for (var i in value) {
+                            if (value[i].status == '1') {
+                                sum++;
+                                sumBalance += parseFloat(value[i].score);
+                            }
+
+                        }
+                        if(sum==0){
+                            return '占未有人评分'
+                        }else {
+                            return '平均得分：'+(sumBalance/sum).toFixed(2) +'分';
+                        }
+
+                    }
+                },
+                {
+                    field : 'remark',
+                    title : '备注',
+                    sortable: true
+                }]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('关联合同申请审批')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaPaymentOweContract-edit" th:object="${oaPaymentOweContract}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="taskId" name="taskId" th:value="${taskId}"
+                               type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>关联合同审批</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">支付单据编号</td>
+                                <td>
+                                    [[*{code}]]
+                                </td>
+                                <td class="active">申请人</td>
+                                <td>
+                                    [[*{userName}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">项目名称</td>
+                                <td>
+                                    [[*{projectName}]]
+
+                                </td>
+                                <td class="active">对方公司（开票方）</td>
+                                <td>
+                                    [[*{payee}]]
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">我方公司（收票方）:</td>
+                                <td>
+                                    [[*{drawee}]]
+
+                                </td>
+                                <td class="active">金额:</td>
+                                <td>
+                                    [[*{money}]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">补合同截止日期:</td>
+                                <td>
+                                    [[${#dates.format(oaPaymentOweContract.contractExpirationDate, 'yyyy-MM-dd HH:mm:ss')}]]
+                                </td>
+                                <td class="active">备注:</td>
+                                <td>
+                                    [[*{remark}]]
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>关联合同</td>
+                                <td>[[*{contractName}]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="agree()" th:if=" ${hisFlag} ne '1'">同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="approveTaskId" data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/oaPaymentOweContract";
+
+        //同意
+        function agree() {
+            $.modal.open("同意备注", ctx + "oa/task/agree/" + $("#taskId").val() + "/400/" + [[${oaPaymentOweContract.id}]] + "/oa_payment_owe_contract");
+        }
+
+        //不同意
+        function disagree() {
+            $.modal.open("不同意原因", ctx + "oa/task/disagree/" + $("#taskId").val() + "/400/" + [[${oaPaymentOweContract.id}]] + "/oa_payment_owe_contract");
+        }
+
+        //返回
+        function backAway() {
+            $.modal.close();
+            var parent = window.parent;
+            parent.$.table.refresh();
+        }
+
+        //流程
+        var data = {};
+        data.procInstId = [[${oaPaymentOweContract.procInstId}]];
+        data.id = [[${oaPaymentOweContract.id}]];
+        selectActProcessList(data, 'approveTaskId');
+    </script>
+</body>
+</html>

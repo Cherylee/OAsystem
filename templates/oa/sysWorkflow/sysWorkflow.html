@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('工程工作流配置主列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+
+							<li>
+								工作流名称：<input type="text" name="workFlowName"/>
+							</li>
+
+							<li>
+								工作流描述：<input type="text" name="content"/>
+							</li>
+
+							<li>
+								<p>项目：</p>
+								<input class="form-control" id="proName" type="text"  onclick="selectPro('proId','proName')" />
+								<input type="hidden" id="proId" name="proId" />
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:sysWorkflow:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:sysWorkflow:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:sysWorkflow:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:sysWorkflow:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+				<a class="btn btn-success" onclick="copyWorkFlow()">
+						<i class="fa fa-copy"></i> 复制审批流
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+
+	<!--复制审批流弹框-->
+	 <div class="modal inmodal fade" id="copyModel" role="dialog" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+			 <div class="modal-content">
+				 <div class="modal-header">
+					 <button type="button" class="close" data-dismiss="modal">
+						 <span aria-hidden="true">&times;</span>
+					 </button>
+				 </div>
+				 <div class="modal-body ">
+					 <form class="form-horizontal m" id="form-copyModel-add">
+						 <div>
+							 <div class="form-group">
+								 <label class="col-sm-3 control-label"><span style="color: red; ">*</span>待配置流程的项目：</label>
+								 <div class="col-sm-8">
+									 <input id="proId2" name="proId2" type="hidden" />
+									 <input id="proName2" name="proName2" class="form-control" type="text"
+											onclick="selectPro('proId2','proName2')" required="required">
+								 </div>
+							 </div>
+							 <div class="form-group">
+								 <label class="col-sm-3 control-label"><span style="color: red; ">*</span>选择已配流程的项目：</label>
+								 <div class="col-sm-8">
+									 <input id="proId3" name="proId3" type="hidden" />
+									 <input id="proName3" name="proName3" class="form-control" type="text"
+											onclick="selectPro('proId3','proName3')" required="required">
+								 </div>
+							 </div>
+						 </div>
+					 </form>
+				 </div>
+				 <div class="modal-footer">
+					 <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+					 <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="doCopyWorkflow()">确定</button>
+				 </div>
+			 </div>
+		 </div>
+	 </div>
+
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:sysWorkflow:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:sysWorkflow:remove')}]];
+        var workflowType = [[${@dict.getType('sys_workflow_type')}]];
+        var prefix = ctx + "oa/sysWorkflow";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "工程工作流配置主",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '审批配置主表id',
+					visible: false
+				},
+				{
+					field : 'companyId', 
+					title : '公司id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'deptId', 
+					title : '部门id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'proId', 
+					title : '项目id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'type', 
+					title : '类型',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(workflowType, value);
+		        	}
+				},
+				{
+					field : 'workFlowName', 
+					title : '工作流名称',
+					sortable: true
+				},
+				{
+					field : 'content', 
+					title : '工作流描述',
+					sortable: true
+				},
+				{
+					field : 'proName', 
+					title : '项目名称',
+					sortable: true
+				},
+				{
+					field : 'proCustom', 
+					title : '自定义项目编码',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建时间',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '更新者',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '更新时间',
+					sortable: true,
+					visible: false
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+
+        //复制审批流
+        function copyWorkFlow(){
+			$.form.reset('form-copyModel-add');//清空原有数据
+			$('#copyModel').modal("show");
+		}
+
+		function doCopyWorkflow() {
+			var formData = $('#form-copyModel-add').serializeObject();
+			var data = {};
+			data.sourceProId = formData.proId3;
+			data.tarProId = formData.proId2;
+			$.operate.saveModalRefresh(prefix+"/copyWorkFlow",data);
+		}
+
+    </script>
+</body>
+</html>

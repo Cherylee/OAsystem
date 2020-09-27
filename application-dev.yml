@@ -1,0 +1,130 @@
+# 开发环境配置
+server:
+  # 服务端口
+  port: 8081
+  servlet:
+    # 项目contextPath
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 800
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
+ 
+# Spring配置
+# 数据源配置
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      # 主库数据源，蛟龙科技数据库
+      master:
+        #url: jdbc:mysql://120.25.218.210:33069/ruoyi_yt_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        url: jdbc:mysql://119.3.250.133:3306/ruoyi?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        username: root
+        password: JIAOLONGtech@123.
+      # 从库数据源
+      slave:
+        # 从数据源开关/默认关闭
+        enabled: false
+        url:
+        username:
+        password:
+      # 初始连接数
+      initialSize: 5
+      # 最小连接池数量
+      minIdle: 10
+      # 最大连接池数量
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /monitor/druid/*
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+  # 文件上传
+  servlet:
+     multipart:
+       # 单个文件大小
+       max-file-size:  50MB
+       # 设置总上传的文件大小
+       max-request-size:  100MB
+  # 服务模块
+  devtools:
+    restart:
+      # 热部署开关
+      enabled: true
+  redis:
+    database: 0
+    host: 119.3.250.133
+    port: 6379
+    password: Aa123456A # 密码（默认为空）
+    timeout: 6000    # 连接超时时长（毫秒）
+    testOnBorrow: false
+    lettuce:
+      pool:
+        max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1     # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 10      # 连接池中的最大空闲连接
+        min-idle: 5       # 连接池中的最小空闲连接
+#activiti数据库类型
+activitidataType: mysql
+#在线预览配置
+jodconverter:
+  enabled: false
+  portNumbers: 8100
+  #portNumbers: 8101
+  maxTasksPerProcess: 10
+  officeHome : D:/soft_install/openoffice
+
+#设置邮件发送开关
+mail.key : false
+#设置邮件发送人
+mail.sender : 1291405803@qq.com
+#设置发送人昵称
+mail.nickname : 百川集团
+# JavaMailSender 邮件发送的配置
+spring.mail.host: smtp.qq.com
+spring.mail.username: 1291405803@qq.com
+spring.mail.properties.mail.smtp.socketFactory.port :  465
+spring.mail.properties.mail.smtp.socketFactory.class : javax.net.ssl.SSLSocketFactory
+spring.mail.properties.mail.smtp.socketFactory.fallback : false
+#QQ邮箱的授权码
+spring.mail.password: hcexiafmvklyfegh
+spring.mail.properties.mail.smtp.auth: true
+spring.mail.properties.mail.smtp.starttls.enable: true
+spring.mail.properties.mail.smtp.starttls.required: true
+spring.mail.default-encoding: UTF-8
+#freemarker配置
+spring.freemarker.content-type: text/html
+spring.freemarker.suffix: .ftl
+spring.freemarker.template-loader-path: classpath:/templates
+spring.freemarker.charset: UTF-8
+spring.freemarker.check-template-location: true

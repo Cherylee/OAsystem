@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('还印申请审批')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaSealReturn-edit" th:object="${oaSealReturn}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+							<input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>还印详情</h2>
+								</caption>
+								<tbody>
+								<tr>
+									<td class="active">操作类型：</td>
+									<td style="width: 35%">
+										<input id="optTypeName" value="用印申请" type="text" class="form-control" readonly>
+									</td>
+									<td class="active">状态：</td>
+									<td>
+										<select class="form-control" name="status" th:with="type=${@dict.getType('oa_leave_status')}" th:field="*{status}" disabled="disabled">
+											<option value="">所有</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="active">申请日期：</td>
+									<td>
+										<input id="createTime" name="createTime"
+											   th:value="${#dates.format(oaSealReturn.createTime, 'yyyy-MM-dd HH:mm:ss')}"
+											   class="form-control time-input" readonly="readonly" type="text" disabled>
+									</td>
+									<td class="active">申请人：</td>
+									<td>
+										<input name="proposer" type="hidden" id="proposer" th:value="*{proposer}" />
+										<input th:value="*{userName}" autocomplete="off" class="form-control" type="text" readonly="readonly">
+									</td>
+								</tr>
+								<tr>
+									<td class="active"><span style="color: red;">*</span>申请公司：</td>
+									<td>
+										<input type="hidden" name="companyId" id="companyId" th:value="*{companyId}" />
+										<input type="text" id="companyName" name="companyName" class="form-control" th:value="*{companyName}"
+											   onclick="selectDeptTree('companyId','companyName','0')" required="required" />
+									</td>
+									<td class="active"><span style="color: red;">*</span>申请部门：</td>
+									<td>
+										<input type="hidden" name="deptId" id="treeId" th:value="*{deptId}" />
+										<input type="text" id="treeName" name="deptName" class="form-control" th:value="*{deptName}"
+												 onclick="selectDeptTree('treeId','treeName','1')" required="required" />
+									</td>
+								</tr>
+								<tr>
+									<td class="active">快递单号：</td>
+									<td>
+										<input id="invoiceNum" name="invoiceNum" th:field="*{invoiceNum}" class="form-control" type="text">
+									</td>
+									<td class="active">备注：</td>
+									<td>
+										<input id="remark" name="remark" class="form-control" type="text" th:field="*{remark}">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">附件：</td>
+									<td colspan="3">
+										<div class="file-loading">
+											<input id="uploadFileId" type="file" multiple>
+										</div>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+						<!-- 添加印章 -->
+						<div class="col-sm-12 select-table table-striped">
+							<div class="fixed-table-container">
+								<table id="detailTable" data-mobile-responsive="true"></table>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-primary"
+										onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+								<button type="button" class="btn btn-sm btn-danger"
+										onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+								<button type="button" class="btn btn-sm btn-success"
+										th:onclick="selectUser('','','0',[[${oaSealReturn.id}]],'oa/oaSealReturn/copy','flag')">
+									抄送</button>
+								<button type="button" class="btn btn-sm btn-danger"
+										onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关闭
+								</button>
+							</div>
+						</div>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="bootstrap-table" data-mobile-responsive="true"></table>
+						</div>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="approveTaskId" data-mobile-responsive="true"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<th:block th:include="include :: lastNode" />
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaSealReturn";
+		var datas = [[${@dict.getType('oa_seal_type')}]];
+		var lastNodeId=[[${oaSealReturn.id}]];
+		var actDefineId=[[${oaSealReturn.actDefineId}]];
+		var lastStatus=[[${oaSealReturn.status}]];
+		//同意
+		function agree() {
+			$.modal.open("同意备注", ctx + "oa/task/agree/" + $("#taskId").val()
+					+ "/5/oa_seal_return/"+[[${oaSealReturn.id}]]);
+		}
+		//不同意
+		function disagree() {
+			$.modal.open("不同意原因", ctx + "oa/task/disagree/"
+					+ $("#taskId").val() + "/5/oa_seal_return/"+[[${oaSealReturn.id}]]);
+		}
+		//返回
+		function backAway() {
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaSealReturn.procInstId}]];
+    	data.id = [[${oaSealReturn.id}]];
+		selectActProcessList(data);
+		
+		
+		var attachmentList = new Array();
+        //图片反显出来
+        $(function () {
+        	var config = {
+        	        url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": [[${oaSealReturn.id}]]},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        			attachmentList.push({"objectId":[[${oaSealReturn.id}]],"attachmentName":attach.attachmentName,"fileName":attach.fileName})
+        	        		}
+        	        		var option1={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:'uploadFileId',
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+        	        }
+        	    };
+        	    $.ajax(config)
+        	
+	    });
+		var options1 = {
+			id : 'detailTable',
+			url: ctx + 'oa/oaSealReturnDetail/list',
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			uniqueId : 'id',
+			modalName : "明细",
+			showExport : false,
+			clickToSelect : true,
+			queryParams: {"mainId": [[${oaSealReturn.id}]]},
+			columns : [
+				{
+					field : 'sealId',
+					title : 'sealId',
+					visible: false
+				},
+				{
+					field : 'sealName',
+					title : '印章名称'
+				},
+				{
+					field : 'sealType',
+					title : '印章类型',
+					formatter: function (value, row, index) {
+						return $.table.selectDictLabel(datas, value);
+					}
+				}]
+
+		};
+		$(function() {
+			$.table.init(options1);
+		});
+
+	</script>
+</body>
+</html>

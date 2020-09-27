@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: select2-css" />
+	<th:block th:include="include :: header('同意')" />
+</head>
+<body>
+    <div class="form-content">
+        <form class="form-horizontal m" id="form-oa-disagree">
+        <input id="taskId" name="taskId" th:value="${taskId}"  type="hidden">
+        <input id="urlId" name="url" th:value="${url}"  type="hidden">
+        	<div class="form-group">	
+				<label class="col-sm-11 control-label" style="text-align: center;">备注：</label>
+			</div>
+        	<div class="form-group">	
+				<div class="col-sm-11">
+					<textarea id="opinion" name="opinion" class="form-control" required="required">同意</textarea>
+				</div>
+			</div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		$("#form-oaLeave-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	$.modal.loading("正在处理中，请稍后...");
+	        	 $.ajax({
+	        		type : "post",
+	        		url : ctx+[[${url}]],
+	        		dataType : "json",
+	        		data:{"opinion":$("#opinion").val(),"isLeaderPass":"Y","taskId":$("#taskId").val()},
+	        		success : function(res){
+	        			$.operate.successCallback(res);
+	        			var parent = window.parent;
+	        			parent.backAway();
+	        			
+	        		}
+	        	}); 
+	        }
+	    }
+		
+	</script>
+</body>
+</html>

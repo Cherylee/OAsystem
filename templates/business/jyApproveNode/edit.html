@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改经营部审批节点设定')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-jyApproveNode-edit" th:object="${jyApproveNode}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">副经理：</label>
+            <div class="col-sm-8">
+                 <input class="form-control" type="hidden" th:field="*{deputyManagerId}" name="deputyManagerId" id="deputyManagerId"   >
+			     <input id="deputyManagerName" th:field="*{deputyManagerName}" name="deputyManagerName" class="form-control" type="text" onclick="selectUserById('deputyManagerId','deputyManagerName')">
+            	
+            </div>
+        </div>
+    </div>
+	
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">部门经理：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="hidden" th:field="*{managerId}" name="managerId" id="managerId"  >
+			    <input id="managerName" name="managerName" th:field="*{managerName}" class="form-control" type="text" onclick="selectUserById('managerId','managerName')" >
+            	
+            </div>
+        </div>
+    </div>
+	
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">申请部门：</label>
+            <div class="col-sm-8">
+                <input type="hidden" name="deptId" th:field="*{deptId}"  class="form-control" id="treeId" /> 
+			    <input type="text" id="treeName" name="deptName" th:field="*{deptName}"  class="form-control"
+						onclick="selectDeptTree('treeId','treeName')"  />
+            	
+            </div>
+        </div>
+    </div>
+	
+	<!-- <div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建日期：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" th:field="*{createTime}" class="form-control" type="text" readonly>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建人：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" th:field="*{createBy}" class="form-control" type="text" readonly>
+            </div>
+        </div>
+    </div> -->
+	
+    <div class="row">
+				<div class="col-sm-offset-5 col-sm-10">
+					<button type="button" class="btn btn-sm btn-primary"
+						onclick="submitHandler()">
+						<i class="fa fa-check"></i>保 存
+					</button>
+					&nbsp;
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="closeItem()">
+						<i class="fa fa-reply-all"></i>关 闭
+					</button>
+				</div>
+			</div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "business/jyApproveNode";
+		$("#form-jyApproveNode-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		/*用户管理-新增-选择部门树*/
+		function selectDeptTree(id, deptName) {
+			divDeptId = id;
+			divDeptName = deptName;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : $("#" + id).val();
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit2(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#" + divDeptId).val(body.find('#treeId').val());
+				$("#" + divDeptName).val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+		//弹框选择人员
+		var domId=null;
+		var domName=null;
+		function selectUserById(id,name) {
+			domId = id;
+			domName=name
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+			$('#'+domId).val(data.userId)	
+			$('#'+domName).val(data.userName)	
+		}
+		
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/edit", $('#form-jyApproveNode-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

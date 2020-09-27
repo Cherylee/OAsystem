@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('样品处理记录列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								<input type="text" name="sampleName" placeholder="样品名称"/>
+							</li>
+
+							<li>
+								<select id="handleType" class="selectpicker" name="handleType" th:with="type=${@dict.getType('bridge_sample_handle_type')}">
+							         <option value=""> 处理类型 </option>
+							         <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					            </select>
+							</li>
+
+							<li class="select-time">
+								<label>处理时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="bridge:bridgeSampleHandle:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<!-- <a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="bridge:bridgeSampleHandle:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="bridge:bridgeSampleHandle:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a> -->
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="bridge:bridgeSampleHandle:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('bridge:bridgeSampleHandle:edit')}]];
+        var seniorEditFlag = [[${@permission.hasPermi('bridge:bridgeSampleHandle:seniorEdit')}]];
+        var deptAuditFlag = [[${@permission.hasPermi('bridge:bridgeSampleHandle:deptAudit')}]];
+        var inspectorAuditFlag = [[${@permission.hasPermi('bridge:bridgeSampleHandle:inspectorAudit')}]];
+        var removeFlag = [[${@permission.hasPermi('bridge:bridgeSampleHandle:remove')}]];
+        var bridgeSampleHandleType=[[${@dict.getType('bridge_sample_handle_type')}]];
+        var bridgeSampleHandleAuditStatus=[[${@dict.getType('bridge_sample_handle_audit_status')}]];
+        var prefix = ctx + "bridge/bridgeSampleHandle";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "样品处理记录",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'handleInfo.id', 
+					title : '处理记录id',
+					visible: false
+				},
+				{
+					field : 'sample.code', 
+					title : '样品代码',
+					sortable: true
+				},
+				{
+					field : 'sample.name', 
+					title : '样品名称',
+					sortable: true
+				},
+				{
+					field : 'handleInfo.handleWay', 
+					title : '处理方式',
+					sortable: true
+				},
+				{
+					field : 'handleInfo.handleDate', 
+					title : '处理日期',
+					sortable: true
+				},
+				{
+					field : 'responsePerson.userName', 
+					title : '责任人',
+					sortable: true
+				},
+				{
+					field : 'handleInfo.remark', 
+					title : '备注',
+					sortable: true
+				},	
+				{
+					field : 'handleInfo.handleType', 
+					title : '处理类型',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(bridgeSampleHandleType, value);
+		        	}
+				},
+				{
+					field : 'handleInfo.auditStatus', 
+					title : '审批状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(bridgeSampleHandleAuditStatus, value);
+		        	}
+				},
+				{
+		            title: '审批',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	if(row.handleInfo.handleType == 0){
+		            		if(row.handleInfo.auditStatus == 0){//待审批
+				            	actions.push('<a class="btn btn-success btn-xs" href="#" onclick="audit(\'' + row.handleInfo.id + '\',1)"><i class="fa fa-edit"></i>提交审批</a> ');
+		            		}else if(row.handleInfo.auditStatus == 1){//第一级审批
+		            			actions.push('<a class="btn btn-success btn-xs ' + deptAuditFlag + '" href="#" onclick="audit(\'' + row.handleInfo.id + '\',2)"><i class="fa fa-edit"></i>同意</a> ');
+		                        actions.push('<a class="btn btn-warning btn-xs ' + deptAuditFlag + '" href="#" onclick="audit(\'' + row.handleInfo.id + '\',0)"><i class="fa fa-remove"></i>驳回上一级</a>');
+		                        actions.push('<a class="btn btn-danger btn-xs ' + deptAuditFlag + '" href="#" onclick="audit(\'' + row.handleInfo.id + '\',4)"><i class="fa fa-remove"></i>取消</a>');
+		            		}else if(row.handleInfo.auditStatus == 2){//第二级审批
+		            			actions.push('<a class="btn btn-success btn-xs ' + inspectorAuditFlag + '" href="#" onclick="audit(\'' + row.handleInfo.id + '\',3)"><i class="fa fa-edit"></i>同意</a> ');
+		                        actions.push('<a class="btn btn-warning btn-xs ' + inspectorAuditFlag + '" href="#" onclick="audit(\'' + row.handleInfo.id + '\',1)"><i class="fa fa-remove"></i>驳回上一级</a>');
+		                        actions.push('<a class="btn btn-danger btn-xs ' + inspectorAuditFlag + '" href="#" onclick="audit(\'' + row.handleInfo.id + '\',4)"><i class="fa fa-remove"></i>取消</a>');
+		            		}else if(row.handleInfo.auditStatus == 3){//已审批
+				            	actions.push('<a class="btn btn-success btn-xs disabled" href="#" onclick="audit(\'' + row.handleInfo.id + '\',1)"><i class="fa fa-edit"></i>已审批</a> ');
+		            		}else{//已取消
+		                        actions.push('<a class="btn btn-danger btn-xs disabled" href="#" onclick="audit(\'' + row.handleInfo.id + '\',4)"><i class="fa fa-remove"></i>取消</a>');
+		            		}
+		            	}
+						return actions.join('');
+		            }
+		        },
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	if(row.handleInfo.handleType == 0){
+		            		if(row.handleInfo.auditStatus == 0){
+				            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.handleInfo.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.handleInfo.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+		            		}else if(row.handleInfo.auditStatus == 1 || row.handleInfo.auditStatus == 2){
+				            	actions.push('<a class="btn btn-success btn-xs ' + seniorEditFlag + '" href="#" onclick="$.operate.editTab(\'' + row.handleInfo.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		                        actions.push('<a class="btn btn-danger btn-xs ' + seniorEditFlag + '" href="#" onclick="$.operate.remove(\'' + row.handleInfo.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+		            		}else{
+		            			
+		            		}
+		            	}
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+      //检后处理状态修改
+        function audit(id, status){
+        	$.modal.confirm('确认执行此操作吗？',function(){
+        		if ($.validate.form()) {
+        			var config = {
+                	        url: ctx + "bridge/bridgeSampleHandle/auditRecord",
+                	        type: "post",
+                	        dataType: "json",
+                	        data:{'id':id, 'status':status},
+                	        beforeSend: function () {
+                	        	$.modal.loading("正在处理中，请稍后...");
+                	        },
+                	        success: function(result) {
+                	        	console.log(result);
+                	        	if(result.code==0){
+                	        		$.modal.msgSuccess(result.msg)
+                	        	}else{
+                	        		$.modal.msgError(result.msg)
+                	        	}
+                	        	$.modal.closeLoading();
+                	        	$.table.refresh();
+                	        }
+                	    };
+                	    $.ajax(config)
+    	        }
+        	});
+        }
+        
+        /*选择样品*/
+		var oid = '';
+		var oname = '';
+		function selectSample(id, name) {
+			oid = id;
+			oname = name;
+			var options = {
+				title : '选择检测项目',
+				width : "1200",
+				url : ctx + "bridge/bridgeSample",
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandlerSelect();
+			var data = result;
+			if (data) {
+				$('#' + oid).val(data.id);
+				$('#' + oname).val(data.name);
+			} else {
+				return;
+			}
+		}
+    </script>
+</body>
+</html>

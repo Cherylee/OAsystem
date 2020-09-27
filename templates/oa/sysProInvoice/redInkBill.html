@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('作废发票明细')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-sysProInvoice-edit" th:object="${sysProInvoice}">
+                        <input id="id" name="id" th:field="*{id}"  type="hidden">
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>销项发票</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>
+                                    <input id="proposerId" name="proposerId" th:field="*{proposerId}" class="form-control" type="hidden">
+                                    <input th:field="*{proposerName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">所属公司：</td>
+                                <td>
+                                    <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                    <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td>
+                                    <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                    <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">工程名称：</td>
+                                <td>
+                                    <input id="projectName" name="projectName" th:field="*{projectName}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请日期：</td>
+                                <td>
+                                    <input id="applyDate" name="applyDate" th:value="${#dates.format(sysProInvoice.applyDate, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text">
+                                </td>
+                                <td class="active">工程地点：</td>
+                                <td>
+                                    <input id="projectLoc" name="projectLoc" th:field="*{projectLoc}" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">建设单位：</td>
+                                <td>
+                                    <input id="constructUnit" name="constructUnit" th:field="*{constructUnit}" class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">开票类型：</td>
+                                <td>
+                                    <select id="billType" name="billType" class="form-control" disabled
+                                            th:field="*{billType}" th:with="type=${@dict.getType('sys_pro_invoice_type')}">
+                                        <option value="">------所有------</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">作废金额：</td>
+                                <td>
+                                    <input id="billAmount" name="billAmount" value="0" class="form-control" type="text" readonly>
+                                </td>
+                                <td class="active">税率：</td>
+                                <td>
+                                    <input id="taxRate" name="taxRate" th:field="*{taxRate}" class="form-control" type="text" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">不含税开票金额：</td>
+                                <td>
+                                    <input id="invoiceTaxAmount" name="invoiceTaxAmount" value="0"  class="form-control" type="text" readonly>
+                                </td>
+                                <td class="active">税额：</td>
+                                <td>
+                                    <input id="taxAmount" name="taxAmount" value="0" class="form-control" type="text" readonly>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class=" select-table table-striped">
+                        <table class="table table-bordered table-bot" id="detail">
+
+                        </table>
+                    </div>
+
+                    <div>
+                        <div class=" select-table table-striped">
+                            <table class="table table-bordered table-bot" id="detail-2">
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:if="${sysProInvoice.status!='2'&&sysProInvoice.status!='16'&&sysProInvoice.status!='99'}"
+                                    onclick="urge()">
+                                <i class="fa fa-check"></i>催办
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" th:if="${sysProInvoice.status!='99'}"
+                                    th:onclick="selectUser('','','0',[[${sysProInvoice.id}]] ,'oa/sysProCostBill/copy')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 弹出框 -->
+<div class="modal inmodal fade" id="myModal5" role="dialog"
+     aria-hidden="true">
+    <input id="myModal5Value" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-Condition-add">
+                    <input id="prepaidTaxId" name="prepaidTaxId" type="hidden">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">预缴税金编号：</label>
+                                <div class="col-sm-8">
+                                    <input id="code" name="code" class="form-control" type="text" onclick="selectPrepaidTax()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">申请日期：</label>
+                                <div class="col-sm-8">
+                                    <input id="applyTime" name="applyTime" class="form-control" type="text" readonly="readonly" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">税额总计：</label>
+                                <div class="col-sm-8">
+                                    <input id="totalTax" name="totalTax" class="form-control" type="text" readonly="readonly">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">销售金额：</label>
+                                <div class="col-sm-8">
+                                    <input id="salesAmount" name="salesAmount" class="form-control" type="number" readonly="readonly">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">已开票金额：</label>
+                                <div class="col-sm-8">
+                                    <input id="invoicedAmount" name="invoicedAmount"  class="form-control" type="text" readonly="readonly">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">本次开票金额：</label>
+                                <div class="col-sm-8">
+                                    <input id="PayBillAmount" name="billAmount" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">剩余开票金额：</label>
+                                <div class="col-sm-8">
+                                    <input id="restBillAmount" name="restBillAmount" class="form-control" type="text" readonly="readonly">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                        id="insertCondition">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 发票弹出框 -->
+<div class="modal inmodal fade" id="myModal5-2" role="dialog" aria-hidden="true">
+    <input id="myModal5Value-2" type="hidden">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-Condition-add-2">
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">发票号码：</label>
+                                <div class="col-sm-8">
+                                    <input id="billCode" name="billCode" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">开票日期：</label>
+                                <div class="col-sm-8">
+                                    <input id="billDate" name="billDate" class="form-control time-input" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">发票金额：</label>
+                                <div class="col-sm-8">
+                                    <input  id="invoiceDetailsBillAmount" name="billAmount" class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">税额：</label>
+                                <div class="col-sm-8">
+                                    <input id="invoiceDetailsTaxAmount" name="taxAmount" class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">价税合计：</label>
+                                <div class="col-sm-8">
+                                    <input id="total"  class="form-control" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">附件：</label>
+                                <div class="col-sm-10" id="fileUpload-2"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                        id="insertCondition-2">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/sysProInvoice";
+
+    //全局变量
+    var billAmount = 0//发票金额
+    //附件
+    var attachmentList = new Array();
+    $("#form-sysProInvoice-edit").validate({
+        rules:{
+            xxxx:{
+                required:true,
+            },
+        },
+        focusCleanup: true
+    });
+
+
+    //提交
+    function submitHandler() {
+        var data = savaData();
+        $.operate.saveJsonTab(prefix + "/add", data);
+    }
+
+    //保存数据
+    function savaData() {
+        var data = {}
+        data.sysProInvoice = $('#form-sysProInvoice-edit').serializeObject();
+        data.detailList = $('#detail-2').bootstrapTable('getSelections');
+        data.status = '2';
+        return data;
+    }
+
+    //取件方式判断
+    var receiveWay =$('#invoiceTakeWay');
+    var receiveWays =  $('.invoiceTakeWay-1');
+    if(receiveWay.val()=='1'){
+        receiveWays.removeClass('hidden');
+    };
+    receiveWay.change(function () {
+        if($(this).val()==='1'){
+            receiveWays.removeClass('hidden')
+        }else{
+            receiveWays.children().find('input').val('');
+            receiveWays.children().find('select').val('');
+            receiveWays.addClass('hidden');
+        }
+    });
+
+
+    $(function() {
+        //缴税记录
+        var options = {
+            id: 'detail',
+            url:ctx+'oa/sysProInvoicePayTax/list',
+            clickToSelect: true,
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: false,
+            pagination: false,
+            uniqueId: 'id',
+            queryParams:{'mainId':[[${sysProInvoice.id}]]},
+            modalName: "缴税记录",
+            showExport: false,
+            columns: [{
+                checkbox: false,
+                visible: false
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field:'mainId',
+                    title:'mainId',
+                    visible: false
+                },
+                {
+                    field:'prepaidTaxId',
+                    title:'prepaidTaxId',
+                    visible:false
+                },
+                {
+                    field: 'code',
+                    title: '预缴税金编号',
+                    sortable: true
+                },
+                {
+                    field: 'applyTime',
+                    title: '申请日期',
+                    sortable: true
+                },
+                {
+                    field: 'totalTax',
+                    title: '税额总计',
+                    sortable: true
+                },
+                {
+                    field: 'salesAmount',
+                    title: '销售金额',
+                    sortable: true,
+                },
+                {
+                    field: 'invoicedAmount',
+                    title: '已开票金额',
+                    sortable: true
+                },
+                {
+                    field: 'billAmount',
+                    title: '本次开票金额',
+                    sortable: true
+                },
+                {
+                    field: 'restBillAmount',
+                    title: '剩余开票金额',
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var action=[]
+                        action.push('<a onclick="removeRow(\'detail\',\''+row.id+'\')">删除</a>  ')
+                        action.push('<a onclick="editRow(\'detail\',\''+row.id+'\',\''+index+'\')">编辑</a>')
+                        return action.join('')
+                    }
+                }]
+        };
+        $.table.init(options);
+
+
+        //发票明细
+        var options2 = {
+            id: 'detail-2',
+            url:ctx+'oa/sysProInvoiceDetail/list',
+            clickToSelect: true,
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: false,
+            pagination: false,
+            uniqueId: 'id',
+            queryParams:{'mainId':[[${sysProInvoice.id}]],'status':'0'},
+            modalName: "发票明细",
+            showExport: false,
+            onLoadSuccess:onLoadSuccess,
+            columns: [{
+                checkbox:true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible:false
+                },
+                {
+                    field:'mainId',
+                    title:'mainId',
+                    visible: false
+                },
+                {
+                    field: 'billCode',
+                    title: '发票编号',
+                    sortable: true
+                },
+                {
+                    field: 'billDate',
+                    title: '开票日期',
+                    sortable: true
+                },
+                {
+                    field: 'billAmount',
+                    title: '发票金额',
+                    sortable: true
+                },
+                {
+                    field: 'taxAmount',
+                    title: '税额',
+                    sortable: true,
+                },
+                {
+                    field: '',
+                    title: '价税合计',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return parseFloat(row.billAmount) +parseFloat(row.taxAmount) ;
+                    }
+                },
+                {
+                    field : 'attachmentList',
+                    title : '关联其他模块',
+                    formatter: function(value, row, index) {
+                        var imgName=''
+                        for (var i=0;i<value.length;i++){
+                            imgName+=value[i].attachmentName+'<br>'
+                        }
+                        return '<span style="color: blue;">'+imgName+'</span>'
+                    },
+                    visible:false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var action=[];
+                        var imgName='';
+                        var list=row.attachmentList;
+                        for (var i=0;i<list.length;i++){
+                            imgName+=list[i].attachmentName+','
+                        }
+
+                        action.push('<a onclick="editRow2(\'detail-2\',\''+row.id+'\',\''+index+'\',\''+imgName+'\')">详情</a>');
+                        return action.join('')
+                    }
+                }]
+        };
+        $.table.init(options2);
+
+        //修改发票明细
+        $('#addCon-2').click(function() {
+            $.form.reset('form-Condition-add-2');//清空原有数据
+            var html='<div class="file-loading">'+
+                '<input id="uploadFileId2" type="file" multiple>'+
+                '</div>';
+            $('#fileUpload-2').html(html);
+            //明细   上传附件
+            var uploadOption1 = {
+                id : 'uploadFileId2',
+                uploadUrl : null,
+                deleteUrl : null,
+                deleteExtraData : null,
+                imgsUrl : new Array(),
+                initialPreviewConfig : null,
+                showPreview : false,
+                attachmentList : new Array()
+            }
+            //附件
+            $.common.uploadFile(uploadOption1);
+            downFile();
+            $('#myModal5Value-2').val('00');
+            $('#myModal5-2').modal(options);
+        });
+        $('#insertCondition-2').click(function() {
+
+            var indexV=$('#myModal5Value-2').val();
+            var formData=$('#form-Condition-add-2').serializeObject();
+            if(indexV=='00'){
+                formData.attachmentList=attachmentList;
+                insertRow2(formData,'detail-2',null)
+
+            }else{
+                formData.attachmentList=attachmentList;
+                insertRow2(formData,'detail-2',indexV)
+
+            }
+        });
+    })
+
+    /*新增行*/
+    function insertRow(data,id,editId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var countDate = $("#"+id).bootstrapTable('getData');
+        var table_row = '';
+        table_row = data
+        table_row.id=randomId
+        if(id=='borrowTable'){
+
+        }else{
+            if(editId!=null){
+                table_row.id=randomId
+                $("#"+id).bootstrapTable('updateRow', {
+                    index: editId, // 你想修改哪行，0表示第一行
+                    row: table_row
+                })
+
+            }else{
+                table_row.id=randomId
+                $("#"+id).bootstrapTable('insertRow', {
+                    index : countDate.length, // 你想插入到哪，0表示第一行
+                    row : table_row
+                })
+            }
+        }
+    }
+    //修改行
+    function editRow(id,rowId,rowIndex){
+        var da=$('#'+id).bootstrapTable('getRowByUniqueId', rowId);
+        $('#myModal5Value').val(rowIndex);
+        $('#myModal5').modal('show');
+        $('#form-Condition-add').loadData(da)
+
+    }
+    //判断是否已经添加
+    function isHas(data,id){
+        var isTF=false;
+        for(var i=0;i<data.length;i++){
+            if(data[i].id==id){
+                isTF=true;
+            }
+        }
+        return isTF;
+    }
+    /* 删除指定表格行 */
+    function removeRow(id,rowId) {
+        $("#" + id).bootstrapTable('removeByUniqueId', rowId)
+
+    }
+    /* 删除所有表格行 */
+    function removeRowAll(id) {
+        $("#" + id).bootstrapTable('removeAll')
+        idxx = 0;
+    }
+
+    //发票明细
+    /*新增行*/
+    var idxId = 1;
+    function insertRow2(data,id,editId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var table_row = '';
+        table_row = data
+        var countDate = $("#"+id).bootstrapTable('getData');
+        if(editId!=null){
+            $("#"+id).bootstrapTable('updateRow', {
+                index: editId, // 你想修改哪行，0表示第一行
+                row: table_row
+            })
+
+        }else{
+            table_row.id=randomId
+            $("#"+id).bootstrapTable('insertRow', {
+                index : countDate.length, // 你想插入到哪，0表示第一行
+                row : table_row
+            });
+            //附件集合
+            imgsUrl.push({
+                'id':randomId,
+                url:table_row.attachmentList
+            });
+        }
+
+    }
+    //判断是否已经添加
+    function isHas2(data,id){
+        var isTF=false;
+        for(var i=0;i<data.length;i++){
+            if(data[i].id==id){
+                isTF=true;
+            }
+        }
+        return isTF;
+    }
+    /* 删除指定表格行 */
+    function removeRow2(id,rowId) {
+        $("#" + id).bootstrapTable('removeByUniqueId', rowId)
+
+    }
+    /* 删除所有表格行 */
+    function removeRowAll2(id) {
+        $("#" + id).bootstrapTable('removeAll');
+        idxx = 0;
+    }
+    //修改行
+    var imgsUrl = new Array();
+    function editRow2(id,rowId,rowIndex,attachmentList){
+        var da=$('#'+id).bootstrapTable('getRowByUniqueId', rowId);
+        $('#myModal5Value-2').val(rowIndex);
+        $('#myModal5-2').modal('show');
+        $('#form-Condition-add-2').loadData(da)
+        var html='<div class="file-loading">'+
+            '<input id="uploadFileId2" type="file" multiple>'+
+            '</div>'
+        $('#form-Condition-add-2').loadData(da[0])
+        $('#fileUpload-2').html(html)
+        //明细   上传附件
+        var file=[]
+        var list=attachmentList.split(',')
+        for(var i=0; i<list.length; i++){
+            file.push(list[i]);
+        }
+        var uploadOption1 = {
+            id:'uploadFileId2',
+            uploadUrl:null,
+            deleteUrl:null,
+            //deleteExtraData:deleteExtraData,
+            imgsUrl:file
+        }
+        //附件
+        $.common.uploadFile(uploadOption1);
+        downFile();
+
+        //计算价税合计
+        var invoiceDetailsTaxAmount = $('#invoiceDetailsTaxAmount').val();
+        var invoiceDetailsBillAmount = $('#invoiceDetailsBillAmount').val();
+        $('#total').val((parseFloat(invoiceDetailsBillAmount)+parseFloat(invoiceDetailsTaxAmount)).toFixed(2))
+    }
+
+
+    //数据加载完成以后
+    function onLoadSuccess() {
+        //选中发票事件
+        $('input[name="btSelectItem"]').change(function() {
+            var bl=$(this).prop('checked');
+            var id= $(this).parent().parent().data('uniqueid');
+            var da = $('#detail-2').bootstrapTable('getRowByUniqueId', id);
+            var taxRate = parseFloat($('#taxRate').val())/100; //税率
+            if(bl==true){
+                billAmount += da.billAmount//作废金额（含税）
+            }else{
+                billAmount = billAmount-da.billAmount//作废金额（含税）
+            }
+            $('#billAmount').val(billAmount);
+            $('#invoiceTaxAmount').val((billAmount/(1+taxRate)).toFixed(2));
+            $('#taxAmount').val((billAmount/(1+taxRate)*taxRate).toFixed(2));
+        })
+    }
+</script>
+</body>
+</html>

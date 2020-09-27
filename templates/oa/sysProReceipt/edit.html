@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改收据')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProReceipt-edit" th:object="${sysProReceipt}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <input id="projectId" name="projectId" th:field="*{projectId}"  type="hidden">
+                            <input id="procInstId" name="procInstId" th:field="*{procInstId}" class="form-control" type="hidden">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>收据</h2>
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        <td class="active">申请人：</td>
+                                        <td>
+                                            <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                                            <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请部门：</td>
+                                        <td>
+                                            <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                            <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请日期：</td>
+                                        <td>
+                                            <input id="applyTime" name="applyTime" th:value="${#dates.format(sysProReceipt.applyTime, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">收款单位：</td>
+                                        <td>
+                                            <input id="receiptUnit" name="receiptUnit" th:field="*{receiptUnit}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">摘要：</td>
+                                        <td>
+                                            <input id="description" name="description" th:field="*{description}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">金额：</td>
+                                        <td>
+                                            <input id="amount" name="amount" th:field="*{amount}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">金额大写：</td>
+                                        <td>
+                                            <input id="moneyUpper" name="moneyUpper" th:field="*{moneyUpper}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">盖章类型：</td>
+                                        <td>
+                                            <select id="receiveWay" name="receiveWay" class="form-control"
+                                                    th:with="type=${@dict.getType('oa_seal_type')}" th:field="*{sealType}">
+                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+		                </form>
+                        <div class="row" >
+                            <div class="col-sm-offset-5 col-sm-10"    th:if="${!sysProReceipt.hasEditPerm}"   style="margin-top: 20px">
+                                <button type="button"  th:if="${sysProReceipt.status == '99' || sysProReceipt.status=='3'}"
+                                        class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+
+                                <button type="button" th:if="${sysProReceipt.status} == '99'"
+                                        class="btn btn-sm btn-primary" onclick="submitHandlerDraft()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="submitHandler()" th:if="${sysProReceipt.status=='3'}">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 select-table table-striped" th:if="${sysProReceipt.hasEditPerm}">
+                            <from  class="form-horizontal m " id="form-sysProReceipt-edit-approval" th:if="${sysProReceipt.status=='2'}" th:object="${sysProReceipt}">
+                                <input name="id" th:field="*{id}"  type="hidden">
+                                <table class="table table-bordered table-condensed table-bot">
+                                    <tbody>
+                                    <tr>
+                                        <td class="active">收据日期：</td>
+                                        <td colspan="3">
+                                            <div class="input-group data">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <input id="receiptDate" name="receiptDate" th:value="${#dates.format(sysProReceipt.receiptDate, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" >
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">收据号码：</td>
+                                        <td>
+                                            <input id="receiptNo" name="receiptNo" th:field="*{receiptNo}" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </from>
+                            <div class="col-sm-offset-5 col-sm-10" th:if="${sysProReceipt.status=='2'}">
+                                <button type="button" class="btn btn-sm btn-info" onclick="saveDraftApproval()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 审批流程记录 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/sysProReceipt";
+		$("#form-sysProReceipt-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+
+        //保存草稿
+        function saveDraft() {
+            if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProReceipt-edit').serializeObject();
+                data.flag = true;
+                $.operate.saveJsonTab(prefix + "/saveDraft", data);
+            }
+        }
+
+        //提交
+        function submitHandler() {
+            if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProReceipt-edit').serializeObject();
+                data.flag = false;
+                $.operate.saveJsonTab(prefix + "/submitDraft", data);
+            }
+        }
+
+        //提交草稿
+        function submitHandlerDraft() {
+            if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProReceipt-edit').serializeObject();
+                data.flag = true;
+                $.operate.saveJsonTab(prefix + "/submitDraft", data);
+            }
+        }
+
+        //审核提交
+        function saveDraftApproval(){
+            if ($.validate.form()) {
+                var data={};
+                data.id = $('#form-sysProReceipt-edit-approval input[name="id"]').val();
+                data.receiptDate= $('#form-sysProReceipt-edit-approval input[name="receiptDate"]').val();
+                data.receiptNo=$('#form-sysProReceipt-edit-approval input[name="receiptNo"]').val();
+                if (data.receiptDate!=''&& data.receiptNo!=''){
+                    $.operate.saveTab(prefix + "/edit",data);
+                }
+
+            }
+        }
+
+        //自动大小写切换
+        $("input[name='amount']").bind("input propertychange",
+            function() {//监控输入框的变化
+                var num = $(this).val();
+                var a = parseInt(num);
+                var config = {
+                    url : ctx + "common/converMoneyToCN/" + a,
+                    type : "get",
+                    dataType : "json",
+                    success : function(result) {
+                        if (result.code == '0') {
+                            $("input[name='moneyUpper']").val(result.msg)
+                        }
+                    }
+                };
+                $.ajax(config)
+            });
+
+        //流程
+        var data = {};
+        data.procInstId= [[${sysProReceipt.procInstId}]];
+        data.id = [[${sysProReceipt.id}]];
+        selectActProcessList(data);
+    </script>
+</body>
+</html>

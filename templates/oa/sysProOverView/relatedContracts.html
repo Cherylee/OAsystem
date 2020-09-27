@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('相关合同')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<body class="white-bg">
+<div class="col-md-12">
+    <div class="box-center">
+        <div class="box-center-title">
+            合同信息汇总(仅统计有效的合同,即已生效和已归档的合同)<hr style="left: 315px;">
+        </div>
+        <div class=" select-table table-striped">
+            <table  id="contractSum" class=" table table-bordered table-bot"></table>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            财务类合同<hr style="left: 85px;">
+        </div>
+        <div class="hide">
+            <div class="col-sm-12 search-collapse">
+                <form id="financeForm">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <input class="overview-select-input" type="text" name="contractName" placeholder="合同名称" style="width: 80px"/>
+                            </li>
+
+                            <li>
+                                <select name="type2" style="width: 100px;" th:with="type=${@dict.getType('oa_contract_type2_1')}" class="overview-select-input">
+                                    <option value=""  style="display: none;"  disabled  selected>合同类型2：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                            </li>
+                            <li>
+                                <p style="width: 80px;">签订日期：</p>
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                                -
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                            </li>
+                            <li>
+                                合同金额
+                                <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                                -
+                                <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                                元
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search('financeForm','financeContract')"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset('financeForm','financeContract')"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class=" select-table table-striped">
+                <table  id="financeContract" class=" table table-bordered table-bot"></table>
+            </div>
+        </div>
+
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            综合类合同<hr style="left: 85px;">
+        </div>
+        <div class="hide">
+            <div class="col-sm-12 search-collapse">
+                <form id="synthesizeForm">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <input class="overview-select-input" type="text" name="contractName" placeholder="合同名称" style="width: 80px"/>
+                            </li>
+
+                            <li>
+                                <select name="type2" style="width: 100px;" th:with="type=${@dict.getType('oa_contract_type2_2')}" class="overview-select-input">
+                                    <option value=""  style="display: none;"  disabled  selected>合同类型2：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                            </li>
+                            <li>
+                                <p style="width: 80px;">签订日期：</p>
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                                -
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                            </li>
+                            <li>
+                                合同金额
+                                <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                                -
+                                <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                                元
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search('synthesizeForm','synthesizeContract')"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset('synthesizeForm','synthesizeContract')"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class=" select-table table-striped">
+                <table  id="synthesizeContract" class=" table table-bordered table-bot"></table>
+            </div>
+        </div>
+
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            工程合同<hr style="left: 65px;">
+        </div>
+        <div class="hide">
+            <div class="col-sm-12 search-collapse">
+                <form id="projectForm">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <input class="overview-select-input" type="text" name="contractName" placeholder="合同名称" style="width: 80px"/>
+                            </li>
+
+                            <li>
+                                <select name="type2" style="width: 100px;" th:with="type=${@dict.getType('oa_contract_type2_3')}" class="overview-select-input">
+                                    <option value=""  style="display: none;"  disabled  selected>合同类型2：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                            </li>
+                            <li>
+                                <p style="width: 80px;">签订日期：</p>
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                                -
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                            </li>
+                            <li>
+                                合同金额
+                                <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                                -
+                                <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                                元
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search('projectForm','projectContract')"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset('projectForm','projectContract')"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class=" select-table table-striped">
+                <table  id="projectContract" class=" table table-bordered table-bot"></table>
+            </div>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            通用合同<hr style="left: 65px;">
+        </div>
+        <div class="hide">
+            <div class="col-sm-12 search-collapse">
+                <form id="currencyForm">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <input class="overview-select-input" type="text" name="contractName" placeholder="合同名称" style="width: 80px"/>
+                            </li>
+
+                            <li>
+                                <select name="type2" style="width: 100px;" th:with="type=${@dict.getType('oa_contract_type2_4')}" class="overview-select-input">
+                                    <option value=""  style="display: none;"  disabled  selected>合同类型2：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                            </li>
+                            <li>
+                                <p style="width: 80px;">签订日期：</p>
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                                -
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                            </li>
+                            <li>
+                                合同金额
+                                <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                                -
+                                <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                                元
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search('currencyForm','currencyContract')"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset('currencyForm','currencyContract')"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class=" select-table table-striped">
+                <table  id="currencyContract" class=" table table-bordered table-bot"></table>
+            </div>
+        </div>
+    </div>
+    <div class="box-center">
+        <div class="box-center-title">
+            <div class="arrow arrow-bottom"></div>
+            其他合同<hr style="left: 65px;">
+        </div>
+        <div class="hide">
+            <div class="col-sm-12 search-collapse">
+                <form id="otherForm">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <input class="overview-select-input" type="text" name="contractName" placeholder="合同名称" style="width: 80px"/>
+                            </li>
+
+                            <li>
+                                <select name="type2" style="width: 100px;" th:with="type=${@dict.getType('oa_contract_type2_5')}" class="overview-select-input">
+                                    <option value=""  style="display: none;"  disabled  selected>合同类型2：</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                            </li>
+                            <li>
+                                <p style="width: 80px;">签订日期：</p>
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                                -
+                                <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                            </li>
+                            <li>
+                                合同金额
+                                <input type="number" style="width: 100px" class="overview-select-input" name="minAmount"  placeholder="起始金额"/>
+                                -
+                                <input type="number" style="width: 100px" class="overview-select-input" name="maxAmount"  placeholder="截止金额"/>
+                                元
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search('otherForm','otherContract')"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset('otherForm','otherContract')"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class=" select-table table-striped">
+                <table  id="otherContract" class=" table table-bordered table-bot"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/oaContract";
+    var oa_contract_type2_1 = [[${@dict.getType('oa_contract_type2_1')}]];
+    var oa_contract_type2_2 = [[${@dict.getType('oa_contract_type2_2')}]];
+    var oa_contract_type2_3 = [[${@dict.getType('oa_contract_type2_3')}]];
+    var oa_contract_type2_4 = [[${@dict.getType('oa_contract_type2_4')}]];
+    var oa_contract_type2_5 = [[${@dict.getType('oa_contract_type2_5')}]];
+    $(function () {
+        //箭头方向
+        var arrowList = $(".arrow");
+        arrowList.click(function () {
+            var obj=$(this);
+            obj.toggleClass("arrow-top");
+            obj.toggleClass("arrow-bottom");
+            obj.parent().siblings().toggleClass("hide");
+        })
+
+        //合同总表
+        var contractSums = {
+            id:'contractSum',
+            url:prefix+'/selectContractSumData',
+            modalName: "合同信息汇总",
+            showSearch:false,
+            showRefresh:false,
+            showColumns:false,
+            showToggle:false,
+            showExport:false,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]]},
+            columns: [
+                {
+                    title : '财务类合同数量',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.count[0].count;
+                    }
+                },
+                {
+                    field : '',
+                    title : '综合类合同数量',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.count[1].count;
+                    }
+                },
+                {
+                    field : '',
+                    title : '工程合同数量',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.count[2].count;
+                    }
+                },
+                {
+                    field : '',
+                    title : '通用合同数量',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.count[3].count;
+                    }
+                },
+                {
+                    field : '',
+                    title : '其他合同数量',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.count[4].count;
+                    }
+                },
+                {
+                    field : '',
+                    title : '合同总金额',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.amount.sumAmout;
+                    }
+                },
+                {
+                    field : '',
+                    title : '已付款总金额',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.amount.sumPayAmout;
+                    }
+                },
+                {
+                    field : '',
+                    title : '已结算总金额',
+                    width:'100px',
+                    align:'center',
+                },
+                {
+                    field : '',
+                    title : '已开票总金额',
+                    width:'100px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return row.amount.alreadyInvoiceAmout;
+                    }
+                },
+                {
+                    field : '',
+                    title : '待开票总金额',
+                    width:'100px',
+                    align:'center'
+                }
+
+            ]
+        };
+        $.table.init(contractSums);
+
+        //财务类合同
+        var financeContract = {
+            id:'financeContract',
+            url:prefix+'/selectContractData',
+            updateUrl:prefix2 + "/toExamine/{id}",
+            modalName: "合同信息汇总",
+            showExport: true,
+            sortOrder : "desc",
+            showFooter:true,
+            queryParams: {"projectId": [[${projectId}]],"type1":"0"},
+            columns: [
+                {
+                    field : 'contractName',
+                    title : '合同名称',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        var contractName=$.table.tooltip(row.contractName,8);
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+contractName+'</a>'
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'thirdPartyName',
+                    title : '第三方名称',
+                    align:'center',
+                },
+                {
+                    field : 'type2',
+                    title : '合同类型2',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oa_contract_type2_1,value)
+                    }
+                },
+                {
+                    field : 'contractTime',
+                    title : '签订日期',
+                    align:'center',
+                },
+                {
+                    field : 'contractAmount',
+                    title : '合同金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].contractAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountPaid',
+                    title : '已付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountPaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountUnpaid',
+                    title : '未付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountUnpaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'invoiced',
+                    title : '已开票金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiced);
+                        }
+                        return sumBalance;
+                    }
+                }
+            ]
+        };
+        $.table.init(financeContract);
+
+        //综合类合同
+        var synthesizeContract = {
+            id:'synthesizeContract',
+            url:prefix+'/selectContractData',
+            updateUrl:prefix2 + "/toExamine/{id}",
+            modalName: "合同信息汇总",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]],"type1":"1"},
+            columns: [
+                {
+                    field : 'contractName',
+                    title : '合同名称',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        var contractName=$.table.tooltip(row.contractName,8);
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+contractName+'</a>'
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'thirdPartyName',
+                    title : '第三方名称',
+                    align:'center',
+                },
+                {
+                    field : 'type2',
+                    title : '合同类型2',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oa_contract_type2_2,value)
+                    }
+                },
+                {
+                    field : 'contractTime',
+                    title : '签订日期',
+                    align:'center',
+                },
+                {
+                    field : 'contractAmount',
+                    title : '合同金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].contractAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountPaid',
+                    title : '已付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountPaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountUnpaid',
+                    title : '未付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountUnpaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'invoiced',
+                    title : '已开票金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiced);
+                        }
+                        return sumBalance;
+                    }
+                }
+
+            ]
+        };
+        $.table.init(synthesizeContract);
+
+        //工程类合同
+        var projectContract = {
+            id:'projectContract',
+            url:prefix+'/selectContractData',
+            updateUrl:prefix2 + "/toExamine/{id}",
+            modalName: "合同信息汇总",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]],"type1":"2"},
+            columns: [
+                {
+                    field : 'contractName',
+                    title : '合同名称',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        var contractName=$.table.tooltip(row.contractName,8);
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+contractName+'</a>'
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'thirdPartyName',
+                    title : '第三方名称',
+                    align:'center',
+                },
+                {
+                    field : 'type2',
+                    title : '合同类型2',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oa_contract_type2_3,value)
+                    }
+                },
+                {
+                    field : 'contractTime',
+                    title : '签订日期',
+                    align:'center',
+                },
+                {
+                    field : 'contractAmount',
+                    title : '合同金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].contractAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountPaid',
+                    title : '已付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountPaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountUnpaid',
+                    title : '未付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountUnpaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'invoiced',
+                    title : '已开票金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiced);
+                        }
+                        return sumBalance;
+                    }
+                }
+
+            ]
+        };
+        $.table.init(projectContract);
+
+        //通用合同
+        var currencyContract = {
+            id:'currencyContract',
+            url:prefix+'/selectContractData',
+            updateUrl:prefix2 + "/toExamine/{id}",
+            modalName: "合同信息汇总",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]],"type1":"3"},
+            columns: [
+                {
+                    field : 'contractName',
+                    title : '合同名称',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        var contractName=$.table.tooltip(row.contractName,8);
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+contractName+'</a>'
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'thirdPartyName',
+                    title : '第三方名称',
+                    align:'center',
+                },
+                {
+                    field : 'type2',
+                    title : '合同类型2',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oa_contract_type2_4,value)
+                    }
+                },
+                {
+                    field : 'contractTime',
+                    title : '签订日期',
+                    align:'center',
+                },
+                {
+                    field : 'contractAmount',
+                    title : '合同金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].contractAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountPaid',
+                    title : '已付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountPaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountUnpaid',
+                    title : '未付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountUnpaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'invoiced',
+                    title : '已开票金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiced);
+                        }
+                        return sumBalance;
+                    }
+                }
+
+            ]
+        };
+        $.table.init(currencyContract);
+
+        //其他合同
+        var otherContract = {
+            id:'otherContract',
+            url:prefix+'/selectContractData',
+            updateUrl:prefix2 + "/toExamine/{id}",
+            modalName: "合同信息汇总",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams: {"projectId": [[${projectId}]],"type1":"99"},
+            columns: [
+                {
+                    field : 'contractName',
+                    title : '合同名称',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        var contractName=$.table.tooltip(row.contractName,8);
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+contractName+'</a>'
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'thirdPartyName',
+                    title : '第三方名称',
+                    align:'center',
+                },
+                {
+                    field : 'type2',
+                    title : '合同类型2',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(oa_contract_type2_5,value)
+                    }
+                },
+                {
+                    field : 'contractTime',
+                    title : '签订日期',
+                    align:'center',
+                },
+                {
+                    field : 'contractAmount',
+                    title : '合同金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].contractAmount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountPaid',
+                    title : '已付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountPaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'amountUnpaid',
+                    title : '未付款',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amountUnpaid);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : 'invoiced',
+                    title : '已开票金额',
+                    align:'center',
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].invoiced);
+                        }
+                        return sumBalance;
+                    }
+                }
+
+            ]
+        };
+        $.table.init(otherContract);
+    })
+</script>
+</body>
+</html>

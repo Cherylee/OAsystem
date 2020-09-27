@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('进项发票审批页')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysProIncomeBill-edit" th:object="${sysProIncomeBill}">
+        	<input id="procInstId" name="procInstId" th:field="*{procInstId}" class="form-control" type="hidden">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目：</label>
+            <div class="col-sm-8">
+            	<input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="hidden">
+            	<input th:field="*{proName}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同：</label>
+            <div class="col-sm-8">
+            	<input id="contractId" name="contractId" th:field="*{contractId}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同类型：</label>
+            <div class="col-sm-8">
+            	<input id="contractType" name="contractType" th:field="*{contractType}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">申请人：</label>
+            <div class="col-sm-8">
+            	<input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+            	<input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">公司：</label>
+            <div class="col-sm-8">
+            	<input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+            	<input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">申请部门：</label>
+            <div class="col-sm-8">
+            	<input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+            	<input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">审批状态：</label>
+            <div class="col-sm-8">
+            	<select class="form-control" name="status"
+					th:with="type=${@dict.getType('oa_leave_status')}"
+					th:field="*{status}" disabled="disabled">
+					<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">申请日期：</label>
+            <div class="col-sm-8">
+            	<input id="applyTime" name="applyTime" th:value="${#dates.format(sysProIncomeBill.applyTime, 'yyyy-MM-dd')}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">供应商：</label>
+            <div class="col-sm-8">
+            	<input id="supplier" name="supplier" th:field="*{supplier}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">开票单位：</label>
+            <div class="col-sm-8">
+            	<input id="issuingOffice" name="issuingOffice" th:field="*{issuingOffice}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">发票类型：</label>
+            <div class="col-sm-8">
+            	<select name="invoiceType" class="form-control"
+								th:with="type=${@dict.getType('sys_pro_invoice_type')}"
+								th:field="*{invoiceType}" disabled="disabled">
+								<option th:each="dict : ${type}" th:text="${dict.dictLabel}" 
+								th:value="${dict.dictValue}">
+								</option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">发票税率：</label>
+            <div class="col-sm-8">
+            	<select name="invoiceRate" class="form-control"
+								th:with="type=${@dict.getType('sys_pro_invoice_rate')}"
+								th:field="*{invoiceRate}" disabled="disabled">
+								<option th:each="dict : ${type}" th:text="${dict.dictLabel}" 
+								th:value="${dict.dictValue}">
+								</option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">税额总计：</label>
+            <div class="col-sm-8">
+            	<input id="totalTax" name="totalTax" th:field="*{totalTax}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">价税总计：</label>
+            <div class="col-sm-8">
+            	<input id="totalMoney" name="totalMoney" th:field="*{totalMoney}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">货物或服务名：</label>
+            <div class="col-sm-8">
+            	<input id="serviceName" name="serviceName" th:field="*{serviceName}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">结算类型：</label>
+            <div class="col-sm-8">
+            	<select name="settlementType" class="form-control"
+								th:with="type=${@dict.getType('sys_pro_settlement_type')}"
+								th:field="*{settlementType}" disabled="disabled">
+								<option th:each="dict : ${type}" th:text="${dict.dictLabel}" 
+								th:value="${dict.dictValue}">
+								</option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建日期：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" th:value="${#dates.format(sysProIncomeBill.createTime, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建者：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" th:field="*{createBy}" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+		</form>
+		
+		<!-- 付款记录 -->
+		<div class="col-sm-12 select-table table-striped">
+			<div class="fixed-table-container">
+				<table id="payTable" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		<!-- 发票明细 -->
+		<div class="col-sm-12 select-table table-striped">
+			<div class="fixed-table-container">
+				<table id="detailTable" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+		
+    	<div class="row">
+				<div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+					<button type="button" class="btn btn-sm btn-primary"
+						onclick="agree()">同意</button>
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="disagree()">不同意</button>
+					<button type="button" class="btn btn-sm btn-success"
+						th:onclick="selectUser('','','0',[[${sysProIncomeBill.id}]],'oa/oaCertificatesLogout/copy','flag')">
+						抄送</button>
+					<button type="button" class="btn btn-sm btn-danger"
+						onclick="backAway()">
+						<i class="fa fa-reply-all"></i>关闭
+					</button>
+				</div>
+			</div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProIncomeBill";
+		$("#form-sysProIncomeBill-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-sysProIncomeBill-edit').serialize());
+	        }
+	    }
+		
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/proTask/agree/"+[[${taskId}]]+"/GC-4");
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/proTask/disagree/"+[[${taskId}]]+"/GC-4");
+	    }
+	    //返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+	    
+		var options1 = {
+				id : 'detailTable',
+				url : ctx + 'oa/sysProIncomeBillDetail/list',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "明细",
+				showExport : false,
+				clickToSelect : true,
+				queryParams : {"parentId" : [[${sysProIncomeBill.id}]]},
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'code',
+							title : '发票编号'
+						},
+						{
+							field : 'billingDate',
+							title : '开票日期'
+						},
+						{
+							field : 'invoiceAmount',
+							title : '发票金额'
+						},
+						{
+							field : 'invoiceTax',
+							title : '发票税额'
+						},
+						{
+							field : 'totalMoney',
+							title : '价税合计'
+						},
+						{
+							field : 'file',
+							title : '附件'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+
+			};
+		
+		var options2 = {
+				id : 'payTable',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "付款记录",
+				showExport : false,
+				clickToSelect : true,
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'payCode',
+							title : '付款编号'
+						},
+						{
+							field : 'payMoney',
+							title : '付款金额'
+						},
+						{
+							field : 'payee',
+							title : '收款人'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'payTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+
+			};
+		
+		$(function() {
+			$.table.init(options1);
+			$.table.init(options2);
+		});
+	</script>
+</body>
+</html>

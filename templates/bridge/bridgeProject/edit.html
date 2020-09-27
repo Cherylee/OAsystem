@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改工程项目')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeProject-edit" th:object="${bridgeProject}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">工程编号：</label>
+				<div class="col-sm-8">
+					<input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">工程名称：</label>
+				<div class="col-sm-8">
+					<input id="name" name="name" th:field="*{name}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">项目缩写：</label>
+				<div class="col-sm-8">
+					<input id="briefCode" name="briefCode" th:field="*{briefCode}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">委托单位：</label>
+				<div class="col-sm-8">
+					<input id="client" name="client" th:field="*{client}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">工程用途：</label>
+				<div class="col-sm-8">
+					<input id="usage" name="usePlace" th:field="*{usePlace}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">工程负责人：</label>
+				<div class="col-sm-8">
+					<input id="chargePersonId" name="chargePersonId" class="form-control" type="hidden" th:field="*{chargePersonId}">
+					<input id="chargePersonName" name="chargePersonName" class="form-control" th:field="*{chargePersonName}" type="text" onclick="selectUser('chargePersonId','chargePersonName')">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">联系人姓名：</label>
+				<div class="col-sm-8">
+					<input id="contactPersonName" name="contactPersonName" th:field="*{contactPersonName}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">联系人电话：</label>
+				<div class="col-sm-8">
+					<input id="contactPhone" name="contactPhone" th:field="*{contactPhone}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">详细地址：</label>
+				<div class="col-sm-8">
+					<input id="detailAddr" name="detailAddr" th:field="*{detailAddr}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">邮政编码：</label>
+				<div class="col-sm-8">
+					<input id="zipCode" name="zipCode" th:field="*{zipCode}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">建设单位：</label>
+				<div class="col-sm-8">
+					<input id="constructUnit" name="constructUnit" th:field="*{constructUnit}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">设计单位：</label>
+				<div class="col-sm-8">
+					<input id="designUnit" name="designUnit" th:field="*{designUnit}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">施工单位：</label>
+				<div class="col-sm-8">
+					<input id="workingUnit" name="workingUnit" th:field="*{workingUnit}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">见证单位：</label>
+				<div class="col-sm-8">
+					<input id="monitorUnit" name="monitorUnit" th:field="*{monitorUnit}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">见证人姓名：</label>
+				<div class="col-sm-8">
+					<input id="witnessPersonName" name="witnessPersonName" th:field="*{witnessPersonName}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">见证人证号：</label>
+				<div class="col-sm-8">
+					<input id="witnessPersonCode" name="witnessPersonCode" th:field="*{witnessPersonCode}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">取样员姓名：</label>
+				<div class="col-sm-8">
+					<input id="samplingPersonName" name="samplingPersonName" th:field="*{samplingPersonName}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">取样员证号：</label>
+				<div class="col-sm-8">
+					<input id="samplingPersonCode" name="samplingPersonCode" th:field="*{samplingPersonCode}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">计划开工时间：</label>
+				<div class="col-sm-8">
+				   <div class="input-group data">
+				     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					 <input id="planStartDate" name="planStartDate" class="form-control required time-input-data" type="text" 
+						th:value="${#dates.format(bridgeProject.planStartDate, 'yyyy-MM-dd')}">
+				   </div>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">计划完工时间：</label>
+				<div class="col-sm-8">
+				    <div class="input-group data">
+				     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					 <input id="planEndDate" name="planEndDate" class="form-control required time-input-data" type="text" 
+						th:value="${#dates.format(bridgeProject.planEndDate, 'yyyy-MM-dd')}">
+					</div>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">项目重难点：</label>
+				<div class="col-sm-8">
+					<input id="difficultPoint" name="difficultPoint" th:field="*{difficultPoint}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<br>
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+				&nbsp;
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "bridge/bridgeProject";
+		$("#form-bridgeProject-edit").validate({
+			rules:{
+				contactPhone:{//联系人电话
+					isPhone:true					
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/edit", $('#form-bridgeProject-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

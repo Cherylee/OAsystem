@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增银行保函')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-oaBankGuarantee-add">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">编号：</label>
+                <div class="col-sm-8">
+                    <input name="code" class="form-control" type="text" disabled="disabled">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请人：</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" readonly
+                           th:value="${user.userName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">公司：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="companyId" id="companyId"
+                           th:value="${company.deptId}"/> <input type="text"
+                                                                 name="companyName" id="companyName"
+                                                                 class="form-control"
+                                                                 onclick="selectDeptTree('companyId','companyName','0')"
+                                                                 th:value="${company.deptName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">部门：</label>
+                <div class="col-sm-8">
+                    <input id="treeId" name="deptId" class="form-control"
+                           type="hidden" th:value="${user.dept.deptId}"> <input
+                        id="treeName" name="deptName" class="form-control" type="text"
+                        onclick="selectDeptTree('treeId','treeName','1')"
+                        th:value="${user.dept.deptName}">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">关联模块：</label>
+                <div class="col-sm-8">
+                    <select name="relaType" class="form-control"
+                            onchange="selectModel(this)">
+                        <option value="0">无</option>
+                        <option value="1">工程合同</option>
+                        <option value="2">项目</option>
+                        <option value="3">投标申请单</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">工程合同：</label>
+                <div class="col-sm-8">
+                    <input id="contractId" name="contractId" class="form-control"
+                           type="hidden"> <input id="contractName"
+                                                 name="contractName" class="form-control" type="text"
+                                                 onclick="showLinkM('contractId','contractName','oa/oaContract','工程合同',doSubmit1)">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目：</label>
+                <div class="col-sm-8">
+                    <input id="projectId" name="projectId" class="form-control"
+                           type="hidden"> <input id="projectName" name="projectName"
+                                                 class="form-control" type="text"
+                                                 onclick="showLinkM('projectId','projectName','oa/oaProject','项目',doSubmit3)">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请单：</label>
+                <div class="col-sm-8">
+                    <input id="tenderId" name="tenderId" class="form-control"
+                           type="hidden"> <input id="tenderName" name="tenderName"
+                                                 class="form-control" type="text"
+                                                 onclick="showLinkM('tenderId','tenderName','business/jyTenderNotice','投标申请单',doSubmit2)">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span
+                        style="color: red;">*</span>开具有效期：</label>
+                <div class="col-sm-8">
+                    <input id="expectDate" name="expectDate" placeholder="请输入有效期，单位：天"
+                           class="form-control" type="text" required="required">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span
+                        style="color: red;">*</span>保函开具金额：</label>
+                <div class="col-sm-8">
+                    <input id="amount" name="amount" class="form-control"
+                           type="number" required="required">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">保函金额大写：</label>
+                <div class="col-sm-8">
+                    <input id="amountUpcase" name="amountUpcase" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span
+                        style="color: red;">*</span>保函类型：</label>
+                <div class="col-sm-8">
+                    <select name="guaranteeType"
+                            th:with="type=${@dict.getType('oa_bankGuarantee_type')}"
+                            class="form-control" required="required">
+                        <option value="">--请选择--</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">保函开具押金：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" id="receivablesId" name="receivablesId">
+                    <input id="deposit" name="deposit" class="form-control" type="text" onclick="selectReceivables()">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">是否注销：</label>
+                <div class="col-sm-8">
+                    <select name="logoutStatus"
+                            th:with="type=${@dict.getType('sys_yes_no')}"
+                            class="form-control">
+                        <option value="">--请选择--</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目性质 ：</label>
+                <div class="col-sm-8">
+                    <select id="tenderType" name="projectType" class="form-control"
+                            th:with="type=${@dict.getType('business_project_type')}">
+                        <option value="">------所有------</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"> 最迟拿到时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="latestDate" name="latestDate" placeholder="请选择时间"
+                               class="form-control time-input" type="text">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">备注：</label>
+                <div class="col-sm-8">
+                    <input id="remark" name="remark" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请日期：</label>
+                <div class="col-sm-8">
+                    <input id="applyTime" name="applyTime"
+                           class="form-control currentTime" type="text" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">附件：</label>
+                <div class="col-sm-9">
+                    <div class="file-loading">
+                        <input id="uploadFileId" type="file" multiple>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-info"
+                    onclick="saveDraft()">
+                <i class="fa fa-check"></i>保存草稿
+            </button>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="submitHandler()">
+                <i class="fa fa-check"></i>提交
+            </button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    onclick="closeItem()">
+                <i class="fa fa-reply-all"></i>关 闭
+            </button>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script type="text/javascript">
+    var prefix = ctx + "oa/oaBankGuarantee"
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+
+    //显示隐藏
+    function selectModel(obj) {
+        var num = $(obj).val();
+        var obj = $('#form-oaBankGuarantee-add')
+        var contract = obj.find('input[name="contractId"]').parent()
+            .parent().parent();
+        var project = obj.find('input[name="projectId"]').parent().parent()
+            .parent();
+        var tender = obj.find('input[name="tenderId"]').parent().parent()
+            .parent();
+        //清空
+        contract.find('input').val('')
+        project.find('input').val('')
+        tender.find('input').val('')
+        if (num == '0') {
+            contract.addClass('hide')
+            project.addClass('hide')
+            tender.addClass('hide')
+        } else if (num == '1') {//工程合同
+            contract.removeClass('hide')
+            project.addClass('hide')
+            tender.addClass('hide')
+        } else if (num == '2') {//项目
+            project.removeClass('hide')
+            contract.addClass('hide')
+            tender.addClass('hide')
+        } else if (num == '3') {//投标申请单
+            tender.removeClass('hide')
+            project.addClass('hide')
+            contract.addClass('hide')
+        }
+    }
+
+    //关联收款单
+    function selectReceivables() {
+        var options = {
+            title: '收款单',
+            width: "1200",
+            url: ctx + 'oa/oaReceivables',
+            callBack: doSubmit5
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit5(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#deposit').val(data.money);
+        $('#receivablesId').val(data.id);
+    }
+
+    //关联 弹框
+    var lId = null;
+    var lName = null;
+
+    function showLinkM(id, name, url, text, doSubmit) {
+        lId = id;
+        lName = name
+        var options = {
+            title: text,
+            width: "1200",
+            url: ctx + url,
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    ////工程合同
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + lId).val(data.id)
+        $('#' + lName).val(data.contractName)
+    }
+
+    ////投标申请单
+    function doSubmit2(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + lId).val(data.id)
+        $('#' + lName).val(data.projectName)
+    }
+
+    ////项目
+    function doSubmit3(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + lId).val(data.id)
+        $('#' + lName).val(data.projectName)
+    }
+
+    //提交
+    function submitHandler() {
+        var data = {}
+        var dataForm = $('#form-oaBankGuarantee-add').serializeObject();
+        data.oaBankGuarantee = dataForm;
+        data.attachmentList = attachmentList;
+        if ($.validate.form()) {
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = {}
+        var dataForm = $('#form-oaBankGuarantee-add').serializeObject();
+        data.oaBankGuarantee = dataForm;
+        data.attachmentList = attachmentList;
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+
+    }
+
+    //自动大小写转换
+    coverUpper('amount', 'amountUpcase')
+
+</script>
+</body>
+</html>

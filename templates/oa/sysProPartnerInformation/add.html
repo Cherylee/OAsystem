@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增合作方库')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysProPartnerInformation-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合作方姓名：</label>
+            <div class="col-sm-8">
+            	<input id="partnerName" name="partnerName" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合作日期：</label>
+            <div class="col-sm-8">
+            	<input id="cooperationData" name="cooperationData" type="text" class="form-control time-input-data currentDate">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">身份证号：</label>
+            <div class="col-sm-8">
+            	<input id="idCard" name="idCard" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">联系电话：</label>
+            <div class="col-sm-8">
+            	<input id="phoneNumber" name="phoneNumber" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目：</label>
+            <div class="col-sm-8">
+                <input id="projectId" name="projectId" type="hidden" />
+                <input id="projectType" name="projectType"  type="hidden">
+                <input id="projectName" class="form-control" name="projectName" type="text" onclick="selectPro('projectId','projectName','projectType')" >
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程造价（万元）：</label>
+            <div class="col-sm-8">
+            	<input id="projectCost" name="projectCost" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">区域：</label>
+            <div class="col-sm-8">
+            	<input id="area" name="area" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">联系地址(现居住地址)：</label>
+            <div class="col-sm-8">
+            	<input id="currentAddress" name="currentAddress" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">信用评分：</label>
+            <div class="col-sm-8">
+            	<input id="creditScore" name="creditScore" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">来源：</label>
+            <div class="col-sm-8">
+            	<input id="source" name="source" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProPartnerInformation"
+		$("#form-sysProPartnerInformation-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+        //选择工程
+        var pId = null;
+        var pName = null;
+        var pType = null;
+        function selectPro(id, name,type) {
+            pId = id;
+            pName = name;
+            pType = type;
+            var options = {
+                title : '工程',
+                width : "600",
+                url : ctx + "oa/oaProject",
+                callBack : doSubmit1
+            };
+            $.modal.openOptions(options);
+        }
+        function doSubmit1(index, layero) {
+            var iframeWin = layero.find('iframe')[0];
+            var result = iframeWin.contentWindow.submitHandler();
+            var data = result;
+            $('#' + pId).val(data.id)
+            $('#' + pName).val(data.projectName)
+            $('#' + pType).val(data.projectType)
+        }
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-sysProPartnerInformation-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('招标列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                       <!-- <li>
+                            <select name="tenderProjType" th:with="type=${@dict.getType('yt_bid_trade')}">
+                                <option value="">招标类型</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>-->
+                        <li>
+                            <select name="tenderType" th:with="type=${@dict.getType('jy_tender_type')}">
+                                <option value="">投标类型</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+
+                        </li>
+                        <li>
+                            <input type="text" name="area" placeholder="地区"/>
+                        </li>
+                        <li>
+                            <input type="text" name="province" placeholder="省份"/>
+                        </li>
+                        <li>
+                            <input type="text" name="publicTypeName" placeholder="公示类型"/>
+                        </li>
+                        <li class="select-time">
+                            <label>发布时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                   name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                   name="params[endTime]"/>
+                        </li>
+
+                        <li><a class="btn btn-primary btn-rounded btn-sm"
+                               onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm"
+                               onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()"
+               shiro:hasPermission="business:jyConstructInfo:add"> <i
+                    class="fa fa-plus"></i> 添加
+            </a> <a class="btn btn-primary btn-edit disabled"
+                    onclick="$.operate.editTab()"
+                    shiro:hasPermission="business:jyConstructInfo:edit"> <i
+                class="fa fa-edit"></i> 修改
+        </a>
+            <!--				<a class="btn btn-danger btn-del btn-del disabled"-->
+            <!--					onclick="$.operate.removeAll()"-->
+            <!--					shiro:hasPermission="business:jyConstructInfo:remove"> <i-->
+            <!--					class="fa fa-remove"></i> 删除-->
+            <!--				</a> -->
+            <a class="btn btn-warning" onclick="getWebData()"> <i
+                    class="fa fa-upload"></i> 信息来源
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('business:jyConstructInfo:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('business:jyConstructInfo:remove')}]];
+    var prefix = ctx + "business/jyConstructInfo";
+
+    var jyTenderType = [[${@dict.getType('jy_tender_type')}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "招标",
+            clickToSelect: true,
+            sortName: "sendTime",
+            sortOrder: "desc",
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'title',
+                    title: '标题',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 15, "open");
+                    }
+                },
+                {
+                    field: 'projName',
+                    title: '项目名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 15, "open");
+                    }
+                },
+                {
+                    field: 'province',
+                    title: '省份',
+                    sortable: true
+                },
+                {
+                    field: 'bidName',
+                    title: '相关标段包名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'tenderProjType',
+                    title: '招标类型',
+                    sortable: true
+                },
+                {
+                    field: 'sendTime',
+                    title: '发布时间',
+                    sortable: true
+                },
+                {
+                    field: 'tenderProjCode',
+                    title: '招标项目编号',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'winBidderName',
+                    title: '中标人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'bidAmount',
+                    title: '中标价',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'publicTypeName',
+                    title: '公示类型',
+                    sortable: true
+                },
+                {
+                    field: 'bid',
+                    title: 'bid',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'dataFrom',
+                    title: 'dataFrom',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'detailUrl',
+                    title: '详情链接地址',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var detailUrl = '<a href="' + row.detailUrl + '" target="view_window">点击查看</a>'
+                        return $.table.tooltip(value, 10, "open") + detailUrl
+
+                    }
+                },
+                {
+                    field: 'tenderType',
+                    title: '投标类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(jyTenderType, value);
+                    }
+                },
+                {
+                    field: 'area',
+                    title: '地区',
+                    sortable: true
+                },
+                {
+                    field: 'ownerName',
+                    title: '保证金归属人',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'tendeRagencyName',
+                    title: '业主',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'sourcePlatform',
+                    title: '来源平台',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '更新者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var text='投标申请'
+                        if ([[${isYtUser}]]) {//禹涛人员专属
+                            actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="toYtAudit(\'' + row.id + '\')">直接买标</a> ');
+                            actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="#" onclick="toAuditYt(\'' + row.id + '\')">买标申请</a> ');
+                        }else{
+                            actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="#" onclick="toAudit(\'' + row.id + '\')">投标申请</a> ');
+                        }
+
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        // actions.push('<a class="' +
+                        // 		'btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+        console.log([[${isYtUser}]])
+    });
+
+    //弹框获取数据
+    function getWebData() {
+        $.modal.open("选择获取数据源", prefix + "/toWebData");
+    }
+
+    //打开投标申请
+    function toAudit(id) {
+        createMenuItem(ctx + "business/jyTender/add/" + id, '投标申请')
+    }
+    //打开投标申请  ------禹涛的买标申请
+    function toAuditYt(id) {
+        createMenuItem(ctx + "business/jyConstructInfo/ytAdd/" + id, '买标申请')
+    }
+    // 禹涛专属，直接买标
+    function toYtAudit(id) {
+        $.operate.get(ctx + "business/jyTender/directAdd/" + id)
+        $.table.refresh();
+    }
+
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+</script>
+</body>
+</html>

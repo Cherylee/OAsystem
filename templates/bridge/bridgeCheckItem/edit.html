@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改检测项目')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeCheckItem-edit" th:object="${bridgeCheckItem}">
+            <input id="itemId" name="itemId" th:field="*{itemId}"  type="hidden">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">父项目id：</label>
+				<div class="col-sm-8">
+					<input id="parentId" name="parentId" th:field="*{parentId}" class="form-control" type="text" readonly="readonly" >
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">祖级列表：</label>
+				<div class="col-sm-8">
+					<input id="ancestors" name="ancestors" th:field="*{ancestors}" class="form-control" type="text" readonly="readonly" >
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">检测项目编码：</label>
+				<div class="col-sm-8">
+					<input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">检测项目名称：</label>
+				<div class="col-sm-8">
+					<input id="itemName" name="itemName" th:field="*{itemName}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">单位：</label>
+				<div class="col-sm-8">
+					<input id="unit" name="unit" th:field="*{unit}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">单价：</label>
+				<div class="col-sm-8">
+					<input id="price" name="price" th:field="*{price}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">创建时间：</label>
+				<div class="col-sm-8">
+					<input id="createTime" name="createTime" th:value="${#dates.format(bridgeCheckItem.createTime, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" type="text" readonly="readonly" >
+				</div>
+			</div>
+		</form>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "bridge/bridgeCheckItem";
+		$("#form-bridgeCheckItem-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-bridgeCheckItem-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

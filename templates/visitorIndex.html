@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>施工单位办公管理系统</title>
+    <meta name="keywords" content="OA管理系统首页">
+    <meta name="description" content="OA管理系统首页">
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html"/>
+    <![endif]-->
+    <link th:href="@{favicon.ico}" rel="stylesheet"/>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link th:href="@{/ruoyi/css/ry-ui.css?v=3.3.0}" rel="stylesheet"/>
+    <link th:href="@{/css/visitor.css}" rel="stylesheet"/>
+</head>
+<body class="">
+<div class="container-fluid visi_container">
+    <div class="row">
+        <div class="page-header">
+            <h1>禹涛工程技术有限公司
+                <small>YUTAO ENGINEERING TECHNOLOGY CO.,LED</small>
+            </h1>
+            <div class="pull-left info">
+                <a th:href="@{logout}" style="padding-left: 5px;"><i
+                        class="fa fa-sign-out text-danger"></i> 退出</a>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-3">
+            <div class="visi_left">
+                <div class="visi_left_icon" onclick="toYtCustomPro()">
+                    <img class="visi_xiangmu_icon" th:src="@{/img/vi_01.png}">
+                    <h1 class="visi_xiangmu_text">我的项目</h1>
+                </div>
+
+                <div class="visi_link">
+                    <h1>联系我们</h1>
+                    <p>禹涛（厦门）工程技术有限公司</p>
+                    <p>YUTAO (XlA MEN) ENGINEERING TECHNOLOGY CO.,LED</p>
+                    <p>地址：厦门市湖里区泗水道617号宝拓大厦1304室</p>
+                    <p>联系电话：15605920826</p>
+                    <p>电话：0592-5980826</p>
+                    <p>网址：<a href="http://www.yutaoxm.cn">www.yutaoxm.cn</a></p>
+                    <br>
+                    <p class="visi_link_title">如果您想要跟我们合作，请留下您的联系方式</p>
+                    <div class="visi_left_contact">
+                        <form id="visi_left_contact_form">
+                            <div class="input-group">
+                                <input type="text" id="contactName" class="form-control" placeholder="姓名"
+                                       aria-describedby="basic-addon1">
+                            </div>
+                            <br>
+                            <div class="input-group">
+                                <input type="text" id="contactPhone" class="form-control" placeholder="电话"
+                                       aria-describedby="basic-addon1">
+                            </div>
+                            <br>
+
+                        </form>
+                        <div class="input-group">
+                            <button class="btn btn-sm btn-primary" type="button" onclick="submitHandler()">提交</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <ul class="nav nav-tabs" id="visiNav">
+
+            </ul>
+            <div class="tab-content" id="visContent">
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+        // 提交意见
+        function submitHandler() {
+            var data = {
+                contactName: "",
+                contactPhone: ""
+            };
+            data.contactName = $('#contactName').val();
+            data.contactPhone = $('#contactPhone').val();
+            var config = {
+                contentType: "application/json;charset=UTF-8",
+                url: ctx + "yt/ytCustomContactInfo/add",
+                type: 'POST',
+
+                dataType: 'json',
+                data: JSON.stringify(data),
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function (result) {
+                    $.modal.closeLoading();
+                    $.modal.confirm('提交成功', function () {
+                        location.reload()
+                    })
+
+                }
+            };
+            $.ajax(config)
+        }
+
+        //项目
+        var type = [[${@dict.getType('yt_project_type')}]];
+
+        function getDict(type, v) {
+            var value = ''
+            for (var i = 0; i < type.length; i++) {
+                if (type[i].dictValue == v) {
+                    value = type[i].dictLabel
+                }
+            }
+            return value
+        }
+
+        var config = {
+            url: ctx + "yt/ytProjectProfileConf/viewList",
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                //console.log(res)
+                if (res.data) {
+                    var navHtml = ''
+                    var contentHtml = ''
+                    for (var i = 0; i < res.data.length; i++) {
+                        var listHtml = ''
+                        //循环对应工程里面的项目列表
+                        for (var y = 0; y < res.data[i].confList.length; y++) {
+                            var imgsrc = res.data[i].confList[y].attachmentUrls[0]
+                            //console.log(imgsrc)
+                            listHtml += '<li class="row">' +
+                                '                            <div class="col-sm-12 col-md-4 col-xs-12">' +
+                                '                                <img src="' + imgsrc.attachmentUrl + '">' +
+                                '                            </div>' +
+                                '                            <div class="text col-sm-12 col-md-7 col-xs-12">' +
+                                '                                <h1>' + res.data[i].confList[y].title + '</h1>' +
+                                '                                <p>' + res.data[i].confList[y].description + '</p>' +
+                                '                            </div>' +
+                                '                        </li>'
+                        }
+                        if (i == 0) {
+                            navHtml += ' <li class="active"><a href="#' + res.data[i].type + '" data-toggle="tab">' + getDict(type, res.data[i].type) +
+                                '</a></li>'
+                            contentHtml += '<div class="tab-pane fade in active" id="' + res.data[i].type + '">' +
+                                '<ul>' + listHtml + '</ul>' +
+                                '</div>'
+
+
+                        } else {
+                            navHtml += ' <li><a href="#' + res.data[i].type + '" data-toggle="tab">' + getDict(type, res.data[i].type) + '</a></li>'
+                            contentHtml += '<div class="tab-pane fade " id="' + res.data[i].type + '">' +
+                                '<ul>' + listHtml + '</ul>' +
+                                '</div>'
+
+                        }
+
+
+                    }
+                    $('#visContent').html(contentHtml)
+                    $('#visiNav').html(navHtml)
+                }
+                else{
+                    $('#visContent').html('<p style="padding-top: 50px;text-align: center;font-size: 22px;color: #555;">'+res.msg+'</p>')
+                }
+            }
+        };
+        $.ajax(config)
+
+        //跳转到我的项目
+        function toYtCustomPro() {
+            $.modal.openFullS("项目概览", ctx + 'yt/ytProjectMain/ytCustomProject/list');
+        }
+</script>
+</body>
+</html>
+

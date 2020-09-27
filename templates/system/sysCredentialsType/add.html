@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增证件类型')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysCredentialsType-add">
+        <input id="treeId" name="parentId" type="hidden" th:value="${credentialsType.typeId}"   />
+			<div class="form-group">
+				<label class="col-sm-3 control-label ">上级类型：</label>
+				<div class="col-sm-8">
+				    <div class="input-group">
+						<input class="form-control" type="text" onclick="selectTypeTree()" id="treeName" readonly="true" th:value="${credentialsType.typeName}">
+					    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+				    </div>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">类型名称：</label>
+				<div class="col-sm-8">
+					<input id="typeName" name="typeName" class="form-control" type="text" required>
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">显示顺序：</label>
+				<div class="col-sm-8">
+					<input id="orderNum" name="orderNum" class="form-control" type="text" required>
+				</div>
+			</div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "system/sysCredentialsType"
+		$("#form-sysCredentialsType-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-sysCredentialsType-add').serialize());
+	        }
+	    }
+		
+		function selectTypeTree() {
+			var options = {
+				title: '类型选择',
+				width: "380",
+				url: prefix + "/selectTypeTree/" + $("#treeId").val(),
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		
+		function doSubmit(index, layero){
+			var body = layer.getChildFrame('body', index);
+   			$("#treeId").val(body.find('#treeId').val());
+   			$("#treeName").val(body.find('#treeName').val());
+   			layer.close(index);
+		}
+	</script>
+</body>
+</html>

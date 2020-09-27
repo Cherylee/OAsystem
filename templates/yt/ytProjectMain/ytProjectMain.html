@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('项目主列表')"/>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li><input type="text" name="name" placeholder="项目名称"/>
+                        </li>
+                        <li> <select name="projectType"
+                                          th:with="type=${@dict.getType('yt_project_type')}">
+                            <option value="">工程类型</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"
+                            ></option>
+                        </select>
+                        </li>
+                        <li><input type="text" name="biddingDate"
+                                        class="time-input-data" placeholder="开标时间"/>
+                        </li>
+
+                        <li><select name="bidType"
+                                         th:with="type=${@dict.getType('yt_bid_type')}"
+                        >
+                            <option value="">投标类型</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"
+                            ></option>
+                        </select>
+                        </li>
+                        <li><select name="state"
+                                         th:with="type=${@dict.getType('yt_project_state')}"
+                        >
+                            <option value="">项目状态</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"
+                            ></option>
+                        </select>
+                        </li>
+
+                        <li><a class="btn btn-primary btn-rounded btn-sm"
+                               onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm"
+                               onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <form id="form-ytProjectMain-edit">
+            <input id="id" name="id" type="hidden">
+            <input id="isDepositBack" name="isDepositBack" class="form-control" type="hidden">
+        </form>
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()"
+               shiro:hasPermission="yt:ytProjectMain:add"> <i
+                    class="fa fa-plus"></i> 添加
+            </a> <a class="btn btn-primary btn-edit disabled"
+                    onclick="$.operate.editTab()"
+                    shiro:hasPermission="yt:ytProjectMain:edit"> <i
+                class="fa fa-edit"></i> 修改
+        </a> <a class="btn btn-danger btn-del btn-del disabled"
+                onclick="$.operate.removeAll()"
+                shiro:hasPermission="yt:ytProjectMain:remove"> <i
+                class="fa fa-remove"></i> 删除
+        </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('yt:ytProjectMain:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('yt:ytProjectMain:remove')}]];
+    var detailFlag = [[${@permission.hasPermi('yt:ytProjectMain:detail')}]];
+    var sunbmitFlag = [[${@permission.hasPermi('yt:ytProjectMain:submit')}]];
+    var prefix = ctx + "yt/ytProjectMain";
+
+    var ytPMinfoType = [[${@dict.getType('yt_project_type')}]];
+    var ytBidType = [[${@dict.getType('yt_bid_type')}]];
+    var ytProjectState = [[${@dict.getType('yt_project_state')}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            /*  detailUrl: prefix + "/detail/{id}", */
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "项目信息",
+            showExport: true,
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '',
+                    visible: false
+                },
+                {
+                    field: 'name',
+                    title: '项目名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var link = null;
+                        if (row.state == '07' || row.state == '04') {
+                            link = '<a onclick="detailTab(\'' + row.id + '\')">' + row.name + '</a>'
+                        } else {
+                            link = row.name
+                        }
+                        return link;
+                    }
+                },
+                {
+                    field: 'code',
+                    title: '项目编号',
+                    sortable: true
+                },
+                {
+                    field: 'biddingInfoLinkLoc',
+                    title: '招标信息',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var linkLoc = '<a target="view_window" href="' + row.biddingInfoLinkLoc + '">点击查看</a>'
+                        return $.table.tooltip(value, 10, "open") + linkLoc
+                    }
+                },
+                {
+                    field: 'biddingApplyId',
+                    title: '费用申请Id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectType',
+                    title: '工程类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ytPMinfoType, value);
+                    }
+                },
+                {
+                    field: 'constructionUnit',
+                    title: '建设单位',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'replaceUnit',
+                    title: '代建单位',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'constructionLoc',
+                    title: '建设地点',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectScale',
+                    title: '项目规模',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'biddingLimitDate',
+                    title: '招标工期',
+                    sortable: true
+                },
+                {
+                    field: 'investAmount',
+                    title: '投资总额',
+                    sortable: true
+                },
+                {
+                    field: 'biddingDesignCost',
+                    title: '招标设计费用(万元)',
+                    sortable: true
+                },
+                {
+                    field: 'biddingContent',
+                    title: '招标内容',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'qualificationRequirements',
+                    title: '资质要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'performanceRequirements',
+                    title: '业绩要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'evaluationMethod',
+                    title: '评标办法',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'deposit',
+                    title: '投标保证金',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'depositSubmitDate',
+                    title: '保证金提交截止日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'filesSubmitDate',
+                    title: '投标文件递交时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'biddingDate',
+                    title: '开标时间',
+                    sortable: true
+                },
+                {
+                    field: 'biddingPlace',
+                    title: '开标地点',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectHeadmanRequirements',
+                    title: '项目负责人要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'projectOthersRequirements',
+                    title: '项目其他人要求',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'accompany',
+                    title: '陪标与否',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'bidType',
+                    title: '投标类型',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ytBidType, value);
+                    }
+                },
+                {
+                    field: 'state',
+                    title: '项目状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(ytProjectState, value);
+                    }
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '更新者',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'isDepositBack',
+                    title: '保证金收回',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var actions = null;
+                        if (row.state == '07') {
+
+                            if (row.isDepositBack == 'N') {
+                                if (row.allowDepositBack == 'Y') {
+                                    actions = '<a class="btn btn-warning btn-xs ' + detailFlag + '" href="#" onclick="freeReturn(\'' + row.id + '\')">保证金收回</a> ';
+                                } else {
+                                    actions = '未收回'
+                                }
+                            } else {
+                                actions = '已收回'
+                            }
+
+                        } else {
+                            actions = '未收回'
+                        }
+                        return actions;
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var ifedit = 'disabled';
+                        var shenhe = ''
+
+                        if (row.state == '00') {
+                            actions.push('<a class="btn btn-warning btn-xs ' + sunbmitFlag + '" href="#" onclick="changeState(\'' + row.id + '\')">提交</a> ');
+                        }
+                        if (row.state == '00' || row.state == '04') {
+                            ifedit = ''
+                            shenhe = 'disabled'
+                        }
+                        if (row.state == '07') {
+                            shenhe = 'disabled'
+                        }
+
+                        actions.push('<a class="btn btn-info btn-xs ' + detailFlag + ' ' + shenhe + '" href="#" onclick="detailTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>审核</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + ' ' + ifedit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    function detailTab(id) {
+        $.modal.openTab("审核界面", ctx + "yt/ytProjectMain/detail/" + id);
+    }
+
+    function changeState(id) {
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + "/changeState",
+            type: "get",
+            data: {'id': id, 'state': '01', 'bidState': ''},
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.modal.closeLoading();
+                $.operate.ajaxSuccess(result);
+            }
+        };
+
+        $.ajax(config)
+    }
+
+    //保证金收回
+    function freeReturn(id) {
+        $('#id').val(id);
+        $.modal.confirm('确认已经收回？', function () {
+            $('#isDepositBack').val('Y');
+            $.operate.save(prefix + "/edit", $('#form-ytProjectMain-edit').serialize());
+        })
+    }
+    //回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if ($.table.selectColumns("id").length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if ($.table.selectColumns("id").length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+</script>
+</body>
+</html>

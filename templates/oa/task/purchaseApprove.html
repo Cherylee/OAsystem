@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('修改采购申请')" />
+<style>
+.add_btn_mt {
+	margin-top: 15px;
+}
+</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-oaPurchase-edit" th:object="${oaPurchase}">
+							<input id="id" name="id" th:field="*{id}" type="hidden">
+							<input name="procInstId" type="hidden" id="procInstId" th:value="*{procInstId}" />
+							<input id="taskId" name="taskId" th:value="${taskId}" type="hidden">
+							<table class="table table-bordered table-condensed" >
+								<caption class="text-center">
+									<h2>采购申请</h2>
+								</caption>
+								<tbody>
+								<th colspan="4">
+									表单信息
+								</th>
+								<tr>
+									<td class="active">采购标题</td>
+									<td>
+										<input id="title" name="title" th:field="*{title}" class="form-control" type="text">
+									</td>
+									<td class="active">申请人</td>
+									<td>
+										<input id="proposer" name="proposer" th:field="*{userName}" class="form-control" type="text" readonly="true">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">归属公司</td>
+									<td>
+										<input name="companyId" type="hidden" id="companyId" th:value="*{companyId}"/>
+										<input name="companyName" id="companyName" onclick="selectDeptTree('companyId','companyName','0')"
+											   th:value="*{companyName}" class="form-control" type="text">
+									</td>
+									<td class="active">归属部门</td>
+									<td>
+										<input name="deptId" type="hidden" id="deptId" th:value="*{deptId}"/>
+										<input th:value="*{dept.deptName}" name="deptName" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">状态</td>
+									<td>
+										<select name="status" class="form-control" th:with="type=${@dict.getType('oa_leave_status')}" th:field="*{status}" disabled="disabled">
+											<option value="">所有</option>
+											<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+										</select>
+									</td>
+									<td class="active">申购原因</td>
+									<td>
+										<input id="reason" name="reason" th:field="*{reason}" class="form-control" type="text">
+									</td>
+								</tr>
+								<tr>
+									<td class="active">创建日期</td>
+									<td>
+										<input id="createTime" name="createTime"class="form-control time-input" type="text"
+											   readonly="true" th:value="${#dates.format(oaPurchase.createTime, 'yyyy-MM-dd HH:mm:ss')}">
+									</td>
+									<td class="active">备注</td>
+									<td>
+										<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+									</td>
+								</tr>
+								</tbody>
+							</table>
+
+							<div class="col-sm-12 select-table table-striped">
+								<table id="bootstrap-table" data-mobile-responsive="true"></table>
+							</div>
+							<div class="row">
+								<div class="col-sm-offset-5 col-sm-10 add_btn_mt">
+									<button type="button" class="btn btn-sm btn-primary"
+										onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+									<button type="button" class="btn btn-sm btn-danger"
+										onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+									<button type="button" class="btn btn-sm btn-success"
+										th:onclick="selectUser('','','0',[[${oaPurchase.id}]],'oa/oapurchase/copy','flag')">
+										抄送</button>
+									<button type="button" class="btn btn-sm btn-danger"
+										onclick="closeItem()">
+										<i class="fa fa-reply-all"></i>关闭
+									</button>
+								</div>
+							</div>
+						</form>
+						<div class="col-sm-12 select-table table-striped">
+							<table id="table-procInstId" data-mobile-responsive="true"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oapurchase";
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+$("#taskId").val()+"/2/oa_purchase/"+[[${oaPurchase.id}]]);
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+$("#taskId").val()+"/2/oa_purchase/"+[[${oaPurchase.id}]]);
+	    }
+	    //返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+		//对应的明细信息
+		$(function() {
+			
+            var options = {
+                createUrl: prefix + "/add",
+                removeUrl: prefix + "/remove",
+                url : ctx+"oa/oaPurchaseDetail/detailListByMid?purchaseId="+$("#id").val(),
+                modalName: "采购物资明细",
+		        showExport: false,
+		        showRefresh:false,
+		        showColumns:false,
+		        showToggle:false,
+		        showSearch:false,
+		        pagination:false,
+		        striped:true,
+                columns: [{
+		            checkbox: false
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'goodsName', 
+					title : '物资名称',
+					sortable: true
+				},
+				{
+					field : 'num', 
+					title : '数量',
+					sortable: true
+				},
+				{
+					field : 'unit', 
+					title : '单位',
+					sortable: true
+				},
+				{
+					field : 'price', 
+					title : '单价',
+					sortable: true
+				},
+				{
+					field : 'brand', 
+					title : '规格型号',
+					sortable: true
+				},
+				{
+					field : 'purchaseId', 
+					title : '主表id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'useTime', 
+					title : '使用时间',
+					sortable: true
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				}]
+            };
+            $.table.init(options);
+        });
+		//流程
+		var data = {};
+    	data.procInstId=[[${oaPurchase.procInstId}]];
+    	data.id = [[${oaPurchase.id}]];
+		selectActProcessList(data,'table-procInstId');
+	</script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('人员薪资列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/oaUserSalary";
+        var sysYesNo = [[${@dict.getType('sys_yes_no')}]];
+
+        $(function() {
+            var options = {
+                url: prefix + "/persoSalary",
+                modalName: "人员薪资",
+                fixedColumns: true,
+    		    fixedNumber: 3,
+    		    sortName : "createTime",
+		        sortOrder : "desc",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				
+				{
+					field : 'basePay', 
+					title : '基本工资',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'postPay', 
+					title : '岗位工资',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'meritPay', 
+					title : '绩效工资',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'seniorityPay', 
+					title : '工龄工资',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'placePay', 
+					title : '外派补贴',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'certifiedPay', 
+					title : '持证补贴',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'partPostPay', 
+					title : '兼岗补贴',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'phonePay', 
+					title : '通讯补贴',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'highTemperPay', 
+					title : '防暑降温补贴',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'otherPay', 
+					title : '其他',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'otherBonusPay', 
+					title : '其他奖金',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'yearBonusPay', 
+					title : '年终奖金',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'curMonthPay', 
+					title : '当月应发合计',
+					width:'100',
+					sortable: true
+				},
+				
+				{
+					field : 'personOldPay', 
+					title : '个人养老保险缴纳金额',
+					width:'150',
+					sortable: true
+				},
+			
+				{
+					field : 'personCurePay', 
+					title : '个人医疗保险缴纳金额',
+					width:'150',
+					sortable: true
+				},
+				
+				{
+					field : 'personLosePay', 
+					title : '个人失业保险缴纳金额',
+					width:'150',
+					sortable: true
+				},
+				
+				{
+					field : 'personCommonPay', 
+					title : '个人公积金缴纳金额',
+					width:'150',
+					sortable: true
+				},
+				
+				{
+					field : 'workPay', 
+					title : '考勤扣款',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'otherDeduction', 
+					title : '其他扣款',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'personTax', 
+					title : '个人所得税',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'realPay', 
+					title : '实发工资',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'workPayRemark', 
+					title : '考勤扣款备注',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'otherDeductionRemark', 
+					title : '其他扣款备注',
+					width:'100',
+					sortable: true
+				},
+				{
+					field : 'createBy', 
+					title : '创建人',
+					width:'100',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					width:'100',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '修改日期',
+					width:'100',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改人',
+					width:'100',
+					sortable: true,
+					visible: false
+				}]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+	<!-- 导入区域 -->
+	<script id="importTpl" type="text/template">
+	<form enctype="multipart/form-data" class="mt20 mb10">
+		<div class="col-xs-offset-1">
+			<input type="file" id="file" name="file"/>
+			<div class="mt10 pt5">
+				<a onclick="$.table.importTemplate()" class="btn btn-default btn-xs"><i class="fa fa-file-excel-o"></i> 下载模板</a>
+			</div>
+			<font color="red" class="pull-left mt10">
+				提示：仅允许导入“xls”或“xlsx”格式文件！
+			</font>
+		</div>
+	</form>
+	</script>
+</html>

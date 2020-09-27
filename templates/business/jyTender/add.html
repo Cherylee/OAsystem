@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增经营部投标申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-jyTender-add">
+        <input type="hidden" name="ytSecondApply" value="Y">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请人：</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text"
+                           th:value="${user.userName}" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请公司：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="companyId" id="companyId"
+                           th:value="${company.deptId}"/>
+                    <input type="text" id="companyName" name="companyName" class="form-control"
+                           onclick="selectDeptTree('companyId','companyName','0')"
+                           th:value="${company.deptName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">申请部门：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="deptId" id="treeId"
+                           th:value="${user.dept.deptId}"/>
+                    <input type="text" id="treeName" name="deptName" class="form-control"
+                           onclick="selectDeptTree('treeId','treeName','1')"
+                           th:value="${user.dept.deptName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目名称：</label>
+                <div class="col-sm-8">
+                    <input id="projectName" name="projectName" class="form-control"
+                           type="text" th:value="${info.projName}">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目规模：</label>
+                <div class="col-sm-8">
+                    <input id="projectScale" name="projectScale" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目编号：</label>
+                <div class="col-sm-8">
+                    <input id="code" name="code" class="form-control" type="text" th:value="${info.tenderProjCode}"
+                           readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标公告网址：</label>
+                <div class="col-sm-8">
+                    <input name="projectId" type="hidden" th:value="${info.projectId}">
+                    <input name="biddingInfoId" type="hidden" th:value="${info.bid}">
+                    <input id="tenderDoc" name="tenderDoc" th:value="${info.detailUrl}" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">工程类型：</label>
+                <div class="col-sm-8">
+                    <select id="proType" name="proType" class="form-control"
+                            th:with="type=${@dict.getType('business_engineer_type')}" th:value="${info.tenderType}">
+                        <option value="">------所有------</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">建设单位：</label>
+                <div class="col-sm-8">
+                    <input id="constructUnit" name="constructUnit"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">代建单位：</label>
+                <div class="col-sm-8">
+                    <input id="replaceUnit" name="replaceUnit" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">建设地点：</label>
+                <div class="col-sm-8">
+                    <input id="constructionLoc" name="constructionLoc"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">工期：</label>
+                <div class="col-sm-8">
+                    <input id="timeLimit" name="timeLimit" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投资总额：</label>
+                <div class="col-sm-8">
+                    <input id="investAmount" name="investAmount" class="form-control"
+                           type="number">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">建安费：</label>
+                <div class="col-sm-8">
+                    <input id="biddingDesignCost" name="biddingDesignCost"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">招标内容：</label>
+                <div class="col-sm-8">
+                    <input id="projectDesc" name="projectDesc"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">资质要求：</label>
+                <div class="col-sm-8">
+                    <input id="qualifications" name="qualifications"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">业绩要求：</label>
+                <div class="col-sm-8">
+                    <input id="kpiRequire" name="kpiRequire" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">评标办法：</label>
+                <div class="col-sm-8">
+                    <input id="evaluationMethod" name="evaluationMethod"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标保证金：</label>
+                <div class="col-sm-8">
+                    <input id="deposit" name="deposit" class="form-control"
+                           type="number">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">保证金提交截止时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="depositSubmitDate" name="depositSubmitDate"
+                               class="form-control time-input" type="text">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标文件递交截止时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="filesSubmitDate" name="filesSubmitDate"
+                               class="form-control time-input" type="text">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red; ">*</span>开标时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="openTenderDate" name="openTenderDate"
+                               class="form-control time-input" type="text" required="required">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">开标地点：</label>
+                <div class="col-sm-8">
+                    <input id="biddingPlace" name="biddingPlace" class="form-control"
+                           type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">开标方式：</label>
+                <div class="col-sm-8">
+                    <select name="biddingWay" class="form-control"
+                            th:with="type=${@dict.getType('bidding_way')}">
+                        <option value="">-----所有-----</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">项目负责人要求：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="builderId">
+                    <input id="builderName" name="builderName" class="form-control"
+                           type="text" onclick="selectTypeTree('builderId','builderName')">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投标方式：</label>
+                <div class="col-sm-8">
+                    <select id="tenderType" name="tenderType" class="form-control"
+                            th:with="type=${@dict.getType('business_project_type')}">
+                        <option value="">------所有------</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">备注：</label>
+                <div class="col-sm-8">
+                    <input id="remark" name="remark" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-offset-5 col-sm-10">
+                <button type="button" class="btn btn-sm btn-info"
+                        onclick="save()">
+                    <i class="fa fa-check"></i>保存草稿
+                </button>
+
+                <button type="button" class="btn btn-sm btn-primary"
+                        onclick="submitHandler()">
+                    <i class="fa fa-check"></i>提 交
+                </button>
+                &nbsp;
+                <button type="button" class="btn btn-sm btn-danger"
+                        onclick="closeItem()">
+                    <i class="fa fa-reply-all"></i>关 闭
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "business/jyTender"
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/add", $('#form-jyTender-add')
+                .serialize());
+        }
+    }
+
+    //保存草稿
+    function save() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/saveDraft", $('#form-jyTender-add')
+                .serialize());
+        }
+    }
+
+    /*选择归属类型 */
+    function selectTypeTree(id, typeName) {
+        divTypeId = id;
+        divTypeName = typeName;
+        var treeId = $("#" + id).val();
+        var deptId = $.common.isEmpty(treeId) ? "1" : $("#" + id).val();
+        var options = {
+            title: '选择归属类型',
+            width: "380",
+            url: ctx + "system/sysCredentialsType/selectTypeTree/" + deptId,
+            callBack: typeSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+    function typeSubmit(index, layero) {
+        var tree = layero.find("iframe")[0].contentWindow.$._tree;
+        if ($.tree.notAllowParents(tree)) {
+            var body = layer.getChildFrame('body', index);
+            $("#" + divTypeId).val(body.find('#treeId').val());
+            $("#" + divTypeName).val(body.find('#treeName').val());
+            layer.close(index);
+        }
+    }
+</script>
+</body>
+</html>

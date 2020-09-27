@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改部门与角色关系')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysCustDeptRole-edit" th:object="${sysCustDeptRole}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+            <div class="form-group">
+				<label class="col-sm-3 control-label">用户：</label>
+				<div class="col-sm-6">
+					<input id="userId" name="userId" class="form-control" type="hidden" th:field="*{userId}">
+					<input id="userName" name="userName" class="form-control"
+						type="text" onclick="selectUserById('userId','userName')" th:field="*{userName}">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">部门：</label>
+				<div class="col-sm-8">
+					<input id="treeId" name="deptId" class="form-control" type="hidden" th:field="*{deptId}">
+					<input id="treeName" name="deptName" class="form-control"
+						type="text" onclick="selectDeptTree('treeId','treeName','0')" th:field="*{deptName}">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">角色：</label>
+				<div class="col-sm-8">
+					<input id="roleId" name="roleId" type="hidden" th:field="*{roleId}"> <input id="roleName" name="roleName" class="form-control"
+						type="text" onclick="selectRoleById('roleId','roleName')" th:field="*{roleName}">
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+				&nbsp;
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+    </div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "system/sysCustDeptRole";
+		//弹框选择角色
+		var roleId=null;
+		var roleName=null;
+		function selectRoleById(id,name) {
+			roleId = id;
+			roleName = name;
+			var options = {
+				title : '选择角色',
+				width : "1200",
+				url : ctx + "system/role",
+				callBack : doSubmitRole
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmitRole(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			$('#'+roleId).val(data.roleId)
+			$('#'+roleName).val(data.roleName)	
+		}
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/edit", $('#form-sysCustDeptRole-edit').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

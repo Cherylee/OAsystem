@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('批量打印')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body>
+<div style="position: fixed; z-index: 10; top: 30px;right: 40px">
+    <button class="btn btn-warning btn-rounded btn-sm" onclick="printing()"><i class="fa fa-download"></i>打印</button>
+</div>
+<div id="printing">
+    <div th:each="margin,marginStat :${marginVoList}">
+        <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+            <!--抬头  -->
+            <div class="hr-line-dashed"></div>
+            <div class="row">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <table class="table table-bordered table-condensed" >
+                                <caption class="text-center">
+                                    <h2>保证金</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active" style="width: 15%">编号</td>
+                                    <td style="width: 35%">[[${margin.oaMargin.code}]]</td>
+                                    <td class="active" style="width: 15%">投标公司</td>
+                                    <td>[[${margin.oaMargin.tenderCompany}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人</td>
+                                    <td>[[${margin.oaMargin.userName}]]</td>
+                                    <td class="active">保证金类型</td>
+                                    <td th:classappend="${'marginType'+ (marginStat.index)}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请公司</td>
+                                    <td>[[${margin.oaMargin.companyName}]]</td>
+                                    <td class="active">转账方式</td>
+                                    <td th:classappend="${'transferMethod'+ (marginStat.index)}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门</td>
+                                    <td>[[${margin.oaMargin.deptName}]]</td>
+                                    <td class="active">关联收款单</td>
+                                    <td>[[${margin.oaMargin.receiptCode}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期</td>
+                                    <td>[[${#dates.format(margin.oaMargin.applyTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">工程名称</td>
+                                    <td>[[${margin.oaMargin.projectName}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">到账截止时间</td>
+                                    <td>[[${#dates.format(margin.oaMargin.endArrivalTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                    <td class="active">投标方式</td>
+                                    <td th:classappend="${'tenderType'+ (marginStat.index)}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="active">保证金总金额</td>
+                                    <td>[[${margin.oaMargin.marginTotalMoney}]]</td>
+                                    <td class="active">保证金总金额（大写）</td>
+                                    <td>[[${margin.oaMargin.totalMoneyUpcase}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">转账说明</td>
+                                    <td colspan="3">[[${margin.oaMargin.transferDesc}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active" colspan="2" style="text-align: center">款项来源人明细</td>
+                                    <td class="active" colspan="2" style="text-align: center">保证金收款明细</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">款项来源人</td>
+                                    <td>[[${margin.oaMargin.sourceOfPayment}]]</td>
+                                    <td class="active">收款人</td>
+                                    <td>[[${margin.oaMargin.collectOfPayment}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">来源人账号</td>
+                                    <td>[[${margin.oaMargin.sourceOfAccount}]]</td>
+                                    <td class="active">收款人账号</td>
+                                    <td>[[${margin.oaMargin.collectOfAccount}]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="active">来源人开户行</td>
+                                    <td>[[${margin.oaMargin.sourceOpenBank}]]</td>
+                                    <td class="active">收款开户行</td>
+                                    <td>[[${margin.oaMargin.collectOpenBank}]]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>审批流程</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th></th>
+                                            <th style="width: 25%">流程名称</th>
+                                            <th style="width: 25%">开始时间</th>
+                                            <th style="width: 25%">审批信息</th>
+                                            <th style="width: 25%">审核时间</th>
+                                        </tr>
+                                        <tr th:each="approval,approvalStat :${marginVoList[marginStat.index].processList}">
+                                            <td>[[${approvalStat.index}]]</td>
+                                            <td>[[${approval.actName}]]</td>
+                                            <td>[[${#dates.format(approval.startTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                            <td>[[${approval.message}]]</td>
+                                            <td>[[${#dates.format(approval.endTime, 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="box-center-title " style="margin-top: 20px">
+                                    <span>最后一个节点</span>
+                                </div>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-condensed" >
+                                        <tr>
+                                            <th style="width: 50%">用户名称</th>
+                                            <th style="width: 50%">留言</th>
+                                        </tr>
+                                        <tr th:unless="${margin.oaProcExeComment==null}">
+                                            <td>[[${margin.oaProcExeComment.userName}]]</td>
+                                            <td>[[${margin.oaProcExeComment.content}]]</td>
+                                        </tr>
+                                        <tr th:if="${margin.oaProcExeComment==null}">
+                                            <td colspan="2" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="page-break-after:always;"></div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    console.log([[${marginVoList}]]);
+
+    //字典查询
+    //保证金类型
+    var marginTypeList = [[${@dict.getType('oa_jy_margin_type')}]];
+    selectDictionary(marginTypeList,[[${marginVoList}]],'oaMargin','marginType');
+    //转账方式
+    var transferMethodList = [[${@dict.getType('oa_jy_margin_transferMethod')}]];
+    selectDictionary(transferMethodList,[[${marginVoList}]],'oaMargin','transferMethod');
+    //投标方式
+    var tenderTypeList = [[${@dict.getType('business_project_type')}]];
+    selectDictionary(tenderTypeList,[[${marginVoList}]],'oaMargin','tenderType');
+
+    function printing() {
+        $('#printing').jqprint({
+            debug: false,
+            importCSS: true,
+            printContainer: true,
+            operaSupport: false
+        });
+    }
+</script>
+</body>
+</html>

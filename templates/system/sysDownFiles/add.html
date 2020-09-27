@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增下载文件')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysDownFiles-add">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">存储类别：</label>
+				<div class="col-sm-8">
+					<input id="storeCategory" name="storeCategory" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">区域：</label>
+				<div class="col-sm-8">
+					<input id="domain" name="domain" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">桶名：</label>
+				<div class="col-sm-8">
+					<input id="bucketName" name="bucketName" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">文件用户ID：</label>
+				<div class="col-sm-8">
+					<input id="fileUserId" name="fileUserId" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">文件名：</label>
+				<div class="col-sm-8">
+					<input id="fileName" name="fileName" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">文件大小：</label>
+				<div class="col-sm-8">
+					<input id="capacity" name="capacity" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">加密状态（0不加密 1加密）：</label>
+				<div class="col-sm-8">
+					<input id="encryptedState" name="encryptedState" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">最后改变时间：</label>
+				<div class="col-sm-8">
+					<input id="changeTime" name="changeTime" class="form-control" type="text">
+				</div>
+			</div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "system/sysDownFiles"
+		$("#form-sysDownFiles-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.save(prefix + "/add", $('#form-sysDownFiles-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

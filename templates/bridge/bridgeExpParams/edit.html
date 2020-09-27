@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改试验参数')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeExpParams-edit" th:object="${bridgeExpParams}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">试验参数编码：</label>
+					<div class="col-sm-8">
+						<input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">参数名称：</label>
+					<div class="col-sm-8">
+						<input id="name" name="name" th:field="*{name}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">2019标准单价（元）：</label>
+					<div class="col-sm-8">
+						<input id="price" name="price" th:field="*{price}" class="form-control" type="number">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">2007标准单价（元）：</label>
+					<div class="col-sm-8">
+						<input id="historyPrice" name="historyPrice" th:field="*{historyPrice}" class="form-control" type="number">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">价格计量单位：</label>
+					<div class="col-sm-8">
+						<input id="unit" name="unit" th:field="*{unit}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">环境条件要求：</label>
+					<div class="col-sm-8">
+						<input id="envConditions" name="envConditions" th:field="*{envConditions}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">委托单类型：</label>
+					<div class="col-sm-8">
+						<input id="orderType" name="orderType" th:field="*{orderType}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">检测大类编码：</label>
+					<div class="col-sm-8">
+						<input id="itemCode" name="itemCode" th:field="*{itemCode}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">检测大类名称：</label>
+					<div class="col-sm-8">
+						<input id="itemName" name="itemName" th:field="*{itemName}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group">
+					<label class="col-sm-4 control-label">备注：</label>
+					<div class="col-sm-8">
+						<input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+					</div>
+				</div>
+			</div>
+		</form>
+    </div>
+	<!-- 关联试验参数 -->
+	<div class="col-sm-6 select-table table-striped">
+		<div class="btn-group-sm" id="toolbar1" role="group">
+			<a class="btn btn-warning" data-toggle="modal" onclick="selectMachine()"> <i class="fa fa-plus"></i> 添加关联仪器 </a>
+			<a class="btn btn-danger" onclick="removeRowAll('paramMachineTable')"><i class="fa fa-remove"></i> 删除所有行</a>
+		</div>
+		<div class="fixed-table-container">
+			<table id="paramMachineTable" data-mobile-responsive="true"></table>
+		</div>
+		<div class="row">
+			<div class="col-sm-offset-6 col-sm-6">
+				<button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+					<i class="fa fa-check"></i>保 存
+				</button>
+
+				<button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+	</div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		var prefix = ctx + "bridge/bridgeExpParams";
+		$("#form-bridgeExpParams-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+				var data = {};
+				data.params = $('#form-bridgeExpParams-edit').serializeObject();
+				data.machineList = $('#paramMachineTable').bootstrapTable('getData');
+				$.operate.saveJsonTab(prefix + "/edit", data);
+	        }
+	    }
+
+		/* 删除指定表格行 */
+		function removeRow(id, rowId) {
+			$.modal.confirm("确定删除该行数据吗?", function() {
+				$("#" + id).bootstrapTable('removeByUniqueId', rowId);
+			});
+		}
+		/* 删除所有表格行 */
+		function removeRowAll(id) {
+			$.modal.confirm("确定删除所有行吗?", function() {
+				$("#" + id).bootstrapTable('removeAll');
+			});
+		}
+
+		function selectMachine() {
+			var options = {
+				title : '选择关联仪器',
+				width : "1200",
+				url : ctx + "bridge/bridgeMachine",
+				callBack : saveToParamMachineTable
+			};
+			$.modal.openOptions(options);
+		}
+
+		//将关联信息填入到关联明细中
+		function saveToParamMachineTable(index, layero){
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			for (var i = 0; i < result.length; i++) {
+				insertRow(result[i]);
+			}
+		}
+
+		function insertRow(data) {
+			var randomId = 100 + ~~(Math.random() * 100);
+			var table_row = '';
+			table_row = data
+			table_row[0]=false;
+
+			var countDate = $("#paramMachineTable").bootstrapTable('getData');
+			if(isHas(countDate,data.id)==false){
+				$("#paramMachineTable").bootstrapTable('insertRow', {
+					index : 0, // 你想插入到哪，0表示第一行
+					row : table_row
+				})
+			}
+		}
+
+		//判断是否已经添加
+		function isHas(data,id){
+			var isTF=false;
+			for(var i=0;i<data.length;i++){
+				if(data[i].id==id){
+					isTF=true;
+				}
+			}
+			return isTF;
+		}
+
+		var options = {
+			id : 'paramMachineTable',
+			url : ctx + 'bridge/bridgeMachine/listByParamCode',
+			showSearch : false,
+			showRefresh : false,
+			showToggle : false,
+			showColumns : false,
+			showPageGo : false,
+			pagination : false,
+			uniqueId : 'id',
+			modalName : "关联仪器明细",
+			showExport : false,
+			clickToSelect : true,
+			queryParams : {"paramCode" : [[${bridgeExpParams.code}]]},
+			columns : [
+				{
+					field : 'id',
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'machineCode',
+					title : '设备编码',
+				},
+				{
+					field : 'machineName',
+					title : '设备名称',
+				},
+				{
+					field : 'machineType',
+					title : '设备类别',
+				},
+				{
+					field : 'specifications',
+					title : '规格型号',
+				},
+				{
+					title : '操作',
+					formatter : function(value, row, index) {
+						return	'<a class="btn btn-danger" onclick="removeRow(\'paramMachineTable\',\'' + row.id + '\')">删除</a> '
+					}
+				} ]
+
+		};
+
+		$(function() {
+			$.table.init(options);
+		});
+
+
+	</script>
+</body>
+</html>

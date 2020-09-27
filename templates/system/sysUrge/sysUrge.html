@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+<th:block th:include="include :: header('系统催办列表')" />
+</head>
+<body class="gray-bg">
+
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>标题：<input type="text" name="title" />
+							</li>
+
+							<li>流程类别：<input type="text" name="category" />
+							</li>
+
+							<li><p>标记：</p> <select name="flag"
+								th:with="type=${@dict.getType('sys_urge_flag')}">
+									<option value="">--请选择--</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+							</select></li>
+
+							<li><a class="btn btn-primary btn-rounded btn-sm"
+								onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm"
+								onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:sysUrge:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:sysUrge:remove')}]];
+        var prefix = ctx + "system/sysUrge";
+        var urgeFlag = [[${@dict.getType('sys_urge_flag')}]];
+
+		$(function () {
+			list();
+			window.setInterval(
+				function(){
+					getCacheUpdateFlag(4);
+				},30000
+			);
+		});
+
+        function list() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "系统催办",
+		        showExport: true,
+		        sortName : "createTime",
+			    sortOrder: "desc",
+			    clickToSelect: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : '主键',
+					visible: false
+				},
+				{
+					field : 'title', 
+					title : '标题',
+					sortable: true,
+					formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a onclick="openPageById(\'' + row.id + '\')">'+value+'</a> ');
+						return actions.join('');
+		            }
+				},
+				{
+					field : 'theme', 
+					title : '主题',
+					sortable: true
+				},
+				{
+					field : 'userId', 
+					title : '发起人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'userName', 
+					title : '发起人姓名',
+					sortable: true
+				},
+				{
+					field : 'category', 
+					title : '流程类别',
+					sortable: true
+				},
+				{
+					field : 'relationTable', 
+					title : '关联表名',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'relationId', 
+					title : '关联的表主键值',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'dealUserId', 
+					title : '处理人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'dealUserName', 
+					title : '处理人姓名',
+					sortable: true
+				},
+				{
+					field : 'nodeName', 
+					title : '节点名称',
+					sortable: true
+				},
+				{
+					field : 'flag', 
+					title : '标记',
+					sortable: true,
+					formatter: function (value, row, index) {
+			        	return $.table.selectDictLabel(urgeFlag, value);
+			        }
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				},
+				{
+					field : 'createTime', 
+					title : '创建日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'createBy', 
+					title : '创建人',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateTime', 
+					title : '修改日期',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'updateBy', 
+					title : '修改人',
+					sortable: true,
+					visible: false
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="openPageById(\'' + row.id + '\')">审批</a> ');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        };
+        
+        //打开对应页面
+        function openPageById(id){
+        	var config = {
+        	        url: prefix + "/openPageById/"+id,
+        	        type: "get",
+        	        dataType: "json",
+        	        beforeSend: function () {
+        	        	$.modal.loading("正在处理中，请稍 后...");
+        	        },
+        	        success: function(result) {
+        	        	$.modal.closeLoading();
+        	        	$.modal.openFullS("催办任务",ctx + result.url);
+        	        }
+        	    };
+        	    $.ajax(config)	
+        }
+        
+        
+    </script>
+</body>
+</html>

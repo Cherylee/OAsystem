@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改项目扣款')" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+
+                        <form class="form-horizontal m" id="form-sysProDebit-edit" th:object="${sysProDebit}">
+                            <input id="id" name="id" th:field="*{id}"  type="hidden">
+                            <input id="procInstId" name="procInstId" th:field="*{procInstId}" class="form-control" type="hidden">
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>项目扣款</h2>
+                                </caption>
+                                <tbody>
+                                <tr>
+                                    <td class="active">项目：</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" th:field="*{projectId}" class="form-control" type="hidden">
+                                        <input th:field="*{proName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">编号：</td>
+                                    <td>
+                                        <input id="code" name="code" th:field="*{code}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人：</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:field="*{proposer}" class="form-control" type="hidden">
+                                        <input th:field="*{userName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">公司：</td>
+                                    <td>
+                                        <input id="companyId" name="companyId" th:field="*{companyId}" class="form-control" type="hidden">
+                                        <input th:field="*{companyName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门：</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" th:field="*{deptId}" class="form-control" type="hidden">
+                                        <input th:field="*{deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">审批状态：</td>
+                                    <td>
+                                        <select class="form-control" name="status"
+                                                th:with="type=${@dict.getType('oa_leave_status')}"
+                                                th:field="*{status}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请日期：</td>
+                                    <td>
+                                        <input id="applyTime" name="applyTime" th:value="${#dates.format(sysProDebit.applyTime, 'yyyy-MM-dd')}" class="form-control time-input-data" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">扣款总金额：</td>
+                                    <td>
+                                        <input id="amount" name="amount" th:field="*{amount}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">金额大写：</td>
+                                    <td>
+                                        <input id="moneyUpper" name="moneyUpper" th:field="*{moneyUpper}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">扣款类型：</td>
+                                    <td>
+                                        <select name="type" class="form-control"
+                                                th:with="type=${@dict.getType('sys_debit_type')}"
+                                                th:field="*{type}" disabled="disabled">
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                    th:value="${dict.dictValue}">
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">备注：</td>
+                                    <td colspan="3">
+                                        <input id="remark" name="remark" th:field="*{remark}" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件：</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple disabled>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="col-sm-12 select-table table-striped">
+                            <div class="fixed-table-container">
+                                <table id="detailTable" data-mobile-responsive="true"></table>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10 add_btn_mt" style="padding-top: 20px">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="agree()" th:if=" ${hisFlag} ne '1'">同意</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="disagree()" th:if=" ${hisFlag} ne '1'">不同意</button>
+                                <button type="button" class="btn btn-sm btn-success"
+                                        th:onclick="selectUser('','','0',[[${sysProDebit.id}]],'oa/oaCertificatesLogout/copy','flag')">
+                                    抄送</button>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关闭
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 审批流程记录 -->
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="javascript">
+		var prefix = ctx + "oa/sysProDebit";
+		var debitType=[[${@dict.getType('sys_debit_bill_type')}]];
+		//流程
+		var data = {};
+    	data.procInstId= [[${sysProDebit.procInstId}]];
+    	data.id = [[${sysProDebit.id}]];
+		selectActProcessList(data);
+		
+		//同意
+    	function agree(){
+    		$.modal.open("同意备注", ctx+"oa/task/agree/"+[[${taskId}]]+"/GC-3/sys_pro_debit/"+[[${sysProDebit.id}]]);
+    	}
+		//不同意
+	    function disagree(){
+	    	$.modal.open("不同意原因", ctx+"oa/task/disagree/"+[[${taskId}]]+"/GC-3/sys_pro_debit/"+[[${sysProDebit.id}]]);
+	    }
+	    //返回
+		function backAway(){
+			$.modal.close();
+			var parent = window.parent;
+			parent.$.table.refresh();
+		}
+
+
+        $(function () {
+            var attachmentList = new Array();
+            //回显附件
+            var config = {
+                url: ctx+"oa/oaAttachment/selectAttachByObjectId",
+                type: "post",
+                dataType: "json",
+                data: {"objId": [[${sysProDebit.id}]]},
+                success: function(result) {
+                    var imgsUrl = new Array();
+                    var attachList = result.data;
+                    if(attachList!=null && attachList.length>0){
+                        var downloadConfig = new Array();
+                        for(var i=0; i<attachList.length; i++){
+                            var down = {};
+                            var attach = attachList[i];
+                            imgsUrl.push(attach.attachmentUrl);
+                            down.key = attach.attachmentName;
+                            down.caption = attach.fileName;
+                            down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+                            if(isAssetTypeAnImage(attach.attachmentName)){
+                                down.type = 'image';
+                            }else{
+                                down.type = 'object';
+                            }
+                            downloadConfig.push(down);
+                        }
+                        var option1={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            imgsUrl:imgsUrl,
+                            downloadConfig:downloadConfig
+                        }
+                        $.common.uploadFile(option1);
+                    }else{
+                        var option2={
+                            id:'uploadFileId',
+                            uploadUrl:null,
+                            deleteUrl:null,
+                            deleteExtraData:null,
+                            imgsUrl:new Array(),
+                            initialPreviewConfig:null
+                        }
+                        $.common.uploadFile(option2);
+                    }
+                    downFile();
+                }
+            };
+            $.ajax(config)
+        });
+        // 直接返回获取
+        var sys_pro_debit_type_link = [[${@dict.getType('sys_pro_debit_type_link')}]]
+        var sys_pro_debit_type1 = [[${@dict.getType('sys_pro_debit_type1')}]]
+        var sys_pro_debit_type2_1 = [[${@dict.getType('sys_pro_debit_type2_1')}]]
+        var sys_pro_debit_type2_2 = [[${@dict.getType('sys_pro_debit_type2_2')}]]
+        var sys_pro_debit_type2_3 = [[${@dict.getType('sys_pro_debit_type2_3')}]]
+        var sys_pro_debit_type2_4 = [[${@dict.getType('sys_pro_debit_type2_4')}]]
+        var sys_pro_debit_type2_5 = [[${@dict.getType('sys_pro_debit_type2_5')}]]
+		var options1 = {
+				id : 'detailTable',
+				url : ctx+'oa/sysProDebitDetail/list',
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				showPageGo : false,
+				pagination : false,
+				uniqueId : 'id',
+				modalName : "明细",
+				showExport : false,
+				clickToSelect : true,
+				queryParams : {"parentId" : [[${sysProDebit.id}]]},
+				columns : [
+						{
+							radio : true
+						},
+						{
+							field : 'id',
+							title : 'id',
+							visible : false
+						},
+						{
+							field : 'billType',
+							title : '款项类别',
+							formatter: function (value, row, index) {
+				        		return $.table.selectDictLabel(debitType, value);
+				        	}
+						},
+						{
+							field : 'detailType',
+							title : '款项小类',
+                            formatter: function (value, row, index) {
+                                var relation=[]
+                                for (var i = 0; i < sys_pro_debit_type_link.length; i++) {
+                                    if(sys_pro_debit_type_link[i].dictLabel==row.billType){
+                                        relation=eval(sys_pro_debit_type_link[i].dictValue)
+                                    }
+                                }
+                                return $.table.selectDictLabel(relation, value);
+                            }
+						},
+						{
+							field : 'amount',
+							title : '扣款金额'
+						},
+						{
+							field : 'reason',
+							title : '扣款事由'
+						},
+						{
+							field : 'file',
+							title : '附件'
+						},
+						{
+							title : '操作',
+							formatter : function(value, row, index) {
+								return	'<a class="btn btn-danger" onclick="removeRow(\'detailTable\',\'' + row.id + '\')">删除</a> '
+							}
+						} ]
+
+			};
+		$.table.init(options1);
+		
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: select2-css" />
+	<th:block th:include="include :: header('同意原因')" />
+</head>
+<body>
+    <div class="form-content">
+        <form class="form-horizontal m" id="form-oa-disagree">
+        <input id="taskId" name="taskId" th:value="${taskId}"  type="hidden">
+        <input id="urlId" name="url" th:value="${url}"  type="hidden">
+		<input id="id" name="id" th:value="${id}"  type="hidden">
+        	<div class="form-group">
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<textarea id="opinion" name="opinion" class="form-control" required="required">同意</textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">扣款事由：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="reason" id="reason">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">扣款金额：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="money" id="money">
+				</div>
+			</div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script th:inline="javascript">
+		$("#form-oaLeave-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+				if($('#money').val()!=''&&$('#reason').val()==''){
+					$.modal.alertWarning("理由必填！");
+					return;
+				}
+	        	$.modal.loading("正在处理中，请稍后...");
+	        	 $.ajax({
+	        		type : "post",
+					url : ctx+[[${url}]],
+	        		dataType : "json",
+	        		data:{
+	        			"opinion":$("#opinion").val(),
+						"isLeaderPass":"Y",
+						"taskId":$("#taskId").val(),
+						"id":$("#id").val(),
+						"reason":$("#reason").val(),
+						"money":$("#money").val(),
+						"tableName":[[${tableName}]]
+					},
+	        		success : function(res){
+						var topWindow = $(window.parent.parent.document);
+						var currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-panel');
+						var $contentWindow = $('.RuoYi_iframe[data-id="' + currentId + '"]', topWindow)[0].contentWindow;
+						$.modal.close();
+						$contentWindow.$.modal.msgSuccess(res.msg);
+						$contentWindow.$(".layui-layer-padding").removeAttr("style");
+						if ($contentWindow.$.table._option.type == table_type.bootstrapTable) {
+							$contentWindow.$.table.refresh();
+						} else if ($contentWindow.$.table._option.type == table_type.bootstrapTreeTable) {
+							$contentWindow.$.treeTable.refresh();
+						}
+						var panelUrl = window.frameElement.getAttribute('data-panel');
+						$('.page-tabs-content .active i', topWindow).click();
+						if($.common.isNotEmpty(panelUrl)){
+							$('.menuTab[data-id="' + panelUrl + '"]', topWindow).addClass('active').siblings('.menuTab').removeClass('active');
+							$('.mainContent .RuoYi_iframe', topWindow).each(function() {
+								if ($(this).data('id') == panelUrl) {
+									$(this).show().siblings('.RuoYi_iframe').hide();
+									return false;
+								}
+							});
+						}
+	        			
+	        		}
+	        	}); 
+	        }
+	    }
+		
+	</script>
+</body>
+</html>

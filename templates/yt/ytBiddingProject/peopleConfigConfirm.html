@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:include="include :: header('确认人员配置')" />
+	<th:block th:include="include :: layout-latest-css"/>
+	<th:block th:include="include :: ztree-css"/>
+	<style type="text/css">
+		.table-bot {
+			margin-bottom: 0 !important;
+		}
+
+		.title {
+			background: #f6f4f0
+		}
+		.panel-body1 {
+			display: flex;
+		}
+
+		.container-div {
+			width: 70%;
+		}
+		.main-content{
+			width: 350px;
+			margin-right: 30px;
+		}
+	</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				
+				<div class="panel panel-default">
+
+					<div class="panel-body col-sm-12">
+					    <h3 class="thisState"></h3>
+						<form id="form-ytPeopleConfiguration-edit">
+							<table class="table table-bordered table-bot">
+								<tbody>
+									<tr>
+										<td colspan="3" class="text-center ">
+											<div class="form-inline">
+												<div class="form-group ">												    
+													<input type="hidden" class="form-control" name="projectId" th:value="${ytProjectAllocateMain.projectId}">
+													<select id="serchItemCode" name="itemCode" class="form-control" onchange="show_stage(this,'stageLi')">
+														<option th:each="list : ${ytLeaderAllocateVoList}" th:value="${list.ytLeaderAllocateMain.item}" th:text="${list.ytLeaderAllocateMain.itemName}" th:name="${list.ytLeaderAllocateMain.id}"></option>
+													</select>												
+												</div>
+											</div>
+										</td>
+									</tr>
+									<tr class="">
+										<td>
+										   <select id="stageLi" onchange="searchRecord()"  name="stage" class="form-control">
+										   </select>
+										</td>
+										<td>
+										   <select id="checkNode" onchange="searchRecord()"  name="checkNode" class="form-control"  th:with="type=${@dict.getType('yt_people_config_node')}">
+							                  <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+						                   </select>
+										</td>
+										<td>
+										   <input type="number" class="form-control" name="nodeProportion" id="nodeProportion" placeholder="节点比例">
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<input type="hidden" name="ytPeopleConfigurationId">
+						<table class="table table-bordered" id="tableEdit">
+
+						</table>
+						<div class="row comfirmEenter">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button class="btn btn-sm btn-info" onclick="comfirmEenter('02')">确认分配</button>
+								<button class="btn btn-sm btn-danger" onclick="comfirmEenter('03')">驳回</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row" id="configBox">
+			<div class="col-sm-offset-1 col-sm-10">
+				<!-- 分配比例  -->
+				<div class="panel panel-default">
+
+					<!-- 添加  -->
+					<div class="panel-body panel-body1">
+						<div class="main-content">
+							<div class="box box-main">
+								<div class="box-header">
+									<div class="box-title">
+										<i class="fa icon-grid"></i> 人员配置
+									</div>
+								</div>
+								<div class="">
+									<div id="tree" class="ztree"></div>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="container-div">
+							<div class="row">
+								<div class="col-sm-12 select-table table-striped">
+									<form id="formId1">
+										<input type="hidden" id="typeId" name="typeId">
+										<input type="hidden" id="projectId" name="projectId">
+
+									</form>
+									<table id="bootstrap-table1" data-mobile-responsive="true"></table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: layout-latest-js"/>
+	<th:block th:include="include :: ztree-js"/>
+	<script th:inline="javascript">     
+		var prefix = ctx + "yt/ytProjectMain";    
+		// 字段返回数据 
+		function returnSelect(dict,value){
+			var addSelect='';
+			for(var i=0;i<dict.length;i++){
+				if(value!=''){
+					if(value==dict[i].dictValue){
+						addSelect+='<option value="'+dict[i].dictValue+'" selected>'+dict[i].dictLabel+'</option>';
+					}else{
+						addSelect+='<option value="'+dict[i].dictValue+'" >'+dict[i].dictLabel+'</option>';
+					}
+					
+				}else{
+					addSelect+='<option value="'+dict[i].dictValue+'" >'+dict[i].dictLabel+'</option>';
+				}
+				
+			}
+			return addSelect;
+		}
+		//下拉框选择
+		function show_stage(obj,stageList){
+			var val_s=$(obj).val();
+			var mainId=$(obj).find('option:selected').attr('name');			
+			var list=[[${ytLeaderAllocateVoList}]]
+			var stageLi='';
+			for(var i=0;i<list.length;i++){	
+				
+				if(list[i].ytLeaderAllocateMain.id==mainId){
+					stageLi=list[i].ytLeaderAllocateStageList
+					
+				}
+			}
+			var html=''
+			
+			for(var a=0;a<stageLi.length;a++){
+				html+='<option value="'+stageLi[a].stageCode+'" >'+stageLi[a].stageName+'</option>';
+			}
+			$('#'+stageList).html(html)	
+			searchRecord()
+			
+		}
+		//状态回显
+		function stateHui(state){
+			var stateName=null;
+			if(state=='01'){
+				stateName='审核中'
+			}else if(state=='02'){
+				stateName='审核通过'
+			}else if(state=='03'){
+				stateName='驳回'
+			}
+			return stateName;
+		}
+		//查询
+		function searchRecord(){
+			var serchData={
+					'id':'',
+					'itemCode':'',
+					'stage':'',
+					'checkNode':'',
+					'projectId':''
+			}
+
+			serchData.itemCode=$('#serchItemCode').val();
+			serchData.stage=$('#stageLi').val();
+			serchData.checkNode=$('#checkNode').val();
+			serchData.projectId=projectId;
+			var config = {
+				contentType : "application/json;charset=UTF-8",
+				url : prefix + "/peopleConfiguration/searchRecord",
+				type : "post",
+				data : JSON.stringify(serchData),
+				beforeSend : function() {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success : function(result) {
+					console.log(result)
+					$.modal.closeLoading();
+					var data=result.data.ytPeopleConfigurationDetailList;
+					var html='<tr>'+
+						'<td class="active"></td>'+
+						'<td class="active">人员</td>'+
+						'<td class="active">比重（%）</td>'+
+						'<td class="active">有效产值（万）</td>'+
+						'<td class="active">工期</td>'+
+						'<td class="active">操作</td>'+
+					    '</tr>'
+					if(result.data.ytPeopleConfigurationDetailList== null){
+						html='<tr><td colspan="6" class="text-center">暂无数据</td></tr>';
+						$('#nodeProportion').val('');
+						$('#addSaveBtn').addClass('hide');
+						$('#tableEdit').html('');
+						$('.comfirmEenter').addClass('hide');
+					}else{
+						$('#nodeProportion').val(result.data.ytPeopleConfiguration.nodeProportion);
+						$('#addSaveBtn').removeClass('hide');
+						$('.comfirmEenter').removeClass('hide');
+						$('#tableEdit').html('');
+						//设置ytPeopleConfigurationId
+						$('input[name="ytPeopleConfigurationId"]').val(result.data.ytPeopleConfiguration.id);
+						//状态展示
+						$('.thisState').text(stateHui(result.data.ytPeopleConfiguration.state));
+						if(result.data.ytPeopleConfiguration.state=='02'){
+							$('.comfirmEenter').addClass('hide');
+							$('#addSaveBtn').addClass('hide')
+						}
+						for(var i=0;i<data.length;i++){
+							var roleCode=''
+							var roleId=''
+							var dele=''
+							if(data[i].roleCode=='00'){
+								roleCode='<select name="roleCode" class="form-control hide">'+
+									       '<option value="00" selected="selected">项目分管</option>'+
+									    '</select>项目分管';
+							    roleId='<input type="hidden" name="roleId" th:value="'+[[${ytProjectAllocateMain.projectManagerId}]]+'">'+[[${ytProjectAllocateMain.projectManagerName}]]+''
+							    dele=''
+							}else{
+								roleCode='<select name="roleCode" class="form-control">'+returnSelect([[${@dict.getType('yt_project_role')}]],data[i].roleCode)+'</select>'
+								roleId='<input type="hidden" class="form-control roleId" name="roleId" value="'+data[i].roleId+'"> <input type="text"'+
+								'class="form-control roleName" value="'+data[i].roleName+'"  name="roleName"'+
+								'onclick="selectUserById(this)">';
+								/* dele='<a class="glyphicon glyphicon-remove dele"></a>' */
+								dele=''
+							}
+							html+='<tr class="mainDetail">'+
+							'<td><input type="hidden" name="id" value="'+data[i].id+'"><input type="hidden" name="mainId" value="'+data[i].mainId+'">'+roleCode+'</td>'+
+							'<td>'+roleId+'</td>'+
+							'<td><input type="number" min="1" max="100"'+
+								'class="form-control" name="roleProportion" value="'+data[i].roleProportion+'"></td>'+
+							'<td><input type="number" class="form-control"'+
+								'name="effectiveValue" value="'+data[i].effectiveValue+'"></td>'+
+							'<td>'+
+								'<div class="input-daterange input-group">'+
+									'<input name="startTime" type="text" class="input-sm form-control time-input-data" placeholder="'+data[i].startTime+'">'+
+									'<span class="input-group-addon">到</span> '+
+									'<input name="endTime" type="text"  class="input-sm form-control time-input-data"  placeholder="'+data[i].endTime+'">'+
+								'</div>	'+									
+							'</td>'+
+							'<td >'+dele+'</td>'+
+						'</tr>'
+						}
+					}
+					
+					
+					$('#tableEdit').append(html)
+					
+				}
+			};
+			$.ajax(config)	
+			
+		}
+		//状态修改函数
+		 function comfirmEenter(state){
+			var ytPeopleConfigurationId = $('input[name="ytPeopleConfigurationId"]').val();
+			var data={'id':ytPeopleConfigurationId,'state':state};
+			var config = {
+					contentType : "application/json;charset=UTF-8",
+					url : prefix + "/peopleConfiguration/changeState",
+					type : "post",
+					data : JSON.stringify(data),
+					beforeSend : function() {
+						$.modal.loading("正在处理中，请稍后...");
+					},
+					success : function(result) {
+						$.operate.successTabCallback(result);
+					}
+				};
+				$.ajax(config)
+		}
+		//保存数据
+		var projectId=[[${ytProjectAllocateMain.projectId}]]
+		$(function(){
+			show_stage('select[name="itemCode"]','stageLi')
+			queryTypeTree();
+		})
+		function queryCredentialsList(typeId, projectId) {
+			var options = {
+				id: 'bootstrap-table1',
+				url: ctx + "yt/ytProjectMain/getConfigListByType",
+				modalName: "人员配置",
+				rememberSelected: true,
+				sortName: "createTime",
+				sortOrder: "desc",
+				clickToSelect: true,
+				showSearch: false,
+				showRefresh: false,
+				showToggle: false,
+				showColumns: false,
+				showPageGo: false,
+				pagination: false,
+				queryParams: {'typeId': typeId, 'projectId': projectId},
+				columns: [
+					{
+						field: 'id',
+						title: '主键',
+						visible: false
+					},
+					{
+						field: 'mainId',
+						title: '配置主表id',
+						sortable: true,
+						visible: false
+					}, {
+						field: 'roleCodeName',
+						title: '人员角色',
+						sortable: true
+					}, {
+						field: 'roleName',
+						title: '人员',
+						sortable: true
+					},
+					{
+						field: 'roleProportion',
+						title: '角色所占比例(%)',
+						sortable: true
+					},
+					{
+						field: 'finishProportion',
+						title: '已完成比例(%)',
+						sortable: true
+					},
+					{
+						field: 'effectiveValue',
+						title: '有效产值(万)',
+						sortable: true
+					},
+					{
+						field: 'startTime',
+						title: '工期开始',
+						sortable: true
+					},
+					{
+						field: 'endTime',
+						title: '工期结束',
+						sortable: true
+					},
+					{
+						field: 'typeId',
+						title: '',
+						sortable: true,
+						visible: false
+					}]
+			};
+			$.table.init(options);
+		}
+
+
+		function queryTypeTree() {
+			var url = ctx + "yt/ytPeopleAllocateType/treeData/" + projectId;
+			var options = {
+				url: url,
+				expandLevel: 2,
+				expandAll: true,
+				onClick: zOnClick
+			};
+			$.tree.init(options);
+
+			function zOnClick(event, treeId, treeNode) {
+				console.log(treeNode)
+				if (treeNode.level == 2){
+					$("#typeId").val(treeNode.id);
+					$("#projectId").val(projectId);
+					getItemCode(treeNode.id);
+					queryCredentialsList(treeNode.id, projectId)
+					$.table.search('formId1');
+				} else {
+					$.modal.msgWarning("只能选择子节点")
+				}
+
+			}
+		}
+		
+		function getItemCode(typeId) {
+			var config = {
+				url: ctx + "yt/ytPeopleAllocateType/getNodeValue/" + typeId,
+				type: 'GET',
+				dataType: 'json',
+				success: function (result) {
+					$('#serchItemCode').val(result.data.itemCode);
+					show_stage($('#serchItemCode'),'stageLi');
+					$('#stageLi').val(result.data.stage);
+					$('#checkNode').val(result.data.checkNode);
+					searchRecord();
+				}
+			};
+			$.ajax(config)
+		}
+		
+		var config = {
+			url: ctx + "yt/ytPeopleAllocateType/treeData/" + projectId,
+			type: 'GET',
+			dataType: 'json',
+			beforeSend: function () {
+				$.modal.loading("正在处理中，请稍后...");
+			},
+			success: function (result) {
+				queryCredentialsList(result[0].id, projectId);
+				if (result.length == 0) {
+					$('#configBox').addClass('hide')
+				}
+			}
+		};
+		$.ajax(config)
+	</script>
+</body>
+</html>

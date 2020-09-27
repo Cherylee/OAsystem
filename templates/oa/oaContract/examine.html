@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('合同申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <style type="text/css">
+
+        caption {
+            font-size: 16px !important;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content"
+     th:object="${vo}">
+    <form id="form-oaContract-examine">
+        <!-- 流程内的同意和不同意 -->
+        <span th:if="${vo.taskUserMapList != null}" th:each="person : *{taskUserMapList}">
+            <span th:if="${person!=null}">
+                <span th:if="${person.assignee} eq *{curUser.userId}">
+                    <input type="hidden" name="taskId" th:value="${person.taskId}">
+                    <input type="hidden" name="procInstId" th:value="${person.procInstId}">
+				</span>
+                <input id="signedWay" name="signedWay" type="hidden">
+                <input id="effectDate" name="effectDate" type="hidden">
+				<input id="expirationDate" name="expirationDate" type="hidden">
+			</span>
+        </span>
+        <input type="hidden" id="pass" name="pass">
+        <input type="hidden" id="opinion" name="opinion">
+        <input  type="hidden" id="nodeFlag" name="nodeFlag">
+    </form>
+
+
+    <!--按钮  -->
+    <div class="row">
+        <div class="col-sm-offset-4 col-sm-4 text-center">
+			
+			<span th:if="*{oaContract.contractType} eq '0'">
+			    <button th:if="*{oaContract.type1} eq '7' and *{oaContract.status} eq '8'" type="button"
+                        class="btn btn-sm btn-primary" onclick="openSideAgreement()">新建附属协议</button>
+			</span>
+            <button th:if="*{oaContract.contractCode} and *{oaContract.contractType}!='2'" type="button"
+                    class="btn btn-sm btn-primary" onclick="openSupplementary()">新建补充协议</button>
+
+            <button type="button" class="btn btn-sm btn-info" onclick="urge()">合同催办</button>
+            &nbsp;
+            <button type="button" class="btn btn-sm btn-success" onclick="selectUser()">抄送</button>
+
+            <button type="button" class="btn btn-sm btn-warning" onclick="backProcess()" shiro:hasPermission="oa:oaContract:backProcess">法务驳回</button>
+
+        </div>
+    </div>
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-8 clearfix">
+            <table class="table table-condensed">
+                <tr>
+                    <td>合同流水号:[[*{oaContract.serialNum}]]</td>
+                    <td>审核节点:<span th:if="*{nodeName!=null}">[[*{nodeName}]]</span><span
+                            th:unless="*{nodeName!=null}"><strong style="color:#337ab7">已审核</strong> </span></td>
+                    <td><strong>合同编号:[[*{oaContract.contractCode}]]</strong></td>
+                    <td>当前处理人:<span th:if="${vo.disposeUserList != null}" th:each="person : *{disposeUserList}">
+                                        <span th:if="${person!=null}"> [[${person.userName}]] </span>
+                                   </span>
+                    </td>
+                    <td>
+                        效力状态:<span><strong style="color:#337ab7">[[${vo.effectStatus}]]</strong></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!-- 	<div class="hr-line-dashed"></div> -->
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <!-- 合同申请 -->
+                    <table class="table table-bordered">
+                        <caption>
+                            <strong>合同申请</strong>
+                        </caption>
+
+
+                        <tbody>
+                        <tr>
+                            <td class="active">申请人</td>
+                            <td><span th:text="*{oaContract.applier}"></span></td>
+                            <td class="active">申请部门</td>
+                            <td><span th:text="*{oaContract.deptName}"></span></td>
+                            <td class="active">申请日期</td>
+                            <td><span
+                                    th:text="*{#dates.format(oaContract.createTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="active">合同类型</td>
+                            <td><span class="oaContractType"></span></td>
+                            <td class="active">合同类型2</td>
+                            <td><span class="oaContractType2"></span></td>
+                            <td class="active">我方单位名称</td>
+                            <td>[[*{oaContract.ourUnitName}]]</td>
+                        </tr>
+                        <tr>
+                            <td class="active">用印类型</td>
+                            <td>[[*{oaContract.useSealType}]]</td>
+                            <td class="active">合同金额</td>
+                            <td><span th:text="*{oaContract.contractAmount}"></span></td>
+                            <td class="active">合同金额大写</td>
+                            <td><span th:text="*{oaContract.amountUpper}"></span></td>
+                        </tr>
+
+
+                        <tr class="ifshowProject hide">
+                            <td class="active">工程名称</td>
+                            <td colspan="5"><span th:text="*{oaProject.projectName}"></span></td>
+                        </tr>
+                        <tr th:if="*{oaContract.type1} eq '2'">
+                            <td class="active">关联移交单</td>
+                            <td colspan="5" ><a onclick="gotoBid()"><span th:text="*{oaContract.winBidId}"></span></a></td>
+                        </tr>
+                        <tr th:if="*{oaContract.type1} eq '2'">
+                            <td class="active">中标单位</td>
+                            <td>[[*{oaContract.constructUnit}]]</td>
+                            <td class="active">建造师</td>
+                            <td>[[*{oaContract.proManager}]]</td>
+                            <td class="active">工期</td>
+                            <td><span th:text="*{oaContract.timeLimit}"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="active">税率(%)</td>
+                            <td colspan="3"><span th:text="*{oaContract.rate}"></span></td>
+                            <td class="active">合同名称</td>
+                            <td colspan="3"><span th:text="*{oaContract.contractName}"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="active">签约方名称</td>
+                            <td colspan="3"><span
+                                    th:text="*{oaContract.signingParties}"></span></td>
+                            <td class="active">付款方式</td>
+                            <td colspan="3"><span class="payWay"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="active">合同签订日期</td>
+                            <td colspan="7"><span th:text="*{#dates.format(oaContract.contractTime, 'yyyy-MM-dd HH:mm:ss')}"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="active">第三方名称</td>
+                            <td colspan="3"><span
+                                    th:text="*{oaContract.thirdPartyName}"></span></td>
+                            <td class="active">第三方负责人</td>
+                            <td colspan="3"><span
+                                    th:text="*{oaContract.thirdPartPerson}"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="active">签约方资质证明</td>
+                            <td colspan="3" id="uploadFile2">
+										<span>
+											<div class="file-loading">
+									            <input id="uploadFileId2" type="file" multiple disabled>
+									        </div>
+										</span>
+                            </td>
+                            <td class="active">合同附件</td>
+                            <td colspan="3" id="uploadFile1" th:unless="*{oaContract.contractType=='2'}">
+										<span>
+											<div class="file-loading">
+									            <input id="uploadFileId1" type="file" multiple disabled>
+									        </div>
+										</span>
+                            </td>
+                            <td colspan="2" id="uploadFile6" th:if="*{oaContract.contractType=='2'}">
+										<span >
+											<div class="file-loading">
+									            <input id="uploadFileId6" type="file" multiple disabled>
+									        </div>
+										</span>
+                            </td>
+
+
+
+                        </tr>
+                        <tr>
+                            <td class="active">签约背景/备注说明</td>
+                            <td colspan="5"><span th:text="*{oaContract.remark}"></span></td>
+                        </tr>
+                        <tr th:if="*{oaContract.type1} eq '3'">
+                            <td class="active">关联工程合同名称</td>
+                            <td colspan="5"  ><a  onclick="gotoContract()"><span th:text="*{oaContract.relProjectContractName}"></span></a></td>
+                        </tr>
+                        <tr th:if="*{oaContract.contractType} eq '2'">
+                            <td class="active">补充协议附件</td>
+                            <td colspan="5"><span th:text="*{oaContract.supplementaryDoc}"></span></td>
+                        </tr>
+                        <tr th:if="*{oaContract.contractType} eq '2'">
+                            <td>签约背景/备注说明</td>
+                            <td colspan="5"><span th:text="*{remark2}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!-- 主管部门审核 -->
+                    <table class="table table-bordered" id="table0">
+                        <caption>
+                            <strong>主管部门审核</strong>
+                        </caption>
+
+                        <tbody>
+                        <tr class="active">
+                            <td width="20%">主管部门审核</td>
+                            <td width="50%">审核意见</td>
+                            <td width="30%">审核日期</td>
+                        </tr>
+                        <tr th:each="ea : *{hisNodeList.key0}">
+                            <td>[[${ea.userName}]]</td>
+                            <td>
+                                <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+                                <div th:unless="${ea.message != ''}">
+                                    <div th:if="${vo.nodeFlag} eq 'key0' and ${vo.curUser.userId==__${ea.userId}__}">
+										       <span class="par_btn">
+												  <button type="button" class="btn btn-sm  btn-info"
+                                                          onclick="Agree(this)">同意</button> &nbsp;
+												  <button type="button" class="btn btn-sm btn-danger"
+                                                          onclick="Reject(this)">驳回</button>
+											   </span>
+                                        <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info"
+                                                           onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											   </span>
+                                    </div>
+
+                                </div>
+
+                            </td>
+                            <td>[[${ea.endTime}]]</td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <!-- 相关部门审核 -->
+
+                    <table class="table table-bordered " id="table1">
+                        <caption>
+                            <strong>相关部门审核</strong>
+                        </caption>
+
+
+                        <tbody>
+                        <tr class="active">
+                            <td width="10%">部门审核人员</td>
+                            <td width="15%">附件</td>
+                            <td width="20%">审核意见</td>
+                            <td width="10%">审核日期</td>
+                            <td width="10%">申请人回复</td>
+                            <td width="20%">回复意见</td>
+                            <td width="10%">回复时间</td>
+                            <td width="15%">附件</td>
+                        </tr>
+                        <tr th:if="${#arrays.isEmpty(vo.hisNodeList.key1)}">
+                            <td><span>[[${vo.contractNode.staffName}]]</span></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr th:each="ea,eaStat : *{hisNodeList.key1}">
+                            <td><span>[[${ea.userName}]]</span></td>
+                            <td>
+                                <div class="file-loading">
+                                    <input th:id="'uploadFileAudit'+${ea.num}" type="file" multiple
+                                           th:disabled="${vo.nodeFlag=='key1'&& vo.curUser.userId==__${ea.userId}__&&ea.message == ''?false:true}">
+                                </div>
+                            </td>
+                            <td>
+                                <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+                                <div th:unless="${ea.message != ''}">
+                                    <div th:if="${vo.nodeFlag} eq 'key1' and ${vo.curUser.userId==__${ea.userId}__}">
+
+                                        <div th:unless="${ea.pass == 'C'}">
+												<span class="par_btn">
+													<button type="button" onclick="Agree(this)"
+                                                            class="btn btn-sm  btn-info">同意</button> &nbsp;
+													<button type="button" onclick="Reject(this)"
+                                                            class="btn btn-sm btn-danger">不同意</button>
+												</span> <span class="btnshow hide">
+													<button class="btn btn-sm btn-info"
+                                                            onclick="submitHandler1('form-oaContract-examine')">提交</button>
+												</span>
+                                        </div>
+
+
+                                        <div th:if="${ea.pass == 'C'} ">
+													<span class="par_btn">
+														<button type="button" onclick="AgreeT(this)"
+                                                                class="btn btn-sm  btn-info">同意</button> &nbsp;
+														<button type="button" onclick="RejectT(this)"
+                                                                class="btn btn-sm btn-danger">不同意</button>
+													</span> <span class="btnshow hide">
+														<form th:id="${'form-oaContract-examine'+eaStat.index}"
+                                                              class="hide">
+															<!-- 不再流程内的同意和不同意 -->
+															<input type="hidden" name="id" th:value="${ea.commentId}"> 
+															<input type="hidden" name="taskId" th:value="${ea.taskId}">
+												<input type="hidden" name="procInstId"
+                                                       th:value="${ea.procInstId}"> <input type="hidden" id="passT"
+                                                                                           name="pass"> <input
+                                                                type="hidden" id="auditOpinion" name="auditOpinion">
+															<input type="hidden" name="isAudit" value="Y">
+														</form>
+														<button class="btn btn-sm btn-info"
+                                                                th:onclick="'javascript:submitHandler2(\'form-oaContract-examine'+${eaStat.index}+'\');'">提交</button>
+													</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </td>
+                            <td>[[${ea.endTime}]]</td>
+                            <td>
+                                <div th:if="${ea.pass=='U'}">
+                                    <div th:if="*{oaContract.applier}">
+                                        [[*{oaContract.applier}]]
+                                    </div>
+                                </div>
+                                <div th:if="${ea.pass == 'N'} and *{curUser.userId == oaContract.proposer} ">
+                                    <div th:if="*{oaContract.applier}">
+                                        [[*{oaContract.applier}]]
+                                    </div>
+                                </div>
+
+                            </td>
+                            <td>
+                                <div th:if="${ea.pass=='N'}">
+                                    <div th:if="${ea.replyOpinion != ''}">
+                                        [[${ea.replyOpinion}]]
+                                    </div>
+                                    <div th:unless="${ea.replyOpinion != ''}">
+                                        <form th:id="${'form-oaContract-huifuexamine'+eaStat.index}">
+                                            <input type="hidden" name="taskId" th:value="${ea.taskId}">
+                                            <input type="hidden" name="procInstId" th:value="${ea.procInstId}">
+                                            <input type="hidden" name="id" th:value="${ea.commentId}">
+                                            <input type="hidden" name="isAudit" value="N">
+                                            <div class="text-center"
+                                                 th:if="${ea.pass == 'N'} and *{curUser.userId == oaContract.proposer} ">
+                                                <input type="text" name="replyOpinion" required="required"
+                                                       class="form-control ">
+                                                <br>
+                                                <button class="btn btn-sm btn-info"
+                                                        th:onclick="'javascript:submitHandler2(\'form-oaContract-huifuexamine'+${eaStat.index}+'\');'">
+                                                    回复
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div th:if="${ea.pass=='U'}">
+                                    <div th:if="${ea.replyOpinion != ''}">
+                                        [[${ea.replyOpinion}]]
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div th:if="${ea.pass=='U'}">
+                                    [[${ea.replyDate}]]
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="file-loading">
+                                    <input th:id="'uploadFileContract'+${ea.num}" type="file" multiple
+                                           th:disabled="${vo.nodeFlag=='key1' && vo.curUser.userId == vo.oaContract.proposer&&ea.message != ''&&ea.pass == 'N'? false:true}">
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!-- 总经理裁决 -->
+                    <table class="table table-bordered " id="table3">
+                        <caption>
+                            <strong>总经理裁决</strong>
+                        </caption>
+
+                        <tbody>
+                        <tr class="active">
+                            <td width="20%">总经理裁决</td>
+                            <td width="50%">审核意见</td>
+                            <td width="30%">审核日期</td>
+                        </tr>
+                        <tr th:if="${#arrays.isEmpty(vo.hisNodeList.key3)}">
+                            <td><span>[[${vo.contractNode.managerName}]]</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr th:each="ea : *{hisNodeList.key3}">
+                            <td><span>[[${ea.userName}]]</span></td>
+                            <td>
+                                <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+                                <div th:unless="${ea.message != ''}">
+                                    <div th:if="${vo.nodeFlag} eq 'key3' and  ${vo.curUser.userId == __${ea.userId}__}">
+												<span class="par_btn">
+												     <button type="button" class="btn btn-sm btn-info"
+                                                             onclick="Agree(this)">同意</button>
+												     &nbsp;
+												     <button type="button" class="btn btn-sm  btn-danger"
+                                                             onclick="Reject(this)">驳回</button>
+												</span>
+
+                                        <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info"
+                                                           onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											    </span>
+                                    </div>
+                                </div>
+
+                            </td>
+                            <td>[[${ea.endTime}]]</td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <!-- 法务签发 -->
+                    <table class="table table-bordered" id="table5">
+                        <caption>
+                            <strong>法务签发</strong>
+                        </caption>
+                        <tbody>
+                        <tr class="active">
+                            <td width="20%">法务</td>
+                            <td width="30%">审核意见</td>
+                            <td width="30%">审核日期</td>
+                            <td width="20%">附件</td>
+                        </tr>
+                        <tr th:if="${#arrays.isEmpty(vo.hisNodeList.key2)}">
+                            <td><span>[[${vo.contractNode.legalIssueName}]]</span></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr th:each="ea,eaStat : *{hisNodeList.key2}">
+                            <td><span>[[${ea.userName}]]</span></td>
+                            <td>
+                                <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+                                <div th:unless="${ea.message != ''}">
+                                    <div th:if="${vo.nodeFlag} eq 'key2' and ${vo.curUser.userId==__${ea.userId}__}">
+										       <span class="par_btn">
+												  <button type="button" class="btn btn-sm  btn-info"
+                                                          onclick="Agree(this)">同意</button> &nbsp;
+												  <button type="button" class="btn btn-sm btn-danger"
+                                                          onclick="Reject(this)">驳回</button>
+											   </span>
+                                        <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info"
+                                                           onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											   </span>
+                                    </div>
+
+                                </div>
+                            </td>
+                            <td>[[${ea.endTime}]]</td>
+                            <td class="text-center" th:if="${eaStat.index == 0}  " th:rowspan="${eaStat.size}" id="uploadFile4">
+                                <div class="file-loading" th:if="${vo.curUser.userId==__${ea.userId}__}">
+                                    <input id="uploadFileId4" type="file" multiple
+                                           th:disabled="${vo.nodeFlag=='key2'?false:true}">
+                                </div>
+                                <br>
+                                <button class="btn btn-info " onclick="submitFile()" th:if="${vo.nodeFlag=='key2'} and ${vo.curUser.userId==__${ea.userId}__}">
+                                    提交
+                                </button>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <!-- 申请人签署 -->
+                    <table class="table table-bordered" id="table6">
+                        <caption>
+                            <strong>待签署</strong>
+                        </caption>
+                        <tbody>
+                        <tr class="active">
+                            <td width="20%">申请人</td>
+                            <td width="80%">请确认对方已签章或我方先签章</td>
+                        </tr>
+                        <tr th:if="${#arrays.isEmpty(vo.hisNodeList.key5)}">
+                            <td><span>[[${vo.oaContract.applier}]]</span></td>
+                            <td></td>
+                        </tr>
+                        <tr th:each="ea : *{hisNodeList.key5}">
+                            <td><span>[[${vo.oaContract.applier}]]</span></td>
+                            <td>
+                                <div th:if="${ea.message}">
+                                    [[${ea.message}]]
+                                </div>
+
+                                <button  th:if="${vo.nodeFlag} eq 'key5' and  ${vo.curUser.userId == __${ea.userId}__} and ${ea.message}==''" class="btn btn-sm btn-info" onclick="selectApplier()">签署</button>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <!-- 法务用印 -->
+                    <table class="table table-bordered" id="table7">
+                        <caption>
+                            <strong>法务复核</strong>
+                        </caption>
+                        <tbody>
+                        <tr class="active">
+                            <td width="20%">法务</td>
+                            <td width="80%">用印</td>
+                        </tr>
+                        <tr th:if="${#arrays.isEmpty(vo.hisNodeList.key6)}">
+                            <td><span>[[${vo.contractNode.legalSealName}]]</span></td>
+                            <td></td>
+                        </tr>
+                        <tr th:each="ea : *{hisNodeList.key6}">
+                            <td><span>[[${ea.userName}]]</span></td>
+                            <td>
+                                <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+                                <div th:unless="${ea.message != ''}">
+                                    <div th:if="${vo.nodeFlag} eq 'key6' and  ${vo.curUser.userId == __${ea.userId}__}">
+												<span class="par_btn">
+												     <button type="button" class="btn btn-sm btn-info"
+                                                             onclick="Agree(this)">同意</button>
+												     &nbsp;
+												     <button type="button" class="btn btn-sm  btn-danger"
+                                                             onclick="Reject(this)">驳回</button>
+												</span>
+
+                                        <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info"
+                                                           onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											    </span>
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!-- 综合部用印 -->
+                    <table class="table table-bordered" id="table8">
+                        <caption>
+                            <strong>综合部用印</strong>
+                        </caption>
+                        <tbody>
+                        <tr class="active">
+                            <td width="20%">综合部</td>
+                            <td width="80%">用印</td>
+                        </tr>
+                        <tr th:if="${#arrays.isEmpty(vo.hisNodeList.key7)}">
+                            <td><span>[[${vo.contractNode.comdeptSealName}]]</span></td>
+                            <td></td>
+                        </tr>
+                        <tr th:each="ea : *{hisNodeList.key7}">
+                            <td><span>[[${ea.userName}]]</span></td>
+                            <td>
+                                <div th:if="${ea.message != ''}">[[${ea.message}]]</div>
+                                <div th:unless="${ea.message != ''}">
+                                    <div th:if="${vo.nodeFlag} eq 'key7' and  ${vo.curUser.userId == __${ea.userId}__}">
+												<span class="par_btn">
+												     <button type="button" class="btn btn-sm btn-info"
+                                                             onclick="Agree(this)">同意</button>
+												     &nbsp;
+												     <button type="button" class="btn btn-sm  btn-danger"
+                                                             onclick="Reject(this)">驳回</button>
+												</span>
+
+                                        <span class="btnshow hide">
+											       <button class="btn btn-sm btn-info"
+                                                           onclick="submitHandler1('form-oaContract-examine')">提交</button>
+											    </span>
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <!-- 归档 -->
+                    <table class="table table-bordered" id="table4">
+                        <caption>
+                            <strong>归档</strong>
+                        </caption>
+
+
+                        <tbody>
+                        <tr>
+                            <td class="active">签署日期</td>
+                            <td><span th:text="${#dates.format(vo.oaContract.createTime, 'yyyy-MM-dd')}"></span></td>
+                            <td class="active">合同生效日</td>
+                            <td><span th:text="${#dates.format(vo.oaContract.effectDate, 'yyyy-MM-dd')}"></span></td>
+                            <td class="active">合同失效日</td>
+                            <td><span th:text="${#dates.format(vo.oaContract.expirationDate, 'yyyy-MM-dd')}"></span>
+                            </td>
+                        </tr>
+                        <tr th:each="ea,eaStat : *{hisNodeList?.key8}">
+                            <td class="active">归档人员</td>
+                            <td><span>[[${vo.contractNode.archivingName}]]</span></td>
+                            <td th:if="${#arrays.isEmpty(vo.hisNodeList.key8)}">
+                                <button class="btn btn-sm btn-info" disabled="disabled"
+                                        onclick="submitHandler1('form-oaContract-examine')">归档
+                                </button>
+                            </td>
+                            <td >
+                                <div th:if="${vo.nodeFlag} eq 'key8' and  ${vo.curUser.userId == __${ea.userId}__}">
+											<span>
+												<button class="btn btn-sm btn-info" onclick="addDateTime()">归档</button>
+											</span>
+                                </div>
+
+                            </td>
+                            <td class="active">归档日期</td>
+                            <td><span th:text="${#dates.format(vo.oaContract.filingTime, 'yyyy-MM-dd')}"></span></td>
+                            <td class="text-center">
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center" colspan="5" id="uploadFile5">
+                                <div class="file-loading">
+                                    <input id="uploadFileId5" type="file" multiple
+                                           th:disabled="${vo.nodeFlag=='key8'?false:true}">
+                                </div>
+                                <br>
+                                <button class="btn btn-info " onclick="submitFile()" th:if="${vo.nodeFlag=='key8'} ">
+                                    提交
+                                </button>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <hr>
+                    <span th:unless="*{oaContract.contractType} eq '1' or *{oaContract.contractType} eq '2'">
+						    <a onclick="openSideAgreementList()" th:if="*{oaContract.type1} eq '7'"><h3>附属协议列表</h3></a>
+						</span>
+
+                    <a onclick="openSupplementaryList()" th:unless="*{oaContract.contractType} eq '2'"><h3>补充协议列表</h3>
+                    </a>
+                    <span th:if="*{oaContract.contractType} eq '1' or *{oaContract.contractType} eq '2'">
+					       <a th:onclick="openExamine([[${vo.oaContract.parentId}]]);"><h3>返回主合同</h3></a>
+					    </span>
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 选择签署弹出框 -->
+<div class="modal inmodal fade" id="applierModel" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-applierModel-add">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">签章方式：</label>
+                        <div class="col-sm-8">
+                            <select id="addApplier" name="addApplier" class="form-control">
+                                <option value="对方先签署原件已寄回公司">对方先签署原件已寄回公司</option>
+                                <option value="我方先签署">我方先签署</option>
+                            </select>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToDetailTable()">签署
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 选择归档弹出框 -->
+<div class="modal inmodal fade" id="applierModelKey8" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <form class="form-horizontal m" id="form-applierModelKey8-add">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同生效日：</label>
+                        <div class="col-sm-8">
+                            <div class="input-group data">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input id="effectDate2" name="effectDate2 " required="required"
+                                       class="form-control time-input-data" type="text">
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同失效日期：</label>
+                        <div class="col-sm-8">
+                            <div class="input-group data">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input id="expirationDate2" name="expirationDate2 " required="required"
+                                       class="form-control time-input-data" type="text">
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="fileTime()">归档</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    $.modal.closeLoading();
+    console.log([[${vo}]])
+    $(function () {
+        //判断是否显示工程字段&&副总审核
+        if ([[${vo.oaContract.type1}]] == '2'||[[${vo.oaContract.type1}]]=='3') {/*工程合同 通用合同*/
+            $('.ifshowProject').removeClass('hide')
+        }
+
+        //回显合同类型字段
+        dictV('.oaContractType', [[${@dict.getType('oa_contract_type1')}]], [[${vo.oaContract.type1}]])
+
+        dictV('.oaProject', [[${@dict.getType('oa_contract_type2')}]], [[${vo.oaProject.type}]])
+
+        //回显付款方式
+        dictV('.payWay', [[${@dict.getType('oa_contact_payway')}]], [[${vo.oaContract.payType}]])
+
+        if ([[${vo.nodeFlag}]] == 'key1') {
+            $('#nodeFlag').val('key1')
+        }
+    });
+
+    var prefix = ctx + "oa/oaContract"
+    var oaContractType = [[${@dict.getType('oa_contract_type1')}]]
+
+    //流程内
+    function submitHandler1(id) {
+        var data=$('#' + id).serializeObject()
+        data.attachmentList=key1AttachmentList
+        data.tableName = "oa_contract";
+        data.id=[[${vo.oaContract.id}]];
+        var config = {
+            url: prefix + "/completeDeptTask",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            data: JSON.stringify(data) ,
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.modal.closeLoading();
+                refreshItem();
+                $.operate.successCallback(result);
+            }
+        };
+        $.ajax(config)
+
+    }
+    //流程外
+    function submitHandler2(id) {
+        var data=$('#' + id).serializeObject()
+        data.attachmentList=key1AttachmentList;
+        data.tableName = "oa_contract";
+        //data.id=[[${vo.oaContract.id}]];
+        if ($.validate.form(id)) {
+            var config = {
+                url: ctx + "oa/oaContractComment/edit",
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                data:JSON.stringify(data) ,
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function (result) {
+                    $.modal.closeLoading();
+                    refreshItem();
+                    $.operate.successCallback(result);
+                }
+            };
+
+            $.ajax(config)
+        }
+    }
+
+    //同意操作
+    function Agree(obj) {
+        var par = $(obj).parents('.par_btn')
+        btnHandle(obj, par, 'Y')
+    }
+
+    //驳回操作
+    function Reject(obj) {
+        var par = $(obj).parents('.par_btn')
+        btnHandle(obj, par, 'N')
+    }
+
+    //按钮操作
+    function btnHandle(obj, id, flag) {
+        layer.prompt({title: '请写下您的审核意见', formType: 2}, function (text, index) {
+            layer.close(index);
+            id.html(text)
+            $('.btnshow').removeClass('hide')
+            $('#pass').val(flag)
+            $('#opinion').val(text)
+
+        });
+    }
+
+    //签署方式选择
+    function selectApplier() {
+        $('#applierModel').modal("show");
+    }
+
+    function saveToDetailTable() {
+        $('input[name="opinion"]').val($("#addApplier option:selected").val());
+        submitHandler1('form-oaContract-examine')
+    }
+
+    //合同生效日和合同失效日期选择
+    function addDateTime() {
+        $('#applierModelKey8').modal("show");
+    }
+
+    function fileTime() {
+        if ($.validate.form("form-applierModelKey8-add")) {
+            $('input[id="effectDate"]').val($('#effectDate2').val());
+            $('input[id="expirationDate"]').val($('#expirationDate2').val());
+            submitHandler1('form-oaContract-examine')
+        }
+    }
+
+    /*----不再工作流----*/
+    //同意操作
+    function AgreeT(obj) {
+        var par = $(obj).parents('.par_btn')
+        btnHandleT(obj, par, 'Y')
+    }
+
+    //驳回操作
+    function RejectT(obj) {
+        var par = $(obj).parents('.par_btn')
+        btnHandleT(obj, par, 'N')
+    }
+
+    //按钮操作
+    function btnHandleT(obj, id, flag) {
+        layer.prompt({title: '请写下您的审核意见', formType: 2}, function (text, index) {
+            layer.close(index);
+            id.html(text)
+            $('.btnshow').removeClass('hide')
+            $('#passT').val(flag)
+            $('#auditOpinion').val(text)
+            $('#isAudit').val('Y')
+        });
+    }
+
+    //回显字典 封装的公用方法
+    function dictV(id, d, v) {//d:字典名 v:键值
+        $(id).html($.table.selectDictLabel(d, v));
+    }
+
+    //打开补充协议界面
+    function openSupplementary() {
+        var id = [[${vo.oaContract.id}]]
+        $.modal.openTab("新增补充协议", prefix + "/toAddSupplementary/" + id);
+    }
+
+    //打开附属协议界面
+    function openSideAgreement() {
+        var id = [[${vo.oaContract.id}]]
+        $.modal.openTab("新增附属协议", prefix + "/toSideAgreement/" + id);
+    }
+
+    //打开补充协议列表界面
+    function openSupplementaryList() {
+        var id = [[${vo.oaContract.id}]]
+        $.modal.openTab("补充协议列表", prefix + "/toSupplementaryList/" + id);
+    }
+
+    //打开附属协议列表界面
+    function openSideAgreementList() {
+        var id = [[${vo.oaContract.id}]]
+        $.modal.openFullS("附属协议列表", prefix + "/toSideAgreementList/" + id);
+    }
+
+    //打开合同审核界面
+    function openExamine(id) {
+        $.modal.openFullS("合同审核", prefix + "/toExamine/" + id);
+    }
+    //打开工程合同界面
+    function gotoContract(){
+        $.modal.openFullS("合同", ctx + "oa/oaContract/toExamine/" + [[${vo.oaContract.relProjectContractId}]]);
+        // createMenuItem(ctx + "oa/oaContract/edit/" + [[${vo.oaContract.relProjectContractId}]],"合同")
+    }
+    //打开移交单
+    function gotoBid(){
+        $.modal.openFullS("移交单", ctx + "oa/oaWinBidTurnOver/edit/" + [[${vo.oaContract.winBidId}]]);
+    }
+
+    //催办
+    function urge() {
+        var id = [[${vo.oaContract.id}]];
+        $.operate.get(prefix + "/urge/" + id);
+    }
+
+    /* 多选用户 */
+    var UId = null;
+    var UName = null;
+
+    function selectUser(id, name) {
+        UId = id;
+        UName = name;
+        var options = {
+            title: '选择用户',
+            width: "1200",
+            url: ctx + "oa/oaApplyTemplate/selectUser",
+            callBack: doSubmit1
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandlerMore1();
+        var data = result;
+        var dataSend = {
+            "id": "",
+            "copyUserList": ''
+        }
+        dataSend.id = [[${vo.oaContract.id}]];
+        dataSend.copyUserList = data
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + "/copy",
+            type: "post",
+            data: JSON.stringify(dataSend),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.successTabCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+    //附件
+    var attachmentList = new Array();
+    //相关部门附件
+    var key1List=[[${vo.hisNodeList.key1}]]
+    for (var i=0;i<key1List.length;i++) {
+        if(key1List[i].proposer.length!=0){//申请人上传附件
+            console.log(key1List[i].proposer);
+            var attach=key1List[i].proposer
+            var imgsUrl=[]
+            var down={}
+            var downloadConfig=[]
+            var deleteExtraData={}
+            for (var k=0;k<attach.length;k++){
+                imgsUrl.push(attach[k].attachmentUrl);
+                down.key = attach[k].attachmentName;
+                down.caption = attach[k].fileName;
+                if (isAssetTypeAnImage(attach[k].attachmentName)) {
+                    down.type = 'image';
+                } else {
+                    down.type = 'object';
+                }
+                downloadConfig.push(down);
+            }
+            var option3 = {
+                id: 'uploadFileContract'+ key1List[i].num,
+                uploadUrl: null,
+                deleteUrl: null,
+                imgsUrl: imgsUrl,
+                downloadConfig: downloadConfig,
+                attachmentList: new Array(),
+                callback: callbackContract
+            }
+            $.common.uploadFile(option3);
+        }else {
+            var option3 = {
+                id: 'uploadFileContract' + key1List[i].num,
+                uploadUrl: null,
+                deleteUrl: null,
+                deleteExtraData: null,
+                imgsUrl: new Array(),
+                initialPreviewConfig: null,
+                callback: callbackContract
+            }
+            $.common.uploadFile(option3);
+        }
+
+        if(key1List[i].approver.length!=0){//审批人人上传附件
+            var attach=key1List[i].approver
+            var imgsUrl=[]
+            var down={}
+            var downloadConfig=[]
+            var deleteExtraData={}
+            for (var k=0;k<attach.length;k++){
+                imgsUrl.push(attach[k].attachmentUrl);
+                down.key = attach[k].attachmentName;
+                down.caption = attach[k].fileName;
+                if (isAssetTypeAnImage(attach[k].attachmentName)) {
+                    down.type = 'image';
+                } else {
+                    down.type = 'object';
+                }
+                downloadConfig.push(down);
+            }
+            var option3 = {
+                id: 'uploadFileAudit'+ key1List[i].num,
+                uploadUrl: null,
+                deleteUrl: null,
+                imgsUrl: imgsUrl,
+                downloadConfig: downloadConfig,
+                attachmentList: new Array(),
+                callback: callbackContract
+            }
+            $.common.uploadFile(option3);
+        }else {
+            var option3 = {
+                id: 'uploadFileAudit' + key1List[i].num,
+                uploadUrl: null,
+                deleteUrl: null,
+                deleteExtraData: null,
+                imgsUrl: new Array(),
+                initialPreviewConfig: null,
+                callback: callbackContract
+            }
+            $.common.uploadFile(option3);
+        }
+    }
+    var key1AttachmentList=[]
+    function callbackContract(){
+        key1AttachmentList=attachmentList
+    }
+
+
+    // 合同所有附件
+    var config = {
+        url: ctx + "oa/oaAttachment/selectAttachByObjectId",
+        type: "post",
+        dataType: "json",
+        data: {"objId": [[${vo.oaContract.id}]]},
+        success: function (result) {
+            var attachList = result.data;
+            if (attachList != null && attachList.length > 0) {
+                var imgsUrl = new Array();
+                var downloadConfig = new Array();
+                var deleteExtraData = {}
+                var imgsUrl2 = new Array();
+                var downloadConfig2 = new Array();
+                var deleteExtraData2 = {}
+                var imgsUrl4 = new Array();
+                var downloadConfig4 = new Array();
+                var deleteExtraData4 = {}
+                var imgsUrl5 = new Array();
+                var downloadConfig5 = new Array();
+                var deleteExtraData5 = {}
+                var imgsUrl6 = new Array();
+                var downloadConfig6 = new Array();
+                var deleteExtraData6 = {}
+                for (var i = 0; i < attachList.length; i++) {
+                    var down = {};
+                    var attach = attachList[i];
+                    if (attach.type == '0') {//合同文件
+                        imgsUrl.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        //down.frameAttr={style :'height:100px;high:100px'};
+                        downloadConfig.push(down);
+                        deleteExtraData.fileName = attach.attachmentName
+                        deleteExtraData.tableName = "oa_attachment"
+
+                    } else if (attach.type == '1') {//资质证明
+
+                        imgsUrl2.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        //down.frameAttr={style :'height:100px;high:100px'};
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig2.push(down);
+                        deleteExtraData2.fileName = attach.attachmentName
+                        deleteExtraData2.tableName = "oa_attachment"
+                    } else if (attach.type == '4') {
+
+                        imgsUrl4.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        //down.frameAttr={style :'height:100px;high:100px'};
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig4.push(down);
+                        deleteExtraData4.fileName = attach.attachmentName
+                        deleteExtraData4.tableName = "oa_attachment"
+                    } else if (attach.type == '5') {
+
+                        imgsUrl5.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        //down.frameAttr={style :'height:100px;high:100px'};
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig5.push(down);
+                        deleteExtraData5.fileName = attach.attachmentName
+                        deleteExtraData5.tableName = "oa_attachment"
+                    }else if (attach.type == '6') {
+                        imgsUrl6.push(attach.attachmentUrl);
+                        down.key = attach.attachmentName;
+                        down.caption = attach.fileName;
+                        //down.frameAttr={style :'height:100px;high:100px'};
+                        if (isAssetTypeAnImage(attach.attachmentName)) {
+                            down.type = 'image';
+                        } else {
+                            down.type = 'object';
+                        }
+                        downloadConfig6.push(down);
+                        deleteExtraData6.fileName = attach.attachmentName
+                        deleteExtraData6.tableName = "oa_attachment"
+                    }
+
+                }
+
+                var option1 = {
+                    id: 'uploadFileId1',
+                    uploadUrl: null,
+                    deleteUrl: null,
+                    deleteExtraData: deleteExtraData,
+                    imgsUrl: imgsUrl,
+                    downloadConfig: downloadConfig
+                }
+                $.common.uploadFile(option1);
+                var option2 = {
+                    id: 'uploadFileId2',
+                    uploadUrl: null,
+                    deleteUrl: null,
+                    deleteExtraData: deleteExtraData2,
+                    imgsUrl: imgsUrl2,
+                    downloadConfig: downloadConfig2
+                }
+                $.common.uploadFile(option2);
+
+                $(".kv-file-eye").unbind("click")
+            } else {
+                 $('#uploadFile1').html('无上传任何文件');
+                 // $('#uploadFile3').html('无上传任何文件');
+                 $('#uploadFile2').html('无上传任何文件');
+                 // $('#uploadFile6').html('无上传任何文件');
+                 // $('#uploadFile4').html('无上传任何文件');
+                 // $('#uploadFile5').html('无上传任何文件');
+            }
+            var option4 = {
+                id: 'uploadFileId4',
+                uploadUrl: null,
+                deleteUrl: null,
+                deleteExtraData: deleteExtraData4,
+                imgsUrl: imgsUrl4,
+                downloadConfig: downloadConfig4,
+                attachmentList: new Array(),
+                callback: callback
+            }
+            $.common.uploadFile(option4);
+            var option5 = {
+                id: 'uploadFileId5',
+                uploadUrl: null,
+                deleteUrl: null,
+                deleteExtraData: deleteExtraData5,
+                imgsUrl: imgsUrl5,
+                downloadConfig: downloadConfig5,
+                attachmentList: new Array(),
+                callback: callback
+            }
+            $.common.uploadFile(option5);
+            var option6 = {
+                id: 'uploadFileId6',
+                uploadUrl: null,
+                deleteUrl: null,
+                deleteExtraData: deleteExtraData6,
+                imgsUrl: imgsUrl6,
+                downloadConfig: downloadConfig6,
+                attachmentList: new Array(),
+                callback: callback
+            }
+            $.common.uploadFile(option6);
+            downFile();
+        }
+    }
+    $.ajax(config)
+    var fileList3 = []
+    function callback(id) {
+        if (id == 'uploadFileId4') {
+            fileList3 = attachmentList;
+            for (var i = 0; i < fileList3.length; i++) {
+                fileList3[i].type = '4'
+            }
+        }
+        if (id == 'uploadFileId5') {
+            fileList3 = attachmentList;
+            for (var i = 0; i < fileList3.length; i++) {
+                fileList3[i].type = '5'
+            }
+        }
+    }
+
+    //提交附件
+    function submitFile() {
+        var data = {};
+        data.id = [[${vo.oaContract.id}]]
+        data.attachmentList = fileList3
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: ctx + "oa/oaContract/saveContractAttach",
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.modal.closeLoading();
+                refreshItem();
+                $.operate.successCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+    function backProcess() {
+        var config = {
+            url: ctx + "oa/oaContract/backProcess",
+            type: "post",
+            dataType: "json",
+            data: {"id":[[${vo.oaContract.id}]],"activityId":[[${vo.oaContract.procInstId}]]},
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.successTabCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+    // 合同类型关联
+    var relation=[]
+    var oa_contract_relation = [[${@dict.getType('oa_contract_relation')}]]
+    var oa_contract_type2_1 = [[${@dict.getType('oa_contract_type2_1')}]]
+    var oa_contract_type2_2 = [[${@dict.getType('oa_contract_type2_2')}]]
+    var oa_contract_type2_3 = [[${@dict.getType('oa_contract_type2_3')}]]
+    var oa_contract_type2_4 = [[${@dict.getType('oa_contract_type2_4')}]]
+    var oa_contract_type2_5 = [[${@dict.getType('oa_contract_type2_5')}]]
+    for (var i = 0; i < oa_contract_relation.length; i++) {
+        if(oa_contract_relation[i].dictLabel==[[${vo.oaContract.type1}]]){
+            relation=eval(oa_contract_relation[i].dictValue)
+        }
+    }
+    dictV('.oaContractType2', relation, [[${vo.oaContract.type2}]])
+
+</script>
+</body>
+</html>

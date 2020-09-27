@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: select2-css" />
+<th:block th:include="include :: header('修改用户')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body>
+	<div class="form-content main-content">
+		<form class="form-horizontal" id="form-user-edit" th:object="${user}">
+			<input name="userId" id="userId" type="hidden" th:field="*{userId}" />
+			<input name="deptId" type="hidden" th:field="*{deptId}" id="treeId" />
+			<input name="companyId" type="hidden" th:field="*{companyId}"
+				id="companyId" />
+			<h4 class="form-header h4">基本信息</h4>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>用户名称：</label>
+						<div class="col-sm-8">
+							<input name="userName" autocomplete="off" placeholder="请输入用户名称"
+								class="form-control" type="text" maxlength="30"
+								th:field="*{userName}" required>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>所属公司：</label>
+						<div class="col-sm-8">
+							<div class="input-group">
+								<input name="companyName" onclick="selectDeptTree('companyId')"
+									id="companyName" th:field="*{company.deptName}" type="text"
+									class="form-control" required> <span
+									class="input-group-addon"><i class="fa fa-search"></i></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>归属部门：</label>
+						<div class="col-sm-8">
+							<div class="input-group">
+								<input class="form-control" type="text" name="deptName"
+									onclick="selectDeptTree('treeId')" id="treeName"
+									th:field="*{dept.deptName}" required> <span
+									class="input-group-addon"><i class="fa fa-search"></i></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>身份证号：</label>
+						<div class="col-sm-8">
+							<input name="idCard" autocomplete="off" placeholder="请输入身份证号"
+								class="form-control" type="text" maxlength="30"
+								th:field="*{idCard}" required>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>家庭地址：</label>
+						<div class="col-sm-8">
+							<input name="homeAddress" autocomplete="off"
+								placeholder="请输入家庭地址" th:field="*{homeAddress}"
+								class="form-control" type="text" required>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>现居住地址：</label>
+						<div class="col-sm-8">
+							<input name="currentAddress" autocomplete="off"
+								class="form-control" th:field="*{currentAddress}" type="text"
+								required>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">岗位：</label>
+						<div class="col-xs-8">
+							<select id="post" name="postIds"
+								class="form-control select2-hidden-accessible selectpicker"
+								multiple="">
+								<option th:each="post:${posts}" th:value="${post.postId}"
+									th:selected="${post.flag}" th:text="${post.postName}"
+									th:disabled="${post.status == '1'}"></option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">用户状态：</label>
+						<div class="col-sm-8">
+							<div class="onoffswitch">
+								<input type="checkbox"
+									th:checked="${user.status == '0' ? true : false}"
+									class="onoffswitch-checkbox" id="status"> <label
+									class="onoffswitch-label" for="status"> <span
+									class="onoffswitch-inner"></span> <span
+									class="onoffswitch-switch"></span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>手机号码：</label>
+						<div class="col-sm-8">
+							<input name="phonenumber" autocomplete="off"
+								placeholder="请输入手机号码" class="form-control" type="text"
+								maxlength="11" th:field="*{phonenumber}" required>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>邮箱：</label>
+						<div class="col-sm-8">
+							<input name="email" autocomplete="off" class="form-control email"
+								type="text" maxlength="50" placeholder="请输入邮箱"
+								th:field="*{email}" required>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>登录账号：</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" readonly="true"
+								th:field="*{loginName}" />
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>登录密码：</label>
+						<div class="col-sm-8">
+							<!-- <input name="password" placeholder="请输入登录密码" autocomplete="off" class="form-control" type="password" th:value="*{password}" required> -->
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">紧急联系人：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="emergency" name="emergency" autocomplete="off"
+									th:field="*{emergency}" class="form-control" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">用户性别：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<select name="sex" class="form-control m-b"
+									th:with="type=${@dict.getType('sys_user_sex')}">
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}" th:field="*{sex}"></option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">入职时间：</label>
+						<div class="col-sm-8">
+							<div class="input-group data">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="hireDate" name="hireDate" placeholder="入职时间"
+									autocomplete="off" class="form-control time-input" type="text"
+									th:value="${#dates.format(user.hireDate, 'yyyy-MM-dd HH:mm:ss')}">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">剩余年假：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input class="form-control" type="text" readonly="true"
+									th:field="*{yearHoliday}" disabled="disabled" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">职称：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input class="form-control" type="text"
+									th:field="*{professional}" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">合同到期时间：</label>
+						<div class="col-sm-8">
+							<div class="input-group data">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="contractEndDate" name="contractEndDate"
+									th:value="${#dates.format(user.contractEndDate, 'yyyy-MM-dd HH:mm:ss')}"
+									placeholder="合同到期时间" autocomplete="off"
+									class="form-control time-input" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">直属上级：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="parentUserName" th:value="*{parentUserName}"
+									autocomplete="off" onclick="selectUserById()"
+									class="form-control" type="text" /> <input id="parentUserId" name="parentUserId"
+									type="hidden" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">转正日期：</label>
+						<div class="col-sm-8">
+							<div class="input-group data">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="correctionDate" name="correctionDate"
+									autocomplete="off"
+									th:value="${#dates.format(user.correctionDate, 'yyyy-MM-dd HH:mm:ss')}"
+									class="form-control time-input" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">合同期限：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="contractPeriod" name="contractPeriod"
+									th:field="*{contractPeriod}" autocomplete="off"
+									class="form-control" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">合同续签：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="contractRenewal" name="contractRenewal"
+									th:field="*{contractRenewal}" autocomplete="off"
+									class="form-control" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">缴纳五险日期：</label>
+						<div class="col-sm-8">
+							<div class="input-group data">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="fiveRisksDate" name="fiveRisksDate"
+									th:value="${#dates.format(user.fiveRisksDate, 'yyyy-MM-dd HH:mm:ss')}"
+									autocomplete="off" class="form-control time-input" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">缴纳公积金日期：</label>
+						<div class="col-sm-8">
+							<div class="input-group data">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="commonFundsDate" name="commonFundsDate"
+									th:value="${#dates.format(user.commonFundsDate, 'yyyy-MM-dd HH:mm:ss')}"
+									autocomplete="off" class="form-control time-input" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">可调休时数：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="breakOffHours" name="breakOffHours"
+									th:field="*{breakOffHours}" autocomplete="off"
+									class="form-control" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><span
+							style="color: red;">*</span>是否享有探亲假：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<select id="haveFamilyLeave" required="required"
+									class="form-control select2-hidden-accessible valid"
+									th:field="*{haveFamilyLeave}" name="haveFamilyLeave"
+									th:with="type=${@dict.getType('sys_yes_no')}">
+									<option value="">-- 请选择 --</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">是否跳过自己的审批节点：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<select id="skipFlag"
+									class="form-control select2-hidden-accessible valid"
+									th:field="*{skipFlag}" name="skipFlag"
+									th:with="type=${@dict.getType('sys_yes_no')}">
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h4 class="form-header h4">学历信息</h4>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">第一学历：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="firstEducation" name="firstEducation"
+									th:field="*{firstEducation}" autocomplete="off"
+									class="form-control" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">专业：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="firstMajor" name="firstMajor"
+									th:field="*{firstMajor}" autocomplete="off"
+									class="form-control" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">毕业院校：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="firstSchool" name="firstSchool"
+									th:field="*{firstSchool}" autocomplete="off"
+									class="form-control" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">毕业时间：</label>
+						<div class="col-sm-8">
+							<div class="input-group data">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="firstGraduationTime" name="firstGraduationTime"
+									th:value="${#dates.format(user.firstGraduationTime, 'yyyy-MM-dd HH:mm:ss')}"
+									autocomplete="off" class="form-control time-input" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">第二学历：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="secondEducation" name="secondEducation"
+									th:field="*{secondEducation}" autocomplete="off"
+									class="form-control" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">专业：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="secondMajor" name="secondMajor"
+									th:field="*{secondMajor}" autocomplete="off"
+									class="form-control" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">毕业院校：</label>
+						<div class="col-sm-8">
+							<div class="input-group" style="width: 100%">
+								<input id="secondSchool" name="secondSchool"
+									th:field="*{secondSchool}" autocomplete="off"
+									class="form-control" type="text" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">毕业时间：</label>
+						<div class="col-sm-8">
+							<div class="input-group date">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input id="secondGraduationTime" name="secondGraduationTime"
+									th:value="${#dates.format(user.secondGraduationTime, 'yyyy-MM-dd HH:mm:ss')}"
+									autocomplete="off" class="form-control time-input" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<h4 class="form-header h4">角色信息</h4>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group">
+						<label class="col-xs-2 control-label">角色：</label>
+						<div class="col-xs-10">
+							<label th:each="role:${roles}" class="check-box"> <input
+								name="roleIds" type="radio" th:checked="${role.flag}"
+								th:value="${role.roleId}" th:text="${role.roleName}"
+								th:disabled="${role.status == '1'}">
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h4 class="form-header h4">业务角色信息</h4>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group">
+						<label class="col-xs-2 control-label">业务角色：</label>
+						<div class="col-xs-10">
+							<label th:each="sysRoleBiz:${sysRoleBizs}" class="check-box"> <input
+									name="sysRoleBizIds" type="radio" th:checked="${sysRoleBiz.flag}"
+									th:value="${sysRoleBiz.roleId}" th:text="${sysRoleBiz.roleName}"
+									th:disabled="${sysRoleBiz.status == '1'}">
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h4 class="form-header h4">是否启用业务角色权限</h4>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group col-xs-12">
+						<div class="onoffswitch">
+							<input type="checkbox" th:checked="${user.roleFlag == 'Y' ? true : false}"
+								   class="onoffswitch-checkbox" id="roleFlag">
+								<label class="onoffswitch-label" for="roleFlag">
+								<span class="onoffswitch-inner"></span>
+								<span class="onoffswitch-switch"></span>
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h4 class="form-header h4">是否启用用户默认组织权限</h4>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group col-xs-12">
+						<div class="onoffswitch">
+							<input type="checkbox" th:checked="${user.issueFlag == 'Y' ? true : false}"
+								   class="onoffswitch-checkbox" id="issueFlag">
+							<label class="onoffswitch-label" for="issueFlag">
+								<span class="onoffswitch-inner"></span>
+								<span class="onoffswitch-switch"></span>
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h4 class="form-header h4">其它信息</h4>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group">
+						<label class="col-xs-2 control-label">备注：</label>
+						<div class="col-xs-10">
+							<textarea name="remark" autocomplete="off" maxlength="500"
+								class="form-control" rows="3">[[*{remark}]]</textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h4 class="form-header h4">附件信息（身份证，证件信息）</h4>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-content">
+							<div class="form-group">
+								<div class="file-loading">
+									<input id="uploadFileId" type="file" multiple>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="row">
+		<div class="col-sm-offset-5 col-sm-10">
+			<button type="button" class="btn btn-sm btn-primary"
+				onclick="submitHandler()">
+				<i class="fa fa-check"></i>保 存
+			</button>
+			&nbsp;
+			<button type="button" class="btn btn-sm btn-danger"
+				onclick="closeItem()">
+				<i class="fa fa-reply-all"></i>关 闭
+			</button>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: select2-js" />
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script type="text/javascript">
+		var prefix = ctx + "system/user";
+		var attachmentList = new Array();
+		//图片反显出来
+		$(function() {
+			var config = {
+				url : ctx + "oa/oaAttachment/selectAttachByObjectId",
+				type : "post",
+				dataType : "json",
+				data : {
+					"objId" : "[[${user.userId}]]"
+				},
+				success : function(result) {
+					var imgsUrl = new Array();
+					var attachList = result.data;
+					if (attachList != null && attachList.length > 0) {
+						var downloadConfig = new Array();
+						for (var i = 0; i < attachList.length; i++) {
+							var down = {};
+							var attach = attachList[i];
+							imgsUrl.push(attach.attachmentName);
+							down.key = attach.attachmentName;
+							down.caption = attach.fileName;
+							if (isAssetTypeAnImage(attach.attachmentName)) {
+								down.type = 'image';
+							} else {
+								down.type = 'object';
+							}
+							downloadConfig.push(down);
+						}
+						var deleteExtraData = {
+							"fileName" : attach.attachmentName,
+							"tableName" : "oa_attachment"
+						};
+						var option1 = {
+							id : 'uploadFileId',
+							uploadUrl : null,
+							deleteUrl : null,
+							deleteExtraData : deleteExtraData,
+							imgsUrl : imgsUrl,
+							downloadConfig : downloadConfig
+						}
+						$.common.uploadFile(option1);
+						//uploadFunction('uploadFileId',null,null,deleteExtraData,imgsUrl,downloadConfig);
+					} else {
+						var option2 = {
+							id : 'uploadFileId',
+							uploadUrl : null,
+							deleteUrl : null,
+							deleteExtraData : null,
+							imgsUrl : new Array(),
+							initialPreviewConfig : null
+						}
+						$.common.uploadFile(option2);
+						//uploadFunction('uploadFileId',null,null,null,new Array(),null);
+					}
+					downFile();
+				}
+			};
+			$.ajax(config)
+		});
+
+		$("#form-user-edit").validate({
+			onkeyup : false,
+			rules : {
+				password : {
+					minlength : 5,
+					maxlength : 20
+				},
+				email : {
+					email : true
+				},
+				phonenumber : {
+					isPhone : true
+				},
+			},
+
+			focusCleanup : true
+		});
+
+		/*用户管理-选择直属上级-用户列表*/
+		function selectUserById() {
+			var options = {
+				title : '选择用户',
+				width : "1200",
+				url : ctx + "oa/oaApplyTemplate/selectUser",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result.data;
+			$('#parentUserId').val(data.userId);
+			$("#parentUserName").val(data.userName);
+			/* var row = $("#bootstrap-table").bootstrapTable('getSelections');
+			if(row.length<=0){
+			  $.modal.alertWarning('请先选择要操作的记录！');
+			  return;
+			 } */
+
+		}
+
+		function submitHandler() {
+			if ($.validate.form()) {
+				var data = $("#form-user-edit").serializeObject();
+				var status = $("input[id='status']").is(':checked') == true ? 0
+						: 1;
+				//var roleIds = $.form.selectCheckeds("role");
+				var postIds = $.form.selectSelects("post");
+				data.status = status;
+				var roleFlag = $("input[id='roleFlag']").is(':checked') == true ? 'Y' : 'N';
+				data.roleFlag = roleFlag;
+				data.attachmentList = attachmentList;
+				var rs = data.roleIds;
+				var roles = [];
+				roles[0] = data.roleIds;
+				data.roleIds = roles;
+				var sysRoleBizs = [];
+				sysRoleBizs[0] = data.sysRoleBizIds;
+				data.sysRoleBizIds = sysRoleBizs;
+				/* data.push({"name": "postIds", "value": postIds}); */
+				//$.operate.saveTab(prefix + "/edit", data);
+				var config = {
+					contentType : "application/json;charset=UTF-8",
+					url : prefix + "/edit",
+					type : "post",
+					dataType : "json",
+					data : JSON.stringify(data),
+					beforeSend : function() {
+						$.modal.loading("正在处理中，请稍后...");
+					},
+					success : function(result) {
+						/* console.log(result) */
+						$.operate.successTabCallback(result);
+					}
+				};
+				$.ajax(config)
+			}
+		}
+
+		var domId = null;
+		/*用户管理-新增-选择部门树*/
+		function selectDeptTree(id) {
+			domId = id;
+			var treeId = $("#" + id).val();
+			var deptId = $.common.isEmpty(treeId) ? "100" : treeId;
+			var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title : '选择部门',
+				width : "380",
+				url : ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack : doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit(index, layero) {
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if (domId == 'treeId' && $.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+				$("#treeId").val(body.find('#treeId').val());
+				$("#treeName").val(body.find('#treeName').val());
+				layer.close(index);
+			} else if (domId == 'companyId') {
+				var body = layer.getChildFrame('body', index);
+				$("#companyId").val(body.find('#treeId').val());
+				$("#companyName").val(body.find('#treeName').val());
+				layer.close(index);
+			}
+		}
+	</script>
+</body>
+</html>

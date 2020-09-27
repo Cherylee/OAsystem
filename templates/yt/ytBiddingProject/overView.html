@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改人员配置')"/>
+    <th:block th:include="include :: layout-latest-css"/>
+    <th:block th:include="include :: ztree-css"/>
+    <style type="text/css">
+        .panel-body1 {
+            display: flex;
+        }
+
+        .container-div {
+            width: 100%;
+        }
+        .p-row{
+            margin-right: 15px;
+            display: inline;
+        }
+
+    </style>
+</head>
+<body>
+<!--展示-->
+<div class="row" id="configBox">
+    <br>
+    <div class="col-sm-offset-1 col-sm-10">
+        <!-- 分配比例  -->
+        <div class="panel panel-default">
+
+            <!-- 添加  -->
+            <div class="panel-body panel-body1">
+                <div class="main-content">
+                    <div class="box box-main">
+                        <div class="box-header">
+                            <div class="box-title">
+                                <i class="fa icon-grid"></i> 人员配置
+                            </div>
+                        </div>
+                        <div class="">
+                            <div id="tree" class="ztree"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-div">
+                    <div class="row">
+                        <div class="col-sm-12 select-table table-striped">
+                            <form id="formId1">
+                                <input type="hidden" id="typeId" name="typeId">
+                                <input type="hidden" id="projectId" name="projectId">
+
+                            </form>
+                            <table id="bootstrap-table1" data-mobile-responsive="true"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: layout-latest-js"/>
+<th:block th:include="include :: ztree-js"/>
+<script th:inline="javascript">
+    var projectId=[[${ytProjectMain.id}]]
+    //树
+    $(function () {
+        var panehHidden = false;
+        if ($(this).width() < 769) {
+            panehHidden = true;
+        }
+        queryTypeTree();
+    });
+
+    function queryCredentialsList(typeId,projectId) {
+        var options = {
+            id:'bootstrap-table1',
+            url: ctx + "yt/ytProjectMain/getConfigListByType",
+            modalName: "人员配置",
+            rememberSelected: true,
+            sortName: "createTime",
+            sortOrder: "desc",
+            clickToSelect: true,
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: false,
+            pagination: false,
+            queryParams:{'typeId':typeId,'projectId':projectId},
+            columns: [
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'mainId',
+                    title: '配置主表id',
+                    sortable: true,
+                    visible: false
+                }, {
+                    field: 'roleCodeName',
+                    title: '人员角色',
+                    sortable: true
+                }, {
+                    field: 'roleName',
+                    title: '人员',
+                    sortable: true
+                },
+                {
+                    field : 'roleProportion',
+                    title : '角色所占比例(%)',
+                    sortable: true
+                },
+                {
+                    field : 'finishProportion',
+                    title : '已完成比例(%)',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return '<p class="p-row">'+row.finishProportion+'%</p><a class="p-row" onclick="toPeopleDetail(\'' + row.id + '\')">详情</a>'
+                    }
+                },
+                {
+                    field : 'effectiveValue',
+                    title : '有效产值(万)',
+                    sortable: true
+                },
+                {
+                    field : 'startTime',
+                    title : '工期开始',
+                    sortable: true
+                },
+                {
+                    field : 'endTime',
+                    title : '工期结束',
+                    sortable: true
+                },
+                {
+                    field : 'typeId',
+                    title : '',
+                    sortable: true,
+                    visible:false
+                }]
+        };
+        $.table.init(options);
+    }
+
+    function toPeopleDetail(id){
+        createMenuItem(ctx + "yt/ytPeopleSchedule/overViewDetail/" + id, '人员进度详情')
+    }
+
+
+    function queryTypeTree() {
+        var url = ctx + "yt/ytPeopleAllocateType/treeData/"+ projectId;
+        var options = {
+            url: url,
+            expandLevel: 2,
+            expandAll:true,
+            onClick: zOnClick
+        };
+        $.tree.init(options);
+
+        function zOnClick(event, treeId, treeNode) {
+            $("#typeId").val(treeNode.id);
+            $("#projectId").val(projectId);
+            queryCredentialsList(treeNode.id,projectId)
+            $.table.search('formId1');
+        }
+    }
+</script>
+</body>
+</html>

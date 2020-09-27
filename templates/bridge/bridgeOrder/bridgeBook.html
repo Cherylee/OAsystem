@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('委托书列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								委托单名称：<input type="text" name="name"/>
+							</li>
+
+							<li>
+								委托单类型：<input type="text" name="orderType"/>
+							</li>
+
+							<li>
+								备注：<input type="text" name="remark"/>
+							</li>
+
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "bridge/bridgeBook";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                modalName: "委托书",
+		        showExport: false,
+		        clickToSelect : true,
+		        showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                showSearch: false,
+                columns: [{
+		            radio: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'name', 
+					title : '委托单名称',
+					sortable: true
+				},
+				{
+					field : 'orderType', 
+					title : '委托单类型',
+					sortable: true
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				}]
+            };
+            $.table.init(options);
+        });
+        
+        /*返回选中行数据*/
+        function submitHandlerSelect() {
+			var target =$('#bootstrap-table').bootstrapTable('getSelections');
+			$.modal.close();
+			return target[0];
+		}
+    </script>
+</body>
+</html>

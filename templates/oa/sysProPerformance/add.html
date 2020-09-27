@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增业绩申请')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProPerformance-add">
+                            <table class="table table-bordered table-condensed" >
+                                <caption class="text-center">
+                                    <h2>业绩申请</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active"><span style="color: red; ">*</span>项目</td>
+                                    <td>
+                                        <input id="projectId" name="projectId" type="hidden" />
+                                        <input id="proName" name="proName" class="form-control" type="text"
+                                               onclick="selectPro('projectId','proName')" required="required">
+                                    </td>
+                                    <td class="active">编号</td>
+                                    <td>
+                                        <input id="code" name="code" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请人</td>
+                                    <td>
+                                        <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control" type="hidden">
+                                        <input th:value="${user.userName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">公司</td>
+                                    <td>
+                                        <input id="companyId" name="companyId" th:value="${company.deptId}" class="form-control" type="hidden">
+                                        <input id="companyName" name="companyName" th:value="${company.deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">申请部门</td>
+                                    <td>
+                                        <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}" type="hidden">
+                                        <input id="deptName" name="deptName" th:value="${user.dept.deptName}" class="form-control" type="text" readonly="readonly">
+                                    </td>
+                                    <td class="active">申请日期</td>
+                                    <td>
+                                        <div class="input-group data">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input id="applyTime" name="applyTime" class="form-control time-input-data currentDate" type="text" >
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">预计归还日期</td>
+                                    <td>
+                                        <div class="input-group data">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input id="expectBackDate" name="expectBackDate" class="form-control time-input-data currentDate" type="text" >
+                                        </div>
+                                    </td>
+                                    <td class="active">借业绩事由</td>
+                                    <td>
+                                        <input id="reason" name="reason" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">证明材料</td>
+                                    <td>
+                                        <input id="prove" name="prove" class="form-control" type="text">
+                                    </td>
+                                    <td class="active">备注</td>
+                                    <td>
+                                        <input id="remark" name="remark" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">附件</td>
+                                    <td colspan="3">
+                                        <div class="file-loading">
+                                            <input id="uploadFileId" type="file" multiple>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10">
+                                <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProPerformance"
+		$("#form-sysProPerformance-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+                var data = $('#form-sysProPerformance-add').serializeObject();
+                data.attachmentList = attachmentList;
+                $.operate.saveJsonTab(prefix + "/add", data);
+	        }
+	    }
+
+        //上传附件
+        var attachmentList = new Array();
+        var option = {
+            id : 'uploadFileId',
+            uploadUrl : null,
+            deleteUrl : null,
+            deleteExtraData : null,
+            imgsUrl : new Array(),
+            initialPreviewConfig : null,
+            showPreview : true
+        }
+        $.common.uploadFile(option);
+        downFile();
+
+
+        //保存草稿
+        function saveDraft(){
+            var data = $('#form-sysProPerformance-add').serializeObject();
+            data.attachmentList = attachmentList;
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+	</script>
+</body>
+</html>

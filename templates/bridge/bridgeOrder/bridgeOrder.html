@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('样品列表')"/>
+    <style>
+        #formId .select-list th:onclick> ul > li p {
+            width: 100px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input type="text" name="code" placeholder="委托单编码"/>
+                        </li>
+                        <li>
+                            <input type="hidden" name="projectId" id="projectId"/>
+                            <input type="text" id="projectName" onclick="selectPro('projectId','projectName')"
+                                   placeholder="工程名称"/>
+                        </li>
+                        <li>
+                            <select id="checkType" class="selectpicker" name="checkType"
+                                    th:with="type=${@dict.getType('bridge_order_checkType')}">
+                                <option value="">检验类别</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <input type="text" name="clientUnit" placeholder="委托单位"/>
+                        </li>
+                        <li>
+                            <input type="text" name="clientName" placeholder="委托人"/>
+                        </li>
+                        <li class="select-time">
+                            <label>委托时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="bridge:bridgeOrder:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <!-- <a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="bridge:bridgeOrder:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="bridge:bridgeOrder:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a> -->
+            <a class="btn btn-info" onclick="expenseSettlement()">
+                <i class="fa fa-upload"></i> 结算费用
+            </a>
+            <!-- <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="bridge:bridgeOrder:export">
+                    <i class="fa fa-download"></i> 导出
+             </a> -->
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+    <form id="form-edit" class="hide">
+        <input type="hidden" name="id" id="orderid">
+        <input type="hidden" name="status" id="orderstatus">
+    </form>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+
+    var bridgeOrderState = [[${@dict.getType('bridge_order_status')}]];
+    var bridgeOrderSource = [[${@dict.getType('bridge_order_source')}]];
+    var bridgeOrderCheckType = [[${@dict.getType('bridge_order_checkType')}]];
+
+    var checkFlag = [[${@permission.hasPermi('bridge:bridgeOrder:check')}]];
+
+    var prefix = ctx + "bridge/bridgeOrder";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            detailUrl: prefix + "/detail/{id}",
+            modalName: "委托单",
+            sortName: "createTime",
+            sortOrder: "desc",
+            showExport: true,
+            showFooter: true,
+            showPageGo: true,
+            clickToSelect: true,
+            rememberSelected: true,
+            columns: [{
+                checkbox: true,
+                formatter: function (i, row) {	// 每次加载 checkbox 时判断当前 row 的 id 是否已经存在全局 Set() 里
+                    if ($.inArray(row.order.id, selectionIds) != -1) {
+                        return {
+                            checked: true 	// 存在则选中
+                        }
+                    }
+                }
+            },
+                {
+                    field: 'order.id',
+                    title: '委托单id',
+                    visible: false
+                },
+                {
+                    field: 'order.code',
+                    title: '委托单编码',
+                    sortable: true
+                },
+                {
+                    field: 'order.source',
+                    title: '委托来源',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bridgeOrderSource, value);
+                    }
+
+                },
+                {
+                    field: 'order.projectId',
+                    title: '关联工程id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'order.contractId',
+                    title: '关联合同id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'order.bookId',
+                    title: '委托书id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'book.name',
+                    title: '委托书名称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    }
+                },
+                {
+                    field: 'project.name',
+                    title: '工程项目',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    }
+                },
+                {
+                    field: 'order.deptId',
+                    title: '分配部门id',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    field: 'order.checkType',
+                    title: '检验类别',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bridgeOrderCheckType, value);
+                    }
+
+                },
+                {
+                    field: 'order.clientUnit',
+                    title: '委托单位',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    }
+                },
+                {
+                    field: 'order.constructionUnit',
+                    title: '施工单位',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    }
+                },
+                {
+                    field: 'order.clientName',
+                    title: '委托人',
+                    sortable: true
+                },
+                {
+                    field: 'order.orderDate',
+                    title: '委托日期',
+                    sortable: true
+                },
+                {
+                    field: 'order.status',
+                    title: '状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bridgeOrderState, value);
+                    }
+                },
+                {
+                    field: 'order.createTime',
+                    title: '创建日期',
+                    sortable: true,
+                    visible: false
+                },
+                {
+                    title: '附件',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return '<a onclick="toReport(\'' + row.order.id + '\')">报告信息</a>'
+                    }
+                },
+                {
+                    field: 'order.totalAmount',
+                    title: '19版总费用(元)',
+                    sortable: true,
+                    footerFormatter: function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            if (value[i].order.historyTotalAmount != null) {
+                                sumBalance += parseFloat(value[i].order.totalAmount);
+                            } else {
+                                sumBalance += 0
+                            }
+                        }
+                        return '总计：' + sumBalance;
+                    }
+                },
+                {
+                    field: 'order.historyTotalAmount',
+                    title: '07版总费用(元)',
+                    sortable: true,
+                    footerFormatter: function (value) {
+                        var sumBalance = 0;
+                        //console.log(value)
+                        for (var i in value) {
+                            if (value[i].order.historyTotalAmount != null) {
+                                sumBalance += parseFloat(value[i].order.historyTotalAmount);
+                            } else {
+                                sumBalance += 0
+                            }
+
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        var cancel = null;
+                        var fuhe = null;
+                        var editFlag = null;
+                        if (row.order.status == 2) {
+                            cancel = 'disabled';
+                            fuhe = 'disabled'
+                            editFlag = 'disabled'
+                        }
+                        if (row.order.status == 1) {
+                            fuhe = 'disabled'
+                            editFlag = 'disabled'
+                        }
+
+                        actions.push('<a class="btn btn-success btn-xs" href="#" onclick="$.operate.detailTab(\'' + row.order.id + '\',)"><i class="fa fa-edit"></i>详情</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + cancel + '" href="#" onclick="changeStatus(\'' + row.order.id + '\',2,this)">取消</a> ');
+                        actions.push('<a class="btn btn-warning ' + checkFlag + ' btn-xs ' + fuhe + '" href="#" onclick="changeStatus(\'' + row.order.id + '\',1,this)"></i>复核</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="#" onclick="$.operate.editTab(\'' + row.order.id + '\',)"><i class="fa fa-edit"></i>编辑</a> ');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    //委托单回显
+    function submitHandler() {
+        var target = $('#bootstrap-table').bootstrapTable('getSelections');
+
+
+        if (target.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        if (target.length > 1) {
+            $.modal.alertWarning("只能选择一条记录哦！");
+            return;
+        }
+
+        $.modal.close();
+        return target[0];
+    }
+
+    function toReport(id) {
+        $.modal.openTab("上传报告", prefix + "/bridgeReport/" + id);
+    }
+
+    function changeStatus(id, status, obj) {
+        $('#orderid').val(id);
+        $('#orderstatus').val(status);
+
+        $.modal.confirm('确认执行此操作吗？', function () {
+            if ($.validate.form()) {
+                var config = {
+                    url: prefix + "/edit",
+                    type: "post",
+                    dataType: "json",
+                    data: $('#form-edit').serialize(),
+                    beforeSend: function () {
+                        $.modal.loading("正在处理中，请稍后...");
+                    },
+                    success: function (result) {
+                        $.operate.ajaxSuccess(result);
+                        $(obj).addClass('disabled');
+                    }
+                };
+                $.ajax(config)
+
+            }
+        });
+
+
+    }
+
+    //选择工程
+    var pId = null;
+    var pName = null;
+
+    function selectPro(id, name) {
+        pId = id;
+        pName = name;
+        var options = {
+            title: '选择工程',
+            width: "1200",
+            url: ctx + "bridge/bridgeProject",
+            callBack: doSubmit1
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + pId).val(data.id)
+        $('#' + pName).val(data.name)
+    }
+
+    //费用结算
+    function expenseSettlement() {
+        if (selectionIds.length > 0) {
+            var currentId = 'settlementId';
+            $.modal.disable();
+            var data = {};
+            data.orderIds = selectionIds;
+            layer.open({
+                type: 1,
+                area: ['400px', '230px'],
+                fix: false,
+                //不固定
+                maxmin: true,
+                shade: 0.3,
+                title: '选择需要关联的费用标准',
+                content: $('#' + currentId).html(),
+                btn: ['<i class="fa fa-check"></i> 确定', '<i class="fa fa-remove"></i> 取消'],
+                // 弹层外区域关闭
+                shadeClose: true,
+                btn1: function () {
+                    data.checkStandard = $("input[name='checkStandard']").is(':checked');
+                    $.ajax({
+                        url: prefix + "/genExpSettlementBill",
+                        contentType: "application/json;charset=UTF-8",
+                        type: "post",
+                        data: JSON.stringify(data),
+                        beforeSend: function () {
+                            $.modal.loading("正在处理中，请稍后...");
+                        },
+                        success: function (response, status) {
+                            if (status == "success") {
+                                var blob = new Blob([response]);
+                                var reader = new FileReader();
+                                reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a标签href
+                                reader.onload = function (e) {
+                                    // 转换完成，创建一个a标签用于下载
+                                    var a = document.createElement('a');
+                                    a.download = '费用结算清单.xls';
+                                    a.href = e.target.result;
+                                    $("body").append(a);
+                                    a.click();
+                                    $(a).remove();
+                                }
+                                $.modal.closeLoading();
+                                layer.alert("结算单生成成功！", {
+                                    icon: $.modal.icon(modal_status.SUCCESS),
+                                    title: "系统提示",
+                                    btn: ['确认'],
+                                    yes: function () {
+                                        $.modal.closeAll();
+                                        $.modal.openTab("费用结算", ctx + "bridge/bridgeSettlement");
+                                    },
+                                    btnclass: ['btn btn-primary'],
+                                });
+                            } else {
+                                $.modal.closeAll();
+                                $.modal.alertError("结算单生成失败！详情请咨询管理员");
+                                $.modal.closeLoading();
+                            }
+                        }
+                    });
+                }
+            });
+        } else {
+            $.modal.alertError("请至少选择一条记录！");
+        }
+    }
+</script>
+<!--费用结算区-->
+<script id="settlementId" type="text/template">
+    <form enctype="multipart/form-data" class="mt20 mb10">
+        <div class="col-xs-offset-1">
+            <div class="mt10 pt5">
+                <input type="checkbox" id="checkStandard" name="checkStandard"/> 是否选用07版收费标准
+            </div>
+            <font color="red" class="pull-left mt10">
+                提示：默认选用19版收费标准
+            </font>
+        </div>
+    </form>
+</script>
+</body>
+</html>

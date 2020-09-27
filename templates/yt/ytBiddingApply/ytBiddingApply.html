@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('招标申请列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+						    <input type="hidden" name="companyId" value="126">
+							<li>
+								<p>申请状态：</p> <select id="applyStatus" name="applyStatus"
+								th:with="type=${@dict.getType('oa_leave_status')}">
+									<option value="">------所有------</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+										th:value="${dict.dictValue}"></option>
+							</select>
+
+							</li>
+					
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="yt:ytBiddingApply:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="yt:ytBiddingApply:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="yt:ytBiddingApply:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="yt:ytBiddingApply:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('oa:oaMargin:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('oa:oaMargin:remove')}]];
+    var prefix = ctx + "oa/oaMargin";
+
+    var marginType=[[${@dict.getType('oa_jy_margin_type')}]];
+    var tenderType=[[${@dict.getType('business_project_type')}]];
+    var applyState=[[${@dict.getType('oa_leave_status')}]];
+    var payStatus=[[${@dict.getType('oa_jy_payStatus')}]];
+    var backStatus=[[${@dict.getType('oa_jy_backStatus')}]];
+    var applyType=[[${@dict.getType('oa_jy_applyType')}]];
+    
+    $(function() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+			exportUrl: prefix + "/export",
+            modalName: "保证金申请",
+	        showExport: true,
+	        queryParams:{'companyId':126},
+	        sortName: "createTime",
+		    sortOrder: "desc",
+            columns: [{
+	            checkbox: true
+	        },
+			{
+				field : 'id', 
+				title : 'id',
+				visible: false
+			},
+			{
+				field : 'code', 
+				title : '编号',
+				sortable: true,
+	            formatter: function(value, row, index) {
+					return '<a  href="#" onclick="$.operate.editTab(\'' + row.id + '\')">'+row.code+'</a> '
+	            }
+			},
+			{
+				field : 'tenderCompany', 
+				title : '投标公司',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'proposer', 
+				title : '申请人id',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'userName', 
+				title : '申请人',
+				sortable: true
+			},
+			{
+				field : 'deptId', 
+				title : '申请部门id',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'deptName', 
+				title : '申请部门',
+				sortable: true
+			},
+			{
+				field : 'applyTime', 
+				title : '申请日期',
+				sortable: true
+			},
+			{
+				field : 'applyType', 
+				title : '申请类型',
+				sortable: true,
+				formatter: function (value, row, index) {
+					return $.table.selectDictLabel(applyType, value);
+				}
+			},
+			{
+				field : 'projectName', 
+				title : '工程名称',
+				sortable: true,
+				formatter: function (value, row, index) {
+					return $.table.tooltip(value,5, "open");
+				}
+			},
+			{
+				field : 'marginType', 
+				title : '保证金类型',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(marginType, value);
+	        	}
+			},
+			{
+				field : 'actualTransferMoney', 
+				title : '审批金额',
+				sortable: true,
+				formatter: function (value, row, index) {
+					var amount=null;
+					if(row.actualTransferMoney==null){
+						amount=row.marginTotalMoney;
+					}else{
+						amount=row.actualTransferMoney;
+					}
+					return amount;
+	        	}
+			},
+			{
+				field : 'transferMethod', 
+				title : '转账方式',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'marginTotalMoney', 
+				title : '保证金总金额',
+				sortable: true
+			},
+			{
+				field : 'totalMoneyUpcase', 
+				title : '保证金总金额大写',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'actualTransferMoney', 
+				title : '实际转账金额',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'actualTransferUpcase', 
+				title : '实际转账金额大写',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'transferDesc', 
+				title : '转账说明',
+				sortable: true,
+				visible: false,
+				formatter: function (value, row, index) {
+					return $.table.tooltip(value,5, "open");
+				}
+			},
+			{
+				field : 'applyType', 
+				title : '申请类型',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'companyAccount', 
+				title : '公司收款账户',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'projectId', 
+				title : '工程id',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'tenderType', 
+				title : '投标方式',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(tenderType, value);
+	        	}
+			},
+			{
+				field : 'endArrivalTime', 
+				title : '到账截止时间',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'sourceOfPayment', 
+				title : '款项来源人',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'sourceOfAccount', 
+				title : '来源人账号',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'sourceOpenBank', 
+				title : '来源人开户行',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'collectOfPayment', 
+				title : '收款人',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'collectOfAccount', 
+				title : '收款人账号',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'collectOpenBank', 
+				title : '收款人开户行',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'backMarginId', 
+				title : '退保证金时关联的申请保证金id',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'backMarginCode', 
+				title : '退保证金时关联申请保证金的编码',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'applyStatus', 
+				title : '审批状态',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(applyState, value);
+	        	}
+			},
+			{
+				field : 'payStatus', 
+				title : '付款状态',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(payStatus, value);
+	        	}
+			},
+			{
+				field : 'backStatus', 
+				title : '退回状态',
+				sortable: true,
+				formatter: function (value, row, index) {
+	        		return $.table.selectDictLabel(backStatus, value);
+	        	}
+			},
+			{
+				field : 'remark', 
+				title : '备注',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'createBy', 
+				title : '创建者',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'createTime', 
+				title : '创建时间',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'updateBy', 
+				title : '更新者',
+				sortable: true,
+				visible: false
+			},
+			{
+				field : 'updateTime', 
+				title : '更新时间',
+				sortable: true,
+				visible: false
+			},
+	        {
+	            title: '操作',
+	            align: 'center',
+	            formatter: function(value, row, index) {
+	            	var actions = [];
+	            	var text='查看详情'
+	            	var classN='btn-info'
+					if(row.applyStatus=='3'){
+						text='编辑'
+						classN='btn-success'
+					}
+	            	if(row.applyStatus == '0'){
+						actions.push('<a class="btn btn-primary btn-xs " href="#" onclick="backMargin(\'' + row.id + '\')">退保证金 </a>  ');
+					}
+	            	if(row.applyStatus == '16'){
+						actions.push('<a class="btn btn-primary btn-xs " href="#" onclick="showMainAdd(\'' + row.projectId + '\',\'' + row.id + '\')">项目申请 </a>  ');
+					}
+	            	actions.push('<a class="btn '+classN+' btn-xs ' + editFlag + ' " href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+                    actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+					return actions.join('');
+	            }
+	        }]
+        };
+        $.table.init(options);
+    });
+  //跳转到新增项目主体信息---无费用
+  function showMainAdd(project,id){  
+  	$.modal.confirm('添加项目信息？',function(){
+  		 $.modal.openTab("添加项目信息",ctx + "yt/ytBiddingInfo/addProjectWithoutCost/?id="+project+"&applyId="+id);         		 
+	    })	 
+  }
+    </script>
+</body>
+</html>

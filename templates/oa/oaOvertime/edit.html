@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改加班申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaOvertime-edit" th:object="${oaOvertime}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>加班申请</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">申请人</td>
+                                <td>
+                                    <input id="userName" name="userName" th:field="*{userName}" class="form-control"
+                                           type="text" readonly>
+                                </td>
+                                <td class="active">申请公司</td>
+                                <td>
+                                    <input type="hidden" name="applyCompanyId" id="companyId"
+                                           th:field="*{applyCompanyId}"/>
+                                    <input type="text" id="companyName" name="applyCompanyName" class="form-control"
+                                           onclick="selectDeptTree('companyId','companyName','0')"
+                                           th:field="*{applyCompanyName}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门</td>
+                                <td>
+                                    <input type="hidden" name="applyDeptId" id="treeId" th:field="*{applyDeptId}"/>
+                                    <input type="text" id="treeName" name="applyDeptName" class="form-control"
+                                           onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:field="*{applyDeptName}"/>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>加班起始日期</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="workStart" name="workStart"
+                                               class="form-control currentTime time-input" type="text"
+                                               required="required"
+                                               th:value="${#dates.format(oaOvertime.workStart, 'yyyy-MM-dd HH:mm:ss')}"
+                                               data-callback="limitTime" data-mark="2">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>加班结束日期</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="workEnd" name="workEnd" class="form-control currentTime time-input"
+                                               type="text" required="required"
+                                               th:value="${#dates.format(oaOvertime.workEnd, 'yyyy-MM-dd HH:mm:ss')}"
+                                               data-callback="limitTime" data-mark="1">
+                                    </div>
+                                </td>
+                                <td class="active">加班时长</td>
+                                <td>
+                                    <input id="workHour" name="workHour" th:field="*{workHour}" class="form-control"
+                                           type="number">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">加班事由</td>
+                                <td>
+                                    <input id="reason" name="reason" th:field="*{reason}" class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">申请日期</td>
+                                <td>
+                                    <input id="applyTime" name="applyTime" class="form-control" type="text" readonly
+                                           th:value="${#dates.format(oaOvertime.applyTime, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">备注</td>
+                                <td colspan="3">
+                                    <input id="remark" name="remark" th:field="*{remark}" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <br>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()" th:if="${oaOvertime.status=='99'}">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandlerDraft()" th:if="${oaOvertime.status=='99'}">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="submitHandler()" th:if="${oaOvertime.status=='3'}">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:if="${oaOvertime.status!='2'&&oaOvertime.status!='16'&&oaOvertime.status!='99'}"
+                                    onclick="urge()">
+                                <i class="fa fa-check"></i>催办
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" th:if="${oaOvertime.status!='99'}"
+                                    th:onclick="selectUser('','','0',[[${oaOvertime.id}]],'oa/oaOvertime/copy')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table table-bordered " id="approveInfoId"
+                               data-mobile-responsive="true"></table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaOvertime";
+    var lastNodeId = [[${oaOvertime.id}]];
+    var actDefineId = [[${oaOvertime.actDefineId}]];
+    var lastStatus = [[${oaOvertime.status}]];
+    //流程
+    var data = {};
+    data.procInstId = [[${oaOvertime.procInstId}]];
+    data.id = [[${oaOvertime.id}]];
+    selectActProcessList(data, "approveInfoId");
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/modifyOvertime", $('#form-oaOvertime-edit')
+                .serialize());
+        }
+    }
+
+    //时长计算
+    var dataTime = {};
+
+    function limitTime(value, dataT, mark) {
+        dataTime.startTime = $('#workStart').val()
+        dataTime.endTime = $('#workEnd').val()
+        if (mark == '2') {
+            $('#workStart').val('')
+            dataTime.startTime = value
+        } else {
+            $('#workEnd').val('')
+            dataTime.endTime = value
+        }
+        if (dataTime.startTime != '' && dataTime.endTime != ''
+            && dataTime.startTime != undefined && dataTime.endTime != undefined) {
+            var config = {
+                contentType: "application/json;charset=UTF-8",
+                url: ctx + "oa/oatravel/calculateDays",
+                type: "post",
+                dataType: "json",
+                data: JSON.stringify(dataTime),
+                success: function (result) {
+                    if (result.retCode != '200') {
+                        $("#workHour").val('');
+                        $.modal.alertWarning(result.msg);
+                    } else {
+                        $("#workHour").val(result.time);
+                    }
+                }
+            };
+            $.ajax(config)
+        }
+    }
+
+    //提交草稿
+    function submitHandlerDraft() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/submitDraft", $('#form-oaOvertime-edit')
+                .serialize());
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        $.operate.saveTab(prefix + "/saveDraft", $('#form-oaOvertime-edit')
+            .serialize());
+    }
+
+</script>
+</body>
+</html>

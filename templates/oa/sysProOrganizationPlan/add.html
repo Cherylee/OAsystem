@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增施工组织方案')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-sysProOrganizationPlan-add">
+                            <input type="hidden" name="companyId" th:value="${company.deptId}" >
+                            <input type="hidden" name="companyName" th:value="${company.deptName}" >
+                            <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                                <caption class="text-center">
+                                    <h2>施工组织方案</h2>
+                                </caption>
+                                <tbody>
+                                    <tr>
+                                        <td class="active">申请人：</td>
+                                        <td>
+                                            <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control" type="hidden">
+                                            <input th:value="${user.userName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">关联模块：</td>
+                                        <td>
+                                            <input class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请部门：</td>
+                                        <td>
+                                            <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}" type="hidden">
+                                            <input id="deptName" name="deptName" th:value="${user.dept.deptName}" class="form-control" type="text" readonly="readonly">
+                                        </td>
+                                        <td class="active">工程名称：</td>
+                                        <td>
+                                            <input id="projectId" name="projectId" type="hidden" />
+                                            <input id="projectName" name="projectName" class="form-control" type="text"
+                                                   onclick="selectPro('projectId','projectName')" required="required">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">申请日期：</td>
+                                        <td>
+                                            <div class="input-group data">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                <input id="applyTime" name="applyTime" class="form-control time-input-data currentDate" type="text" >
+                                            </div>
+                                        </td>
+                                        <td class="active">方案名称：</td>
+                                        <td>
+                                            <input id="planName" name="planName" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">项目驻点负责人：</td>
+                                        <td>
+                                            <input id="projectPointManager" name="projectPointManager" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">项目负责人：</td>
+                                        <td>
+                                            <input id="projectManager" name="projectManager" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">合作方名字：</td>
+                                        <td>
+                                            <input id="partnerName" name="partnerName" class="form-control" type="text">
+                                        </td>
+                                        <td class="active">主要条款：</td>
+                                        <td>
+                                            <input id="mainClause" name="mainClause" class="form-control" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="active">附件：</td>
+                                        <td colspan="3">
+                                            <div class="file-loading">
+                                                <input id="uploadFileId" type="file" multiple>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                        <div class="row">
+                            <div class="col-sm-offset-5 col-sm-10">
+                                <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                                    <i class="fa fa-check"></i>保存草稿
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                    <i class="fa fa-check"></i>提交
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                    <i class="fa fa-reply-all"></i>关 闭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script type="text/javascript">
+		var prefix = ctx + "oa/sysProOrganizationPlan"
+		$("#form-sysProOrganizationPlan-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+
+        //上传附件
+        var attachmentList = new Array();
+        var option = {
+            id : 'uploadFileId',
+            uploadUrl : null,
+            deleteUrl : null,
+            deleteExtraData : null,
+            imgsUrl : new Array(),
+            initialPreviewConfig : null,
+            showPreview : true
+        }
+        $.common.uploadFile(option);
+        downFile();
+
+
+        //提交
+        function submitHandler() {
+            if ($.validate.form()) {
+                var data = {};
+                data = $('#form-sysProOrganizationPlan-add').serializeObject();
+                data.attachmentList=attachmentList;
+                data.flag = true;
+                $.operate.saveJsonTab(prefix + "/add", data);
+            }
+        }
+
+        //保存草稿
+        function saveDraft(){
+            var data = {};
+            data = $('#form-sysProOrganizationPlan-add').serializeObject();
+            data.attachmentList=attachmentList;
+            data.flag = true;
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+	</script>
+</body>
+</html>

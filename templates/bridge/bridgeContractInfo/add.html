@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增合同')" />
+	<th:block th:include="include :: select2-css" />
+	<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeContractInfo-add">
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同编号：</label>
+            <div class="col-sm-8">
+            	<input id="code" name="code" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同名称：</label>
+            <div class="col-sm-8">
+            	<input id="name" name="name" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">签订日期：</label>
+            <div class="col-sm-8">
+            	<div class="input-group data">
+			    	<span class="input-group-addon">
+			    		<i class="fa fa-calendar"></i>
+			    	</span>
+					<input id="signDate" 
+						name="signDate"
+						class="form-control time-input-data" 
+						type="text">
+				</div>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">开始日期：</label>
+            <div class="col-sm-8">
+            	<div class="input-group data">
+			    	<span class="input-group-addon">
+			    		<i class="fa fa-calendar"></i>
+			    	</span>
+					<input id="startDate" 
+						name="startDate"
+						class="form-control time-input-data" 
+						type="text">
+				</div>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">结束日期：</label>
+            <div class="col-sm-8">
+            	<div class="input-group data">
+			    	<span class="input-group-addon">
+			    		<i class="fa fa-calendar"></i>
+			    	</span>
+					<input id="endDate" 
+						name="endDate"
+						class="form-control time-input-data" 
+						type="text">
+				</div>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同性质1：</label>
+            <div class="col-sm-8">
+            	<input id="contractNatureFirst" name="contractNatureFirst" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同性质2：</label>
+            <div class="col-sm-8">
+            	<input id="contractNatureSecond" name="contractNatureSecond" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同性质3：</label>
+            <div class="col-sm-8">
+            	<input id="contractNatureThird" name="contractNatureThird" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同金额(元)：</label>
+            <div class="col-sm-8">
+            	<input id="contractAmount" name="contractAmount" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">累计收款(元)：</label>
+            <div class="col-sm-8">
+            	<input id="totalCollections" name="totalCollections" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">收款状态：</label>
+			<div class="col-sm-8">
+				<select id="collectionStatus" class="form-control" name="collectionStatus"
+					th:with="type=${@dict.getType('bridge_collection_status')}">
+				<option th:each="dict : ${type}"
+						th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+			</div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同存档日期：</label>
+            <div class="col-sm-8">
+            	<div class="input-group data">
+			    	<span class="input-group-addon">
+			    		<i class="fa fa-calendar"></i>
+			    	</span>
+					<input id="contractFileDate" 
+						name="contractFileDate"
+						class="form-control time-input-data" 
+						type="text">
+				</div>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同存档编号：</label>
+            <div class="col-sm-8">
+            	<input id="contractFileCode" name="contractFileCode" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同结算日期：</label>
+            <div class="col-sm-8">
+            	<div class="input-group data">
+			    	<span class="input-group-addon">
+			    		<i class="fa fa-calendar"></i>
+			    	</span>
+					<input id="contractSettleDate" 
+						name="contractSettleDate"
+						class="form-control time-input-data" 
+						type="text">
+				</div>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">工程项目：</label>
+            <div class="col-sm-8">
+                <input id="projectId" name="projectId" type="hidden">
+            	<input id="projectName" name="projectName" class="form-control" type="text" onclick="selectProject('projectId','projectName')">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">负责人：</label>
+            <div class="col-sm-8">
+                <input id="chargePersonId" name="chargePersonId" type="hidden">
+            	<input id="chargePersonNmae" name="chargePersonNmae" class="form-control" type="text" readonly="readonly">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目类别：</label>
+            <div class="col-sm-8">
+            	<select id="projectType" class="form-control" name="projectType"
+					th:with="type=${@dict.getType('bridge_project_type')}">
+				<option th:each="dict : ${type}"
+						th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">项目承接人：</label>
+            <div class="col-sm-8">
+            	<input id="projectHoldPerson" name="projectHoldPerson" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">委托单位：</label>
+            <div class="col-sm-8">
+            	<input id="clientUnit" name="clientUnit" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">行政区县：</label>
+            <div class="col-sm-8">
+            	<input id="district" name="district" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">邮政编码：</label>
+            <div class="col-sm-8">
+            	<input id="zipCode" name="zipCode" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">街道及门牌号：</label>
+            <div class="col-sm-8">
+            	<input id="streetNumber" name="streetNumber" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">地址全称：</label>
+            <div class="col-sm-8">
+            	<input id="fullAddr" name="fullAddr" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">电话：</label>
+            <div class="col-sm-8">
+            	<input id="phone" name="phone" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">传真：</label>
+            <div class="col-sm-8">
+            	<input id="fax" name="fax" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同预审附件url：</label>
+            <div class="col-sm-8">
+            	<input id="contractPretrialFile" name="contractPretrialFile" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同正式附件url：</label>
+            <div class="col-sm-8">
+            	<input id="contractFormalFile" name="contractFormalFile" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同文件状态：</label>
+			<div class="col-sm-8">
+				<select id="contractFileStatus" class="form-control" name="contractFileStatus"
+					th:with="type=${@dict.getType('bridge_contract_file_status')}">
+				<option th:each="dict : ${type}"
+						th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+			</div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">合同结算说明：</label>
+            <div class="col-sm-8">
+            	<input id="contractSettlementNote" name="contractSettlementNote" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">完工情况：</label>
+            <div class="col-sm-8">
+            	<input id="finishSitu" name="finishSitu" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">是否生效：</label>
+			<div class="col-sm-8">
+				<select id="isEffect" class="form-control" name="isEffect"
+					th:with="type=${@dict.getType('bridge_yes_no')}">
+				<option th:each="dict : ${type}"
+						th:text="${dict.dictLabel}"
+						th:value="${dict.dictValue}"></option>
+				</select>
+			</div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">备注：</label>
+            <div class="col-sm-8">
+            	<input id="remark" name="remark" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+    <h4 class="form-header h4">附件信息</h4>
+    <div class="row">
+    	<div class="col-sm-12">
+    		<div class="ibox float-e-margins">
+             <div class="ibox-content">
+                 <div class="form-group">
+                  <div class="file-loading">
+			          <input id="uploadFileId" type="file" multiple>
+			      </div>
+                 </div>
+             </div>
+         </div>
+        </div>
+    </div>
+	<!-- <div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建者：</label>
+            <div class="col-sm-8">
+            	<input id="createBy" name="createBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">创建时间：</label>
+            <div class="col-sm-8">
+            	<input id="createTime" name="createTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新者：</label>
+            <div class="col-sm-8">
+            	<input id="updateBy" name="updateBy" class="form-control" type="text">
+            </div>
+        </div>
+    </div>
+	<div class="col-sm-6">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">更新时间：</label>
+            <div class="col-sm-8">
+            	<input id="updateTime" name="updateTime" class="form-control" type="text">
+            </div>
+        </div>
+    </div> -->
+		</form>
+	</div>
+	<div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+            <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+        </div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: select2-js" />
+	 <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script type="text/javascript">
+		var prefix = ctx + "bridge/bridgeContractInfo"
+		
+		
+		//文件上传
+	    var attachmentUrls = null;
+	    $("#uploadFileId").fileinput({
+            'theme': 'explorer-fas',
+            uploadUrl: ctx+'common/bootstrapFileInputUpload',
+            overwriteInitial: false,
+            initialPreviewAsData: true,
+            uploadAsync : true
+        }).on("fileuploaded", function(event, data, previewId, index) {
+        	if(attachmentUrls==null){
+        		attachmentUrls = data.response.url;
+        	}else{
+        		attachmentUrls += ","+data.response.url;
+        	}
+        });;
+		
+		$("#form-bridgeContractInfo-add").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	var data = $("#form-bridgeContractInfo-add").serializeArray();
+	        	data.push({"name": "attachmentUrls", "value": attachmentUrls});
+	            $.operate.saveTab(prefix + "/add", data);
+	        }
+	    }
+		
+		/*选择项目工程*/
+		var mid = '';
+		var mname = ''
+		function selectProject(id, name) {
+			mid = id;
+			mname = name;
+			var options = {
+				title : '选择工程项目',
+				width : "1200",
+				url : ctx + "bridge/bridgeOrder/enterOrder",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			/* console.log(result) */
+			$('#' + mname).val(data.name);
+			$('#' + mid).val(data.id);
+			$('#briefCode').val(data.briefCode)
+			$('#clientUnit').val(data.client)
+			$('#probriefCode').val(data.briefCode)
+			$('#constructionUnit').val(data.workingUnit)
+			$('#constructUnit').val(data.constructUnit)
+			$('#chargePersonId').val(data.chargePersonId)
+			$('#chargePersonNmae').val(data.contactPersonName)
+			
+		}
+	</script>
+</body>
+</html>

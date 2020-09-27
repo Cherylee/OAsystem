@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增印章')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!--抬头  -->
+        <div class="hr-line-dashed"></div>
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-body ">
+                        <form class="form-horizontal m" id="form-oaSeal-add">
+                            <table class="table table-bordered table-condensed" >
+                                <caption class="text-center">
+                                    <h2>新增印章</h2>
+                                </caption>
+                                <tbody>
+                                <th colspan="4">
+                                    表单信息
+                                </th>
+                                <tr>
+                                    <td class="active">印章名称</td>
+                                    <td>
+                                        <input id="sealName" name="sealName" class="form-control" type="text">
+                                    </td>
+                                    <td class="active"><span style="color: red; ">*</span>印章类型</td>
+                                    <td>
+                                        <select required="required" name="type" class="form-control" th:with="type=${@dict.getType('oa_seal_type')}" >
+                                            <option value="">--请选择--</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">归属公司</td>
+                                    <td>
+                                        <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                                        <input type="text" id="companyName" name="companyName" class="form-control"
+                                               onclick="selectDeptTree('companyId','companyName','0')" required="required" th:value="${company.deptName}"/>
+                                    </td>
+                                    <td class="active"><span style="color: red; ">*</span>申请部门：</td>
+                                    <td>
+                                        <input type="hidden" name="deptId" id="treeId" th:value="${user.deptId}"/>
+                                        <input type="text" id="treeName" name="deptName" class="form-control"
+                                               onclick="selectDeptTree('treeId','treeName','1')" th:value="${user.dept.deptName}" required="required"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">刻制人</td>
+                                    <td>
+                                        <input id="engravingByName"  onclick="selectUserById('engravingBy','engravingByName')"
+                                               class="form-control" type="text">
+                                        <input name="engravingBy" id="engravingBy" type="hidden" />
+                                    </td>
+                                    <td class="active">备注</td>
+                                    <td>
+                                        <input id="remark" name="remark" class="form-control" type="text">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">刻制部门</td>
+                                    <td>
+                                        <input name="engravingDeptId" type="hidden" id="engravingDeptId"/>
+                                        <input name="engravingDeptName" onclick="selectDeptTree('engravingDeptId','engravingDeptName','1')"
+                                               id="engravingDeptName" type="text" placeholder="请选择归属部门" class="form-control" required>
+                                    </td>
+                                    <td class="active">保管部门</td>
+                                    <td>
+                                        <input name="safekeepingDeptId" type="hidden" id="safekeepingDeptId"/>
+                                        <input name="safekeepingDeptName" onclick="selectDeptTree('safekeepingDeptId','safekeepingDeptName','1')"
+                                               id="safekeepingDeptName" type="text" placeholder="请选择归属部门" class="form-control" required>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">保管人</td>
+                                    <td>
+                                        <input id="safekeepingByName"  onclick="selectUserById('safekeepingBy','safekeepingByName')" class="form-control" type="text">
+                                        <input name="safekeepingBy" id="safekeepingBy" type="hidden" />
+                                    </td>
+                                    <td class="active">可预约</td>
+                                    <td>
+                                        <select name="canAppoint" class="form-control" th:with="type=${@dict.getType('sys_yes_no')}" >
+                                            <option value="">--请选择--</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="active">在公司</td>
+                                    <td>
+                                        <select name="inCompany" class="form-control" th:with="type=${@dict.getType('sys_yes_no')}" >
+                                            <option value="">--请选择--</option>
+                                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                        </select>
+                                    </td>
+                                    <td class="active">公安备案时间</td>
+                                    <td>
+                                        <div class="input-group data">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input id="filingTime" name="filingTime" class="form-control time-input" type="text">
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col-sm-offset-5 col-sm-10">
+                                     <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+                                     <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "oa/oaSeal"
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/add", $('#form-oaSeal-add').serialize());
+	        }
+	    }
+		
+	</script>
+</body>
+</html>

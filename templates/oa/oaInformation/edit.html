@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改发布')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-oaInformation-edit" th:object="${oaInformation}">
+                        <input id="id" name="id" th:field="*{id}" type="hidden">
+                        <input id="procInstId" name="procInstId" th:field="*{procInstId}" type="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <caption class="text-center">
+                                <h2>新增发布</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active">申请部门</td>
+                                <td>
+                                    <input type="hidden" name="deptId" th:value="*{deptId}">
+                                    <input type="text" class="form-control" th:value="*{deptName}" readonly="readonly"/>
+                                </td>
+                                <td class="active">申请人</td>
+                                <td>
+                                    <input id="proposer" th:value="*{proposer}" name="proposer" type="hidden"/>
+                                    <input th:value="*{userName}" class="form-control" type="text" readonly="readonly"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>缓急等级</td>
+                                <td>
+                                    <select required="required" name="urgencyGrade" th:field="*{urgencyGrade}"
+                                            class="form-control" th:with="type=${@dict.getType('oa_urgency_grade')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>秘密等级</td>
+                                <td>
+                                    <select required="required" name="secretGrade" th:field="*{secretGrade}"
+                                            class="form-control" th:with="type=${@dict.getType('oa_secret_grade')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>类别</td>
+                                <td>
+                                    <select required="required" name="type" th:field="*{type}" class="form-control"
+                                            th:with="type=${@dict.getType('oa_information_type')}">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>标题</td>
+                                <td>
+                                    <input required="required" id="title" name="title" th:field="*{title}"
+                                           class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">内容</td>
+                                <td>
+										<textarea id="remark" name="remark" class="form-control" type="text"
+                                                  th:field="*{remark}">
+										</textarea>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>查收部门</td>
+                                <td>
+                                    <input id="receiptDeptId" name="receiptDeptId" th:field="*{receiptDeptId}"
+                                           type="hidden"/>
+                                    <input id="treeName" onclick="selectDeptTree()" th:value="*{deptName}"
+                                           placeholder="请选择查收部门" class="form-control" type="text" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">状态</td>
+                                <td>
+                                    <select name="status" class="form-control"
+                                            th:with="type=${@dict.getType('oa_leave_status')}" th:field="*{status}"
+                                            disabled="disabled">
+                                        <option value="">所有</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active">申请日期</td>
+                                <td>
+                                    <input id="createTime" name="createTime" disabled="disabled"
+                                           class="form-control time-input" type="text"
+                                           th:value="${#dates.format(oaInformation.createTime, 'yyyy-MM-dd HH:mm:ss')}">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label"><span
+                                        style="color: red;">*</span>查收部门：</label>
+                                <div class="col-sm-10">
+                                    <div class="btn-group-sm" id="toolbar1" role="group">
+                                        <a class="btn btn-success" onclick="selectRuleDept()"> <i
+                                                class="fa fa-plus"></i> 添加
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-12 select-table table-striped">
+                                        <table id="bootstrap-table-dept" data-mobile-responsive="true"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-info"
+                                    onclick="saveDraft()" th:if="${oaInformation.status} == '99'">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" th:if="${oaInformation.status} == '99'"
+                                    class="btn btn-sm btn-primary" onclick="submitHandlerDraft()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" th:if="${oaInformation.status} == '3'"
+                                    class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info"
+                                    th:if="${oaInformation.status!='2'&&oaInformation.status!='16'&&oaInformation.status!='99'}"
+                                    onclick="urge()">
+                                <i class="fa fa-check"></i>催办
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    th:if="${oaInformation.status} != '99'"
+                                    th:onclick="selectUser('','','0',[[${oaInformation.id}]],'oa/oaInformation/copy')">
+                                抄送
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                    </div>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="approveTaskId" data-mobile-responsive="true"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: lastNode"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaInformation";
+    var lastNodeId = [[${oaInformation.id}]];
+    var actDefineId = [[${oaInformation.actDefineId}]];
+    var lastStatus = [[${oaInformation.status}]];
+    //流程
+    var data = {};
+    data.procInstId = [[${oaInformation.procInstId}]];
+    data.id = [[${oaInformation.id}]];
+    selectActProcessList(data);
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+            var data = $('#form-oaInformation-edit').serializeObject();
+            var relationList = $("#bootstrap-table-dept").bootstrapTable('getData')
+            data.attachmentList = attachmentList
+            if (relationList == 0) {
+                $.modal.alertWarning('查收部门必填！');
+                return;
+            } else {
+                data.relationList = relationList
+            }
+
+            $.operate.saveJsonTab(prefix + "/edit", data);
+        }
+    }
+
+    //提交草稿
+    function submitHandlerDraft() {
+        var data = $('#form-oaInformation-edit').serializeObject();
+        var relationList = $("#bootstrap-table-dept").bootstrapTable('getData')
+        data.attachmentList = attachmentList
+        if (relationList == 0) {
+            $.modal.alertWarning('查收部门必填！');
+            return;
+        } else {
+            data.relationList = relationList
+        }
+
+        $.operate.saveJsonTab(prefix + "/submitDraft", data);
+    }
+
+    //保存草稿
+    function saveDraft() {
+        if ($.validate.form()) {
+            var data = $('#form-oaInformation-edit').serializeObject();
+            var relationList = $("#bootstrap-table-dept").bootstrapTable('getData')
+            data.attachmentList = attachmentList
+            if (relationList == 0) {
+                $.modal.alertWarning('查收部门必填！');
+                return;
+            } else {
+                data.relationList = relationList
+            }
+            $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        }
+    }
+
+    //弹框选择部门
+    function selectRuleDept() {
+        var options = {
+            title: '选择部门',
+            width: "380",
+            url: ctx + "system/dept/selectDeptTree/100",
+            callBack: doSubmitRoleDept
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitRoleDept(index, layero) {
+        var tree = layero.find("iframe")[0].contentWindow.$._tree;
+        if ($.tree.notAllowParents(tree)) {
+            var body = layer.getChildFrame('body', index);
+            var deptData = {}
+            deptData.deptId = body.find('#treeId').val();
+            deptData.deptName = body.find('#treeName').val()
+            layer.close(index);
+            insertRow(deptData, 'bootstrap-table-dept')
+        }
+
+    }
+
+    /*新增行*/
+    function insertRow(data, tableId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var table_row = '';
+        table_row = data
+        table_row[0] = false;
+        var countDate = $("#" + tableId).bootstrapTable('getData');
+        if (isHas(countDate, data.deptId) == false) {
+            $("#" + tableId).bootstrapTable('insertRow', {
+                index: 0, // 你想插入到哪，0表示第一行
+                row: table_row
+            })
+        }
+    }
+
+    //判断是否已经添加
+    function isHas(data, id, flag) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].deptId == id) {
+                isTF = true;
+            }
+
+        }
+        return isTF;
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(tableId, rowId) {
+        $("#" + tableId).bootstrapTable('removeByUniqueId', rowId)
+
+    }
+
+    $(function () {
+        $.table.init(options1);
+    })
+    var options1 = {
+        modalName: "部门",
+        url: ctx + "oa/oaInfoDept/list",
+        id: "bootstrap-table-dept",
+        showExport: false,
+        showSearch: false,
+        showRefresh: false,
+        showToggle: false,
+        showColumns: false,
+        showPageGo: false,
+        pagination: false,
+        queryParams: {"infoId": lastNodeId},
+        uniqueId: 'deptId',
+        toolbar: "toolbar1",
+        columns: [
+            {
+                checkbox: true
+            },
+            {
+                field: 'id',
+                title: '主键',
+                visible: false
+            },
+            {
+                field: 'rulesId',
+                title: '制度id',
+                sortable: true,
+                visible: false
+            },
+            {
+                field: 'deptId',
+                title: '部门id',
+                sortable: true
+            },
+            {
+                field: 'deptName',
+                title: '部门名称',
+                sortable: true
+            },
+            {
+                title: '操作',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var actions = [];
+                    actions
+                        .push('<a class="btn btn-danger btn-xs" onclick="removeRow(\'bootstrap-table-dept\',\''
+                            + row.deptId + '\')">删除</a>');
+                    return actions.join('');
+                }
+            }]
+    };
+</script>
+</body>
+</html>

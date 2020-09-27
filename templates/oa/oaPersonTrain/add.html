@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增培训报告')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+	<!--抬头  -->
+	<div class="hr-line-dashed"></div>
+	<div class="row">
+		<div class="col-sm-offset-1 col-sm-10">
+			<div class="panel panel-default">
+				<div class="panel-body ">
+					<form class="form-horizontal" id="form-oaPersonTrain-add">
+
+						<table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+							<caption class="text-center">
+								<h2>培训报告</h2>
+							</caption>
+							<tbody>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>申请公司：</td>
+								<td>
+									<input type="hidden" name="applyCompanyId" id="companyId"
+										   th:value="${company.deptId}" required="required"/>
+									<input type="text" id="companyName" name="applyCompanyName" class="form-control"
+										   readonly th:value="${company.deptName}" required="required"/>
+								</td><td class="active"><span style="color: red;">*</span>申请部门：</td>
+								<td>
+									<input type="hidden" name="applyDeptId" id="treeId"
+										   th:value="${user.dept.deptId}" required="required"/>
+									<input type="text" id="treeName" name="applyDeptName" class="form-control"
+										   readonly th:value="${user.dept.deptName}" required="required"/>
+								</td>
+							</tr>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>申请人：</td>
+								<td>
+									<input type="hidden" name="proposer" id="proposer" th:value="${user.userId}">
+									<input class="form-control" type="text"
+										   th:value="${user.userName}" readonly required="required">
+								</td><td class="active"><span style="color: red;">*</span>报告提交时间：</td>
+								<td>
+									<input id="trainTimeStart" name="trainTimeStart"
+										   class="form-control currentTime time-input" type="text"
+										   required="required">
+								</td>
+							</tr>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>报告截至时间：</td>
+								<td>
+									<input id="trainTimeEnd" name="trainTimeEnd"
+										   class="form-control currentTime time-input" type="text"
+										   required="required">
+								</td><td class="active"><span style="color: red;">*</span>培训课题：</td>
+								<td>
+									<input id="trainTopic" name="trainTopic" class="form-control" required="required"></td>
+							</tr>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>培训内容：</td>
+								<td>
+									<input id="trainContent" name="trainContent" class="form-control" required="required">
+								</td><td class="active"><span style="color: red;">*</span>申请日期：</td>
+								<td>
+									<input id="applyTime" name="applyTime"
+										   class="form-control currentTime" type="text" readonly required="required">
+								</td>
+							</tr>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>事由：</td>
+								<td colspan="3">
+									<input id="reason" name="reason" class="form-control" type="text" required="required">
+								</td>
+							</tr>
+							<tr>
+								<td class="active"><span style="color: red;">*</span>培训报告：</td>
+								<td colspan="3">
+									<div class="file-loading">
+										<input id="uploadFileId" type="file" multiple >
+									</div>
+								</td>
+
+							</tr>
+							</tbody>
+						</table>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+		<div class="row">
+			<div class="col-sm-offset-5 col-sm-10">
+				<button type="button" class="btn btn-sm btn-info"
+					onclick="saveDraft()">
+					<i class="fa fa-check"></i>保存草稿
+				</button>
+				<button type="button" class="btn btn-sm btn-primary"
+					onclick="submitHandler()">
+					<i class="fa fa-check"></i>提交
+				</button>
+				<button type="button" class="btn btn-sm btn-danger"
+					onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script type="text/javascript">
+		var prefix = ctx + "oa/oaPersonTrain"
+		//上传附件
+		var attachmentList = new Array();
+		var option = {
+			id : 'uploadFileId',
+			uploadUrl : null,
+			deleteUrl : null,
+			deleteExtraData : null,
+			imgsUrl : new Array(),
+			initialPreviewConfig : null,
+			showPreview : true
+		}
+		$.common.uploadFile(option);
+		downFile();
+
+		function submitHandler() {
+			var data={}
+			data.oaPersonTrain=$('#form-oaPersonTrain-add').serializeObject()
+			data.attachmentList=attachmentList
+			if ($.validate.form()) {
+				$.operate.saveJsonTab(prefix + "/add",data);
+			}
+		}
+		//提交草稿
+		function saveDraft() {
+			var data={}
+			data.oaPersonTrain=$('#form-oaPersonTrain-add').serializeObject()
+			data.attachmentList=attachmentList
+			if ($.validate.form()) {
+				$.operate.saveJsonTab(prefix + "/saveDraft",data);
+			}
+		}
+
+	</script>
+</body>
+</html>

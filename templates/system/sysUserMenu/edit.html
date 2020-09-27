@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改人员和菜单关联')" />
+	<th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sysUserMenu-edit" th:object="${sysUserMenu}">
+            <input id="userId" name="userId" th:field="*{userId}"  type="hidden">
+            <div class="form-group">
+				<label class="col-sm-3 control-label ">用户名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="userName" id="userName" th:field="${user.userName}" readonly="readonly">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">菜单权限</label>
+						<div class="col-sm-8">
+							<div id="menuTrees" class="ztree"></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">手机端菜单权限</label>
+						<div class="col-sm-8">
+							<div class="input-group">
+								<div id="phoneMenuTrees" class="ztree"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div class="col-sm-offset-6 col-sm-6">
+				<br>
+				<button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"> 
+					<i class="fa fa-check"></i>保 存
+				</button>
+				&nbsp;
+				<button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+					<i class="fa fa-reply-all"></i>关 闭
+				</button>
+				<br>
+			</div>
+		</div>
+    </div>
+    <div th:include="include::footer"></div>
+    <th:block th:include="include :: layout-latest-js" />
+	<th:block th:include="include :: ztree-js" />
+	<script th:inline="javascript">
+    
+    $(function() {
+		var url = ctx + "system/menu/selectMenuTreeByUserId/" + [[${sysUserMenu.userId}]];
+		var options = {
+			id: "menuTrees",
+	        url: url,
+	        check: { enable: true },
+	        expandLevel: 0
+	    };
+		$.tree.init(options);
+
+		var options = {
+			id: "phoneMenuTrees",
+	        url: ctx + "system/menu/selectPhoneMenuTreeByUserId/" + [[${sysUserMenu.userId}]],
+	        check: { enable: true },
+	        expandLevel: 0
+	    };
+		$.tree.init(options);
+	});
+    
+		var prefix = ctx + "system/sysUserMenu";
+		$("#form-sysUserMenu-edit").validate({
+			rules:{
+				xxxx:{
+					required:true,
+				},
+			},
+			focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	edit();
+	        }
+	    }
+		
+		function edit() {
+			var pcTree = $.fn.zTree.getZTreeObj("menuTrees");
+			var nodes = pcTree.getCheckedNodes();
+			var menuIds = $.map(nodes, function (row) {
+				return row['id'];
+			}).join();
+
+			var phoneTree = $.fn.zTree.getZTreeObj("phoneMenuTrees");
+			var phoneNodes = phoneTree.getCheckedNodes();
+			var phoneMenuIds = $.map(phoneNodes, function (row) {
+				return row['id'];
+			}).join();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : prefix+"/modifyUserMenuByVo",
+				data : {
+					"userId": $("#userId").val(),
+					"menuIds": menuIds,
+					"phoneIds": phoneMenuIds
+				},
+				async : false,
+				error : function(request) {
+					$.modal.alertError("系统错误");
+				},
+				success : function(data) {
+					$.operate.successTabCallback(data);
+				}
+			});
+		}
+	</script>
+</body>
+</html>

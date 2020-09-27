@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增项目收款')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal m" id="form-sysProReceivables-add">
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>项目收款</h2>
+                            </caption>
+                            <tbody>
+                            <th colspan="4">
+                                表单信息
+                            </th>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>项目：</td>
+                                <td>
+                                    <input id="projectId" name="projectId" type="hidden"/>
+                                    <input id="proName" name="proName" class="form-control" type="text"
+                                           onclick="selectPro('projectId','proName')" required="required">
+                                </td>
+                                <td class="active">编号：</td>
+                                <td>
+                                    <input id="code" name="code" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请人：</td>
+                                <td>
+                                    <input id="proposer" name="proposer" th:value="${user.userId}" class="form-control"
+                                           type="hidden">
+                                    <input th:value="${user.userName}" class="form-control" type="text"
+                                           readonly="readonly">
+                                </td>
+                                <td class="active">公司：</td>
+                                <td>
+                                    <input id="companyId" name="companyId" th:value="${company.deptId}"
+                                           class="form-control" type="hidden">
+                                    <input id="companyName" name="companyName" th:value="${company.deptName}"
+                                           class="form-control" type="text" readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">申请部门：</td>
+                                <td>
+                                    <input id="deptId" name="deptId" class="form-control" th:value="${user.deptId}"
+                                           type="hidden">
+                                    <input id="deptName" name="deptName" th:value="${user.dept.deptName}"
+                                           class="form-control" type="text" readonly="readonly">
+                                </td>
+                                <td class="active">申请日期：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="applyTime" name="applyTime"
+                                               class="form-control time-input-data currentDate" type="text">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="element2">
+                                <td class="active"><span style="color: red; ">*</span>款项类别：</td>
+                                <td>
+                                    <select id="paymentType" name="paymentType" class="form-control valid first"
+                                            th:with="type=${@dict.getType('sys_pro_payment_type')}" required="required">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active"><span style="color: red; ">*</span>款项用途：</td>
+                                <td>
+                                    <select id="moneyPurpost" class="form-control select2-hidden-accessible valid second" name="moneyPurpost" required="required"
+                                            th:with="type=${@dict.getType('sys_pro_payment_type2_1')}" onchange="type2Change(this.value)">
+                                        <option value="">------所有------</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>交款日期：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="paymentDate" name="paymentDate" required="required"
+                                               class="form-control time-input-data currentDate" type="text">
+                                    </div>
+                                </td>
+                                <td class="active">交款人：</td>
+                                <td>
+                                    <input id="paymentPeople" name="paymentPeople" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red; ">*</span>收款金额：</td>
+                                <td>
+                                    <input id="amount" name="amount" class="form-control" type="text" required="required">
+                                </td>
+                                <td class="active">金额大写：</td>
+                                <td>
+                                    <input id="moneyUpper" name="moneyUpper" class="form-control" type="text"
+                                           readonly="readonly">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">收款事由：</td>
+                                <td>
+                                    <input id="reason" name="reason" class="form-control" type="text">
+                                </td>
+                                <td class="active">备注：</td>
+                                <td>
+                                    <input id="remark" name="remark" class="form-control" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+                            </tr>
+                            <th colspan="4">款项来源人和收款人</th>
+                            <tr>
+                                <td class="active">款项来源人：</td>
+                                <td>
+                                    <input id="moneySourcePeople" name="moneySourcePeople" class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">款项来源人账号：</td>
+                                <td>
+                                    <input id="moneySourceAccount" name="moneySourceAccount" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">款项来源人开户行：</td>
+                                <td>
+                                    <input id="meoneySourceOpenBank" name="meoneySourceOpenBank" class="form-control"
+                                           type="text">
+                                </td>
+                                <td class="active">收款人：</td>
+                                <td>
+                                    <input id="moneyEndPeople" name="moneyEndPeople" class="form-control" type="text" list="payeeList">
+                                    <datalist id="payeeList" >
+                                        <option th:each="item : ${payeeDataList}" th:text="${item.dictLabel}"
+                                                th:data-value="${item.dictValue}">
+                                        </option>
+                                    </datalist>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active">收款人账号：</td>
+                                <td>
+                                    <input id="moneyEndAccount" name="moneyEndAccount" class="form-control" type="text">
+                                </td>
+                                <td class="active">收款人开户行：</td>
+                                <td>
+                                    <input id="meoneyEndOpenBank" name="meoneyEndOpenBank" class="form-control"
+                                           type="text">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                                <i class="fa fa-check"></i>保存草稿
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()">
+                                <i class="fa fa-check"></i>提交
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()">
+                                <i class="fa fa-reply-all"></i>关 闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: jquery-cxselect-js"/>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/sysProReceivables"
+    var payerList=[];
+    $("#form-sysProReceivables-add").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    //提交
+    function submitHandler() {
+        if ($.validate.form()) {
+            var data = $('#form-sysProReceivables-add').serializeObject();
+            data.attachmentList = attachmentList;
+            data.flag = false;
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+        var data={}
+        data.payee=$('#moneyEndPeople').val()
+        data.account=$('#moneyEndAccount').val()
+        data.openingBank=$('#meoneyEndOpenBank').val()
+        data.isNew=1
+        $.operate.saveModal(ctx+'oa/oaPayeeAccountInformation/add',data)
+    }
+
+    coverUpper('amount', 'moneyUpper');
+
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+
+
+    //保存草稿
+    function saveDraft() {
+        var data = $('#form-sysProReceivables-add').serializeObject();
+        data.attachmentList = attachmentList;
+        data.flag = true;
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+        var data={}
+        data.payee=$('#moneyEndPeople').val()
+        data.account=$('#moneyEndAccount').val()
+        data.openingBank=$('#meoneyEndOpenBank').val()
+        data.isNew=1
+        $.operate.saveModal(ctx+'oa/oaPayeeAccountInformation/add',data)
+    }
+
+    // 直接返回获取
+    var sys_pro_payment_type_relation = [[${@dict.getType('sys_pro_payment_type_relation')}]]
+    var sys_pro_payment_type = [[${@dict.getType('sys_pro_payment_type')}]]
+    var sys_pro_payment_type2_1 = [[${@dict.getType('sys_pro_payment_type2_1')}]]
+    var sys_pro_payment_type2_2 = [[${@dict.getType('sys_pro_payment_type2_2')}]]
+    var sys_pro_payment_type2_3 = [[${@dict.getType('sys_pro_payment_type2_3')}]]
+    var sys_pro_payment_type2_4 = [[${@dict.getType('sys_pro_payment_type2_4')}]]
+    var sys_pro_payment_type2_5 = [[${@dict.getType('sys_pro_payment_type2_5')}]]
+    $(function () {
+        var dictD = []
+        for (var i = 0; i < sys_pro_payment_type_relation.length; i++) {
+
+            dictD.push({
+                'v': sys_pro_payment_type[i].dictValue,
+                'n': sys_pro_payment_type[i].dictLabel,
+                's': []
+            })
+            var vlp = eval(sys_pro_payment_type_relation[i].dictValue)
+            for (var a = 0; a < vlp.length; a++) {
+                var dictD_2 = {}
+                dictD_2.v = vlp[a].dictValue
+                dictD_2.n = vlp[a].dictLabel
+                dictD[i].s.push(dictD_2)
+            }
+
+        }
+
+        $('#element2').cxSelect({
+            selects: ['first', 'second'],
+            jsonValue: 'v',
+            data: dictD
+        });
+    })
+    $('#moneyEndPeople').bind('input propertychange', function() {
+        payee=parseInt($(this).val())
+        var config = {
+            url: ctx+'oa/oaPayeeAccountInformation/list',
+            type: 'post',
+            dataType: 'json',
+            data: {'payee':payee},
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function(result) {
+                $.modal.closeLoading();
+                var html=""
+                for (var i=0;i<result.length;i++){
+                    html+="<option data-value="+result[i].id+"> "+result[i].payee+"</option>"
+                    if($('#moneyEndPeople').val()==result[i].payee){
+                        payerList=result[i]
+                        $('#moneyEndAccount').val(result[i].account)
+                        $('#meoneyEndOpenBank').val(result[i].openingBank)
+                    }
+                }
+                $('#payeeList').html(html)
+
+            }
+        };
+        $.ajax(config)
+    })
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('新增保证金申请')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+	<style>
+		.tender-company-select{
+			position: relative;
+		}
+		.tender-company-select button{
+			width: 80px;
+			position: absolute;
+			right: 0;
+			top: 0;
+			height: 100%;
+			border: 1px solid #e5e6e7;
+			outline: none;
+		}
+	</style>
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<!--抬头  -->
+		<div class="hr-line-dashed"></div>
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<form class="form-horizontal m" id="form-jyMargin-add">
+							<input id="noticeId" name="tenderNoticeId" th:value="${noticeId}" type="hidden">
+							<table class="table table-bordered table-condensed"
+								style="width: 90%; margin: 0 auto">
+								<caption class="text-center">
+									<h2>投标保证金</h2>
+								</caption>
+								<tbody>
+									<tr>
+										<td class="active">编号：</td>
+										<td><input class="form-control" type="text" name="code" id="code"
+											 disabled="disabled"/></td>
+										<td class="active">投标公司：</td>
+										<td>
+											<div class="tender-company-select">
+												<input type="hidden"  id="tenderCompanyId" th:value="${company.deptId}" />
+												<input type="text" id="tenderCompany" name="tenderCompany" class="form-control" th:value="${company.deptName}" />
+												<button  onclick="selectDeptTree('tenderCompanyId','tenderCompany','0')">选择公司</button>
+											</div>
+										</td>
+
+									</tr>
+									<tr>
+										<td class="active">申请人：</td>
+										<td><input class="form-control" type="text"
+											name="userName" readonly th:value="${user.userName}" /></td>
+										<td class="active">保证金类型：</td>
+										<td><select id="marginType" name="marginType"
+											required="required" class="form-control"
+											th:with="type=${@dict.getType('oa_jy_margin_type')}" >
+												<option value="">------所有------</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">申请公司：</td>
+										<td><input type="hidden" name="companyId" id="companyId"
+											th:value="${company.deptId}" /> <input type="text"
+											id="companyName" name="companyName" class="form-control"
+											onclick="selectDeptTree('companyId','companyName','0')"
+											th:value="${company.deptName}" /></td>
+										<td class="active">转账方式：</td>
+										<td><select id="transferMethod1" 
+											required="required" class="form-control hide"
+											th:with="type=${@dict.getType('oa_margin_tansfer')}">
+												<option value="">------所有------</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select> <select id="transferMethod2" 
+											required="required" class="form-control hide"
+											th:with="type=${@dict.getType('oa_margin_guarantee')}">
+												<option value="">------所有------</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">申请部门：</td>
+										<td><input id="treeId" name="deptId" class="form-control"
+											type="hidden" th:value="${user.dept.deptId}"> <input
+											id="treeName" name="deptName" class="form-control"
+											type="text" onclick="selectDeptTree('treeId','treeName','1')"
+											th:value="${user.dept.deptName}"></td>
+										<td class="active">关联收款单：</td>
+										<td>
+											<input type="hidden" id="receiptId" name="receiptId">
+											<input id="receiptCode" name="receiptCode"
+											class="form-control" type="text"
+											th:readonly="${jyTender?.tenderType=='0'}"  onclick="selectReceivables()"></td>
+									</tr>
+									<tr>
+										<td class="active">申请日期：</td>
+										<td colspan="3"><input id="applyTime" name="applyTime"
+											class="form-control currentTime" type="text" readonly></td>
+
+									</tr>
+									<tr>
+										<td class="active">工程名称：</td>
+										<td>
+											<input id="projectId" name="projectId" class="form-control" type="hidden" th:value="${jyTender?.projectId}"> <!-- 工程id -->
+											<input id="projectName" name="projectName" class="form-control dis" type="text" onclick="selectPro('projectId','projectName')" th:value="${jyTender?.projectName}" th:disabled="${jyTender?.ytApply}">
+										</td>
+										<td class="active">投标方式：</td>
+										<td><select id="tenderType" name="tenderType"
+											class="form-control dis"
+											th:with="type=${@dict.getType('business_project_type')}"
+											th:value="${jyTender?.tenderType}"
+											th:disabled="${jyTender?.tenderType}">
+												<option value="">------所有------</option>
+												<option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+													th:value="${dict.dictValue}"
+													th:selected="${jyTender?.tenderType}==${dict.dictValue}"></option>
+										</select></td>
+									</tr>
+									<tr>
+										<td class="active">到账截止时间：</td>
+										<td colspan="3"><input id="endArrivalTime"
+											name="endArrivalTime" class="form-control time-input"
+											type="text"></td>
+									</tr>
+									<tr>
+										<td class="active">保证金总金额：</td>
+										<td><input id="marginTotalMoney" name="marginTotalMoney"
+											class="form-control" type="number"
+											th:value="${jyTender?.promiseMoney}"></td>
+										<td class="active">保证金总金额（大写）：</td>
+										<td><input id="totalMoneyUpcase" name="totalMoneyUpcase"
+											class="form-control" type="text"></td>
+									</tr>
+									<tr>
+										<td class="active">转账说明：</td>
+										<td colspan="3"><input id="transferDesc"
+											name="transferDesc" class="form-control" type="text"
+											>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">附件：</td>
+										<td colspan="3">
+											<div class="file-loading">
+												<input id="uploadFileId" type="file" multiple>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="active" colspan="2">款项来源人明细：</td>
+										<td class="active" colspan="2">保证金收款明细：</td>
+									</tr>
+									<tr>
+										<td class="active">款项来源人：</td>
+										<td>
+											<input id="sourceOfPayment" name="sourceOfPayment" class="form-control" type="text" list="payeeList2">
+											<datalist id="payeeList2" >
+												<option th:each="item : ${payeeDataList}" th:text="${item.dictLabel}"
+														th:data-value="${item.dictValue}">
+												</option>
+											</datalist>
+										</td>
+										<td class="active">收款人：</td>
+										<td>
+											<input id="collectOfPayment" name="collectOfPayment" class="form-control" type="text" list="payeeList">
+											<datalist id="payeeList" >
+												<option th:each="item : ${payeeDataList}" th:text="${item.dictLabel}"
+														th:data-value="${item.dictValue}">
+												</option>
+											</datalist>
+										</td>
+									</tr>
+									<tr>
+										<td class="active">来源人账号：</td>
+										<td><input id="sourceOfAccount" name="sourceOfAccount"
+											class="form-control" type="text"></td>
+										<td class="active">收款人账号：</td>
+										<td><input id="collectOfAccount" name="collectOfAccount"
+											class="form-control" type="text"></td>
+									</tr>
+									<tr>
+										<td class="active">来源人开户行：</td>
+										<td><input id="sourceOpenBank" name="sourceOpenBank"
+											class="form-control" type="text"></td>
+										<td class="active">收款开户行：</td>
+										<td><input id="collectOpenBank" name="collectOpenBank"
+											class="form-control" type="text"></td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-5 col-sm-10">
+								<button type="button" class="btn btn-sm btn-info"
+									onclick="saveDraft()">
+									<i class="fa fa-check"></i>保存草稿
+								</button>
+								<button type="button" class="btn btn-sm btn-primary"
+									onclick="submitHandler()">
+									<i class="fa fa-check"></i>提交
+								</button>
+								<button type="button" class="btn btn-sm btn-danger"
+									onclick="closeItem()">
+									<i class="fa fa-reply-all"></i>关 闭
+								</button>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "oa/oaMargin"
+
+		//上传附件
+		var attachmentList = new Array();
+		var option = {
+			id : 'uploadFileId',
+			uploadUrl : null,
+			deleteUrl : null,
+			deleteExtraData : null,
+			imgsUrl : new Array(),
+			initialPreviewConfig : null,
+			showPreview : false
+		}
+		$.common.uploadFile(option);
+		downFile();
+
+		//选择工程
+		var pId = null;
+		var pName = null;
+		function selectPro(id, name) {
+			pId = id;
+			pName = name;
+			var options = {
+				title : '选择工程',
+				width : "1200",
+				url : prefix + "/jyTenderNotice",
+				callBack : doSubmit1
+			};
+			$.modal.openOptions(options);
+		}
+		function doSubmit1(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			$('#' + pId).val(data.id)
+			$('#' + pName).val(data.projectName)
+		}
+
+		function submitHandler() {
+			$(".dis").attr("disabled", false);
+			$(".code").attr("disabled", false);
+			var data = {}
+			var fData = $('#form-jyMargin-add').serializeObject();
+			fData.applyType = '0';
+			data.oaMargin = fData
+			data.attachmentList = attachmentList
+			if ($.validate.form()) {
+				instectUser('sourceOfPayment','sourceOfAccount','sourceOpenBank');
+				instectUser('collectOfPayment','collectOfAccount','collectOpenBank');
+				$.operate.saveJsonTab(prefix + "/add", data);
+			}
+		}
+		function saveDraft() {
+			$(".dis").attr("disabled", false);
+			var data = {}
+			var fData = $('#form-jyMargin-add').serializeObject();
+			fData.applyType = '0';
+			data.oaMargin = fData
+			data.attachmentList = attachmentList
+			if ($.validate.form()) {
+				instectUser('sourceOfPayment','sourceOfAccount','sourceOpenBank');
+				instectUser('collectOfPayment','collectOfAccount','collectOpenBank');
+				$.operate.saveJsonTab(prefix + "/saveDraft", data);
+			}
+		}
+		//关联收款单
+		function selectReceivables(){
+			var options = {
+				title : '收款单',
+				width : "1200",
+				url : ctx + 'oa/oaReceivables',
+				callBack : doSubmit2
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit2(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			$('#receiptCode').val(data.code);
+			$('#receiptId').val(data.id);
+		}
+		//自动大小写转换
+		coverUpper('marginTotalMoney','totalMoneyUpcase')
+		//联动
+		$("#marginType").change(
+				function() {
+					var m_val=$(this).val();
+					if (m_val == '0') {
+						$('#transferMethod1').removeClass('hide').attr('name','transferMethod').siblings()
+								.addClass('hide').attr('name','')
+					} else {
+						$('#transferMethod2').removeClass('hide').attr('name','transferMethod').siblings()
+								.addClass('hide').attr('name','')
+					}
+				});
+
+
+		//款项来源人模糊搜素带出账号
+		$('#sourceOfPayment').bind('input propertychange', function() {
+			payee=$(this).val();
+			var config = {
+				url: ctx+'oa/oaPayeeAccountInformation/list',
+				type: 'post',
+				dataType: 'json',
+				data: {'payee':payee},
+				beforeSend: function () {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success: function(result) {
+					console.log(result)
+					$.modal.closeLoading();
+					var html=""
+					for (var i=0;i<result.length;i++){
+						html+="<option data-value="+result[i].id+"> "+result[i].payee+"</option>"
+						if($('#sourceOfPayment').val()==result[i].payee){
+							payerList=result[i]
+							$('#sourceOfAccount').val(result[i].account)
+							$('#sourceOpenBank').val(result[i].openingBank)
+						}
+					}
+					$('#payeeList2').html(html)
+
+				}
+			};
+			$.ajax(config)
+		})
+
+		//收款人模糊搜素带出账号
+		$('#collectOfPayment').bind('input propertychange', function() {
+			payee=$(this).val();
+			var config = {
+				url: ctx+'oa/oaPayeeAccountInformation/list',
+				type: 'post',
+				dataType: 'json',
+				data: {'payee':payee},
+				beforeSend: function () {
+					$.modal.loading("正在处理中，请稍后...");
+				},
+				success: function(result) {
+					$.modal.closeLoading();
+					var html="";
+					for (var i=0;i<result.length;i++){
+						html+="<option data-value="+result[i].id+"> "+result[i].payee+"</option>"
+						if($('#collectOfPayment').val()==result[i].payee){
+							payerList=result[i]
+							$('#collectOfAccount').val(result[i].account)
+							$('#collectOpenBank').val(result[i].openingBank)
+						}
+					}
+					$('#payeeList').html(html)
+
+				}
+			};
+			$.ajax(config)
+		})
+
+
+		//提交添加模糊搜索
+		function instectUser(payee,payeeAccount,payeeOpenBank) {
+			var data={};
+			data.payee=$('#'+payee).val();
+			data.account=$('#'+payeeAccount).val();
+			data.openingBank=$('#'+payeeOpenBank).val();
+			data.isNew=1;
+			var config = {
+				url: ctx+'oa/oaPayeeAccountInformation/add',
+				type: "post",
+				dataType: "json",
+				data: data,
+			};
+			$.ajax(config)
+		}
+	</script>
+</body>
+</html>

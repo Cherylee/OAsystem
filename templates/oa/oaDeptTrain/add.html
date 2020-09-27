@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增培训申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <!--抬头  -->
+    <div class="hr-line-dashed"></div>
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-default">
+                <div class="panel-body ">
+                    <form class="form-horizontal" id="form-oaDeptTrain-add">
+                        <input type="hidden" name="applyCompanyId" id="applyCompanyId" th:value="${company.deptId}"/>
+                        <table class="table table-bordered table-condensed" style="width: 90%; margin: 0 auto">
+                            <caption class="text-center">
+                                <h2>部门培训申请</h2>
+                            </caption>
+                            <tbody>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请部门：</td>
+                                <td>
+                                    <input type="hidden" name="applyDeptId" id="treeId" th:value="${user.dept.deptId}"
+                                           required="required"/>
+                                    <input type="text" id="treeName" name="applyDeptName" class="form-control"
+                                           required="required"
+                                           onclick="selectDeptTree('treeId','treeName','1')"
+                                           th:value="${user.dept.deptName}"/>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>课程费用：</td>
+                                <td>
+                                    <input id="courseFee" name="courseFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请人：</td>
+                                <td>
+                                    <input type="hidden" name="proposer" id="proposer" th:value="${user.userId}">
+                                    <input class="form-control" type="text" th:value="${user.userName}" readonly
+                                           required="required">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>考试费用：</td>
+                                <td>
+                                    <input id="examFee" name="examFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请时间：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="applyTime" name="applyTime"
+                                               class="form-control currentTime time-input" type="text"
+                                               required="required">
+                                    </div>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>往返交通费：</td>
+                                <td>
+                                    <input id="trafficFee" name="trafficFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训类别：</td>
+                                <td>
+                                    <input id="trainType" name="trainType" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>酒店住宿费：</td>
+                                <td>
+                                    <input id="roomFee" name="roomFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训开始时间：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="trainTimeStart" name="trainTimeStart" required="required"
+                                               class="form-control currentTime time-input" type="text">
+                                    </div>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>其他费用：</td>
+                                <td>
+                                    <input id="otherFee" name="otherFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训结束时间：</td>
+                                <td>
+                                    <div class="input-group data">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input id="trainTimeEnd" name="trainTimeEnd" required="required"
+                                               class="form-control currentTime time-input" type="text">
+                                    </div>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>总计费用：</td>
+                                <td>
+                                    <input id="totalFee" name="totalFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训机构：</td>
+                                <td>
+                                    <input id="trainOrg" name="trainOrg" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>人均费用：</td>
+                                <td>
+                                    <input id="personFee" name="personFee" class="form-control" type="number"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训地点：</td>
+                                <td>
+                                    <input id="trainArea" name="trainArea" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>合同期限：</td>
+                                <td>
+                                    <input id="contractTerm" name="contractTerm" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>费用承担：</td>
+                                <td>
+                                    <select name="feeBear" class="form-control"
+                                            th:with="type=${@dict.getType('oa_deptTrainCost_take')}"
+                                            required="required">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                                <td class="active"><span style="color: red;">*</span>合同状况：</td>
+                                <td>
+                                    <select name="contractSign" class="form-control"
+                                            th:with="type=${@dict.getType('oa_deptTainContract_status')}"
+                                            required="required">
+                                        <option value="">--请选择--</option>
+                                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                                th:value="${dict.dictValue}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训课题：</td>
+                                <td colspan="3">
+                                    <input id="trainTopic" name="trainTopic" class="form-control" required="required">
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>培训内容：</td>
+                                <td colspan="3">
+                                    <input id="trainContent" name="trainContent" class="form-control"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>申请理由：</td>
+                                <td colspan="3">
+                                    <input id="reason" name="reason" class="form-control" type="text"
+                                           required="required">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="active"><span style="color: red;">*</span>附件：</td>
+                                <td colspan="3">
+                                    <div class="file-loading">
+                                        <input id="uploadFileId" type="file" multiple>
+                                    </div>
+                                </td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label"></label>
+                                <div class="col-sm-10">
+                                    <div class="btn-group-sm" id="toolbar" role="group">
+                                        <a class="btn btn-success" onclick="selectTrainUser()"> <i
+                                                class="fa fa-plus"></i> 添加学员名单
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-12 select-table table-striped">
+                                        <table id="bootstrap-table-person" data-mobile-responsive="true"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-offset-4 col-sm-10">
+        <br>
+        <button type="button" class="btn btn-sm btn-info"
+                onclick="saveDraft()">
+            <i class="fa fa-check"></i>保存草稿
+        </button>
+        <button type="button" class="btn btn-sm btn-primary"
+                onclick="submitHandler()">
+            <i class="fa fa-check"></i>提交
+        </button>
+        <button type="button" class="btn btn-sm btn-danger"
+                onclick="closeItem()">
+            <i class="fa fa-reply-all"></i>关 闭
+        </button>
+        <br>
+    </div>
+</div>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/oaDeptTrain"
+    //上传附件
+    var attachmentList = new Array();
+    var option = {
+        id: 'uploadFileId',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        showPreview: true
+    }
+    $.common.uploadFile(option);
+    downFile();
+    //学员表
+    $(function () {
+        var options = {
+            id: "bootstrap-table-person",
+            modalName: "培训申请",
+            uniqueId: 'userId',
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            showPageGo: false,
+            pagination: false,
+            modalName: "学院培训",
+            showExport: false,
+            onEditableSave: onEditableSave,
+            toolbar: "toolbar",
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: 'userName',
+                    title: '学员姓名',
+                    sortable: true
+                },
+                {
+                    field: 'userId',
+                    title: '学员Id',
+                    sortable: true
+                },
+                {
+                    field: 'userPosition',
+                    title: '职位',
+                    sortable: true,
+                    editable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions
+                            .push('<a class="btn btn-danger btn-xs" onclick="removeRow(\'bootstrap-table-person\',\''
+                                + row.userId + '\')">删除</a>');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+        //	计算
+        var courseFee = 0
+        var examFee = 0
+        var trafficFee = 0
+        var roomFee = 0
+        var otherFee = 0
+        $('#courseFee').bind('input propertychange', function () {
+            courseFee = parseInt($(this).val())
+            $('#totalFee').val(courseFee + examFee + trafficFee + roomFee + otherFee)
+        })
+        $('#examFee').bind('input propertychange', function () {
+            examFee = parseInt($(this).val())
+            $('#totalFee').val(courseFee + examFee + trafficFee + roomFee + otherFee)
+        })
+        $('#trafficFee').bind('input propertychange', function () {
+            trafficFee = parseInt($(this).val())
+            $('#totalFee').val(courseFee + examFee + trafficFee + roomFee + otherFee)
+        })
+        $('#roomFee').bind('input propertychange', function () {
+            roomFee = parseInt($(this).val())
+            $('#totalFee').val(courseFee + examFee + trafficFee + roomFee + otherFee)
+        })
+        $('#otherFee').bind('input propertychange', function () {
+            otherFee = parseInt($(this).val())
+            $('#totalFee').val(courseFee + examFee + trafficFee + roomFee + otherFee)
+        })
+    });
+
+    /* 多选用户 */
+    function selectTrainUser() {
+        var options = {
+            title: '选择用户',
+            width: "1200",
+            url: ctx + "oa/oaApplyTemplate/selectUser",
+            callBack: doSubmitTrainUser
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitTrainUser(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandlerMore1();
+        var data = result;
+        for (var i = 0; i < data.length; i++) {
+            insertRow(data[i], 'bootstrap-table-person')
+        }
+
+    }
+
+    /*新增行*/
+    var idxId = 1;
+
+    function insertRow(data, tableId) {
+        var randomId = 100 + ~~(Math.random() * 100);
+        var table_row = '';
+        table_row = data
+        table_row[0] = false;
+        table_row.userPosition = '职位'
+        var countDate = $("#" + tableId).bootstrapTable('getData');
+        if (isHas(countDate, data.userId) == false) {
+            $("#" + tableId).bootstrapTable('insertRow', {
+                index: 0, // 你想插入到哪，0表示第一行
+                row: table_row
+            })
+        }
+
+    }
+
+    //判断是否已经添加
+    function isHas(data, id) {
+        var isTF = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].userId == id) {
+                isTF = true;
+            }
+        }
+        return isTF;
+    }
+
+    /* 删除指定表格行 */
+    function removeRow(tableId, rowId) {
+        $("#" + tableId).bootstrapTable('removeByUniqueId', rowId)
+
+    }
+
+    //编辑字段
+    function onEditableSave(field, row, oldValue, $el) {
+        alert("字段名：" + field + "，当前值：" + row[field] + "，旧值：" + oldValue);
+    }
+
+    //保存数据
+    function savaDta() {
+        var data = {};
+        data.oaDeptTrain = $('#form-oaDeptTrain-add').serializeObject()
+        data.personList = $("#bootstrap-table-person").bootstrapTable('getData')
+        data.attachmentList = attachmentList;
+        return data;
+    }
+
+    //提交
+    function submitHandler() {
+        var data = savaDta();
+        if ($.validate.form()) {
+            if ($.common.isEmpty(data.personList)) {
+                $.modal.alertWarning("人员不能为空！");
+                return;
+            }
+            if ($.common.isEmpty(data.attachmentList)) {
+                $.modal.alertWarning("附件不能为空！");
+                return;
+            }
+            $.operate.saveJsonTab(prefix + "/add", data);
+        }
+    }
+
+    //保存草稿
+    function saveDraft() {
+        var data = savaDta();
+        $.operate.saveJsonTab(prefix + "/saveDraft", data);
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('还印申请列表')" />
+	<style>
+	   #formId .select-list>ul>li p{
+	   width:120px;
+	    }
+	</style>
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								<input type="hidden" id="proposerId" name="proposer" />
+								<input type="text" id="proposerName" name="proposerName" onclick="selectUserById('proposerId','proposerName')" placeholder="申请人"/>
+
+							</li>
+							<li>
+								<input type="hidden" id="companyId" name="companyId" /> <input
+									type="text" id="companyName"
+									onclick="selectDeptTree('companyId','companyName','0')" placeholder="申请公司"/>
+							</li>
+
+							<li>
+								<input type="hidden" name="deptId" id="treeId" />
+								<input type="text" id="treeName"
+									   onclick="selectDeptTree('treeId','treeName','1')" placeholder="申请部门"/>
+							</li>
+							<li class="select-time">
+								<label>申请时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="oa:oaSealReturn:add">
+					<i class="fa fa-plus"></i> 添加
+				</a>
+				<a class="btn btn-primary btn-edit disabled" onclick="$.operate.editTab()" shiro:hasPermission="oa:oaSealReturn:edit">
+					<i class="fa fa-edit"></i> 修改
+				</a>
+				<a class="btn btn-danger btn-del btn-del disabled" onclick="$.operate.removeAll()" shiro:hasPermission="oa:oaSealReturn:remove">
+					<i class="fa fa-remove"></i> 删除
+				</a>
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="oa:oaSealReturn:export">
+						<i class="fa fa-download"></i> 导出
+				 </a>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('oa:oaSealReturn:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('oa:oaSealReturn:remove')}]];
+        var prefix = ctx + "oa/oaSealReturn";
+        
+        var datas = [[${@dict.getType('oa_seal_type')}]];
+        var oaStatus = [[${@dict.getType('oa_leave_status')}]];
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "印章流程",
+                sortName:"createTime",
+                sortOrder:"desc",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'userName', 
+					title : '申请人',
+					sortable: true
+				},
+				{
+					field : 'companyName', 
+					title : '申请公司',
+					sortable: true
+				},
+				{
+					field : 'deptName', 
+					title : '申请部门',
+					sortable: true
+				},
+				{
+					field : 'procInstId', 
+					title : '流程id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'invoiceNum',
+					title : '快递单号',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(oaStatus, value);
+		        	}
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	var text='查看详情'
+		                var edit=''
+				        var classN='btn-info'
+						if(row.status=='3'||row.status=='99'){
+							if (row.allowedEdit==true)
+							{
+								edit=editFlag
+								text='编辑'
+								classN='btn-success'
+								actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+								actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+							}
+						}else
+						{
+							actions.push('<a class="btn '+classN+' btn-xs ' + edit + '" href="#" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>'+text+'</a> ');
+						}
+						if(row.status=='0'&&row.allowedEdit==true){
+							actions.push('<a class="btn btn-warning btn-xs " href="#" onclick="withdrawTask(\'' + row.procInstId + '\')"><i class="fa fa-backward"></i> 撤回</a>');
+						}
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        
+        /*用户管理-新增-选择部门树*/
+        function selectDeptTree(id,deptName) {
+        	divDeptId = id;
+        	divDeptName = deptName;
+        	var treeId = $("#"+id).val();
+        	var deptId = $.common.isEmpty(treeId) ? "100" : $("#"+id).val();
+        	var url = ctx + "system/dept/selectDeptTree/" + deptId;
+			var options = {
+				title: '选择部门',
+				width: "380",
+				url: ctx + "system/dept/selectDeptTree/" + deptId,
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+        function doSubmit(index, layero){
+			var tree = layero.find("iframe")[0].contentWindow.$._tree;
+			if ($.tree.notAllowParents(tree)) {
+				var body = layer.getChildFrame('body', index);
+    			$("#"+divDeptId).val(body.find('#treeId').val());
+    			$("#"+divDeptName).val(body.find('#treeName').val());
+    			layer.close(index);
+			}
+		}
+        
+        /*用户列表*/
+        var mid='';
+        var mname=''
+        function selectUserById(id,name){
+        	mid=id;
+        	mname=name;
+    		var options = {
+    				title: '选择用户',
+    				width: "1200",
+    				url: ctx + "oa/oaApplyTemplate/selectUser",
+    				callBack: doSubmit1
+    			};
+    			$.modal.openOptions(options);
+    	}
+        function doSubmit1(index, layero){
+          var iframeWin = layero.find('iframe')[0];
+          var result = iframeWin.contentWindow.submitHandler();
+		  var data = result.data;
+		  
+		  $('#'+mname).val(data.userName);
+		  $('#'+mid).val(data.userId);
+ 
+        }
+
+    </script>
+</body>
+</html>

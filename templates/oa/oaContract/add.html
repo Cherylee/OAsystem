@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('合同申请')"/>
+    <th:block th:include="include :: bootstrap-fileinput-css"/>
+
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-oaContract-add">
+        <!-- 合同种类，默认主合同 -->
+        <input id="contractType" name="contractType" value="0" type="hidden">
+        <!-- 合同申请时间，默认当前日期 -->
+        <input id="createTime" name="createTime"
+               class="form-control time-input-data currentTime" type="hidden">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>申请公司：</label>
+                <div class="col-sm-8">
+                    <input type="hidden" name="companyId" id="companyId" th:value="${company.deptId}"/>
+                    <input type="text" name="companyName" id="companyName" class="form-control"
+                           onclick="selectDeptTree('companyId','companyName','0')" th:value="${company.deptName}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>申请部门：</label>
+                <div class="col-sm-8">
+                    <input id="treeId" name="deptId" class="form-control" type="hidden" th:value="${user.dept.deptId}">
+                    <input id="treeName" name="deptName" class="form-control"
+                           type="text" onclick="selectDeptTree('treeId','treeName','1')" th:value="${user.dept.deptName}">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>签约相对方：</label>
+                <div class="col-sm-8">
+                    <input id="signingParties" name="signingParties" required="required"
+                           class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div id="element2">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同类型：</label>
+                    <div class="col-sm-8">
+                        <select id="type1" required="required" class="form-control select2-hidden-accessible valid first" name="type1"
+                                th:with="type=${@dict.getType('oa_contract_type1')}" onchange="type1Change(this.value)">
+                            <option value="">------所有------</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6" id="projectContactType">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同类型2</label>
+                    <div class="col-sm-8">
+                        <select id="type2" class="form-control select2-hidden-accessible valid second" name="type2" required="required"
+                                th:with="type=${@dict.getType('oa_contract_type2')}" onchange="type2Change(this.value)">
+                            <option value="">------所有------</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 ourUnitName">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>我方单位名称：</label>
+                <div class="col-sm-8">
+                    <input id="ourUnitName" name="ourUnitName" class="form-control" required type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide type2-input">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">证件类型：</label>
+                <div class="col-sm-8">
+                    <input id="credentialsType" name="credentialsType" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide type2-input">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">专业：</label>
+                <div class="col-sm-8">
+                    <input id="major" name="major" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 ">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>用印类型：</label>
+                <div class="col-sm-8">
+                    <input id="useSealId" name="useSealId"  class="form-control" type="hidden">
+                    <input id="useSealType" name="useSealType"  class="form-control" type="hidden">
+                    <input id="useSealName" name="useSealName" class="form-control" required type="text" placeholder="输入公司名称及印章" onclick="selectSeal()">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide relProject">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>关联工程合同：</label>
+                <div class="col-sm-8">
+                    <input id="relProjectContractId" name="relProjectContractId"  class="form-control" type="hidden">
+                    <input id="relProjectContractName" class="form-control" type="text" onclick="selectProjectContract()">
+                    <span id="projectContract" class="form-control hide" style="color: #1f90d8; cursor: pointer" onclick="openProjectContract()"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide tenderProjectName">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>关联移交单：</label>
+                <div class="col-sm-8">
+                    <input id="winBidId" name="winBidId" type="hidden">
+                    <input id="tenderProjectName" class="form-control" type="text" onclick="selectChangeBill()">
+                    <span id="winBidTurn" class="form-control hide" style="color: #1f90d8; cursor: pointer" onclick="openWinBid()"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide changeBill">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">中标单位：</label>
+                <div class="col-sm-8">
+                    <input id="constructUnit" name="constructUnit"  class="form-control" type="text" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide changeBill">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">工期：</label>
+                <div class="col-sm-8">
+                    <input id="timeLimit" name="timeLimit"  class="form-control" type="text" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>税率（%）：</label>
+                <div class="col-sm-8">
+                    <input id="rate" name="rate" class="form-control" required type="number">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide changeBill">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">投资总额：</label>
+                <div class="col-sm-8">
+                    <input id="winBidMoney" name="winBidMoney"  class="form-control" type="text" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide changeBill">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">建造师：</label>
+                <div class="col-sm-8">
+                    <input id="proManager" name="proManager"  class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同名称：</label>
+                <div class="col-sm-8">
+                    <input id="contractName" name="contractName" class="form-control" required type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 hide projectName">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>工程名称：</label>
+                <div class="col-sm-8">
+                    <input id="projectId" name="projectId" type="hidden">
+                    <input id="projectName" name="projectName" class="form-control" type="text"
+                           onclick="selectProjectInfo('projectId','projectName')">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同金额：</label>
+                <div class="col-sm-8">
+                    <input id="contractAmount" name="contractAmount" required class="form-control" type="number">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同金额大写：</label>
+                <div class="col-sm-8">
+                    <input id="amountUpper" name="amountUpper" class="form-control" required type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>合同签订日期：</label>
+                <div class="col-sm-8">
+                    <div class="input-group data">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="contractTime" name="contractTime" required class="form-control time-input-data" type="text">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>付款方式：</label>
+                <div class="col-sm-8">
+                    <select id="payType" class="form-control" name="payType" required th:with="type=${@dict.getType('oa_contact_payway')}">
+                        <option value="">------所有------</option>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>第三方负责人：</label>
+                <div class="col-sm-8">
+                    <input id="thirdPartPerson" name="thirdPartPerson" required class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>第三方名称：</label>
+                <div class="col-sm-8">
+                    <input id="thirdPartyName" name="thirdPartyName" required class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><span style="color: red;">*</span>签约背景/备注说明：</label>
+                <div class="col-sm-8">
+                    <input id="remark" name="remark" class="form-control" required type="text">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="form-group">
+                <label class="col-sm-3 control-label"><span style="color: red;">*</span>合同文件：</label>
+                <div class="col-sm-9">
+                    <div class="file-loading">
+                        <input id="uploadFileId1" type="file" multiple>
+                    </div>
+                    <input id="fileUrl1" name="tenderDoc" class="form-control" type="hidden">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">资质证明：</label>
+                <div class="col-sm-9">
+                    <div class="file-loading">
+                        <input id="uploadFileId2" type="file" multiple>
+                    </div>
+                    <input id="fileUrl2" name="qualifications" class="form-control"
+                           type="hidden">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-offset-5 col-sm-10">
+                <button type="button" class="btn btn-sm btn-info" onclick="saveDraft()">
+                    <i class="fa fa-check"></i>保存草稿
+                </button>
+                <button type="button" class="btn btn-sm btn-primary"
+                        onclick="submitHandler()">
+                    <i class="fa fa-check"></i>申请
+                </button>
+                &nbsp;
+                <button type="button" class="btn btn-sm btn-danger"
+                        onclick="closeItem()">
+                    <i class="fa fa-reply-all"></i>关 闭
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<div th:include="include::footer"></div>
+<th:block th:include="include :: bootstrap-fileinput-js"/>
+<th:block th:include="include :: jquery-cxselect-js"/>
+<script type="text/javascript" th:inline="javascript">
+    var prefix = ctx + "oa/oaContract"
+    var attachmentList = new Array();
+
+    $("#form-oaContract-add").validate({
+        rules: {
+            xxxx: {
+                required: true,
+            },
+        },
+        focusCleanup: true
+    });
+
+    var option1 = {
+        id: 'uploadFileId1',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        attachmentList: new Array(),
+        callback: callback
+    }
+    $.common.uploadFile(option1);
+
+    var option2 = {
+        id: 'uploadFileId2',
+        uploadUrl: null,
+        deleteUrl: null,
+        deleteExtraData: null,
+        imgsUrl: new Array(),
+        initialPreviewConfig: null,
+        attachmentList: new Array(),
+        callback: callback
+    }
+    $.common.uploadFile(option2);
+    downFile();
+    //合同文件附件集合
+    var fileList1 = null;
+    //资质证明附件集合
+    var fileList2 = null;
+
+    function callback(id) {
+        if (id == 'uploadFileId1') {
+            fileList1 = attachmentList;
+        } else {
+            fileList2 = attachmentList;
+        }
+    }
+    //草稿
+    function saveDraft() {
+        if ($("#type1").val()=='2'||$("#type1").val()=='3') {
+            $('input[name="projectName"]').attr("required", "true");
+            if ($("#type1").val()=='2') {
+                $('input[id="tenderProjectName"]').attr("required", "true");
+            }
+            if($("#type1").val()=='3'){
+                $('#relProjectContractName').attr("required", "true");
+            }
+
+        }
+        var data = $("#form-oaContract-add").serializeObject();
+        data.tenderAttachmentList = fileList1;
+        data.qualificationsList = fileList2;
+
+        var config = {
+            contentType: "application/json;charset=UTF-8",
+            url: prefix + "/saveDraft",
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍后...");
+            },
+            success: function (result) {
+                $.operate.successTabCallback(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+    //提交
+    function submitHandler() {
+        if ($("#type1").val()=='2'||$("#type1").val()=='3') {
+            $('input[name="projectName"]').attr("required", "true");
+            if ($("#type1").val()=='2') {
+                $('input[id="tenderProjectName"]').attr("required", "true");
+            }
+            if($("#type1").val()=='3'){
+                $('#relProjectContractName').attr("required", "true");
+            }
+
+        }
+        var data = $("#form-oaContract-add").serializeObject();
+        data.tenderAttachmentList = fileList1;
+        data.qualificationsList = fileList2;
+
+        if ($.validate.form()) {
+            var config = {
+                contentType: "application/json;charset=UTF-8",
+                url: prefix + "/add",
+                type: "post",
+                dataType: "json",
+                data: JSON.stringify(data),
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                },
+                success: function (result) {
+                    $.operate.successTabCallback(result);
+                }
+            };
+            $.ajax(config)
+        }
+    }
+
+    /*工程信息*/
+    var bid = null;
+    var bname = null;
+
+    function selectProjectInfo(id, name) {
+        bid = id;
+        bname = name;
+        var options = {
+            title: '选择工程信息',
+            width: "1200",
+            url: ctx + "oa/oaProject",
+            callBack: doSubmit1
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmit1(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#' + bid).val(data.id)
+        $('#' + bname).val(data.projectName)
+    }
+    //关联移交单
+    function selectChangeBill() {
+        var options = {
+            title: '关联移交单',
+            width: "1200",
+            url: ctx + "oa/oaWinBidTurnOver/passPage",
+            callBack: doSubmitBill
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitBill(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('.changeBill').removeClass('hide')
+        $('#winBidTurn').html(data.projectName).removeClass('hide')
+        $('#winBidId').val(data.id)
+        $('#constructUnit').val(data.winUnit)
+        $('#tenderProjectName').val(data.projectName).addClass('hide')
+        $('#proManager').val(data.buildPerson)
+        $.common.dictV({
+            'className':'proType',
+            'dict':[[${@dict.getType('business_engineer_type')}]],
+            'value':data.proType
+        })
+        $('#timeLimit').val(data.timeLimit)
+        $('#winBidMoney').val(data.winBidMoney)
+    }
+
+    //打开移交单
+    function openWinBid() {
+        $.modal.openTab("移交单", ctx + "oa/oaWinBidTurnOver/edit/" + $('#winBidId').val());
+    }
+
+    //关联工程合同
+    function selectProjectContract(){
+        var options = {
+            title: '关联工程合同',
+            width: "1200",
+            url: prefix + "/proContract",
+            callBack: doSubmitProContract
+        };
+        $.modal.openOptions(options);
+    }
+
+    function doSubmitProContract(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#relProjectContractId').val(data.id)
+        $('#relProjectContractName').val(data.contractName).addClass('hide')
+        $('#projectContract').html(data.contractName).removeClass('hide')
+    }
+
+
+    //打开工程合同
+    function openProjectContract() {
+        $.modal.openTab("工程合同", ctx + "oa/oaContract/toExamine/" + $('#relProjectContractId').val());
+    }
+
+    //关联印章
+    function selectSeal(){
+        var options = {
+            title: '关联工程合同',
+            width: "1200",
+            url: ctx + "oa/oaSeal",
+            callBack: doSubmitSeal
+        };
+        $.modal.openOptions(options);
+    }
+    function doSubmitSeal(index, layero) {
+        var iframeWin = layero.find('iframe')[0];
+        var result = iframeWin.contentWindow.submitHandler();
+        var data = result;
+        $('#useSealId').val(data.id)
+        $('#useSealType').val(data.type)
+        $('#useSealName').val(data.sealName)
+        // $.common.dictV({
+        //     'className':'sealTypeDict',
+        //     'dict':[[${@dict.getType('oa_seal_type')}]],
+        //     'value':data.type
+        // })
+    }
+
+    function currentDate(obj) {
+        var myDate = new Date;
+        var year = myDate.getFullYear(); //获取当前年
+        var mon = myDate.getMonth() + 1; //获取当前月
+        var date = myDate.getDate(); //获取当前日
+        // var h = myDate.getHours();//获取当前小时数(0-23)
+        // var m = myDate.getMinutes();//获取当前分钟数(0-59)
+        // var s = myDate.getSeconds();//获取当前秒
+        /* var week = myDate.getDay();
+        var weeks = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]; */
+        /*  console.log(year + "-" + mon + "-" + date) */
+        obj.val(year + "-" + mon + "-" + date);
+    }
+
+    var currentTime = function () {
+        if ($('.currentTime').length > 0) {
+            $(".currentTime").each(function (index, item) {
+                var thisObj = $(item);
+                currentDate(thisObj)
+            })
+        }
+    }
+    $(function () {
+        //当前时间
+        currentTime()
+
+        // 直接返回获取
+        var oa_contract_relation = [[${@dict.getType('oa_contract_relation')}]]
+        var oa_contract_type1 = [[${@dict.getType('oa_contract_type1')}]]
+        var oa_contract_type2_1 = [[${@dict.getType('oa_contract_type2_1')}]]
+        var oa_contract_type2_2 = [[${@dict.getType('oa_contract_type2_2')}]]
+        var oa_contract_type2_3 = [[${@dict.getType('oa_contract_type2_3')}]]
+        var oa_contract_type2_4 = [[${@dict.getType('oa_contract_type2_4')}]]
+        var oa_contract_type2_5 = [[${@dict.getType('oa_contract_type2_5')}]]
+        var dictD = []
+        for (var i = 0; i < oa_contract_relation.length; i++) {
+
+            dictD.push({
+                'v': oa_contract_type1[i].dictValue,
+                'n': oa_contract_type1[i].dictLabel,
+                's': []
+            })
+            var vlp=eval(oa_contract_relation[i].dictValue)
+            for (var a = 0; a < vlp.length; a++) {
+                var dictD_2 = {}
+                dictD_2.v = vlp[a].dictValue
+                dictD_2.n = vlp[a].dictLabel
+                dictD[i].s.push(dictD_2)
+            }
+
+        }
+
+        $('#element2').cxSelect({
+            selects: ['first', 'second'],
+            jsonValue: 'v',
+            data: dictD
+        });
+
+    })
+
+    //合同类型onchange事件
+    // function type1Change(v) {
+    //     if (v == '0' || v == '1' || v == '99') {
+    //         $('.ourUnitName').removeClass('hide')
+    //     }else{
+    //         $('.ourUnitName').addClass('hide')
+    //         $('input[name="ourUnitName"]').val('')
+    //     }
+    // }
+
+    //合同类型onchange事件
+    function type1Change(v) {
+        if (v == '2' || v == '3') {
+            $('.projectName').removeClass('hide')
+            if(v == '3'){
+                $('.relBid').addClass('hide');
+                $('.relProject').removeClass('hide');
+                $('.tenderProjectName').addClass('hide');
+                $('.changeBill').addClass('hide');
+                $('#winBidId').val('');
+                $('#constructUnit').val('');
+                $('#tenderProjectName').val('');
+                $('#proManager').val('');
+                $('#timeLimit').val('');
+                $('#winBidMoney').val('');
+                $('#winBidTurn').addClass('hide').html('')
+                $('#tenderProjectName').removeClass('hide').val('')
+            }else{
+                $('.relBid').removeClass('hide');
+                $('.relProject').addClass('hide');
+                $('.tenderProjectName').removeClass('hide')
+                $('#projectContract').addClass('hide').html('')
+                $('#relProjectContractName').removeClass('hide').val('')
+            }
+        }else{
+            $('.relBid').removeClass('hide');
+            $('.relProject').addClass('hide');
+            $('.projectName').val('').addClass('hide');
+            $('.tenderProjectName').addClass('hide');
+            $('.changeBill').addClass('hide');
+            $('input[name="projectId"]').val('');
+            $('#winBidId').val('');
+            $('#constructUnit').val('');
+            $('#tenderProjectName').val('');
+            $('#proManager').val('');
+            $('#timeLimit').val('');
+            $('#winBidMoney').val('');
+            $('#projectContract').addClass('hide').html('')
+            $('#winBidTurn').addClass('hide').html('')
+            $('#tenderProjectName').removeClass('hide').val('')
+            $('#relProjectContractName').removeClass('hide').val('')
+
+        }
+    }
+
+    //合同类型2onchange事件
+    function type2Change(v) {
+
+        if ($('#type1').val()=='1'&&v=='3') {
+            $('.type2-input').removeClass('hide')
+        }else{
+            $('.type2-input').addClass('hide')
+            $('input[name="credentialsType"]').val('')
+            $('input[name="major"]').val('')
+        }
+
+    }
+
+    //自动大小写转换
+    $("input[name='contractAmount']").bind("input propertychange", function () {//监控输入框的变化
+        var num = $(this).val()
+        var a = parseInt(num)
+        var config = {
+            url: ctx + "common/converMoneyToCN/" + a,
+            type: "get",
+            dataType: "json",
+            success: function (result) {
+                if (result.code == '0') {
+                    $("input[name='amountUpper']").val(result.msg)
+                }
+
+            }
+        };
+        $.ajax(config)
+    });
+</script>
+</body>
+</html>

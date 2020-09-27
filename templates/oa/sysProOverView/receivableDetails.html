@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('收款报表')" />
+    <th:block th:include="include :: sysProCss" />
+</head>
+<style>
+
+</style>
+<body class="">
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <input class="overview-select-input" type="text" name="receivePerson" placeholder="交款人" style="width: 80px"/>
+                            <input type="hidden" name="projectId" th:value="${projectId}">
+                        </li>
+
+                        <li>
+                            <select id="proCategory" name="proCategory" style="width: 100px;" th:with="type=${@dict.getType('sys_pro_payment_type')}" class="overview-select-input">
+                                <option value=""  style="display: none;"  disabled  selected>款项类别：</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <p>交款日期：</p>
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="beginTime"  placeholder="起始日期"/>
+                            -
+                            <input type="text" style="width: 100px" class="time-input-data overview-select-input" name="endTime"  placeholder="截止日期"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var prefix = ctx + "oa/sysProOverView";
+    var prefix2 = ctx + "oa/sysProReceivables";
+
+    var sys_pro_payment_type_relation = [[${@dict.getType('sys_pro_payment_type_relation')}]];
+    var sys_pro_payment_type = [[${@dict.getType('sys_pro_payment_type')}]];
+    var sys_pro_payment_type2_1 = [[${@dict.getType('sys_pro_payment_type2_1')}]];
+    var sys_pro_payment_type2_2 = [[${@dict.getType('sys_pro_payment_type2_2')}]];
+    var sys_pro_payment_type2_3 = [[${@dict.getType('sys_pro_payment_type2_3')}]];
+    var sys_pro_payment_type2_4 = [[${@dict.getType('sys_pro_payment_type2_4')}]];
+    var sys_pro_payment_type2_5 = [[${@dict.getType('sys_pro_payment_type2_5')}]];
+
+    $(function() {
+        var options = {
+            url: prefix + "/selectProPaymentData",
+            modalName: "收款报表",
+            updateUrl: prefix2 + "/edit/{id}",
+            showExport: true,
+            showFooter:true,
+            sortOrder : "desc",
+            queryParams:queryParams,
+            columns: [
+                {
+                    title : '',
+                    width:'30px',
+                    align:'center',
+                    formatter: function (value, row, index) {
+                        return $.table.serialNumber(index);
+
+                    },
+                    footerFormatter:function (value) {
+                        return "小计";
+                    }
+                },
+                {
+                    field : 'code',
+                    title : '编号',
+                    align:'center',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        var text=null;
+                        if(row.code){
+                            text=row.code
+                        }else{
+                            text='暂无编号'
+                        }
+                        return '<a onclick="$.operate.editFullS(\'' + row.id + '\')">'+text+'</a>'
+                    }
+                },
+                {
+                    field : 'paymentDate',
+                    title : '交款日期',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'receivePerson',
+                    title : '交款人',
+                    align:'center',
+                    sortable: true
+                },
+                {
+                    field : 'proCategory',
+                    title : '款项类别',
+                    align:'center',
+                    sortable: true,
+                    formatter:function (value, row, index) {
+                        return $.table.selectDictLabel(sys_pro_payment_type, value);
+                    }
+                },
+                {
+                    field : 'detailCategory',
+                    title : '款项用途',
+                    align:'center',
+                    sortable: true,
+                    formatter:function (value, row, index) {
+                        var relation=[];
+                        for (var i = 0; i < sys_pro_payment_type_relation.length; i++) {
+                            if(sys_pro_payment_type_relation[i].dictLabel==row.paymentType){
+                                relation=eval(sys_pro_payment_type_relation[i].dictValue)
+                            }
+                        }
+                        return $.table.selectDictLabel(relation, value);
+                    }
+                },
+                {
+                    field : 'amount',
+                    title : '到账金额',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amount);
+                        }
+                        return sumBalance;
+                    }
+                },
+                {
+                    field : '',
+                    title : '剩余可用金额',
+                    align:'center',
+                    sortable: true,
+                    footerFormatter:function (value) {
+                        var sumBalance = 0;
+                        for (var i in value) {
+                            sumBalance += parseFloat(value[i].amount);
+                        }
+                        return sumBalance;
+                    }
+                }
+
+            ]
+        };
+        $.table.init(options);
+
+
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        var projectId = [[${projectId}]];
+        var paymentType = [[${paymentType}]];
+        var moneyPurpost = [[${moneyPurpost}]]
+        if (paymentType!='null'&&moneyPurpost!='null') {
+            search.projectId = projectId;
+            search.paymentType = paymentType;
+            search.moneyPurpost = moneyPurpost;
+        }else if(paymentType!='null'&&moneyPurpost=='null'){
+            search.projectId = projectId;
+            search.paymentType = paymentType;
+        }else{
+            search.projectId = projectId;
+        }
+        return search;
+    }
+
+
+
+
+</script>
+</body>
+</html>

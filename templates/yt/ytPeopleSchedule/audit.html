@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('人员进度审核')" />
+<th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<div class="panel panel-default">
+					<div class="panel-body ">
+						<div class="addPeopleSchedule has_content">
+
+							<table class="table table-condensed">
+								<tr>
+									<td>任务明细: <span style="color: #337ab7">[[${editVo.content}]]</span></td>
+									<td>计划完工时间：<span style="color: #337ab7">[[${#dates.format(editVo.planEndTime, 'yyyy-MM-dd')}]]
+									</span></td>
+								</tr>
+							</table>
+							<h4>
+								累计进度: <span>[[${editVo.totalProgress}]]%</span>
+							</h4>
+							<div class="progress">
+								<div th:style="'width:'+@{${editVo.totalProgress}}+'%'"
+									class="progress-bar"></div>
+							</div>
+
+
+							<h4 th:if="${editVo.state != null}" class="proState"
+								th:name="${editVo.state}">[[${editVo.state}]]</h4>
+							<h4 th:unless="${editVo.state != null}">暂未审核</h4>
+
+
+							<table class="table table-bordered dataTable"
+								th:each="list,sampleStat : ${editVo.scheduleDetailList}">
+								<tr>
+									<td width="10%" class="active">当前进度</td>
+									<td>[[${list.currentProgress}]]% <input type="hidden"
+										class="thisId" name="id" th:value="${list.id}"> <input
+										type="hidden" class="mainId" name="mainId"
+										th:value="${list.mainId}">
+									</td>
+								</tr>
+								<tr>
+									<td width="10%" class="active">进度汇报</td>
+									<td>[[${list.detailText}]]</td>
+
+								</tr>
+								<tr>
+									<td width="10%" class="active">时间段</td>
+									<td>
+										<div class="input-daterange input-group col-sm-4">
+											<span
+												th:text="*{#dates.format(list.startTime, 'yyyy-MM-dd')}"></span>
+											到 <span
+												th:text="*{#dates.format(list.endTime, 'yyyy-MM-dd')}"></span>
+										</div>
+
+									</td>
+
+								</tr>
+								<tr>
+									<td class="active">关联附件</td>
+									<td colspan="3">
+										<div class="file-loading">
+											<input th:id="uploadFileId+${sampleStat.index}" type="file" multiple>
+										</div>
+									</td>
+								</tr>
+								
+							</table>
+							<div class="row" th:if="${editVo.state == null || editVo.state != '04' && editVo.state != '05'}">
+								<div class="col-sm-offset-5 col-sm-10"
+									th:if="${editVo.totalProgress+'' == '100'}">
+									<button th:if="${editVo.state=='01' || editVo.state=='03'}"
+										type="button" class="btn btn-sm btn-primary"
+										th:onclick="javascript:changeState('04')">
+										确认</button>
+									&nbsp;
+									<button th:if="${editVo.state=='02'}" type="button"
+										class="btn btn-sm btn-primary"
+										th:onclick="javascript:changeState('03')">
+										确认</button>
+									&nbsp;
+									<button th:if="${editVo.state=='01'}" type="button"
+										class="btn btn-sm btn-danger"
+										th:onclick="javascript:changeState('05')">驳回</button>
+									&nbsp;
+									<button th:if="${editVo.state=='02'}" type="button"
+										class="btn btn-sm btn-danger"
+										th:onclick="javascript:changeState('06')">驳回</button>
+									&nbsp;
+									<button th:if="${editVo.state=='03'}" type="button"
+										class="btn btn-sm btn-danger"
+										th:onclick="javascript:changeState('07')">驳回</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<th:block th:include="include :: bootstrap-fileinput-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "yt/ytPeopleSchedule";
+
+		//审核
+		function changeState(state){
+			var dataDetail={};
+			var mainId=[[${editVo.scheduleDetailList}]][0].mainId;
+			var detailId = [[${editVo.detailId}]];
+			dataDetail.id=mainId;
+			dataDetail.configDetailId = detailId;
+			dataDetail.state=state;
+			var config = {
+					contentType : "application/json;charset=UTF-8",
+					url : prefix + "/audit",
+					type : "post",
+					dataType: "json",
+					data : JSON.stringify(dataDetail),
+					beforeSend : function() {
+						$.modal.loading("正在处理中，请稍后...");
+					},
+					success : function(result) {
+						$.operate.successTabCallback(result);
+					}
+				};
+				$.ajax(config)
+		}
+		//回显状态
+		function returnState(state){
+			var text=''
+			if(state=='01'){
+				text='负责人审核中'
+			}else if(state=='02'){
+				text='校核中'
+			}else if(state=='03'){
+				text='审核中'
+			}else if(state=='04'){
+				text='已确认'
+			}else if(state=='05'){
+				text='负责人驳回'
+			}else if(state=='06'){
+				text='校核人员驳回'
+			}else if(state=='07'){
+				text='审核人员驳回'
+			}
+			return text;
+		}
+		var sta=$('.proState')
+        for(var i=0;i<sta.length;i++){
+       	 var state=sta.eq(i).attr('name')
+       	 sta.eq(i).text(returnState(state))
+        }
+		var attachmentList = new Array();
+        //图片反显出来
+        
+        function ytAttachment(objId,uploadFileId){
+        	var config = {
+        	        url: ctx+"yt/ytAttachment/selectAttachByObjectId",
+        	        type: "post",
+        	        dataType: "json",
+        	        data: {"objId": objId},
+        	        success: function(result) {
+				        var imgsUrl = new Array();
+        	        	var attachList = result.data;
+        	        	if(attachList!=null && attachList.length>0){
+        	        		var downloadConfig = new Array();
+        	        		for(var i=0; i<attachList.length; i++){
+        	        			var down = {};
+        	        			var attach = attachList[i];
+        	        			imgsUrl.push(attach.attachmentName);
+        	        			down.key = attach.attachmentName;
+        	        			down.caption = attach.fileName;
+        	        			down.extra={"fileName" : attach.attachmentName,"tableName" : "oa_attachment"};//对象或者函数，通过POST方法传递给初始预览的删除url或者AJAX服务器响应的额外数据。如果没有设置，它将默认为deleteExtraData。
+        	        			if(isAssetTypeAnImage(attach.attachmentName)){
+		    	        			down.type = 'image';
+	    	        			}else{
+	    	        				down.type = 'object';
+	    	        			}
+        	        			downloadConfig.push(down);
+        	        		}
+        	        		var option1={
+        	    					id:uploadFileId,
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					//deleteExtraData:deleteExtraData,
+        	    					imgsUrl:imgsUrl,
+        	    					downloadConfig:downloadConfig,
+        	    					attachmentList : new Array(),
+        	    					callback : callback
+        	    			}
+        	        		$.common.uploadFile(option1); 
+        	        	}else{
+        	        		 var option2={
+        	    					id:uploadFileId,
+        	    					uploadUrl:null,
+        	    					deleteUrl:null,
+        	    					deleteExtraData:null,
+        	    					imgsUrl:new Array(),
+        	    					initialPreviewConfig:null,
+        	    					attachmentList : new Array(),
+        	    					callback : callback
+        	    			}
+        	        		$.common.uploadFile(option2);  
+        	        	}
+		     			downFile();
+        	        }
+        	    };
+        	$.ajax(config)
+        }
+        var fileList=[]
+        function callback(id){
+        	var dataF={
+        			'id':id,
+        			'attachmentList':attachmentList
+        	}
+        	fileList.push(dataF)
+		}
+        $(function () {
+           for(var i=0;i<[[${editVo.scheduleDetailList}]].length;i++){
+        	   var objId=[[${editVo.scheduleDetailList}]][i].id
+        	   ytAttachment(objId,'uploadFileId'+i);
+           } 
+  
+	    });
+        
+	</script>
+</body>
+</html>

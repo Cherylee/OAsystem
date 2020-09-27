@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('任务台账列表')" />
+</head>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="formId">
+					<div class="select-list">
+						<ul>
+							<li>
+								<input type="text" name="principalName" placeholder="主检人"/>
+							</li>
+							<li>
+								<input type="text" name="deputyName" placeholder="副检人"/>
+							</li>
+							<li>
+								<select id="status" class="selectpicker" name="status" th:with="type=${@dict.getType('bridge_task_status')}">
+									<option value=""> 状态 </option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+							<li>
+								<input type="text" name="bookName" placeholder="委托书名称"/>
+							</li>
+							<li class="select-time">
+								<label>确认时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			<div class="col-sm-12 select-table table-striped">
+				<table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "bridge/bridgeTask";
+        var prefix2 = ctx + "bridge/bridgeReport/add";
+        var taskStatus = [[${@dict.getType('bridge_task_status')}]];
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                modalName: "任务分配",
+                sortName : "code",
+                sortOrder : "desc",
+		        showExport: true,
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'id', 
+					title : 'id',
+					visible: false
+				},
+				{
+					field : 'orderId', 
+					title : '委托单id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'deptId', 
+					title : '部门id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'userId', 
+					title : '分配人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'code', 
+					title : '任务编号',
+					sortable: true
+				},
+				{
+					field : 'orderCode', 
+					title : '委托单编号',
+					sortable: true
+				},
+				{
+					field : 'bookName', 
+					title : '委托书名称',
+					sortable: true
+				},
+				{
+					field : 'principalName', 
+					title : '主检人',
+					sortable: true
+				},
+				{
+					field : 'deputyName', 
+					title : '副检人',
+					sortable: true
+				},
+				{
+					field : 'distributionName', 
+					title : '分配人',
+					sortable: true
+				},
+				{
+					field : 'createTime', 
+					title : '分配时间',
+					sortable: true
+				},
+				{
+					field : 'principalName', 
+					title : '确认人',
+					sortable: true
+				},
+				{
+					field : 'updateTime', 
+					title : '确认时间',
+					sortable: true
+				},
+				{
+					field : 'finishedTime', 
+					title : '完成时间',
+					sortable: true
+				},
+				{
+					field : 'status', 
+					title : '状态',
+					sortable: true,
+					formatter: function (value, row, index) {
+		        		return $.table.selectDictLabel(taskStatus, value);
+		        	}
+				},
+				{
+					field : 'bookId', 
+					title : '委托书id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'principalUserId', 
+					title : '主检人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'deputyUserId', 
+					title : '副检人id',
+					sortable: true,
+					visible: false
+				},
+				{
+					field : 'remark', 
+					title : '备注',
+					sortable: true
+				},
+				{
+					field : 'createBy', 
+					title : '创建者',
+					sortable: true,
+					visible: false
+				},
+				
+				{
+					field : 'updateBy', 
+					title : '更新者',
+					sortable: true,
+					visible: false
+				},
+				{
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+                        if(row.status == 2){
+			            	actions.push('<a class="btn btn-danger btn-xs" style="margin-bottom: 5px" href="#" onclick="finishTask(\''+row.id+"',3,'"+row.orderId+'\')">完成 </a><br/>');
+							actions.push('<a class="btn btn-primary btn-xs " style="margin-bottom: 5px" href="#" onclick="openSheet(\''+ row.id + '\')">查看记录表 </a>  <br/>');
+							actions.push('<a class="btn btn-success btn-xs " href="#" onclick="recordSheet(\''+ row.id + '\',\'' + row.bookName + '\')">填写记录表 </a>  ');
+                        }else if(row.status == 3){
+			            	actions.push('<a class="btn btn-danger btn-xs disabled href="#" >已完成 </a>');
+                        }else {
+                        }
+                        return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+        
+      //处理完成
+        function finishTask(id,status,orderId){
+        	$.modal.confirm("是否确认完成任务？", function() {
+        		var config = {
+            	        url: prefix + "/edit",
+            	        type: "post",
+            	        dataType: "json",
+            	        data: {"id":id,"status":status,"orderId":orderId},
+            	        beforeSend: function () {
+            	        	$.modal.loading("正在处理中，请稍后...");
+            	        	$.modal.disable();
+            	        },
+            	        success: function(result) {
+            	        	if(result.code == 500){
+            	        		$.modal.alertError("任务无法完成！该任务下的样品未全部完成检测，详情见该任务关联的委托单流程记录。");
+            	        	}
+            	        	$.modal.closeLoading();
+            	        	$.table.refresh();
+            	        }
+            	    };
+            	    $.ajax(config)
+    		});
+        }
+
+        //填写记录表
+		function recordSheet(id,bookName) {
+			if (bookName === "06委托检测协议书（砼、砂浆、芯样力学性能及长期性耐久性)"){
+				createMenuItem(prefix2+'/'+id, '填写记录表')
+			}
+		}
+
+		//查看记录表
+		function openSheet(id) {
+			var options = {
+				title: '查看记录表 ',
+				width: "1400",
+				url: ctx + "bridge/bridgeReportCementCompression/"+id,
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit(index, layero) {
+			var iframeWin = layero.find('iframe')[0];
+			var result = iframeWin.contentWindow.submitHandler();
+			var data = result;
+			createMenuItem(ctx + "bridge/bridgeReportCementCompression/edit/" + data.id, '查看记录表')
+		}
+    </script>
+</body>
+</html>

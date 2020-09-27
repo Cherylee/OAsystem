@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增样品')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bridgeSample-add">
+           <div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">样品代码：</label>
+				<div class="col-sm-8">
+					<input id="code" name="code" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">样品名称：</label>
+				<div class="col-sm-8">
+					<input id="name" name="name" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">使用部位：</label>
+				<div class="col-sm-8">
+					<input id="usage" name="usePlace" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">样品数量：</label>
+				<div class="col-sm-8">
+					<input id="sampleCount" name="sampleCount" class="form-control" type="number">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">代表数量：</label>
+				<div class="col-sm-8">
+					<input id="representCount" name="representCount" class="form-control" type="number">
+				</div>
+			</div>
+			</div>
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">单位：</label>
+				<div class="col-sm-8">
+					<input id="unit" name="unit" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">样品厂家：</label>
+				<div class="col-sm-8">
+					<input id="factory" name="factory" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">样品批次：</label>
+				<div class="col-sm-8">
+					<input id="lot" name="lot" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">规格型号：</label>
+				<div class="col-sm-8">
+					<input id="specification" name="specification" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">品牌：</label>
+				<div class="col-sm-8">
+					<input id="brand" name="brand" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">出厂日期：</label>
+				<div class="col-sm-8">
+				     <div class="input-group data">
+                          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					      <input id="produceDate" name="produceDate" class="form-control time-input-data" type="text">
+				     </div>
+				</div>
+			</div>
+			</div>
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">出厂编号：</label>
+				<div class="col-sm-8">
+					<input id="produceCode" name="produceCode" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">合格证编号：</label>
+				<div class="col-sm-8">
+					<input id="certificateNo" name="certificateNo" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">来样方式：</label>
+				<div class="col-sm-8">
+					<!-- <input id="receiveWay" name="receiveWay" class="form-control" type="text"> -->
+					<select id="receiveWay" class="form-control selectpicker" name="receiveWay" th:with="type=${@dict.getType('bridge_sample_source')}">
+							<option value=""> -- 所有 --</option>
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+			</div>	
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">检后处理要求：</label>
+				<div class="col-sm-8">
+					<!-- <input id="afterCheck" name="afterCheck" class="form-control" type="text"> -->
+					<select id="afterCheck" class="form-control selectpicker" name="afterCheck" th:with="type=${@dict.getType('bridge_sample_process')}">
+							<option value=""> -- 所有 --</option>
+							<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+					</select>
+				</div>
+			</div>
+			</div>			
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">样品描述：</label>
+				<div class="col-sm-8">
+					<input id="description" name="description" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">制样情况：</label>
+				<div class="col-sm-8">
+					<input id="makeSituation" name="makeSituation" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">抽样情况：</label>
+				<div class="col-sm-8">
+					<input id="samplingSituation" name="samplingSituation" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">存储要求：</label>
+				<div class="col-sm-8">
+					<input id="storageRequirement" name="storageRequirement" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">保密要求：</label>
+				<div class="col-sm-8">
+					<input id="securityRequirement" name="securityRequirement" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">取样日期：</label>
+				<div class="col-sm-8">
+				     <div class="input-group data">
+                          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					      <input id="samplingDate" name="samplingDate" class="form-control time-input-data" type="text">
+				     </div>
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">养护周期（天）：</label>
+				<div class="col-sm-8">
+					<input id="curingPeriod" name="curingPeriod" class="form-control" type="number">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">计划试验日期：</label>
+				<div class="col-sm-8">
+				     <div class="input-group data">
+                          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					      <input id="planDate" name="planDate" class="form-control time-input-data" type="text">
+					</div>
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">取样员姓名：</label>
+				<div class="col-sm-8">
+					<input id="samplingPersonName" name="samplingPersonName" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">取样员证号：</label>
+				<div class="col-sm-8">
+					<input id="samplingPersonCode" name="samplingPersonCode" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">见证员姓名：</label>
+				<div class="col-sm-8">
+					<input id="witnessPersonName" name="witnessPersonName" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">见证员证号：</label>
+				<div class="col-sm-8">
+					<input id="witnessPersonCode" name="witnessPersonCode" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">收样人：</label>
+				<div class="col-sm-8">
+					<input id="receivePerson" name="receivePerson" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row">
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">收样日期：</label>
+				<div class="col-sm-8">
+				     <div class="input-group data">
+                          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					      <input id="receiveDate" name="receiveDate" class="form-control time-input-data" type="text">
+				     </div>
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<input id="remark" name="remark" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<!-- <div class="col-sm-6 hide">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">创建者：</label>
+				<div class="col-sm-8">
+					<input id="createBy" name="createBy" class="form-control" type="text">
+				</div>
+			</div>
+			</div> -->
+			</div>
+			<!-- <div class="row hide">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">创建时间：</label>
+				<div class="col-sm-8">
+					<input id="createTime" name="createTime" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			<div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">更新者：</label>
+				<div class="col-sm-8">
+					<input id="updateBy" name="updateBy" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div>
+			<div class="row hide">
+            <div class="col-sm-6">
+			<div class="form-group">	
+				<label class="col-sm-3 control-label">更新时间：</label>
+				<div class="col-sm-8">
+					<input id="updateTime" name="updateTime" class="form-control" type="text">
+				</div>
+			</div>
+			</div>
+			</div> -->
+			<div class="row">
+                <div class="col-sm-offset-5 col-sm-10">
+                     <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+                     <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+                </div>
+            </div>
+		</form>
+	</div>
+    <div th:include="include::footer"></div>
+    <script type="text/javascript">
+		var prefix = ctx + "bridge/bridgeSample"
+		/*  $("#form-bridgeSample-add").validate({
+			rules:{
+				
+			},
+			focusCleanup: true,
+			messages:{
+				sampleCount:'所输入的字符不符要求'
+			}
+		});  */
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	            $.operate.saveTab(prefix + "/add", $('#form-bridgeSample-add').serialize());
+	        }
+	    }
+	</script>
+</body>
+</html>

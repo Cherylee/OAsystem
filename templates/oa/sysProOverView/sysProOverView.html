@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:include="include :: header('项目概览列表')" />
+	<th:block th:include="include :: sysProCss" />
+</head>
+<style>
+	.modal{
+		top: 150px;
+	}
+	.modal-dialog{
+		width: 1200px;
+	}
+	.modal-headers{
+		padding: 20px;
+		text-align: center;
+	}
+	#detailIframe{
+		width: 100%;
+		height:580px;
+	}
+</style>
+<body class="gray-bg">
+    
+     <div class="container-div">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="col-sm-12 search-collapse" style="display: none;">
+					<form id="formId">
+						<div class="select-list">
+							<ul>
+								<li>
+									项目id：<input type="text" name="projectId"/>
+								</li>
+
+								<li>
+									状态：<input type="text" name="status"/>
+								</li>
+
+								<li>
+									<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+									<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+								</li>
+							</ul>
+						</div>
+					</form>
+				</div>
+				<div class=" select-table table-striped">
+					<table id="bootstrap-table" data-mobile-responsive="true"></table>
+				</div>
+			</div>
+			<div class="col-md-9 hide project-report" style="margin-top: 10px">
+				<div class="panel panel-default">
+					<div id="projectName" class="panel-heading">
+
+					</div>
+					<div class="panel-body ad-btnBox" style="height: 710px;">
+						<div class="choice-List">
+							<button class="choice-left" onclick="shiftLeft()"><</button>
+							<button class="choice-right" onclick="shiftRight()">></button>
+							<ul>
+								<li class="choice-li choice-li-active" onclick="goDetails('projectOverview')">项目概况</li>
+								<li class="choice-li" onclick="goDetails('chartAnalysis')">图表分析</li>
+								<li class="choice-li" onclick="goDetails('statisticsReport')">统计报表</li>
+								<li class="choice-li" onclick="goDetails('expenseReport')">支出报表</li>
+								<li class="choice-li" onclick="goDetails('paymentDetails')">付款明细</li>
+								<li class="choice-li" onclick="goDetails('reimbursementDetails')">报销明细</li>
+								<li class="choice-li" onclick="goDetails('deductionDetails')">扣款明细</li>
+								<li class="choice-li" onclick="goDetails('relatedContracts')">相关合同</li>
+								<li class="choice-li" onclick="goDetails('invoiced')">已开发票</li>
+								<li class="choice-li" onclick="goDetails('paymentRecord')">缴纳记录</li>
+								<li class="choice-li" onclick="goDetails('sysProScore')">项目评分</li>
+<!--								<li class="choice-li" onclick="goDetails('testData')">测试数据</li>-->
+							</ul>
+						</div>
+						<div class="col-md-12">
+							<iframe class="layui-layer-iframes" id="iframe"  src=""></iframe>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+	 <!--支出报表弹窗-->
+	 <div class="modal inmodal fade" id="expensePopup" style="top: 50px" role="dialog" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+			 <div class="modal-content col-md-12">
+				 <div class="modal-headers">
+					 <button type="button" class="close" data-dismiss="modal">
+						 <span aria-hidden="true">&times;</span>
+					 </button>
+				 </div>
+				 <div  class="col-md-12 modal-body">
+					 <div class="col-md-7">
+						 <div class=" select-table table-striped ">
+							 <table  id="expense" class=" table table-bordered table-bot" ></table>
+						 </div>
+					 </div>
+					 <div class="col-md-5">
+						 <div class="echarts" id="echarts-pie-chart" style="top: 50px"></div>
+					 </div>
+
+				 </div>
+			 </div>
+		 </div>
+	 </div>
+	 <!-- 支出报表小类弹出框 -->
+	 <div class="modal inmodal fade" id="expenseDetailPopup" role="dialog" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+			 <div class="modal-content col-md-12">
+				 <div class="modal-headers">
+					 <button type="button" class="close" data-dismiss="modal" onclick="closeDetail()">
+						 <span aria-hidden="true">&times;</span>
+					 </button>
+				 </div>
+				 <!--收款详情-->
+				 <div id="expenseDetails" class="hidden modal-body statistics col-md-12">
+					 <div class="col-md-7">
+						 <div class=" select-table table-striped ">
+							 <table  id="expenseDetail" class=" table table-bordered table-bot" ></table>
+						 </div>
+					 </div>
+					 <div class="col-md-5">
+						 <div class="echarts" id="expenseDetail-pie-chart" style="top: 25px"></div>
+					 </div>
+				 </div>
+			 </div>
+		 </div>
+	 </div>
+	 <!-- 小类弹出框 -->
+	 <div class="modal inmodal fade" id="detailModel" role="dialog" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+			 <div class="modal-content">
+				 <div class="modal-headers">
+					 <button type="button" class="close" data-dismiss="modal" onclick="closeDetail()">
+						 <span aria-hidden="true">&times;</span>
+					 </button>
+				 </div>
+				<!--收款详情-->
+				 <div id="collectionList" class="hidden modal-body statistics">
+					 <div class=" select-table table-striped ">
+						 <table  id="collection" class=" table table-bordered table-bot" ></table>
+					 </div>
+				 </div>
+				<!-- 付款详情-->
+				 <div id="paymentList" class="hidden modal-body statistics">
+					 <div class=" select-table table-striped ">
+						 <table  id="payment" class=" table table-bordered table-bot" ></table>
+					 </div>
+				 </div>
+			 </div>
+		 </div>
+	 </div>
+	 <!--明细弹窗-->
+	 <div class="modal inmodal fade" id="detailPopup" style="top: 50px;z-index: 2070 " role="dialog" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+			 <div class="modal-content">
+				 <div class="modal-headers">
+					 <button type="button" class="close" data-dismiss="modal">
+						 <span aria-hidden="true">&times;</span>
+					 </button>
+				 </div>
+				 <div  class=" modal-body ">
+					 <iframe name="detailIframe"  id="detailIframe"  src=""></iframe>
+				 </div>
+
+			 </div>
+		 </div>
+	 </div>
+
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "oa/oaProject";
+		var prefix2 = ctx + "oa/sysProOverView";
+
+		var payType=[[${@dict.getType('sys_payment_big_type')}]];
+        //全局变量
+		var optProjectId;
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                sortName : "createTime",
+                sortOrder : "desc",
+				striped:true,
+		        showExport: true,
+				showColumns:false,
+				showExport:false,
+                columns: [
+				{
+					title: "",
+					align: "center",
+					width: "50px",
+					formatter: function (value, row, index) {
+						return $.table.serialNumber(index);
+					}
+				},
+				{
+					field : 'projectName',
+					title : '项目名称',
+					sortable: true,
+					align:'left',
+					formatter:function (value, row, index) {
+						var projectName=$.table.tooltip(row.projectName,25);
+						if (index=='0'){
+							displayBox(row.id)
+						}
+						return '<a href="#"  onclick="displayBox(\'' + row.id + '\')">'+projectName+'</a>';
+					}
+				}]
+            };
+            $.table.init(options);
+        });
+
+
+		//导航栏
+        $(document).ready(function (){
+			//导航栏样式
+            var choiceList =$(".choice-li");
+			choiceList.click(function () {
+				var obj=$(this);
+				obj.addClass('choice-li-active').siblings().removeClass('choice-li-active');
+			});
+
+        });
+
+        //跳转至指定iframe
+        function goDetails(url) {
+        	var iframes = $('.layui-layer-iframes')
+        	switch (url) {
+				case 'paymentDetails':
+					iframes.attr("src", prefix2 +"/"+ url+"/"+optProjectId+"/null/null");
+					break;
+				case 'deductionDetails':
+					iframes.attr("src", prefix2 +"/"+ url+"/"+optProjectId+"/null");
+					break;
+				case 'reimbursementDetails':
+					iframes.attr("src", prefix2 +"/"+ url+"/"+optProjectId+"/null");
+					break;
+				default:
+					iframes.attr("src", prefix2 +"/"+ url+"/"+optProjectId);
+					break;
+			}
+
+		}
+
+        //导航栏左移
+        function shiftLeft() {
+			var choiceList =  $(".choice-List");
+			if (choiceList.scrollLeft()>100){
+				var number = choiceList.scrollLeft() - 100;
+				choiceList.scrollLeft(number);
+			}else{
+				choiceList.scrollLeft(0);
+			}
+		}
+
+		//导航栏右移
+		function shiftRight() {
+			var choiceList =  $(".choice-List");
+			if (choiceList.scrollLeft()<choiceList.width()-100){
+				var number = choiceList.scrollLeft() + 100;
+				choiceList.scrollLeft(number);
+			}
+		}
+
+
+		//点击项目名称查看报表
+        function displayBox(id) {
+        	$('.project-report').removeClass('hide');
+        	optProjectId=id;
+        	//导航栏显示选择第一个
+			var choiceList = $(".choice-li");
+			choiceList.eq(0).addClass('choice-li-active').siblings().removeClass('choice-li-active');
+
+			//判断宽度是否足够  是否显示按钮
+			var choiceListWidth = $(".choice-List").width();
+			var ulWidth = choiceList.length*100;
+			if(ulWidth > choiceListWidth){
+				$(".choice-left").css("display","block");
+				$(".choice-right").css("display","block");
+			};
+
+			//更新查看数据
+			var config = {
+				url:prefix+'/detail/'+id,
+				type: 'get',
+				dataType: 'json',
+				success: function(result) {
+					$("#projectName").text(result.projectName);
+					$('.layui-layer-iframes').attr("src", prefix2+'/projectOverview/' + id);
+				}
+			};
+			$.ajax(config)
+        }
+
+
+		//打开弹窗
+		function openDetail(type,type2,ProjectId) {
+
+			$('#detailModel').modal("show");
+			if (type=='collectionList'){
+				$('#collectionList').removeClass('hidden');
+				var collectionList = {
+					url: prefix2 + '/selectStatisticsCollectionData',
+					id:'collection',
+					showSearch:false,
+					showRefresh:false,
+					showColumns:false,
+					showToggle:false,
+					showExport: false,
+					showFooter:true,
+					queryParams: {"projectId": ProjectId,"paymentType":type2},
+					columns:[
+						{
+							title : '',
+							width:'30px',
+							formatter: function (value, row, index) {
+								return $.table.serialNumber(index);
+
+							}
+						},
+						{
+							field:'moneyPurpost',
+							title: '款项用途',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							formatter:function (value, row, index) {
+								var relation=[];
+								var sys_pro_payment_type_relation = [[${@dict.getType('sys_pro_payment_type_relation')}]];
+								var sys_pro_payment_type = [[${@dict.getType('sys_pro_payment_type')}]];
+								var sys_pro_payment_type2_1 = [[${@dict.getType('sys_pro_payment_type2_1')}]];
+								var sys_pro_payment_type2_2 = [[${@dict.getType('sys_pro_payment_type2_2')}]];
+								var sys_pro_payment_type2_3 = [[${@dict.getType('sys_pro_payment_type2_3')}]];
+								var sys_pro_payment_type2_4 = [[${@dict.getType('sys_pro_payment_type2_4')}]];
+								var sys_pro_payment_type2_5 = [[${@dict.getType('sys_pro_payment_type2_5')}]];
+								for (var i = 0; i < sys_pro_payment_type_relation.length; i++) {
+									if(sys_pro_payment_type_relation[i].dictLabel==type2){
+										relation=eval(sys_pro_payment_type_relation[i].dictValue)
+									}
+								}
+								return $.table.selectDictLabel(relation, value);
+							}
+						},
+						{
+							field:'proportion',
+							title:'占比',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							formatter: function (value, row, index) {
+								return parseFloat(value).toFixed(2)+'%'
+
+							}
+						},
+						{
+							field:'sumAmount',
+							title:'收款总额',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							footerFormatter:function (value) {
+								var sumBalance = 0;
+								for (var i in value) {
+									sumBalance += parseFloat(value[i].sumAmount);
+								}
+								return sumBalance;
+							}
+						},
+						{
+							field:'receiptNumber',
+							title:'收款次数',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							formatter: function (value, row, index) {
+								return value+'次'
+							},
+							footerFormatter:function (value) {
+								var sumBalance = 0;
+								for (var i in value) {
+									sumBalance += parseFloat(value[i].receiptNumber);
+								}
+								return sumBalance+'次';
+							}
+						},
+						{
+							field:'lastReceiptDate',
+							title:'上次收款日期',
+							align:'center',
+							halign:'center',
+							sortable: true
+						}]
+				};
+				$.table.destroy('collection');
+				$.table.init(collectionList);
+
+			}else if (type=='paymentList'){
+				//付款小类详情
+				$('#paymentList').removeClass('hidden');
+				var paymentList = {
+					id:'payment',
+					url:prefix2 + '/selectStatisticsPaymentData',
+					showSearch:false,
+					showRefresh:false,
+					showColumns:false,
+					showToggle:false,
+					showExport:false,
+					showFooter:true,
+					queryParams: {"projectId": ProjectId,"proCategory":type2},
+					columns:[
+						{
+							title : '',
+							width:'30px',
+							formatter: function (value, row, index) {
+								return $.table.serialNumber(index);
+							}
+						},
+						{
+							field : 'detailCategory',
+							title: '工程款小类',
+							align:'center',
+							halign:'center',
+							sortable: true
+
+
+						},
+						{
+							field : 'proportion',
+							title:'占比',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							formatter: function (value, row, index) {
+								return parseFloat(value).toFixed(2)+'%'
+
+							}
+						},
+						{
+							field:'sumAmount',
+							title:'付款总额',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							footerFormatter:function (value) {
+								var sumBalance = 0;
+								for (var i in value) {
+									sumBalance += parseFloat(value[i].sumAmount);
+								}
+								return sumBalance;
+							}
+						},
+						{
+							field:'paymentNumber',
+							title:'付款次数',
+							align:'center',
+							halign:'center',
+							sortable: true,
+							formatter: function (value, row, index) {
+								var text = value+'次';
+								return '<a onclick="openDetailPopup(\'paymentDetailList\',\'' + row.proCategory + '\',\'' + row.detailCategory + '\',\'' + ProjectId + '\')">'+text+'</a>';
+							},
+							footerFormatter:function (value) {
+								var sumBalance = 0;
+								for (var i in value) {
+									sumBalance += parseFloat(value[i].paymentNumber);
+								}
+								return sumBalance+'次';
+							}
+						},
+						{
+							field:'lastPaymentDate',
+							title:'上次付款日期',
+							align:'center',
+							halign:'center',
+							sortable: true
+						},
+						{
+							title:'退回次数',
+							align:'center',
+							halign:'center',
+							sortable: true
+						}]
+				};
+				$.table.destroy('payment');
+				$.table.init(paymentList);
+			}
+		}
+
+		//打开明细弹窗
+		function openDetailPopup(type,type2,type3,ProjectId){
+			$('#detailPopup').modal("show");
+			var detailIframe = $('#detailIframe');
+			switch (type) {
+				case 'collectionDetailList':
+					$('#collectionDetailList').removeClass('hidden');
+					break;
+				case 'paymentDetailList':
+					detailIframe.attr("src", prefix2 +"/"+ "paymentDetails"+"/"+ProjectId+"/"+type2+"/"+type3);
+					break;
+				case 'deductionDetailList':
+					detailIframe.attr("src", prefix2 +"/"+ "deductionDetails"+"/"+ProjectId+"/"+type2);
+					break;
+				case 'reimbursementDetails':
+					detailIframe.attr("src", prefix2 +"/"+ "reimbursementDetails"+"/"+ProjectId+"/"+type2);
+			}
+		}
+
+		//打开支出报表弹窗
+		function openExpensePopup(type,ProjectId) {
+			$('#expensePopup').modal("show");
+			switch (type) {
+				case '付款':
+					var expenseList = {
+						id:'expense',
+						url:prefix2 + '/selectStatisticsPaymentData',
+						showSearch:false,
+						showRefresh:false,
+						showColumns:false,
+						showToggle:false,
+						showExport:false,
+						showFooter:true,
+						queryParams: {"projectId":ProjectId},
+						columns:[
+							{
+								title : '',
+								width:'30px',
+								formatter: function (value, row, index) {
+									return $.table.serialNumber(index);
+								}
+							},
+							{
+								field : 'proCategory',
+								title: '工程款大类',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								formatter: function (value, row, index) {
+									var text = $.table.selectDictLabel(payType,value);
+									return '<a onclick="openExpenseDetailPopup(\'paymentList\',\'' + row.proCategory + '\',\'' + ProjectId + '\')">'+text+'</a>';
+								}
+
+							},
+							{
+								field : 'proportion',
+								title:'占比',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								formatter: function (value, row, index) {
+									return parseFloat(value).toFixed(2)+'%'
+
+								}
+							},
+							{
+								field:'sumAmount',
+								title:'付款总额',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].sumAmount);
+									}
+									return sumBalance;
+								}
+							},
+							{
+								field:'paymentNumber',
+								title:'付款次数',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								formatter: function (value, row, index) {
+									var text = value+'次';
+									return '<a onclick="openDetailPopup(\'paymentDetailList\',\'' + row.proCategory + '\',\'null\',\'' + ProjectId + '\')">'+text+'</a>';
+								},
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].paymentNumber);
+									}
+									return sumBalance+'次';
+								}
+							},
+							{
+								field:'lastPaymentDate',
+								title:'上次付款日期',
+								align:'center',
+								halign:'center',
+								sortable: true
+							},
+							{
+								title:'退回次数',
+								align:'center',
+								halign:'center',
+								sortable: true
+							}]
+					};
+					$.table.destroy('expense');
+					$.table.init(expenseList);
+					//报表饼图
+					var pieChartData=[];
+					var dataName=[];
+					var config = {
+						url: prefix2 + '/selectStatisticsPaymentData',
+						type: 'post',
+						dataType: 'json',
+						data:  {"projectId": ProjectId},
+						beforeSend: function () {
+							$.modal.loading("正在处理中，请稍后...");
+						},
+						success: function(result) {
+							var data = result.rows;
+							for (var i=0 ;i< data.length ;i++){
+
+								var	CategoryName = $($.table.selectDictLabel(payType,data[i].proCategory)).text();
+								var dateJson ={};
+								dateJson.value= data[i].sumAmount;
+								dateJson.name = CategoryName;
+								pieChartData.push(dateJson);
+								dataName.push(CategoryName);
+							}
+							$.modal.closeLoading();
+							var pieChart = echarts.init(document.getElementById("echarts-pie-chart"));
+							var pieOptions = {
+								tooltip : {
+									trigger: 'item',
+									formatter: "{a} <br/>{b} : {c} ({d}%)"
+								},
+								legend: {
+									orient : 'vertical',
+									x : 'left',
+									data:dataName,
+								},
+								calculable : true,
+								series : [
+									{
+										name:'费用名称',
+										type:'pie',
+										radius : '75%',
+										center: ['60%', '55%'],
+										data:pieChartData,
+									}
+								]
+							};
+							pieChart.setOption(pieOptions);
+							$(window).resize(pieChart.resize);
+						}
+					};
+					$.ajax(config);
+					break;
+
+				case '报销':
+					var reimbursementType=[[${@dict.getType('oa_reimbursement_type')}]];
+					var reimbursementList = {
+						id:'expense',
+						url:prefix2 + '/selectStatisticsReimbursementData',
+						showSearch:false,
+						showRefresh:false,
+						showColumns:false,
+						showToggle:false,
+						showExport:false,
+						showFooter:true,
+						queryParams: {"projectId":ProjectId},
+						columns:[
+							{
+								title: '报销类别',
+								field:'reimbursementType',
+								align:'center',
+								halign:'center',
+								formatter: function (value, row, index) {
+									return $.table.selectDictLabel(reimbursementType, value);
+								}
+
+							},
+							{
+								title:'占比',
+								field:'proportion',
+								align:'center',
+								halign:'center',
+								formatter: function (value) {
+									return value+'%'
+								},
+
+							},
+							{
+								field:'reimbursementNumber',
+								title:'报销次数',
+								align:'center',
+								halign:'center',
+								formatter: function (value, row, index) {
+
+									var text = value+'次'
+									return '<a onclick="openDetailPopup(\'reimbursementDetails\',\'' + row.reimbursementType + '\',\'null\',\'' + ProjectId + '\')">'+text+'</a>';
+								},
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].reimbursementNumber);
+									}
+									return sumBalance+'次';
+								}
+							},
+							{
+								field:'sumAmount',
+								title:'报销总额',
+								align:'center',
+								halign:'center',
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].sumAmount);
+									}
+									return sumBalance;
+								}
+							},
+							{
+								field:'maxActualMoney',
+								title:'最大报销金额',
+								align:'center',
+								halign:'center',
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].maxActualMoney);
+									}
+									return sumBalance;
+								}
+							},
+							{
+								field:'lastReimbursementDate',
+								title:'上次报销日期',
+								align:'center',
+								halign:'center'
+							}]
+					};
+					$.table.destroy('expense');
+					$.table.init(reimbursementList);
+
+					//报表饼图
+					var pieChartData=[];
+					var dataName=[];
+					var config = {
+						url: prefix2 + '/selectStatisticsReimbursementData',
+						type: 'post',
+						dataType: 'json',
+						data:  {"projectId": ProjectId},
+						beforeSend: function () {
+							$.modal.loading("正在处理中，请稍后...");
+						},
+						success: function(result) {
+							var data = result.rows;
+							for (var i=0 ;i< data.length ;i++){
+
+								var	CategoryName = $($.table.selectDictLabel(reimbursementType,data[i].reimbursementType)).text();
+								var dateJson ={};
+								dateJson.value= data[i].sumAmount;
+								dateJson.name = CategoryName;
+								pieChartData.push(dateJson);
+								dataName.push(CategoryName);
+							}
+							$.modal.closeLoading();
+							var pieChart = echarts.init(document.getElementById("echarts-pie-chart"));
+							var pieOptions = {
+								tooltip : {
+									trigger: 'item',
+									formatter: "{a} <br/>{b} : {c} ({d}%)"
+								},
+								legend: {
+									orient : 'vertical',
+									x : 'left',
+									data:dataName,
+								},
+								calculable : true,
+								series : [
+									{
+										name:'费用名称',
+										type:'pie',
+										radius : '75%',
+										center: ['60%', '55%'],
+										data:pieChartData,
+									}
+								]
+							};
+							pieChart.setOption(pieOptions);
+							$(window).resize(pieChart.resize);
+						}
+					};
+					$.ajax(config);
+					break;
+
+				case  '扣款':
+			}
+
+
+		}
+
+		//打开支出报表小类
+		function openExpenseDetailPopup(type,type2,ProjectId) {
+			$('#expenseDetailPopup').modal("show");
+			switch (type) {
+				case 'paymentList':
+					//付款小类详情
+					$('#expenseDetails').removeClass('hidden');
+					var paymentList = {
+						id:'expenseDetail',
+						url:prefix2 + '/selectStatisticsPaymentData',
+						showSearch:false,
+						showRefresh:false,
+						showColumns:false,
+						showToggle:false,
+						showExport:false,
+						showFooter:true,
+						queryParams: {"projectId": ProjectId,"proCategory":type2},
+						columns:[
+							{
+								title : '',
+								width:'30px',
+								formatter: function (value, row, index) {
+									return $.table.serialNumber(index);
+								}
+							},
+							{
+								field : 'detailCategory',
+								title: '工程款小类',
+								align:'center',
+								halign:'center',
+								sortable: true
+							},
+							{
+								field : 'proportion',
+								title:'占比',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								formatter: function (value, row, index) {
+									return parseFloat(value).toFixed(2)+'%'
+
+								}
+							},
+							{
+								field:'sumAmount',
+								title:'付款总额',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].sumAmount);
+									}
+									return sumBalance;
+								}
+							},
+							{
+								field:'paymentNumber',
+								title:'付款次数',
+								align:'center',
+								halign:'center',
+								sortable: true,
+								formatter: function (value, row, index) {
+									var text = value+'次';
+									return '<a onclick="openDetailPopup(\'paymentDetailList\',\'' + row.proCategory + '\',\'' + row.detailCategory + '\',\'' + ProjectId + '\')">'+text+'</a>';
+								},
+								footerFormatter:function (value) {
+									var sumBalance = 0;
+									for (var i in value) {
+										sumBalance += parseFloat(value[i].paymentNumber);
+									}
+									return sumBalance+'次';
+								}
+							},
+							{
+								field:'lastPaymentDate',
+								title:'上次付款日期',
+								align:'center',
+								halign:'center',
+								sortable: true
+							},
+							{
+								title:'退回次数',
+								align:'center',
+								halign:'center',
+								sortable: true
+							}]
+					};
+					$.table.destroy('expenseDetail');
+					$.table.init(paymentList);
+					//报表饼图
+					var pieChartData=[];
+					var dataName=[];
+					var config = {
+						url: prefix2 + '/selectStatisticsPaymentData',
+						type: 'post',
+						dataType: 'json',
+						data:  {"projectId": ProjectId,"proCategory":type2},
+						beforeSend: function () {
+							$.modal.loading("正在处理中，请稍后...");
+						},
+						success: function(result) {
+							var data = result.rows;
+							for (var i=0 ;i< data.length ;i++){
+								var dateJson ={};
+								dateJson.value= data[i].sumAmount;
+								dateJson.name = data[i].detailCategory;
+								pieChartData.push(dateJson);
+								dataName.push( data[i].detailCategory);
+							}
+							$.modal.closeLoading();
+							var pieChart = echarts.init(document.getElementById("expenseDetail-pie-chart"));
+							var pieOptions = {
+								tooltip : {
+									trigger: 'item',
+									formatter: "{a} <br/>{b} : {c} ({d}%)"
+								},
+								legend: {
+									orient : 'vertical',
+									x : 'left',
+									data:dataName,
+								},
+								calculable : true,
+								series : [
+									{
+										name:'费用名称',
+										type:'pie',
+										radius : '75%',
+										center: ['60%', '55%'],
+										data:pieChartData,
+									}
+								]
+							};
+							pieChart.setOption(pieOptions);
+							$(window).resize(pieChart.resize);
+						}
+					};
+					$.ajax(config);
+					break;
+
+			}
+		}
+
+		//关闭弹窗
+		function closeDetail() {
+			$('.statistics').addClass('hidden')
+		}
+
+
+	</script>
+</body>
+</html>
